@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Upload,
   Download,
@@ -8,6 +8,8 @@ import {
   Pencil,
   Trash2,
 } from "lucide-react";
+import HotelTableSkeleton from "../components/Hotels/HotelTableSkeleton";
+import { useNavigate } from "react-router-dom";
 
 function Hotels() {
     const hotels = [
@@ -91,7 +93,17 @@ function Hotels() {
           contact: "7628988210",
           status: "Active",
         },
-      ];
+    ];
+
+    const [loading, setLoading] = useState(true)
+    const navigate = useNavigate()
+    useEffect(() => {
+      const timer = setTimeout(() => {
+        setLoading(false);
+      }, 2000);
+  
+      return () => clearTimeout(timer);
+    }, []);
 
   return (
     <div className="bg-[#f3f4f6] min-h-screen px-10 py-8">
@@ -117,7 +129,7 @@ function Hotels() {
           Export
         </button>
 
-        <button className="flex items-center gap-2 px-5 py-2 bg-[#ec5a89] text-white rounded-xl shadow-md hover:shadow-lg transition text-sm">
+        <button onClick={()=>navigate("add-hotel")} className=" cursor-pointer flex items-center gap-2 px-5 py-2 bg-[#ec5a89] text-white rounded-xl shadow-md hover:shadow-lg transition text-sm">
           <Plus size={15} />
           Add New Hotels
         </button>
@@ -161,7 +173,11 @@ function Hotels() {
             </thead>
 
             <tbody>
-              {hotels?.slice(0,5).map((hotel, index) => (
+            {
+              loading ?
+              <HotelTableSkeleton/>:
+            
+              hotels?.slice(0,5).map((hotel, index) => (
                 <tr
                   key={index}
                   className="group  border-t border-dashed border-blue-200"
@@ -175,19 +191,19 @@ function Hotels() {
                     </div>
                   </td>
 
-                  <td className="px-6 py-5 text-gray-600">
+                  <td className="px-6 py-3 text-gray-600">
                     {hotel.region}
                   </td>
 
-                  <td className="px-6 py-5 text-gray-600">
+                  <td className="px-6 py-3 text-gray-600">
                     {hotel.category}
                   </td>
 
-                  <td className="px-6 py-5 text-gray-600">
+                  <td className="px-6 py-3 text-gray-600">
                     {hotel.contact}
                   </td>
 
-                  <td className="px-6 py-5">
+                  <td className="px-6 py-3">
                     <span className={` ${hotel?.status==='Active'?"bg-green-100 text-green-600":"bg-red-100 text-red-600"}  text-xs px-4 py-1 rounded-full`}>
                       {hotel.status}
                     </span>

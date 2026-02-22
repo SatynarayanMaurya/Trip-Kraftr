@@ -1,7 +1,14 @@
-import Hotels from '../pages/Hotels'
-import {Route} from 'react-router-dom'
+import { Route } from "react-router-dom"
+import Hotels from "../pages/Hotels"
+import AddHotel from "../components/Hotels/AddHotel"
+import ChooseHotelType from "../components/Hotels/ChooseHotelType"
+
 export const hotelRoutes = (
-  <>
-    <Route path="/hotels" element={<Hotels />} />
-  </>
+  <Route path="hotels">
+    <Route index element={<Hotels />} />
+    <Route path="add-hotel">
+      <Route index element={<ChooseHotelType />} />
+      <Route path="self" element={<AddHotel />} />
+    </Route>
+  </Route>
 )
