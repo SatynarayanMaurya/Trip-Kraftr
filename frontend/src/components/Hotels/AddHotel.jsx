@@ -135,6 +135,8 @@ function AddHotel() {
       </div>
 
       <ReviewPublishModal
+        title={"Add New Hotel"}
+        actionButton ={"Save & Add Rooms"}
         open={reviewOpen}
         onClose={() => setReviewOpen(false)}
         onConfirm={() => {

@@ -17,15 +17,15 @@ import activities_icon from "../../assets/sidebar/activities_icon_sidebar.png";
 import dmc_icon from "../../assets/sidebar/dmc_icon_sidebar.png";
 
 function Sidebar() {
-  const [openSupplier, setOpenSupplier] = useState(true);
+  const [openSupplier, setOpenSupplier] = useState(false);
   const [activeTab, setActiveTab] = useState("Hotels");
 
   const supplierTabs = [
-    { name: "Hotels", icon: hotel_icon,path:"/hotels" },
-    { name: "Vehicles", icon: vehicle_icon,path:"/vehicles"  },
-    { name: "DMC's", icon: dmc_icon ,path:"/" },
-    { name: "Places", icon: place_icon ,path:"/" },
-    { name: "Activities", icon: activities_icon,path:"/"  },
+    { name: "Hotels", icon: hotel_icon, path: "/hotels" },
+    { name: "Vehicles", icon: vehicle_icon, path: "/vehicles" },
+    { name: "DMC's", icon: dmc_icon, path: "/dmc" },
+    { name: "Places", icon: place_icon, path: "/places" },
+    { name: "Activities", icon: activities_icon, path: "/activities" },
   ];
 
   const staticMenuTabs = [
@@ -50,6 +50,30 @@ function Sidebar() {
             <span className="font-medium">Mayank</span>
           </div>
         </div>
+        <div className="space-y-1 pl-3">
+          <NavLink
+            to={"/"}
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-3 py-2 cursor-pointer transition-all ${isActive
+                ? "bg-[#FEF4F8] text-black rounded-tl-full rounded-bl-full"
+                : "hover:bg-[#244A78] rounded-lg text-white"
+              }`
+            }
+          >
+            {() => (
+              <>
+                <img
+                  src={supplierTabs?.[0].icon}
+                  alt={supplierTabs?.[0].name}
+                  className={`w-4 h-4 transition-all `}
+                />
+                <span className="text-sm font-medium">
+                  Dashboard
+                </span>
+              </>
+            )}
+          </NavLink>
+        </div>
 
         {/* Menu */}
         <div className="space-y-1 pl-3">
@@ -73,34 +97,33 @@ function Sidebar() {
 
             {/* Submenu */}
             {openSupplier && (
-            <div className="ml-6 mt-1 space-y-1">
+              <div className="ml-6 mt-1 space-y-1">
                 {supplierTabs.map((tab) => (
-                <NavLink
+                  <NavLink
                     to={tab.path}
                     key={tab.name}
                     className={({ isActive }) =>
-                    `flex items-center gap-3 px-3 py-2 cursor-pointer transition-all ${
-                        isActive
+                      `flex items-center gap-3 px-3 py-2 cursor-pointer transition-all ${isActive
                         ? "bg-[#FEF4F8] text-black rounded-tl-full rounded-bl-full"
                         : "hover:bg-[#244A78] rounded-lg text-white"
-                    }`
+                      }`
                     }
-                >
+                  >
                     {() => (
-                    <>
+                      <>
                         <img
-                        src={tab.icon}
-                        alt={tab.name}
-                        className={`w-4 h-4 transition-all `}
+                          src={tab.icon}
+                          alt={tab.name}
+                          className={`w-4 h-4 transition-all `}
                         />
                         <span className="text-sm font-medium">
-                        {tab.name}
+                          {tab.name}
                         </span>
-                    </>
+                      </>
                     )}
-                </NavLink>
+                  </NavLink>
                 ))}
-            </div>
+              </div>
             )}
           </div>
 

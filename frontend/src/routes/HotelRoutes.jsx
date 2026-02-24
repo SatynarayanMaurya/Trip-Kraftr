@@ -7,8 +7,8 @@ export const hotelRoutes = (
   <Route path="hotels">
     <Route index element={<Hotels />} />
     <Route path="add-hotel">
-      <Route index element={<ChooseHotelType />} />
-      <Route path="self" element={<AddHotel />} />
+      <Route index element={<AddHotel/>} />
+      <Route path="self" element={<ChooseHotelType />} />
     </Route>
   </Route>
 )
