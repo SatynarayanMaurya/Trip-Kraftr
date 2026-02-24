@@ -36,5 +36,4 @@ const format = process.env.NODE_ENV === "production"
   ? ':remote-addr - - [:ist-date] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"'
   : ":method :url :status :response-time ms [:ist-date]";
 
-// Export logger middleware
 export const logger = morgan(format, { stream: logStream });
