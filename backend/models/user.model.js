@@ -21,7 +21,6 @@ const userSchema = new mongoose.Schema({
     phone:{
         type:Number,
         required:true,
-        unique:true
     },
     password:{
         type:String,
@@ -62,12 +61,15 @@ const userSchema = new mongoose.Schema({
     },
 })
 
+// userSchema.index(
+//     { org_id: 1, phone: 1 },
+//     {
+//       unique: true,
+//       partialFilterExpression: { org_id: { $exists: true } }
+//     }
+//   );
 userSchema.index(
-    { org_id: 1, phone: 1 },
-    {
-      unique: true,
-      partialFilterExpression: { org_id: { $exists: true } }
-    }
+    {  phone: 1 },
   );
 
 export default mongoose.model("User",userSchema)

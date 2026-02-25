@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 dotenv.config();
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import { dbConnect } from "./config/databaseConnection.js";
 import { logger } from "./config/logger.js";
 import authRouter from "./routes/auth.routes.js";
@@ -13,7 +14,7 @@ const app = express();
 // Middlewares 
 app.use(express.json());
 app.use(logger);
-
+app.use(cookieParser())
 app.use(cors({
   origin: process.env.FRONTEND_URL,
   credentials: true

@@ -1,4 +1,8 @@
 import { useState } from "react";
+import { toast } from "react-toastify";
+import { apiConnector } from "../services/apiConnector";
+import { authEndpoints } from "../services/Apis/authApis";
+import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
   const [role, setRole] = useState("staff");
@@ -7,7 +11,7 @@ const LoginPage = () => {
   const [phoneError, setPhoneError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
+  const navigate = useNavigate()
 
   const handlePhoneChange = (e) => {
     const val = e.target.value.replace(/\D/g, "");
@@ -19,22 +23,36 @@ const LoginPage = () => {
     setPhone(val.slice(0, 10));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (phone.length < 10) {
-      setPhoneError("Please enter a valid 10-digit phone number.");
-      return;
+  const handleSubmit = async(e) => {
+    try{
+      e.preventDefault();
+      if (phone.length < 10) {
+        setPhoneError("Please enter a valid 10-digit phone number.");
+        return;
+      }
+      if(!phone || !password){
+        toast.warn("Please provide the required field")
+        return ;
+      }
+      setIsLoading(true)
+      const response = await apiConnector("POST",authEndpoints.LOGIN,{role,phone,password})
+      setIsLoading(false)
+      console.log("Response : ",response)
+      toast.success(response?.data?.message)
+      localStorage.setItem("token",response?.data?.token)
+      navigate("/")
     }
-    console.log("Value is : ",phone,password)
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      setSuccess(true);
-    }, 1500);
+    catch(error){
+      setIsLoading(false)
+      console.log("Error in login : ",error)
+      toast.error(error?.response?.data?.message || error?.message || "Error in login")
+    }
+
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-900 via-slate-800 to-slate-900 p-4">
+    // <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-900 via-slate-800 to-slate-900 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-white p-4">
       <div className="w-full max-w-4xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-[540px]">
 
         {/* Left Image Panel */}
@@ -69,17 +87,6 @@ const LoginPage = () => {
 
         {/* Right Form Panel */}
         <div className="md:w-1/2 w-full flex flex-col justify-center px-8 py-10 md:px-12">
-          {success ? (
-            <div className="flex flex-col items-center justify-center text-center py-10">
-              <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mb-4">
-                <svg className="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <h2 className="text-2xl font-bold text-slate-800 mb-2">Login Successful!</h2>
-              <p className="text-slate-500 text-sm">You're signed in as <span className="font-semibold text-indigo-600 capitalize">{role}</span>.</p>
-            </div>
-          ) : (
             <>
               <div className="mb-8">
                 <h2 className="text-2xl font-bold text-slate-800 mb-1" style={{ fontFamily: "'Georgia', serif" }}>
@@ -188,7 +195,7 @@ const LoginPage = () => {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-semibold text-sm shadow-lg shadow-indigo-200 transition-all duration-200 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full py-3 rounded-xl bg-linear-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-semibold text-sm shadow-lg shadow-indigo-200 transition-all duration-200 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {isLoading ? (
                     <>
@@ -209,14 +216,8 @@ const LoginPage = () => {
                 </button>
               </form>
 
-              <p className="mt-6 text-center text-xs text-slate-400">
-                Don't have an account?{" "}
-                <button className="text-indigo-500 cursor-pointer font-semibold hover:text-indigo-700 transition-colors">
-                  Register here
-                </button>
-              </p>
             </>
-          )}
+          
         </div>
       </div>
     </div>
