@@ -6,8 +6,9 @@ import cookieParser from "cookie-parser";
 import { dbConnect } from "./config/databaseConnection.js";
 import { logger } from "./config/logger.js";
 import authRouter from "./routes/auth.routes.js";
+import planRouter from "./routes/plan.routes.js";
 
-dbConnect();
+
 
 const app = express();
 
@@ -22,12 +23,17 @@ app.use(cors({
 
 // Routes
 app.use("/api/v1",authRouter)
+app.use("/api/v1",planRouter)
 
 
 app.get("/", (req, res) => {
   res.send("<h1>TripKraftr Backend is running successfully</h1>");
 });
 
-app.listen(process.env.PORT || 4000, () => {
-    console.log("APP is running on this ",process.env.PORT," port")
-});
+dbConnect().then(()=>{
+  app.listen(process.env.PORT || 4000, () => {
+      console.log("APP is running on this ",process.env.PORT," port")
+  });
+}).catch((error)=>{
+  console.log("Error in connection of db : ",error)
+})

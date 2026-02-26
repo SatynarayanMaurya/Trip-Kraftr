@@ -37,7 +37,6 @@ const LoginPage = () => {
       setIsLoading(true)
       const response = await apiConnector("POST",authEndpoints.LOGIN,{role,phone,password})
       setIsLoading(false)
-      console.log("Response : ",response)
       toast.success(response?.data?.message)
       localStorage.setItem("token",response?.data?.token)
       navigate("/")

@@ -17,8 +17,10 @@ import activities_icon from "../../assets/sidebar/activities_icon_sidebar.png";
 import dmc_icon from "../../assets/sidebar/dmc_icon_sidebar.png";
 
 function Sidebar() {
-  const [openSupplier, setOpenSupplier] = useState(false);
+  const [openSupplier, setOpenSupplier] = useState(true);
   const [activeTab, setActiveTab] = useState("Hotels");
+
+  const [openAdmin, setOpenAdmin] = useState(false)
 
   const supplierTabs = [
     { name: "Hotels", icon: hotel_icon, path: "/hotels" },
@@ -27,6 +29,10 @@ function Sidebar() {
     { name: "Places", icon: place_icon, path: "/places" },
     { name: "Activities", icon: activities_icon, path: "/activities" },
   ];
+  const adminTabs = [
+    { name: "Regions", icon: hotel_icon, path: "/regions" },
+    { name: "Sub Regions", icon: vehicle_icon, path: "/sub-regions" },
+  ];
 
   const staticMenuTabs = [
     "Customise Trips",
@@ -34,6 +40,15 @@ function Sidebar() {
     "Manage B2B Trips",
     "My Sample Trips",
   ]
+
+  const supplierTabClicked = ()=>{
+    setOpenAdmin(false);
+    setOpenSupplier(!openSupplier)
+  }
+  const adminTabClicked = ()=>{
+    setOpenSupplier(false)
+    setOpenAdmin(!openAdmin);
+  }
 
   return (
     <div className="h-screen bg-[#1E3A5F] text-white flex flex-col justify-between">
@@ -81,7 +96,8 @@ function Sidebar() {
           {/* Suppliers */}
           <div>
             <div
-              onClick={() => setOpenSupplier(!openSupplier)}
+              // onClick={() => setOpenSupplier(!openSupplier)}
+              onClick={supplierTabClicked}
               className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-[#244A78] cursor-pointer"
             >
               <div className="flex items-center gap-3">
@@ -151,12 +167,52 @@ function Sidebar() {
           </div>
 
           {/* Admin */}
-          <div className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-[#244A78] cursor-pointer">
-            <div className="flex items-center gap-3">
-              <Shield size={18} />
-              <span>Admin</span>
+          <div>
+            <div
+              onClick={adminTabClicked}
+              className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-[#244A78] cursor-pointer"
+            >
+              <div className="flex items-center gap-3">
+                <Shield size={18} />
+                <span>Admin</span>
+              </div>
+              {openAdmin ? (
+                <ChevronDown size={16} />
+              ) : (
+                <ChevronRight size={16} />
+              )}
             </div>
-            <ChevronRight size={16} />
+
+            {/* Submenu */}
+            {openAdmin && (
+              <div className="ml-6 mt-1 space-y-1">
+                {adminTabs.map((tab) => (
+                  <NavLink
+                    to={tab.path}
+                    key={tab.name}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 px-3 py-2 cursor-pointer transition-all ${isActive
+                        ? "bg-[#FEF4F8] text-black rounded-tl-full rounded-bl-full"
+                        : "hover:bg-[#244A78] rounded-lg text-white"
+                      }`
+                    }
+                  >
+                    {() => (
+                      <>
+                        <img
+                          src={tab.icon}
+                          alt={tab.name}
+                          className={`w-4 h-4 transition-all `}
+                        />
+                        <span className="text-sm font-medium">
+                          {tab.name}
+                        </span>
+                      </>
+                    )}
+                  </NavLink>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

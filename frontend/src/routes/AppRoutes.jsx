@@ -6,6 +6,7 @@ import {VehicleRoutes} from './VehicleRoutes'
 import LoginPage from '../pages/LoginPage'
 import Dashboard from '../pages/Dashboard'
 import { PrivateRoute } from '../utils/PrivateRoute'
+import { planRoutes } from './PlanRoutes'
 
 
 function AppRoutes() {
@@ -14,6 +15,7 @@ function AppRoutes() {
       <Route path="/auth" element={<LoginPage />}/>
       <Route path="/" element={<PrivateRoute><MainLayout /></PrivateRoute>}>
         <Route index element={<Dashboard />} />
+        {planRoutes}
         {hotelRoutes}
         {VehicleRoutes}
       </Route>

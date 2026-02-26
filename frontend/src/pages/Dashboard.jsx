@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const stats = [
   { label: "Total Itineraries", value: "1,284", change: "+12%", up: true, icon: "🗺️", color: "from-sky-500 to-cyan-400" },
@@ -53,6 +54,7 @@ export default function Dashboard() {
   const tabs = ["All", "Active", "Confirmed", "Pending", "Completed", "Cancelled"];
   const filtered = itineraries.filter((it) => activeTab === "All" || it.status === activeTab);
   const maxTours = Math.max(...monthlyData.map((d) => d.tours));
+  const navigate = useNavigate()
 
   return (
     <div className="p-4 md:p-6 bg-[#f1f5f9] min-h-screen space-y-5">
@@ -65,9 +67,14 @@ export default function Dashboard() {
           </h1>
           <p className="text-xs text-slate-400 mt-0.5">Itinerary Management Overview</p>
         </div>
-        <button className="flex items-center gap-2 bg-sky-500 hover:bg-sky-600 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors shadow-sm">
-          <span>+</span> New Itinerary
-        </button>
+        <div className="flex gap-4 items-center">
+          <button onClick={()=>navigate('add-plan')} className="flex items-center gap-2 bg-sky-500 hover:bg-sky-600 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors shadow-sm">
+            <span>+</span> New Plans
+          </button>
+          <button className="flex items-center gap-2 bg-sky-500 hover:bg-sky-600 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors shadow-sm">
+            <span>+</span> New Organization
+          </button>
+        </div>
       </div>
 
       {/* Stat Cards */}
