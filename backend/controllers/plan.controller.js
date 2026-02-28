@@ -4,14 +4,25 @@ import Plan from "../models/plan.model.js"
 
 export const createPlan = async(req ,res)=>{
     try{
-        const {name,max_users,max_departure, max_templates,ai_credits_monthly,price_monthly,price_yearly,has_ai_builder,b2b_trip,has_hotel_management,has_vehicle_management,private_trip} = req.body;
+        const {name,max_users,max_departure, max_templates,ai_credits_monthly,price_monthly,price_yearly,has_ai_builder,b2b_trip,has_hotel_management,has_vehicle_management,private_trip,group_trip} = req.body;
 
 
-        console.log(name,max_users,max_departure, max_templates,ai_credits_monthly,price_monthly,price_yearly,has_ai_builder,b2b_trip,has_hotel_management,has_vehicle_management,private_trip)
+        const existingPlan = await Plan.findOne({name})
+        if(existingPlan){
+            return res.status(409).json({
+                success:false,
+                message:'Plan already exist you need to update for this plan'
+            })
+        }
+
+        const newPlan = await Plan.create({name,max_users,max_departure, max_templates,ai_credits_monthly,price_monthly,price_yearly,has_ai_builder,b2b_trip,has_hotel_management,has_vehicle_management,private_trip,group_trip,updatedBy:req.user.userId})
+
+
 
         return res.status(201).json({
             success:true,
-            message:'Plan created successfully'
+            message:'Plan created successfully',
+            newPlan
         })
     }
     catch(error){

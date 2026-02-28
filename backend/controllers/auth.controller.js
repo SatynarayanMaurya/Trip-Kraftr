@@ -97,6 +97,7 @@ export const login = async(req,res)=>{
                 userId:existingUser?._id,
                 org_id:existingUser?.org_id || null,
                 phone:existingUser?.phone,
+                role:existingUser?.role||'customer',
                 email:existingUser?.email||null,
                 is_active:existingUser?.is_active
             },

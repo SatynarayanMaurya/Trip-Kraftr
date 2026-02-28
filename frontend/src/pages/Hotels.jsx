@@ -129,7 +129,7 @@ function Hotels() {
           Export
         </button>
 
-        <button onClick={()=>navigate("#")} className=" cursor-pointer flex items-center gap-2 px-5 py-2 bg-[#ec5a89] text-white rounded-xl shadow-md hover:shadow-lg transition text-sm">
+        <button onClick={()=>navigate("add-hotel")} className=" cursor-pointer flex items-center gap-2 px-5 py-2 bg-[#ec5a89] text-white rounded-xl shadow-md hover:shadow-lg transition text-sm">
           <Plus size={15} />
           Add New Hotels
         </button>

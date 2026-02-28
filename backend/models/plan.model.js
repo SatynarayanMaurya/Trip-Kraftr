@@ -9,7 +9,7 @@ const planSchema = new mongoose.Schema({
         required:true
     },
 
-    max_users:{
+    max_users:{    // How much user can be use at the same time this is not no. of customer
         type:Number,
         default:0
     },
@@ -62,11 +62,12 @@ const planSchema = new mongoose.Schema({
         type:Boolean,
         default:false
     },
-   
-    createdBy:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"User"
+
+    group_trip:{
+        type:Boolean,
+        default:false
     },
+   
     updatedBy:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"User"

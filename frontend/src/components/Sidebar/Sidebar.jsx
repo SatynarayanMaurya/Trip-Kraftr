@@ -67,7 +67,7 @@ function Sidebar() {
         </div>
         <div className="space-y-1 pl-3">
           <NavLink
-            to={"/"}
+            to={"/dashboard"}
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2 cursor-pointer transition-all ${isActive
                 ? "bg-[#FEF4F8] text-black rounded-tl-full rounded-bl-full"

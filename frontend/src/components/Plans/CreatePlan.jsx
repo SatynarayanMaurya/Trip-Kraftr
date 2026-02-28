@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { usePlanHooks } from "../../hooks/usePlanHooks";
-
+import { useSelector } from "react-redux";
+import { useNavigate } from 'react-router-dom'
+import { toast } from "react-toastify";
 const plans = ["starter", "pro"];
 
 const defaultForm = {
@@ -16,6 +18,7 @@ const defaultForm = {
   has_ai_builder: false,
   b2b_trip: false,
   private_trip: false,
+  group_trip: true,
 };
 
 const Toggle = ({ checked, onChange, label }) => (
@@ -25,14 +28,12 @@ const Toggle = ({ checked, onChange, label }) => (
     </span>
     <div
       onClick={onChange}
-      className={`relative w-11 h-6 rounded-full transition-all duration-300 cursor-pointer flex-shrink-0 ${
-        checked ? "bg-amber-400" : "bg-slate-600"
-      }`}
+      className={`relative w-11 h-6 rounded-full transition-all duration-300 cursor-pointer flex-shrink-0 ${checked ? "bg-amber-400" : "bg-slate-600"
+        }`}
     >
       <div
-        className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all duration-300 ${
-          checked ? "left-6" : "left-1"
-        }`}
+        className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all duration-300 ${checked ? "left-6" : "left-1"
+          }`}
       />
     </div>
   </label>
@@ -61,34 +62,52 @@ const SectionLabel = ({ children }) => (
 
 export default function CreatePlan() {
 
-    const {createPlan} = usePlanHooks()
+  const { createPlan } = usePlanHooks()
+  const navigate = useNavigate();
+  const isProduction = useSelector((state) => state.user.isProduction)
   const [form, setForm] = useState(defaultForm);
   const [submitted, setSubmitted] = useState(false);
+  const loading = useSelector((state) => state.plan.loading)
 
   const set = (key, value) => setForm((f) => ({ ...f, [key]: value }));
 
-  const handleSubmit = async(e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 3000);
-    console.log("Plan data:", form);
-    const response =await createPlan(form)
-    console.log("Incoming response : ",response)
 
+    try {
+      const data = await createPlan(form);
+
+      setSubmitted(true);
+      toast.success(data?.message || "Plan created successfully");
+
+      navigate("/");
+    } catch (error) {
+      if (!isProduction) {
+        console.log("========= ERROR DEBUG START =========");
+        console.log("Error:", error);
+        console.log("Response:", error?.response);
+        console.log("========= ERROR DEBUG END =========");
+      }
+
+      toast.error(
+        error?.response?.data?.message ||
+        error?.message ||
+        "Error in creating the plan"
+      );
+    }
   };
-
 
   return (
     <div
-      className="min-h-screen bg-slate-950 flex items-center justify-center p-6"
-    //   style={{ fontFamily: "'Inter', sans-serif" }}
-        style={{ fontFamily: "'Poppins', sans-serif" }}
+      className="relative  min-h-screen bg-slate-950 flex items-center justify-center p-6 py-4"
+      //   style={{ fontFamily: "'Inter', sans-serif" }}
+      style={{ fontFamily: "'Poppins', sans-serif" }}
     >
       {/* Background decoration */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-96 h-96 bg-amber-400/5 rounded-full blur-3xl" />
         <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-900/50 via-slate-950 to-slate-950" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-li-stops))] from-slate-900/50 via-slate-950 to-slate-950" />
       </div>
 
       <div className="relative w-full max-w-5xl">
@@ -101,9 +120,6 @@ export default function CreatePlan() {
             </span>
           </div>
           <h1 className="text-3xl font-bold text-white tracking-tight">Create Plan</h1>
-          <p className="text-slate-400 text-sm mt-1">
-            Define your subscription plan details and feature access.
-          </p>
         </div>
 
         <form onSubmit={handleSubmit}>
@@ -121,11 +137,10 @@ export default function CreatePlan() {
                       key={p}
                       type="button"
                       onClick={() => set("name", p)}
-                      className={`relative py-2.5 px-4 rounded-xl border text-sm font-semibold tracking-wide capitalize transition-all duration-200 ${
-                        form.name === p
+                      className={`relative py-2.5 px-4 rounded-xl border text-sm font-semibold tracking-wide capitalize transition-all duration-200 ${form.name === p
                           ? "border-amber-400 bg-amber-400/10 text-amber-300"
                           : "border-slate-700 bg-slate-800/50 text-slate-400 hover:border-slate-500 hover:text-slate-200"
-                      }`}
+                        }`}
                     >
                       {p === "pro" && (
                         <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-amber-400 text-slate-900 text-[9px] font-bold px-2 py-0.5 rounded-full tracking-wider uppercase">
@@ -185,7 +200,7 @@ export default function CreatePlan() {
                   />
                   <InputField
                     label="AI Credits / Mo"
-                    value={form.ai_credits_monthly || ""}
+                    value={form.ai_credits_monthly}
                     onChange={(e) => set("ai_credits_monthly", Number(e.target.value))}
                     placeholder="e.g. 500"
                   />
@@ -234,6 +249,11 @@ export default function CreatePlan() {
                     checked={form.private_trip}
                     onChange={() => set("private_trip", !form.private_trip)}
                   />
+                  <Toggle
+                    label="Group Trip"
+                    checked={form.group_trip}
+                    onChange={() => set("group_trip", !form.group_trip)}
+                  />
                 </div>
               </div>
 
@@ -265,7 +285,7 @@ export default function CreatePlan() {
               <div className="flex-1" />
 
               {/* Submit */}
-              <button
+              {/* <button
                 type="submit"
                 className={`w-full py-3 rounded-xl font-semibold text-sm tracking-wide transition-all duration-300 ${
                   submitted
@@ -276,6 +296,49 @@ export default function CreatePlan() {
                 {submitted
                   ? "✓ Plan Saved"
                   : `Save ${form.name.charAt(0).toUpperCase() + form.name.slice(1)} Plan`}
+              </button> */}
+              <button
+                type="submit"
+                disabled={loading}
+                className={`w-full py-3 rounded-xl font-semibold text-sm tracking-wide transition-all duration-300 flex items-center justify-center gap-2
+                  ${loading
+                    ? "bg-amber-400 text-slate-900 opacity-80 cursor-not-allowed"
+                    : submitted
+                      ? "bg-green-500 text-white"
+                      : "bg-amber-400 hover:bg-amber-300 text-slate-900"
+                  }
+                `}
+              >
+                {loading ? (
+                  <>
+                    <svg
+                      className="animate-spin w-4 h-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v8z"
+                      />
+                    </svg>
+                    Saving Plan...
+                  </>
+                ) : submitted ? (
+                  <>✓ Plan Saved</>
+                ) : (
+                  <>
+                    Save {form.name.charAt(0).toUpperCase() + form.name.slice(1)} Plan
+                  </>
+                )}
               </button>
             </div>
 
