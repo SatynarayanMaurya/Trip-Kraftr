@@ -11,7 +11,7 @@ export const createPlan = async(req ,res)=>{
         if(existingPlan){
             return res.status(409).json({
                 success:false,
-                message:'Plan already exist you need to update for this plan'
+                message:'This plan already exists. Please update the existing plan instead.'
             })
         }
 

@@ -6,6 +6,8 @@ import LoginPage from '../pages/LoginPage'
 import { PrivateRoute } from '../utils/PrivateRoute'
 import { dashboardRoutes } from './DashboardRoutes'
 import { Navigate } from 'react-router-dom'
+import { planRoutes } from './PlanRoutes'
+import { organizationRoutes } from './OrganizationRoutes'
 
 
 function AppRoutes() {
@@ -18,6 +20,8 @@ function AppRoutes() {
         {dashboardRoutes}
         {hotelRoutes}
         {VehicleRoutes}
+        {organizationRoutes}
+        {planRoutes}
       </Route>
     </Routes>
   )

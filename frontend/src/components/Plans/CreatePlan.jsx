@@ -107,7 +107,7 @@ export default function CreatePlan() {
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-96 h-96 bg-amber-400/5 rounded-full blur-3xl" />
         <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-li-stops))] from-slate-900/50 via-slate-950 to-slate-950" />
+        <div className="absolute inset-0 bg-linear from-slate-900/50 via-slate-950 to-slate-950" />
       </div>
 
       <div className="relative w-full max-w-5xl">
@@ -284,19 +284,6 @@ export default function CreatePlan() {
 
               <div className="flex-1" />
 
-              {/* Submit */}
-              {/* <button
-                type="submit"
-                className={`w-full py-3 rounded-xl font-semibold text-sm tracking-wide transition-all duration-300 ${
-                  submitted
-                    ? "bg-green-500 text-white"
-                    : "bg-amber-400 hover:bg-amber-300 text-slate-900"
-                }`}
-              >
-                {submitted
-                  ? "✓ Plan Saved"
-                  : `Save ${form.name.charAt(0).toUpperCase() + form.name.slice(1)} Plan`}
-              </button> */}
               <button
                 type="submit"
                 disabled={loading}

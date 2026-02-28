@@ -25,11 +25,12 @@ function Sidebar() {
   const supplierTabs = [
     { name: "Hotels", icon: hotel_icon, path: "/hotels" },
     { name: "Vehicles", icon: vehicle_icon, path: "/vehicles" },
-    { name: "DMC's", icon: dmc_icon, path: "/dmc" },
     { name: "Places", icon: place_icon, path: "/places" },
     { name: "Activities", icon: activities_icon, path: "/activities" },
   ];
   const adminTabs = [
+    { name: "Organizations", icon: activities_icon, path: "/organizations" },
+    { name: "Plans", icon: dmc_icon, path: "/plans" },
     { name: "Regions", icon: hotel_icon, path: "/regions" },
     { name: "Sub Regions", icon: vehicle_icon, path: "/sub-regions" },
   ];
