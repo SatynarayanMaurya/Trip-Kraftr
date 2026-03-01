@@ -74,9 +74,14 @@ morgan.token("ist-date", () => {
 });
 
 // Custom format using IST time
+// const format =
+//   process.env.NODE_ENV === "production"
+//     ? ':remote-addr - - [:ist-date] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"'
+//     : ":method :url :status :response-time ms [:ist-date]";
+
 const format =
   process.env.NODE_ENV === "production"
-    ? ':remote-addr - - [:ist-date] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"'
+    ? ':remote-addr - - [:ist-date] ":method :url HTTP/:http-version" :status :response-time ms :res[content-length] ":referrer" ":user-agent"'
     : ":method :url :status :response-time ms [:ist-date]";
 
 // ⭐ STREAM WRITER → writes to BOTH console + file
