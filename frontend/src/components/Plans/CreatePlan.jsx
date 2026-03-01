@@ -29,7 +29,7 @@ const Toggle = ({ checked, onChange, label }) => (
     </span>
     <div
       onClick={onChange}
-      className={`relative w-11 h-6 rounded-full transition-all duration-300 cursor-pointer flex-shrink-0 ${checked ? "bg-amber-400" : "bg-slate-600"
+      className={`relative w-11 h-6 rounded-full transition-all duration-300 cursor-pointer shrink-0 ${checked ? "bg-amber-400" : "bg-slate-600"
         }`}
     >
       <div

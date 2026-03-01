@@ -225,3 +225,5 @@ GET /api/v1/get-all-organization-for-super-admin 304 262.920 ms [1/3/2026, 12:17
 GET /api/v1/get-all-organization-for-super-admin 304 268.884 ms [1/3/2026, 12:29:41 pm]
 GET /api/v1/get-all-organization-for-super-admin 304 264.544 ms [1/3/2026, 12:29:41 pm]
 GET /api/v1/get-all-organization-for-super-admin - - ms [1/3/2026, 12:34:59 pm]
+GET /api/v1/get-all-organization-for-super-admin 304 5207.441 ms [1/3/2026, 12:43:48 pm]
+GET /api/v1/get-all-organization-for-super-admin 304 1003.908 ms [1/3/2026, 12:43:49 pm]
