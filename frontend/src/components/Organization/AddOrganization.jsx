@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { useOrganizationHooks } from "../../hooks/useOrganizationHooks";
 import { useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
+import { addNewOrganization } from "../../redux/slices/organizationSlice";
 
-export default function AddOrganization({ onSubmit, onCancel }) {
+export default function AddOrganization() {
   const [form, setForm] = useState({
     plan: "starter",
     name: "",
@@ -24,6 +26,7 @@ export default function AddOrganization({ onSubmit, onCancel }) {
   const { addOrganization } = useOrganizationHooks();
   const loading = useSelector((state) => state.user.loading);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   // Handle input changes
   const handleChange = (e) => {
@@ -85,8 +88,8 @@ export default function AddOrganization({ onSubmit, onCancel }) {
       toast?.success(
         data?.message || "Organization created successfully"
       );
+      dispatch(addNewOrganization(data?.newOrganization))
       setErrors({});
-      onSubmit?.(form);
       navigate(-1);
     } catch (error) {
       if (!isProduction) {
@@ -133,6 +136,13 @@ export default function AddOrganization({ onSubmit, onCancel }) {
             </span>
           </div>
           <h1 className="text-3xl font-bold text-white">Add Organization</h1>
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2 text-sm text-gray-500 mt-2 hover:text-[#b0b3b8] cursor-pointer"
+          >
+            <ArrowLeft size={16} />
+            Back to List
+          </button>
         </div>
 
         <form onSubmit={handleSubmit} noValidate>
@@ -425,7 +435,6 @@ export default function AddOrganization({ onSubmit, onCancel }) {
                 {/* Cancel Button */}
                 <button
                   type="button"
-                  onClick={onCancel}
                   disabled={loading} // optionally disable cancel while saving
                   className="w-full rounded-xl border border-[#1e2a3a] bg-transparent py-3 text-sm font-semibold text-slate-400 transition hover:border-slate-500 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
                 >

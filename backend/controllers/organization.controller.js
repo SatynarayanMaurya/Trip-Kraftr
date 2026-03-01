@@ -1,6 +1,9 @@
 import { uploadImageToCloudinary } from "../utils/uploadToCloudinary.js";
 import Organization from "../models/organization.model.js"
 import Plan from "../models/plan.model.js"
+import { defaultRoles } from "../utils/defaultRoles.js";
+import Permission from "../models/permission.model.js";
+import mongoose from "mongoose";
 
 export const addOrganization = async(req, res)=>{
     try{
@@ -50,6 +53,7 @@ export const addOrganization = async(req, res)=>{
             })
         }
 
+
         const organizationData = {
             name,                
             planId: selectedPlan?._id,     
@@ -77,6 +81,17 @@ export const addOrganization = async(req, res)=>{
           };
 
         const newOrganization = await Organization.create(organizationData) 
+        await newOrganization.populate({
+            path: "planId",
+            select: "_id name"
+          });
+        const rolesToInsert = defaultRoles.map(role => ({
+            ...role,
+            org_id: newOrganization?._id,
+            updatedBy: new mongoose.Types.ObjectId(req.user.userId)
+          }));
+
+        await Permission.insertMany(rolesToInsert);
         return res.status(201).json({
             success:true,
             message:"Organization created successfully.",
@@ -91,23 +106,24 @@ export const addOrganization = async(req, res)=>{
     }
 }
 
-export const getAllOrganizationForSuperAdmin = async (req, res)=>{
-    try{
+export const getAllOrganizationForSuperAdmin = async (req, res) => {
+    try {
         const allOrganizations = await Organization.find()
-        .populate({
-            path: 'planId', 
-            select: 'name'   
-        });
+            .sort({ createdAt: -1 }) // Sort by newest first
+            .populate({
+                path: 'planId',
+                select: 'name'
+            });
+
         return res.status(200).json({
-            success:true,
-            message:"All organization fetched",
+            success: true,
+            message: "All organizations fetched",
             allOrganizations
-        })
-    }
-    catch(error){
+        });
+    } catch (error) {
         return res.status(500).json({
-            success:false,
-            message:error?.message || "Internal server error"
-        })
+            success: false,
+            message: error?.message || "Internal server error"
+        });
     }
-}
+};

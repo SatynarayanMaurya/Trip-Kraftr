@@ -52,14 +52,7 @@ const organizatonSchema = new mongoose.Schema({
             return now;
           }
     },
-    createdAt: {
-        type: Date,
-        default: Date.now()
-    },
-    updatedAt: {
-        type: Date,
-        default: Date.now()
-    },
-})
+
+},{ timestamps: true })
 
 export default mongoose.model("Organization", organizatonSchema)

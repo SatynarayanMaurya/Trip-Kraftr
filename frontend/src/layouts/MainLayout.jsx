@@ -6,7 +6,8 @@ function MainLayout() {
     <div className="flex h-screen overflow-hidden">
       
       {/* Sidebar */}
-      <div className="w-[16vw] h-screen sticky top-0 ">
+      {/* <div className="w-[16vw] h-screen sticky top-0 "> */}
+      <div className="w-[16vw] min-h-screen overflow-y-auto">
         <Sidebar />
       </div>
 
@@ -18,19 +19,5 @@ function MainLayout() {
     </div>
   )
 }
-
-// function MainLayout() {
-//   return (
-//     <div className='flex'>
-//       <div className='w-[16vw] '>
-//         <Sidebar />
-//       </div>
-
-//       <div className='w-[84vw] '>
-//         <Outlet />
-//       </div>
-//     </div>
-//   )
-// }
 
 export default MainLayout

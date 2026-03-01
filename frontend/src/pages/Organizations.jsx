@@ -33,7 +33,7 @@ function OrgCard({ org}) {
       <div className="flex items-start gap-4">
         <div className="relative shrink-0">
           <img
-            src={org.logo?.url}
+            src={org.logo?.url || "https://tse4.mm.bing.net/th/id/OIP.xt2aXI1tO688W_ugEZGt6AHaHa?rs=1&pid=ImgDetMain&o=7&rm=3"}
             alt={org.name}
             onError={(e) => {
               e.target.onerror = null;
@@ -146,7 +146,7 @@ export default function Organizations() {
 
   const fetchAllOrganization = async()=>{
     try{
-      if(allOrganizations) return ;
+      if(allOrganizations && allOrganizations?.length > 0) return ;
       const response = await getAllOrganizationForSuperAdmin()
       dispatch(setAllOrganizations(response?.data?.allOrganizations))
       
@@ -182,6 +182,7 @@ export default function Organizations() {
 
   const totalActive = allOrganizations?.filter((o) => o.is_active)?.length || 0;
   const totalPro = allOrganizations?.filter((o) => o.planId?.name === "pro")?.length || 0;
+  const totalInactive = (allOrganizations?.length - totalActive) || 0
 
   return (
     <div className="min-h-screen bg-[#0a0f1a] p-6 md:p-10" style={{ fontFamily: "'DM Sans', sans-serif" }}>
@@ -197,7 +198,7 @@ export default function Organizations() {
           <div>
             <h1 className="text-3xl font-bold text-white">Organizations</h1>
             <p className="text-sm text-slate-500 mt-1">
-              {allOrganizations?.length} total &middot; {totalActive} active &middot; {totalPro} on Pro
+              {allOrganizations?.length || 0} total &middot; {totalActive} active &middot; {totalPro} on Pro
             </p>
           </div>
           <button
@@ -217,7 +218,7 @@ export default function Organizations() {
         {[
           { label: "Total", value: allOrganizations?.length || 0, color: "text-white" },
           { label: "Active", value: totalActive, color: "text-green-400" },
-          { label: "Inactive", value: allOrganizations?.length||0 - totalActive, color: "text-slate-400" },
+          { label: "Inactive", value:totalInactive, color: "text-slate-400" },
           { label: "Pro Plan", value: totalPro, color: "text-yellow-400" },
         ].map(({ label, value, color }) => (
           <div key={label} className="rounded-2xl border border-[#1e2a3a] bg-[#0d1420] px-5 py-4">
@@ -277,7 +278,7 @@ export default function Organizations() {
 
       {/* ── RESULTS COUNT ── */}
       <p className="text-xs text-slate-500 mb-4 font-medium">
-        Showing <span className="text-white font-bold">{filtered?.length}</span> of {allOrganizations?.length} organizations
+        Showing <span className="text-white font-bold">{filtered?.length||0}</span> of {allOrganizations?.length||0} organizations
       </p>
 
       {/* ── CARDS GRID ── */}

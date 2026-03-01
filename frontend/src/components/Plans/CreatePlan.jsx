@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import { useNavigate } from 'react-router-dom'
 import { toast } from "react-toastify";
 const plans = ["starter", "pro"];
+import { ArrowLeft } from "lucide-react";
 
 const defaultForm = {
   name: "starter",
@@ -120,6 +121,13 @@ export default function CreatePlan() {
             </span>
           </div>
           <h1 className="text-3xl font-bold text-white tracking-tight">Create Plan</h1>
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2 text-sm text-gray-500 mt-2 hover:text-[#b0b3b8] cursor-pointer"
+          >
+            <ArrowLeft size={16} />
+            Back to List
+          </button>
         </div>
 
         <form onSubmit={handleSubmit}>
@@ -209,7 +217,7 @@ export default function CreatePlan() {
             </div>
 
             {/* ── RIGHT COLUMN ── */}
-            <div className="bg-slate-900/80 backdrop-blur border border-slate-800 rounded-2xl p-5 flex flex-col gap-5">
+            <div className="bg-slate-900/80 backdrop-blur border border-slate-800 rounded-2xl p-5 flex flex-col gap-4">
 
               {/* Feature Access */}
               <div>
