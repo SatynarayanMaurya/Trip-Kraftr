@@ -5,6 +5,7 @@ import { planEndpoints } from '../services/Apis/planApis'
 import { useDispatch, useSelector } from 'react-redux'
 import { organizationEndPoints } from '../services/Apis/organizationApis'
 import { setLoading } from '../redux/slices/userSlice'
+import { setAllOrganizations } from '../redux/slices/organizationSlice'
 
 export const useOrganizationHooks = () => {
     const dispatch = useDispatch();
@@ -25,6 +26,19 @@ export const useOrganizationHooks = () => {
       try {
         dispatch(setLoading(true));
         const response = await apiConnector("GET",organizationEndPoints.GET_ALL_ORGANIZATION_FOR_SUPER_ADMIN )
+        dispatch(setAllOrganizations(response?.data?.allOrganizations))
+        return response; 
+      } catch (error) {
+        throw error;
+      } finally {
+        dispatch(setLoading(false)); 
+      }
+    }
+    
+    const addOrganizationAdmin = async (adminDetails)=>{
+      try {
+        dispatch(setLoading(true));
+        const response = await apiConnector("POST",organizationEndPoints.ADD_ORGANIZATION_ADMIN,adminDetails)
         return response; 
       } catch (error) {
         throw error;
@@ -33,5 +47,5 @@ export const useOrganizationHooks = () => {
       }
     }
   
-    return { addOrganization,getAllOrganizationForSuperAdmin };
+    return { addOrganization,getAllOrganizationForSuperAdmin,addOrganizationAdmin };
   };

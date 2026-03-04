@@ -13,6 +13,7 @@ import { logger } from "./config/logger.js";
 import authRouter from "./routes/auth.routes.js";
 import planRouter from "./routes/plan.routes.js";
 import organizationRouter from "./routes/organization.routes.js";
+import userRouter from "./routes/userRoutes.js";
 
 // Step 1: Initialize critical services (DB + Cloudinary)
 const initializeServices = async () => {
@@ -42,6 +43,7 @@ initializeServices().then(() => {
   app.use("/api/v1", authRouter);
   app.use("/api/v1", planRouter);
   app.use("/api/v1", organizationRouter);
+  app.use("/api/v1", userRouter);
 
   app.get("/", (req, res) => {
     res.send("<h1>TripKraftr Backend is running successfully</h1>");

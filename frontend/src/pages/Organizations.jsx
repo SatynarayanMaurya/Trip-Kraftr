@@ -148,8 +148,6 @@ export default function Organizations() {
     try{
       if(allOrganizations && allOrganizations?.length > 0) return ;
       const response = await getAllOrganizationForSuperAdmin()
-      dispatch(setAllOrganizations(response?.data?.allOrganizations))
-      
     }
     catch(error){
       if (!isProduction) {
@@ -201,15 +199,26 @@ export default function Organizations() {
               {allOrganizations?.length || 0} total &middot; {totalActive} active &middot; {totalPro} on Pro
             </p>
           </div>
-          <button
-            onClick={()=>navigate("add-organization")}
-            className="flex items-center gap-2 rounded-xl bg-yellow-400 px-5 py-2.5 text-sm font-black uppercase tracking-wider text-black shadow-lg shadow-yellow-400/20 transition hover:bg-yellow-300 active:scale-[0.98] whitespace-nowrap"
-          >
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
-            </svg>
-            Add Organization
-          </button>
+          <div className="flex gap-4 items-center">
+            <button
+              onClick={()=>navigate("add-organization")}
+              className="flex items-center gap-2 rounded-xl bg-yellow-400 px-5 py-2.5 text-sm font-black uppercase tracking-wider text-black shadow-lg shadow-yellow-400/20 transition hover:bg-yellow-300 active:scale-[0.98] whitespace-nowrap"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
+              </svg>
+              Add Organization
+            </button>
+            <button
+              onClick={()=>navigate("add-org-admin")}
+              className="flex items-center gap-2 rounded-xl bg-green-400 px-5 py-2.5 text-sm font-black uppercase tracking-wider text-black shadow-lg shadow-yellow-400/20 transition hover:bg-green-300 active:scale-[0.98] whitespace-nowrap"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
+              </svg>
+              Add Org Admin
+            </button>
+          </div>
         </div>
       </div>
 

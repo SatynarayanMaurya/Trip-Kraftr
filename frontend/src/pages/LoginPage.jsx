@@ -3,6 +3,7 @@ import { toast } from "react-toastify";
 import { apiConnector } from "../services/apiConnector";
 import { authEndpoints } from "../services/Apis/authApis";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const LoginPage = () => {
   const [role, setRole] = useState("staff");
@@ -11,6 +12,7 @@ const LoginPage = () => {
   const [phoneError, setPhoneError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const isProduction = useSelector((state)=>state.user.isProduction)
   const navigate = useNavigate()
 
   const handlePhoneChange = (e) => {
@@ -43,7 +45,12 @@ const LoginPage = () => {
     }
     catch(error){
       setIsLoading(false)
-      console.log("Error in login : ",error)
+      if (!isProduction) {
+        console.log("========= ERROR DEBUG START =========");
+        console.log("Error:", error);
+        console.log("Response:", error?.response);
+        console.log("========= ERROR DEBUG END =========");
+      }
       toast.error(error?.response?.data?.message || error?.message || "Error in login")
     }
 

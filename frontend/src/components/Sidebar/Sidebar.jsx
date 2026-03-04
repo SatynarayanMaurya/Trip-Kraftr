@@ -15,9 +15,11 @@ import vehicle_icon from "../../assets/sidebar/vehicle_icon_sidebar.png";
 import place_icon from "../../assets/sidebar/place_icon_sidebar.png";
 import activities_icon from "../../assets/sidebar/activities_icon_sidebar.png";
 import dmc_icon from "../../assets/sidebar/dmc_icon_sidebar.png";
+import { useSelector } from "react-redux";
 
 function Sidebar() {
   const [openSupplier, setOpenSupplier] = useState(true);
+  const userDetails = useSelector((state)=>state.user.userDetails)
   const [activeTab, setActiveTab] = useState("Hotels");
 
   const [openAdmin, setOpenAdmin] = useState(false)
@@ -52,7 +54,7 @@ function Sidebar() {
   }
 
   return (
-    <div className="h-screen bg-[#1E3A5F] text-white flex flex-col justify-between">
+    <div className="h-screen hide_scrollbar overflow-scroll bg-[#1E3A5F] text-white flex flex-col justify-between">
       <div>
         {/* Logo */}
         <div className="px-6 py-5 text-2xl font-semibold">Mezenga</div>
@@ -61,9 +63,9 @@ function Sidebar() {
         <div className="px-6 mb-6">
           <div className="flex items-center gap-3 bg-[#244A78] rounded-full px-3 py-2 w-fit">
             <div className="w-8 h-8 bg-pink-500 rounded-full flex items-center justify-center text-sm font-semibold">
-              M
+              {userDetails?.name?.split(" ")?.[0]?.[0]||"X"}
             </div>
-            <span className="font-medium">Mayank</span>
+            <span className="font-medium">{userDetails?.name?.split(" ")?.[0] ||""}</span>
           </div>
         </div>
         <div className="space-y-1 pl-3">

@@ -1,9 +1,11 @@
 import { uploadImageToCloudinary } from "../utils/uploadToCloudinary.js";
 import Organization from "../models/organization.model.js"
 import Plan from "../models/plan.model.js"
+import User from "../models/user.model.js"
 import { defaultRoles } from "../utils/defaultRoles.js";
 import Permission from "../models/permission.model.js";
 import mongoose from "mongoose";
+import bcrypt from "bcryptjs";
 
 export const addOrganization = async(req, res)=>{
     try{
@@ -127,3 +129,45 @@ export const getAllOrganizationForSuperAdmin = async (req, res) => {
         });
     }
 };
+
+export const addOrganizationAdmin = async(req,res)=>{
+    try{
+        const {name,email,phone,org_id,password} = req.body;
+        if(!name || !phone || !org_id || !password){
+            return res.status(400).json({
+                success:false,
+                message:"Required field are missing !"
+            })
+        }
+
+        const existingUser = await User.findOne({
+            $or: [
+              { org_id, role: "org_admin" },
+              { phone }
+            ]
+          });
+          
+        if (existingUser) {
+        if (existingUser.org_id === org_id && existingUser.role === "org_admin") {
+            return res.status(409).json({ success:false, message:"This organization already has an admin" });
+        }
+        return res.status(409).json({ success:false, message:"Admin already exists with this phone" });
+        }
+
+        const hashPassword = await bcrypt.hash(password,10)
+
+        const createAdmin = await User.create({name,phone,org_id,role:"org_admin",email,password:hashPassword,createdBy:req.user.userId,updatedBy:req.user.userId})
+        const { password: _, ...adminData } = createAdmin.toObject();
+        return res.status(201).json({
+            success:true,
+            message:"Admin created successfully",
+            adminData
+        })
+    }
+    catch(error){
+        return res.status(500).json({
+            success:false,
+            message:error?.message || "Internal Server Error"
+        })
+    }
+}

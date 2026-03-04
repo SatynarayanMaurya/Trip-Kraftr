@@ -4,8 +4,10 @@ const initialState = {
 
 
     loading:false,
-    NODE_ENV:  import.meta.env.VITE_NODE_ENV||"developement",
-    isProduction:import.meta.env.VITE_NODE_ENV === 'production'
+    isProduction:import.meta.env.VITE_NODE_ENV === 'production',
+
+    userDetails:null
+
 
 
 
@@ -20,9 +22,17 @@ export const userSlice = createSlice({
             state.loading = action.payload
         },
 
+        setUserDetails:(state,action)=>{
+            state.userDetails = action.payload
+        },
+
+        clearUserDetails:(state,action)=>{
+            state.userDetails = null
+        },
+
 
     }
 })
 
-export const {setLoading} = userSlice.actions
+export const {setLoading,setUserDetails,clearUserDetails} = userSlice.actions
 export default userSlice.reducer

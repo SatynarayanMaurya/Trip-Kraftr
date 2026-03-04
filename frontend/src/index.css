@@ -7,3 +7,14 @@ input[type=number]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
+
+/* Reusable class to hide scrollbar */
+.hide_scrollbar {
+  overflow: auto;              /* allow scrolling */
+  scrollbar-width: none;       /* Firefox */
+  -ms-overflow-style: none;    /* IE 10+ */
+}
+
+.hide_scrollbar::-webkit-scrollbar {
+  display: none;               /* Chrome, Safari, Edge */
+}

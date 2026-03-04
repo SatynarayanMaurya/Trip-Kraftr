@@ -70,7 +70,7 @@ export const login = async(req,res)=>{
 
         let existingUser;
         if(role === "staff"){
-            existingUser = await User.findOne({phone})
+            existingUser = await User.findOne({phone},"org_id name email phone password role is_active" ).populate({path:"org_id",select:"subscriptionStartDate subscriptionEndDate is_active"})
         }
         else{
 
@@ -81,6 +81,42 @@ export const login = async(req,res)=>{
                 success:false,
                 message:"User not found"
             })
+        }
+        const getSubscriptionStatus = (org) => {
+            const now = new Date();
+            const start = new Date(org?.subscriptionStartDate);
+            const end = new Date(org?.subscriptionEndDate);
+        
+            if (!org?.is_active) {
+                return { allowed: false, reason: "org_inactive" };
+            }
+            if (now < start) {
+                return { allowed: false, reason: "subscription_not_started", start, end };
+            }
+            if (now > end) {
+                return { allowed: false, reason: "subscription_expired", start, end };
+            }
+            return { allowed: true };
+        }
+        const subscriptionStatus = getSubscriptionStatus(existingUser.org_id);
+
+        if(!subscriptionStatus?.allowed && existingUser?.role !=='super_admin'){
+            let message;
+            switch(subscriptionStatus?.reason){
+                case "org_inactive":
+                    message = "Your organization is inactive. Please contact your administrator.";
+                    break;
+                case "subscription_not_started":
+                    message = `Your organization subscription will start on ${subscriptionStatus?.start.toDateString()}.`;
+                    break;
+                case "subscription_expired":
+                    message = `Your organization subscription expired on ${subscriptionStatus?.end.toDateString()}. Please contact support.`;
+                    break;
+                default:
+                    message = "Access denied due to subscription status.";
+            }
+
+            return res.status(403).json({ success: false, message });
         }
 
         const matchPassword = await bcryptjs.compare(password,existingUser?.password)
@@ -95,7 +131,7 @@ export const login = async(req,res)=>{
         const token = jwt.sign(
             {
                 userId:existingUser?._id,
-                org_id:existingUser?.org_id || null,
+                org_id:existingUser?.org_id?._id || null,
                 phone:existingUser?.phone,
                 role:existingUser?.role||'customer',
                 email:existingUser?.email||null,
@@ -119,10 +155,13 @@ export const login = async(req,res)=>{
         existingUser.last_login = Date.now();
         await existingUser.save()
 
+        const userSafe = existingUser.toObject();
+        delete userSafe.password;
+
         return res.cookie("token",token,cookieOption).status(200).json({
             success:true,
             message:"User login successfull",
-            user:existingUser,
+            user:userSafe,
             token:token
         })
 
@@ -131,6 +170,25 @@ export const login = async(req,res)=>{
         return res.status(500).json({
             success:false,
             message:error?.message || "Internal server error"
+        })
+    }
+}
+
+export const logout = async (req, res) => {
+    try{
+        res.clearCookie("token", { 
+            httpOnly: true, 
+            secure: process.env.NODE_ENV==="production", 
+            sameSite: process.env.NODE_ENV==="production" ? "None" : "Lax", 
+            path: "/" 
+        });
+        return res.status(200).json({success:true, message: "Logged out successfully 🥺" });
+    }
+    catch(error){
+        return res.status(500).json({
+            success:false,
+            message:"Error in logout in backend ",
+            errorMessage:error.message
         })
     }
 }
