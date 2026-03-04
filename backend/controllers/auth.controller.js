@@ -134,8 +134,6 @@ export const login = async(req,res)=>{
                 org_id:existingUser?.org_id?._id || null,
                 phone:existingUser?.phone,
                 role:existingUser?.role||'customer',
-                email:existingUser?.email||null,
-                is_active:existingUser?.is_active
             },
             process.env.JWT_SECRET,
             {
@@ -152,8 +150,6 @@ export const login = async(req,res)=>{
             priority: "high"
         }
 
-        existingUser.last_login = Date.now();
-        await existingUser.save()
 
         const userSafe = existingUser.toObject();
         delete userSafe.password;

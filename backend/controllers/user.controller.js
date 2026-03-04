@@ -19,6 +19,9 @@ export const getUserDetails = async (req, res) => {
             });
         }
 
+        user.last_visited = Date.now();
+        user.save().catch(console.error); // async fire-and-forget
+
         return res.status(200).json({
             success: true,
             message: "User details fetched successfully",
