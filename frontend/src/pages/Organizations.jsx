@@ -209,7 +209,7 @@ export default function Organizations() {
               </svg>
               Add Organization
             </button>
-            <button
+            {/* <button
               onClick={()=>navigate("add-org-admin")}
               className="flex items-center gap-2 rounded-xl bg-green-400 px-5 py-2.5 text-sm font-black uppercase tracking-wider text-black shadow-lg shadow-yellow-400/20 transition hover:bg-green-300 active:scale-[0.98] whitespace-nowrap"
             >
@@ -217,7 +217,7 @@ export default function Organizations() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
               </svg>
               Add Org Admin
-            </button>
+            </button> */}
           </div>
         </div>
       </div>

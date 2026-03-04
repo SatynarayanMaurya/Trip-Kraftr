@@ -8,6 +8,8 @@ import { dashboardRoutes } from './DashboardRoutes'
 import { Navigate } from 'react-router-dom'
 import { planRoutes } from './PlanRoutes'
 import { organizationRoutes } from './OrganizationRoutes'
+import NotFound from '../components/NotFound/NotFound'
+import Unauthorized from '../components/NotFound/Unauthorized'
 
 
 function AppRoutes() {
@@ -22,7 +24,9 @@ function AppRoutes() {
         {VehicleRoutes}
         {organizationRoutes}
         {planRoutes}
+        <Route path="*" element={<NotFound />} />
       </Route>
+      <Route path="*" element={<Navigate to="/auth" replace />} />
     </Routes>
   )
 }

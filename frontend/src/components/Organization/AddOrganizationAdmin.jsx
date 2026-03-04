@@ -138,7 +138,7 @@ export default function AddOrganizationAdmin() {
 
       {/* ── Success State ── */}
 
-      /* ── Form Card ── */
+      {/* ── Form Card ── */ }
       <div className="max-w-3xl mx-auto">
           <div className="bg-[#1a2235] border border-[#2a3448] rounded-2xl overflow-hidden">
 

@@ -435,6 +435,7 @@ export default function AddOrganization() {
                 {/* Cancel Button */}
                 <button
                   type="button"
+                  onClick={()=>navigate(-1)}
                   disabled={loading} // optionally disable cancel while saving
                   className="w-full rounded-xl border border-[#1e2a3a] bg-transparent py-3 text-sm font-semibold text-slate-400 transition hover:border-slate-500 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
                 >

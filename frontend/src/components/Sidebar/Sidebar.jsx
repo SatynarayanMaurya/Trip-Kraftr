@@ -31,11 +31,14 @@ function Sidebar() {
     { name: "Activities", icon: activities_icon, path: "/activities" },
   ];
   const adminTabs = [
-    { name: "Organizations", icon: activities_icon, path: "/organizations" },
-    { name: "Plans", icon: dmc_icon, path: "/plans" },
-    { name: "Regions", icon: hotel_icon, path: "/regions" },
-    { name: "Sub Regions", icon: vehicle_icon, path: "/sub-regions" },
+    { name: "Organizations", icon: activities_icon, path: "/organizations", roles:['super_admin'] },
+    { name: "Plans", icon: dmc_icon, path: "/plans" , roles:['super_admin'] },
+    { name: "Regions", icon: hotel_icon, path: "/regions" , roles:['super_admin','org_admin'] },
+    { name: "Sub Regions", icon: vehicle_icon, path: "/sub-regions", roles:['super_admin',"org_admin"]  },
   ];
+  const filteredTabs = adminTabs.filter(tab =>
+    tab.roles.includes(userDetails?.role)
+  );
 
   const staticMenuTabs = [
     "Customise Trips",
@@ -177,7 +180,7 @@ function Sidebar() {
             >
               <div className="flex items-center gap-3">
                 <Shield size={18} />
-                <span>Admin</span>
+                <span>{userDetails?.role?.toUpperCase()||"Admin"}</span>
               </div>
               {openAdmin ? (
                 <ChevronDown size={16} />
@@ -189,10 +192,10 @@ function Sidebar() {
             {/* Submenu */}
             {openAdmin && (
               <div className="ml-6 mt-1 space-y-1">
-                {adminTabs.map((tab) => (
+                {filteredTabs?.map((tab) => (
                   <NavLink
-                    to={tab.path}
-                    key={tab.name}
+                    to={tab?.path}
+                    key={tab?.name}
                     className={({ isActive }) =>
                       `flex items-center gap-3 px-3 py-2 cursor-pointer transition-all ${isActive
                         ? "bg-[#FEF4F8] text-black rounded-tl-full rounded-bl-full"
