@@ -146,12 +146,13 @@ export const addOrganizationAdmin = async(req,res)=>{
               { phone }
             ]
           });
+
           
         if (existingUser) {
-        if (existingUser.org_id === org_id && existingUser.role === "org_admin") {
-            return res.status(409).json({ success:false, message:"This organization already has an admin" });
-        }
-        return res.status(409).json({ success:false, message:"Admin already exists with this phone" });
+            if (existingUser.org_id?.equals(org_id)  && existingUser.role === "org_admin") {
+                return res.status(409).json({ success:false, message:"This organization already has an admin" });
+            }
+            return res.status(409).json({ success:false, message:"Admin already exists with this phone" });
         }
 
         const hashPassword = await bcrypt.hash(password,10)

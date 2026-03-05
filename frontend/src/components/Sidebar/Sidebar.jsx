@@ -33,8 +33,8 @@ function Sidebar() {
   const adminTabs = [
     { name: "Organizations", icon: activities_icon, path: "/organizations", roles:['super_admin'] },
     { name: "Plans", icon: dmc_icon, path: "/plans" , roles:['super_admin'] },
-    { name: "Regions", icon: hotel_icon, path: "/regions" , roles:['super_admin','org_admin'] },
-    { name: "Sub Regions", icon: vehicle_icon, path: "/sub-regions", roles:['super_admin',"org_admin"]  },
+    { name: "Regions", icon: hotel_icon, path: "/regions" , roles:['org_admin'] },
+    { name: "Sub Regions", icon: vehicle_icon, path: "/sub-regions", roles:["org_admin"]  },
   ];
   const filteredTabs = adminTabs.filter(tab =>
     tab.roles.includes(userDetails?.role)

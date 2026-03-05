@@ -4,6 +4,7 @@ import { BuildingIcon,UserIcon,PhoneIcon,LockIcon,ShieldIcon,ChevronDown } from 
 import { toast } from "react-toastify";
 import { useOrganizationHooks } from "../../hooks/useOrganizationHooks";
 import { setLoading } from "../../redux/slices/userSlice";
+import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const EyeIcon = ({ show }) =>
@@ -134,6 +135,13 @@ export default function AddOrganizationAdmin() {
         </div>
         <h1 className="text-3xl font-bold text-white">Add Org Admin</h1>
         <p className="text-gray-400 text-sm mt-1">Assign an administrator to an existing organization</p>
+        <button
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2 text-sm text-gray-500 mt-2 hover:text-[#b0b3b8] cursor-pointer"
+          >
+            <ArrowLeft size={16} />
+            Back to List
+        </button>
       </div>
 
       {/* ── Success State ── */}
