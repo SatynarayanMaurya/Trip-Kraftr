@@ -32,6 +32,8 @@ function Sidebar() {
   ];
   const adminTabs = [
     { name: "Organizations", icon: activities_icon, path: "/organizations", roles:['super_admin'] },
+    { name: "Master Region", icon: place_icon, path: "/master-regions", roles:['super_admin'] },
+    { name: "Regions Images", icon: vehicle_icon, path: "/regions-images", roles:['super_admin'] },
     { name: "Plans", icon: dmc_icon, path: "/plans" , roles:['super_admin'] },
     { name: "Regions", icon: hotel_icon, path: "/regions" , roles:['org_admin'] },
     { name: "Sub Regions", icon: vehicle_icon, path: "/sub-regions", roles:["org_admin"]  },
@@ -68,7 +70,8 @@ function Sidebar() {
             <div className="w-8 h-8 bg-pink-500 rounded-full flex items-center justify-center text-sm font-semibold">
               {userDetails?.name?.split(" ")?.[0]?.[0]||"X"}
             </div>
-            <span className="font-medium">{userDetails?.name?.split(" ")?.[0] ||""}</span>
+            {/* <span className="font-medium">{userDetails?.name?.split(" ")?.[0] ||""}</span> */}
+            <span className="font-medium">{userDetails?.phone ||""}</span>
           </div>
         </div>
         <div className="space-y-1 pl-3">

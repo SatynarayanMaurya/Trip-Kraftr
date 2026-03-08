@@ -26,14 +26,14 @@ export const authMiddlewareWithAllChecks = async (req ,res, next)=>{
                 const start = new Date(org?.subscriptionStartDate);
                 const end = new Date(org?.subscriptionEndDate);
             
-                if (!org?.is_active) {
-                    return { allowed: false, reason: "org_inactive" };
-                }
                 if (now < start) {
                     return { allowed: false, reason: "subscription_not_started", start, end };
                 }
                 if (now > end) {
                     return { allowed: false, reason: "subscription_expired", start, end };
+                }
+                if (!org?.is_active) {
+                    return { allowed: false, reason: "org_inactive" };
                 }
                 return { allowed: true };
             }

@@ -1,7 +1,6 @@
 
 
 export const roleMiddleware = (allowed = []) => {
-    console.log("allowed : ",allowed)
     return (req, res, next) => {
         try {
             const userRole = req.user?.role;

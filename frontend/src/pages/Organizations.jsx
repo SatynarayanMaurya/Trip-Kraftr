@@ -147,7 +147,7 @@ export default function Organizations() {
   const fetchAllOrganization = async()=>{
     try{
       if(allOrganizations && allOrganizations?.length > 0) return ;
-      const response = await getAllOrganizationForSuperAdmin()
+      await getAllOrganizationForSuperAdmin()
     }
     catch(error){
       if (!isProduction) {

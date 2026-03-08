@@ -32,6 +32,9 @@ const regionSchema = new mongoose.Schema({
         type:Number,
         default:0
     },
+    region_images: [{
+        type: String
+    }],
     
     is_active:{
         type:Boolean,

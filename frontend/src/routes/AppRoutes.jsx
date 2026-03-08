@@ -11,6 +11,8 @@ import { organizationRoutes } from './OrganizationRoutes'
 import NotFound from '../components/NotFound/NotFound'
 import Unauthorized from '../components/NotFound/Unauthorized'
 import { regionRoutes } from './RegionRoutes'
+import { subRegionRoutes } from './SubRegionRoutes'
+import { masterRegionRoutes } from './MasterRegionRoutes'
 
 
 function AppRoutes() {
@@ -26,6 +28,8 @@ function AppRoutes() {
         {organizationRoutes}
         {planRoutes}
         {regionRoutes}
+        {masterRegionRoutes}
+        {subRegionRoutes}
 
         <Route path="*" element={<NotFound />} />
       </Route>

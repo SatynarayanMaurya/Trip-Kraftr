@@ -70,11 +70,12 @@ export default function AddRegion() {
           setErrors(errs);
           return;
         }
-        console.log("Form data : ",form)
-        // const res = await addRegion(form)
-        // toast.success(res?.data?.message)
+        const res = await addRegion(form)
+        toast.success(res?.data?.message)
 
         setErrors({});
+        handleReset();
+        navigate("/regions")
 
     }
     catch(error){
@@ -281,7 +282,7 @@ export default function AddRegion() {
               onMouseEnter={e => e.currentTarget.style.backgroundColor = "#f5b84a"}
               onMouseLeave={e => e.currentTarget.style.backgroundColor = "#f5a623"}
             >
-                {!loading ? (
+                {loading ? (
                     <>
                       <svg
                         className="animate-spin w-4 h-4 text-black"
@@ -317,15 +318,6 @@ export default function AddRegion() {
             </button>
           </div>
 
-          {/* {submitted && (
-            <div className="mt-4 bg-[#0d2a1a] border border-[#1a5c38] rounded-xl px-4 py-3 flex items-center gap-3">
-              <span className="text-green-400 text-lg">✓</span>
-              <div>
-                <p className="text-green-400 text-sm font-semibold">Region added successfully!</p>
-                <p className="text-[#4a7a5a] text-xs">{form.name}, {form.country}</p>
-              </div>
-            </div>
-          )} */}
         </div>
       </div>
     </div>
