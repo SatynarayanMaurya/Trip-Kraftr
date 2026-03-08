@@ -93,7 +93,7 @@ function PlanCard({ plan }) {
     >
       {/* Pro glow top bar */}
       {isPro && (
-        <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-yellow-400 to-transparent" />
+        <div className="absolute top-0 left-0 right-0 h-0.5 bg-linear-to-r from-transparent via-yellow-400 to-transparent" />
       )}
 
       {/* Header */}
@@ -119,13 +119,13 @@ function PlanCard({ plan }) {
 
         {/* Pricing */}
         <div className="flex gap-3 mb-5">
-          <div className="flex-1 rounded-xl bg-white/[0.04] border border-white/[0.06] p-3 text-center">
+          <div className="flex-1 rounded-xl bg-white/4 border border-white/6 p-3 text-center">
             <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Monthly</p>
             <p className="text-xl font-extrabold text-slate-100">
               ₹{plan?.price_monthly?.toLocaleString('en-IN') ?? '—'}
             </p>
           </div>
-          <div className="flex-1 rounded-xl bg-white/[0.04] border border-white/[0.06] p-3 text-center">
+          <div className="flex-1 rounded-xl bg-white/4 border border-white/6 p-3 text-center">
             <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Yearly</p>
             <p className="text-xl font-extrabold text-slate-100">
               ₹{plan?.price_yearly?.toLocaleString('en-IN') ?? '—'}

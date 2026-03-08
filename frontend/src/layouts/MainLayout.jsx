@@ -27,7 +27,7 @@ function MainLayout() {
         console.log("========= ERROR DEBUG END =========");
       }
       const status = error?.status;
-      if (status === 401 || status === 403 ){
+      if (status === 401 || status === 403 || status===404){
         await logout()
         navigate("/auth")
       }
