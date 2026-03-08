@@ -13,6 +13,7 @@ import Unauthorized from '../components/NotFound/Unauthorized'
 import { regionRoutes } from './RegionRoutes'
 import { subRegionRoutes } from './SubRegionRoutes'
 import { masterRegionRoutes } from './MasterRegionRoutes'
+import { regionImagesRoutes } from './RegionImagesRoutes'
 
 
 function AppRoutes() {
@@ -29,6 +30,7 @@ function AppRoutes() {
         {planRoutes}
         {regionRoutes}
         {masterRegionRoutes}
+        {regionImagesRoutes}
         {subRegionRoutes}
 
         <Route path="*" element={<NotFound />} />

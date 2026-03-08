@@ -29,7 +29,7 @@ function SearchDropdown({ label, placeholder, options, value, onChange, onManual
     return () => document.removeEventListener('mousedown', handleClick)
   }, [])
 
-  const filtered = options.filter(o => o.toLowerCase().includes(search.toLowerCase()))
+  const filtered = options.filter(o => o.toLowerCase().startsWith(search.toLowerCase()))
 
   const handleSelect = (opt) => {
     onChange(opt)

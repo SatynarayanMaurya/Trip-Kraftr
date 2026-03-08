@@ -1,10 +1,11 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { useRegionHooks } from '../hooks/useRegionHooks'
 import { toast } from 'react-toastify'
 import MasterRegionSkeleton from '../components/Regions/MasterRegionSkeleton'
 import { useCommonHooks } from '../hooks/useCommonHooks'
+import { clearMasterRegions, setMasteRegionPageLimit } from '../redux/slices/regionSlice'
 
 
 function formatDate(iso) {
@@ -15,6 +16,7 @@ function formatDate(iso) {
 
 function MasterRegions() {
     const navigate = useNavigate()
+    const dispatch = useDispatch()
     const [search, setSearch] = useState('')
     const [filter, setFilter] = useState('All')
     const { getmasterRegions } = useRegionHooks()
@@ -25,6 +27,7 @@ function MasterRegions() {
     const pagination = useSelector((state) => state.region.paginationMasterRegions)
     const stats = useSelector((state) => state.region.statsMasterRegions)
     const isProduction = useSelector((state) => state.user.isProduction)
+    const pageLimit = useSelector((state)=>state.region.masterRegionsPageLimit)
 
     const [searchedRegions, setSearchedRegions] = useState([])
     const [isSearching, setIsSearching] = useState(false)
@@ -77,9 +80,14 @@ function MasterRegions() {
 
     useEffect(() => {
         if (!currentPageRegions) {
-            fetchRegions(currentPage, 5)
+            fetchRegions(currentPage, pageLimit)
         }
-    }, [currentPage])
+    }, [currentPage,pageLimit])
+
+    const changePageLimit = (val)=>{
+        dispatch(clearMasterRegions())
+        dispatch(setMasteRegionPageLimit(Number(val)))
+    }
 
 
     const filtered = isSearching ? searchedRegions : currentPageRegions
@@ -89,7 +97,7 @@ function MasterRegions() {
             <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap'); * { font-family: 'DM Sans', sans-serif; } ::-webkit-scrollbar{width:4px} ::-webkit-scrollbar-track{background:#0d1526} ::-webkit-scrollbar-thumb{background:#2d3a52;border-radius:4px}`}</style>
 
             {/* Header */}
-            <div className="flex items-start justify-between mb-8">
+            <div className="flex items-start justify-between mb-5">
                 <div>
                     <p className="text-[11px] font-bold tracking-[0.15em] uppercase text-amber-400 mb-1.5 flex items-center gap-1.5">
                         <span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block"></span>
@@ -111,13 +119,13 @@ function MasterRegions() {
             </div>
 
             {/* Stat Cards */}
-            <div className="grid grid-cols-3 gap-4 mb-7">
+            <div className="grid grid-cols-3 gap-4 mb-5">
                 {[
                     { label: 'TOTAL', value: pagination?.totalRecords, color: 'text-slate-100' },
                     { label: 'ACTIVE', value: stats?.activeRegion, color: 'text-green-400' },
                     { label: 'INACTIVE', value: stats?.inactiveRegion, color: 'text-red-400' },
                 ]?.map(s => (
-                    <div key={s.label} className="bg-[#111827] border border-[#1e2d45] rounded-2xl px-6 py-5">
+                    <div key={s.label} className="bg-[#111827] border border-[#1e2d45] rounded-2xl px-6 py-4">
                         <p className="text-[11px] font-semibold tracking-widest text-gray-500 uppercase mb-1">{s.label}</p>
                         <p className={`text-3xl font-bold ${s.color}`}>{s.value}</p>
                     </div>
@@ -270,6 +278,22 @@ function MasterRegions() {
                         Next →
                     </button>
 
+                </div>
+
+                {/* Limit  */}
+                <div className="flex items-center gap-3 text-sm text-gray-400">
+                    <span>Limit </span>
+
+                    <select
+                        value={pageLimit}
+                        disabled={isSearching}
+                        onChange={(e) => changePageLimit(Number(e.target.value))}
+                        className="bg-[#1a2035] border border-[#2d3a52] text-white text-sm px-3 py-2 rounded-lg outline-none focus:border-amber-400 cursor-pointer"
+                    >
+                        <option value="5">5</option>
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                    </select>
                 </div>
 
                 {/* Go to page  */}

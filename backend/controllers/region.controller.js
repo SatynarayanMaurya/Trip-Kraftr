@@ -2,6 +2,8 @@
 
 import Region from "../models/region.model.js"
 import MasterRegion from "../models/masterRegions.model.js"
+import RegionImage from "../models/region_images.model.js";
+import { uploadImageToCloudinary } from "../utils/uploadToCloudinary.js";
 
 
 export const addRegion = async (req, res) => {
@@ -53,7 +55,6 @@ export const addRegion = async (req, res) => {
     }
 }
 
-
 export const getRegions = async (req, res) => {
     try {
         const org_id = req.user.org_id
@@ -79,6 +80,55 @@ export const getRegions = async (req, res) => {
     }
 }
 
+export const searchMasterRegions = async (req, res) => {
+    const { search, filter } = req.query
+    const query = {}
+
+    // Prefix search (starts with)
+    if (search) {
+        query.$or = [
+            { name: { $regex: `^${search}`, $options: "i" } },
+            { country: { $regex: `^${search}`, $options: "i" } }
+        ]
+    }
+    if (filter === 'Active') query.is_active = true
+    else if (filter === 'Inactive') query.is_active = false
+
+    const searchedMasterRegion = await MasterRegion.find(query).sort({ createdAt: -1 }).limit(5)
+
+
+    return res.status(200).json({
+        success: true,
+        message: "Master Regions search results",
+        searchedMasterRegion,
+    })
+}
+
+// Fetching the region image according to the region id 
+export const fetchRegionImages = async(req,res)=>{
+    try{
+        const {regionId} = req.query;
+        if(!regionId){
+            return res.status(400).json({
+                success:false,
+                message:"Region Id not found"
+            })
+        }
+
+        const regionsImages = await RegionImage.findOne({masterRegionId:regionId})
+        return res.status(200).json({
+            success:true,
+            message:"Images fetched",
+            regionsImages
+        })
+    }
+    catch(error){
+        return res.status(500).json({
+            success:false,
+            message:error?.message || "Internal server error"
+        })
+    }
+}
 
 
 //Super Admin Controllers 
@@ -115,6 +165,7 @@ export const addMasterRegion = async (req, res) => {
     }
 }
 
+// Get Master region with pagination
 export const getMasterRegions = async (req, res) => {
     try {
         const page = Math.max(parseInt(req.query.page) || 1, 1)
@@ -167,33 +218,80 @@ export const getMasterRegions = async (req, res) => {
     }
 }
 
-
-// GET /api/master-regions/search?search=maharashtra&filter=Active
-export const searchMasterRegions = async (req, res) => {
-    const { search, filter } = req.query
-    console.log("Search and filter : ", search, filter)
-    const query = {}
-
-    // if (search) query.$or = [
-    //   { name: { $regex: search, $options: "i" } },
-    //   { country: { $regex: search, $options: "i" } }
-    // ]
-    // Prefix search (starts with)
-    if (search) {
-        query.$or = [
-            { name: { $regex: `^${search}`, $options: "i" } },
-            { country: { $regex: `^${search}`, $options: "i" } }
-        ]
+export const addRegionImages = async (req, res) => {
+  try {
+    const { regionId } = req.body;
+    if(!regionId){
+        return res.status(400).json({
+            success:false,
+            message:"Region id not found"
+        })
     }
-    if (filter === 'Active') query.is_active = true
-    else if (filter === 'Inactive') query.is_active = false
 
-    const searchedMasterRegion = await MasterRegion.find(query).sort({ createdAt: -1 }).limit(5)
+    const findExistingRegionImages = await RegionImage.findOne({masterRegionId: regionId,})
+    if(findExistingRegionImages){
+        return res.status(409).json({
+            success:false,
+            message:"You already uploaded image for this region"
+        })
+    }
+    // Normalize files
+    let images = req.files?.images 
+    if (!images) {
+      return res.status(400).json({ success: false, message: "No images uploaded" });
+    }
+    if (!Array.isArray(images)) images = [images];
 
-
-    return res.status(200).json({
+    // Upload all images in parallel to Cloudinary
+    const uploadResults = await Promise.allSettled(
+        images.map((file) =>
+          uploadImageToCloudinary(file, process.env.REGION_IMAGES).then((uploaded) => ({
+            url: uploaded.secure_url,
+            public_id: uploaded.public_id,
+            size: uploaded.size,
+          }))
+        )
+      );
+      
+      // Separate successes and failures
+      const uploadedImages = uploadResults
+        .filter(result => result.status === "fulfilled")
+        .map(result => result.value);
+      
+      const failedImages = uploadResults
+        .filter(result => result.status === "rejected")
+        .map((result, idx) => ({ fileName: images[idx].name, error: result.reason.message }));
+      
+      if (uploadedImages.length === 0) {
+        return res.status(500).json({
+          success: false,
+          message: "All image uploads failed",
+          errors: failedImages,
+        });
+      }
+      
+      // Create new document with successfully uploaded images
+      const newRegionImages = await RegionImage.create({
+        masterRegionId: regionId,
+        images: uploadedImages,
+        updatedBy: req.user?.userId,
+      });
+      
+      return res.status(201).json({
         success: true,
-        message: "Master Regions search results",
-        searchedMasterRegion,
-    })
-}
+        message: "Images uploaded successfully",
+        data: {
+          newRegionImages,
+          failedImages, // optional: report which files failed
+        },
+      });
+  } catch (error) {
+    console.error("Add Region Images Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: error?.message || "Internal server error",
+    });
+  }
+};
+
+

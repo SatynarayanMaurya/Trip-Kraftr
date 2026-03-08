@@ -7,6 +7,8 @@ const initialState = {
 
     masterRegionsPages: {},
 
+    masterRegionsPageLimit : 5,
+
     paginationMasterRegions: {
         currentPage: 1,
         totalPages: 1,
@@ -94,6 +96,10 @@ export const regionSlice = createSlice({
             state.paginationMasterRegions = { currentPage: 1, totalPages: 1, limit: 5, totalRecords: 0 }
             state.statsMasterRegions = { totalRegion: 0, activeRegion: 0, inactiveRegion: 0 }
         },
+
+        setMasteRegionPageLimit:(state,action)=>{
+            state.masterRegionsPageLimit = action.payload
+        }
 
     }
 })

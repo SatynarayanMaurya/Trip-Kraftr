@@ -5,6 +5,7 @@ export const regionEndpoints  = {
     ADD_REGION : BASE_URL + '/add-region',
     GET_REGIONS : BASE_URL + '/get-regions',
     SEARCH_MASTER_REGIONS : BASE_URL + '/search-master-regions',
+    FETCH_REGIONS_IMAGES : BASE_URL + '/fetch-regions-images',
 }
 
 
@@ -12,4 +13,5 @@ export const regionEndpoints  = {
 export const regionEndPointsSuperAdmin = {
     ADD_MASTER_REGION : BASE_URL + '/add-master-region',
     GET_MASTER_REGION : BASE_URL + '/get-master-region',
+    ADD_REGION_IMAGES : BASE_URL + '/add-region-images',
 }
