@@ -43,6 +43,28 @@ export const useCommonHooks = () => {
         300 
     )
 
+    // ---------- Master Country Search ----------
+    const searchMasterCountry = debounceSearch(
+        "searchMasterCountry",
+        (searchTerm) =>
+            apiConnector(
+                "GET",
+                `${regionEndpoints.SEARCH_MASTER_COUNTRIES}?search=${encodeURIComponent(searchTerm)}`
+            ),
+        300 
+    )
+
+    // ---------- Master Country Search ----------
+    const searchMasterRegionOnly = debounceSearch(
+        "searchMasterRegionOnly",
+        (searchTerm) =>
+            apiConnector(
+                "GET",
+                `${regionEndpoints.SEARCH_MASTER_REGION_ONLY}?countryName=${encodeURIComponent(searchTerm)}`
+            ),
+        300 
+    )
+
 
     // ---------- Hotel Search (example) ----------
     //   const searchHotel = debounceSearch(
@@ -55,6 +77,6 @@ export const useCommonHooks = () => {
     //   )
 
     return {
-        searchMasterRegion,
+        searchMasterRegion,searchMasterCountry,searchMasterRegionOnly
     }
 }

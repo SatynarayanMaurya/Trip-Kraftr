@@ -95,7 +95,7 @@ export const useRegionHooks = () => {
     }
   }
 
-  const fetchRegionImages = async (regionId) => {
+  const fetchRegionImages = async (regionId) => {   // The region id is master region id
     try {
       dispatch(setLoading(true));
       const response = await apiConnector(

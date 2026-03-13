@@ -2,8 +2,9 @@ import mongoose from "mongoose";
 
 const regionSchema = new mongoose.Schema({
 
-    name:{
-        type:String,
+    masterRegionId:{   
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"MasterRegion",
         required:true
     },
 
@@ -13,10 +14,6 @@ const regionSchema = new mongoose.Schema({
         required:true
     },
 
-    country:{
-        type:String,
-        required:true
-    },
 
     description:{
         type:String,
@@ -49,6 +46,6 @@ const regionSchema = new mongoose.Schema({
 },{ timestamps: true })
 
 // compound index
-regionSchema.index({ org_id: 1, name: 1 })
+regionSchema.index({ org_id: 1,masterRegionId:1 })
 
 export default mongoose.model("Region",regionSchema)

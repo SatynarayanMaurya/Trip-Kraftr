@@ -8,11 +8,11 @@ import { uploadImageToCloudinary } from "../utils/uploadToCloudinary.js";
 
 export const addRegion = async (req, res) => {
     try {
-        const { name, description, country, min_margin, max_margin } = req.body
+        const { description, masterRegionId, min_margin, max_margin,region_images } = req.body
 
         const org_id = req.user.org_id;
 
-        if (!name || !country || !min_margin || !max_margin) {
+        if ( !masterRegionId || !min_margin || !max_margin) {
             return res.status(400).json({
                 success: false,
                 message: "Required fields are missing"
@@ -32,7 +32,7 @@ export const addRegion = async (req, res) => {
             })
         }
 
-        const existingRegion = await Region.findOne({ org_id, name })
+        const existingRegion = await Region.findOne({ org_id,masterRegionId })
         if (existingRegion) {
             return res.status(409).json({
                 success: false,
@@ -40,7 +40,7 @@ export const addRegion = async (req, res) => {
             })
         }
 
-        const newRegion = await Region.create({ name, org_id, description, country, min_margin: Number(min_margin), max_margin: Number(max_margin), updatedBy: req.user.userId })
+        const newRegion = await Region.create({ org_id, description,region_images, masterRegionId, min_margin: Number(min_margin), max_margin: Number(max_margin), updatedBy: req.user.userId })
         return res.status(201).json({
             success: true,
             message: "Region added successfully",
@@ -80,6 +80,7 @@ export const getRegions = async (req, res) => {
     }
 }
 
+// Both For country and region 
 export const searchMasterRegions = async (req, res) => {
     const { search, filter } = req.query
     const query = {}
@@ -104,10 +105,47 @@ export const searchMasterRegions = async (req, res) => {
     })
 }
 
+// Only for searching the country
+export const searchMasterCountries = async (req, res) => {
+    const { search } = req.query
+    const query = {}
+
+    if (search) {
+        query.$or = [
+            { country: { $regex:search, $options: "i" } }
+        ]
+    }
+    query.is_active = true
+
+    // const searchedMasterCountries = await MasterRegion.find(query).sort({ createdAt: -1 })
+    const searchedMasterCountries = await MasterRegion.distinct("country", query);
+
+
+    return res.status(200).json({
+        success: true,
+        message: "Countries search results",
+        searchedMasterCountries,
+    })
+}
+// Only for searching the regions only but the country is already selected
+export const searchMasterRegionsOnly = async (req, res) => {
+    const { countryName } = req.query
+
+
+    const searchedMasterRegionsOnly = await MasterRegion.find({country:countryName})
+
+
+    return res.status(200).json({
+        success: true,
+        message: "Countries search results",
+        searchedMasterRegionsOnly,
+    })
+}
+
 // Fetching the region image according to the region id 
 export const fetchRegionImages = async(req,res)=>{
     try{
-        const {regionId} = req.query;
+        const {regionId} = req.query;  // The region Id is masterRegion id 
         if(!regionId){
             return res.status(400).json({
                 success:false,
