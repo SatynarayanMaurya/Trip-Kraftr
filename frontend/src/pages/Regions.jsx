@@ -1,72 +1,14 @@
+
+
+
 import React, { useCallback, useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { useRegionHooks } from '../hooks/useRegionHooks'
 import { toast } from 'react-toastify'
+
 import RegionsSkeleton from '../components/Regions/RegionsSkeleton'
 
-const dummyRegions = [
-  {
-    _id: '69aae6839522382e9648a9f4',
-    name: 'Uttar Pradesh',
-    country: 'India',
-    description: 'The most populous state in India, known for historic cities like Agra and Varanasi, home to the Taj Mahal.',
-    min_margin: 10,
-    max_margin: 25,
-    region_images: [],
-    is_active: true,
-  },
-  {
-    _id: '69aae6839522382e9648a9f5',
-    name: 'Rajasthan',
-    country: 'India',
-    description: 'Land of kings and majestic forts, known for its vibrant culture, golden deserts, and colourful festivals.',
-    min_margin: 12,
-    max_margin: 30,
-    region_images: [],
-    is_active: true,
-  },
-  {
-    _id: '69aae6839522382e9648a9f6',
-    name: 'Kerala',
-    country: 'India',
-    description: "God's Own Country — famed for its backwaters, lush greenery, Ayurveda retreats, and serene beaches.",
-    min_margin: 15,
-    max_margin: 35,
-    region_images: [],
-    is_active: true,
-  },
-  {
-    _id: '69aae6839522382e9648a9f7',
-    name: 'Himachal Pradesh',
-    country: 'India',
-    description: 'A Himalayan paradise offering snow-capped peaks, adventure sports, and tranquil hill stations.',
-    min_margin: 8,
-    max_margin: 20,
-    region_images: [],
-    is_active: false,
-  },
-  {
-    _id: '69aae6839522382e9648a9f8',
-    name: 'Goa',
-    country: 'India',
-    description: 'India\'s beach capital with sun-soaked shores, Portuguese heritage, vibrant nightlife, and seafood delights.',
-    min_margin: 18,
-    max_margin: 40,
-    region_images: [],
-    is_active: true,
-  },
-  {
-    _id: '69aae6839522382e9648a9f9',
-    name: 'Tamil Nadu',
-    country: 'India',
-    description: 'A treasure trove of Dravidian temples, classical music, silk sarees, and rich culinary traditions.',
-    min_margin: 10,
-    max_margin: 28,
-    region_images: [],
-    is_active: true,
-  },
-]
 
 const placeholderImages = [
   'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=400&q=80',
@@ -75,6 +17,7 @@ const placeholderImages = [
 ]
 
 function RegionCard({ region, index, onEdit }) {
+  const navigate = useNavigate()
   const imgSrc = region?.region_images?.[0] || placeholderImages?.[index % placeholderImages?.length]
 
   return (
@@ -100,7 +43,7 @@ function RegionCard({ region, index, onEdit }) {
       <div style={{ position: 'relative', height: '160px', overflow: 'hidden' }}>
         <img
           src={imgSrc}
-          alt={region?.name}
+          alt={region?.masterRegionId?.name}
           style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           onError={e => { e.target.src = placeholderImages[0] }}
         />
@@ -123,14 +66,14 @@ function RegionCard({ region, index, onEdit }) {
         <div className='flex justify-between items-center'>
           <div style={{ marginBottom: '6px' }}>
             <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '700', color: '#f1f5f9' }}>
-              {region.name}
+              {region?.masterRegionId?.name}
             </h3>
             <p style={{ margin: '2px 0 0', fontSize: '12px', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '4px' }}>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
                 <circle cx="12" cy="10" r="3"/>
               </svg>
-              {region.country}
+              {region?.masterRegionId?.country}
             </p>
           </div>
           <div >
@@ -150,7 +93,7 @@ function RegionCard({ region, index, onEdit }) {
         </div>
 
         {/* Description */}
-        <p style={{
+        {/* <p style={{
           fontSize: '12.5px',
           color: '#64748b',
           lineHeight: '1.55',
@@ -161,7 +104,7 @@ function RegionCard({ region, index, onEdit }) {
           overflow: 'hidden',
         }}>
           {region?.description}
-        </p>
+        </p> */}
 
         {/* Margin badges */}
         <div style={{ display: 'flex', gap: '8px', marginBottom: '14px' }}>
@@ -191,7 +134,7 @@ function RegionCard({ region, index, onEdit }) {
 
         {/* Actions */}
         <div style={{ display: 'flex', gap: '8px' }}>
-          <button style={{
+          <button onClick={()=>navigate(`view-region/${region?._id}`)} style={{
             flex: 1,
             padding: '8px',
             borderRadius: '8px',
@@ -209,7 +152,7 @@ function RegionCard({ region, index, onEdit }) {
             View Details
           </button>
           <button
-            onClick={() => onEdit(region)}
+            onClick={()=>navigate(`edit-region/${region?._id}`)}
             style={{
               flex: 1,
               padding: '8px',
@@ -239,6 +182,7 @@ function Regions() {
   const allRegions = useSelector((state) => state.region.allRegions);
   const isProduction = useSelector((state) => state.user.isProduction);
   const loading = useSelector((state)=>state.user.loading)
+
   
   const { getRegions } = useRegionHooks();
   
@@ -246,7 +190,7 @@ function Regions() {
     try {
       if (allRegions?.length > 0) return;
   
-      await getRegions();
+      const res = await getRegions();
     } catch (error) {
       if (!isProduction) {
         console.log("========= ERROR DEBUG START =========");
@@ -264,11 +208,14 @@ function Regions() {
   }, [allRegions, getRegions, isProduction]);
   
   useEffect(() => {
+    if(allRegions?.length>0){
+      return ;
+    }
     fetchRegions();
   }, [fetchRegions]);
 
   const filtered = allRegions?.filter(r =>
-    r?.name?.toLowerCase()?.includes(search?.toLowerCase())
+    r?.masterRegionId?.name?.toLowerCase()?.includes(search?.toLowerCase())
   )
 
   const handleEdit = (region) => {
@@ -290,7 +237,7 @@ function Regions() {
               Regions
             </h1>
             <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#475569' }}>
-              {dummyRegions.length} total · {dummyRegions.filter(r => r.is_active).length} active
+              {allRegions?.length} total · {allRegions.filter(r => r.is_active).length} active
             </p>
           </div>
           <button

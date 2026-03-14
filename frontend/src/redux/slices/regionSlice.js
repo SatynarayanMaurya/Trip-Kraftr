@@ -7,7 +7,7 @@ const initialState = {
 
     masterRegionsPages: {},
 
-    masterRegionsPageLimit : 5,
+    masterRegionsPageLimit: 5,
 
     paginationMasterRegions: {
         currentPage: 1,
@@ -34,6 +34,24 @@ export const regionSlice = createSlice({
         addNewRegion: (state, action) => {
             state.allRegions.unshift(action.payload)
         },
+
+        updateRegion: (state, action) => {
+            const updatedRegion = action.payload;
+            const index = state.allRegions.findIndex(region => region._id === updatedRegion?._id);
+            if (index !== -1) {
+                state.allRegions[index] = updatedRegion;
+            } else {
+                state.allRegions.unshift(updatedRegion);
+            }
+        },
+
+        deleteRegion: (state, action) => {
+            const deletedRegion = action.payload;
+            state.allRegions = state.allRegions.filter(
+                region => region._id !== deletedRegion?._id
+            );
+        },
+
 
         clearAllRegions: (state) => {
             state.allRegions = []
@@ -97,7 +115,7 @@ export const regionSlice = createSlice({
             state.statsMasterRegions = { totalRegion: 0, activeRegion: 0, inactiveRegion: 0 }
         },
 
-        setMasteRegionPageLimit:(state,action)=>{
+        setMasteRegionPageLimit: (state, action) => {
             state.masterRegionsPageLimit = action.payload
         }
 
@@ -109,6 +127,8 @@ export const {
     addNewRegion,
     clearAllRegions,
     addNewMasterRegion,
+    updateRegion,
+    deleteRegion,
 
     setMasteRegionPageLimit,
 

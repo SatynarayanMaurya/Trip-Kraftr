@@ -1,12 +1,15 @@
 import express from "express";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
-import { addMasterRegion, addRegion, addRegionImages, fetchRegionImages, getMasterRegions, getRegions, searchMasterCountries, searchMasterRegions, searchMasterRegionsOnly } from "../controllers/region.controller.js";
+import { addMasterRegion, addRegion, addRegionImages, deleteRegionById, fetchRegionImages, getMasterRegions, getRegionById, getRegions, searchMasterCountries, searchMasterRegions, searchMasterRegionsOnly, updateRegionById } from "../controllers/region.controller.js";
 import { roleMiddleware } from "../middlewares/role.middleware.js";
 const regionRouter = express.Router()
 
 
 regionRouter.post("/add-region",authMiddleware,roleMiddleware(["org_admin"]),addRegion)
 regionRouter.get("/get-regions",authMiddleware,roleMiddleware(["org_admin"]),getRegions)
+regionRouter.get("/get-region-by-id/:regionId",authMiddleware,roleMiddleware(["org_admin"]),getRegionById)
+regionRouter.put("/update-region-by-id/:regionId",authMiddleware,roleMiddleware(["org_admin"]),updateRegionById)
+regionRouter.delete("/delete-region-by-id/:regionId",authMiddleware,roleMiddleware(["org_admin"]),deleteRegionById)
 regionRouter.get("/search-master-regions",authMiddleware,searchMasterRegions)
 
 regionRouter.get("/fetch-regions-images",authMiddleware,roleMiddleware(["org_admin",'super_admin']),fetchRegionImages)

@@ -8,11 +8,11 @@ import { uploadImageToCloudinary } from "../utils/uploadToCloudinary.js";
 
 export const addRegion = async (req, res) => {
     try {
-        const { description, masterRegionId, min_margin, max_margin,region_images } = req.body
+        const { description, masterRegionId, min_margin, max_margin, region_images } = req.body
 
         const org_id = req.user.org_id;
 
-        if ( !masterRegionId || !min_margin || !max_margin) {
+        if (!masterRegionId || !min_margin || !max_margin) {
             return res.status(400).json({
                 success: false,
                 message: "Required fields are missing"
@@ -32,7 +32,7 @@ export const addRegion = async (req, res) => {
             })
         }
 
-        const existingRegion = await Region.findOne({ org_id,masterRegionId })
+        const existingRegion = await Region.findOne({ org_id, masterRegionId })
         if (existingRegion) {
             return res.status(409).json({
                 success: false,
@@ -40,7 +40,11 @@ export const addRegion = async (req, res) => {
             })
         }
 
-        const newRegion = await Region.create({ org_id, description,region_images, masterRegionId, min_margin: Number(min_margin), max_margin: Number(max_margin), updatedBy: req.user.userId })
+        const newRegion = await Region.create({ org_id, description, region_images, masterRegionId, min_margin: Number(min_margin), max_margin: Number(max_margin), updatedBy: req.user.userId })
+        await newRegion.populate({
+            path: "masterRegionId",
+            select: "name country _id is_active"
+          });
         return res.status(201).json({
             success: true,
             message: "Region added successfully",
@@ -64,7 +68,7 @@ export const getRegions = async (req, res) => {
                 message: "Organization id not found"
             })
         }
-        const regions = await Region.find({ org_id }).sort({ createdAt: -1 })
+        const regions = await Region.find({ org_id }).select("_id description is_active masterRegionId min_margin max_margin region_images").sort({ createdAt: -1 }).populate({ path: "masterRegionId", select: "_id country name is_active" })
         return res.status(200).json({
             success: true,
             message: "All Regions fetched",
@@ -76,6 +80,139 @@ export const getRegions = async (req, res) => {
         return res.status(500).json({
             success: false,
             message: error?.message || "Internal server error"
+        })
+    }
+}
+
+export const getRegionById = async (req, res) => {
+    try {
+        const { regionId } = req.params
+        if (!regionId) {
+            return res.status(400).json({
+                success: false,
+                message: "Region Id not found"
+            })
+        }
+
+        const org_id = req.user.org_id;
+        if (!org_id) {
+            return res.status(401).json({
+                success: false,
+                message: "Org Id not found"
+            })
+        }
+        const findRegion = await Region.findOne({ org_id, _id: regionId }).populate({ path: "masterRegionId", select: "_id name country is_active" }).populate({path:"updatedBy",select:"name _id"})
+        if (findRegion) {
+            return res.status(200).json({
+                success: true,
+                message: "Region found",
+                findRegion
+            })
+        }
+        else {
+            return res.status(404).json({
+                success: true,
+                message: "Region not found"
+            })
+        }
+    }
+    catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error?.message || "Internal server Error"
+        })
+    }
+}
+
+export const updateRegionById = async (req, res) => {
+    try {
+        const { regionId } = req.params;
+        const orgId = req.user?.org_id; // get org_id from request body or authenticated user
+
+
+        if (!regionId) {
+            return res.status(400).json({
+                success: false,
+                message: "Region Id not found"
+            });
+        }
+
+        if (!orgId) {
+            return res.status(400).json({
+                success: false,
+                message: "Organization Id not found"
+            });
+        }
+
+        const { description, region_images, min_margin, max_margin, is_active } = req.body;
+
+        if (min_margin === undefined || max_margin === undefined) {
+            return res.status(400).json({
+                success: false,
+                message: "Min margin and Max margin are required."
+            });
+        }
+
+        if (parseFloat(min_margin) >= parseFloat(max_margin)) {
+            return res.status(400).json({
+                success: false,
+                message: "Max margin must be greater than Min margin."
+            });
+        }
+
+        const updatedRegion = await Region.findOneAndUpdate(
+            { org_id: orgId, _id: regionId },
+            { $set: { description, region_images, min_margin, max_margin, is_active } },
+            { new: true }
+        ).populate({ path: "masterRegionId", select: "_id country name is_active" })
+
+        if (!updatedRegion) {
+            return res.status(404).json({
+                success: false,
+                message: "Region not found or does not belong to your organization."
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Region updated successfully",
+            updatedRegion
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error?.message || "Internal server error"
+        });
+    }
+};
+
+export const deleteRegionById = async (req,res)=>{
+    try{
+        const {regionId} = req.params;
+        if(!regionId){
+            return res.status(400).json({
+                success:false,
+                message:"Region id not found"
+            })
+        }
+        if(!req.user.org_id){
+            return res.status(401).json({
+                success:true,
+                message:"Organization id not found"
+            })
+        }
+
+        const deletedRegion = await Region.findOneAndDelete({org_id:req.user.org_id,_id:regionId})
+        return res.status(200).json({
+            success:true,
+            message:"Region deleted successfully",
+            deletedRegion
+        })
+    }
+    catch(error){
+        return res.status(500).json({
+            success:false,
+            message:error?.message||"Internal server error"
         })
     }
 }
@@ -112,7 +249,7 @@ export const searchMasterCountries = async (req, res) => {
 
     if (search) {
         query.$or = [
-            { country: { $regex:search, $options: "i" } }
+            { country: { $regex: search, $options: "i" } }
         ]
     }
     query.is_active = true
@@ -132,7 +269,7 @@ export const searchMasterRegionsOnly = async (req, res) => {
     const { countryName } = req.query
 
 
-    const searchedMasterRegionsOnly = await MasterRegion.find({country:countryName})
+    const searchedMasterRegionsOnly = await MasterRegion.find({ country: countryName })
 
 
     return res.status(200).json({
@@ -143,27 +280,27 @@ export const searchMasterRegionsOnly = async (req, res) => {
 }
 
 // Fetching the region image according to the region id 
-export const fetchRegionImages = async(req,res)=>{
-    try{
-        const {regionId} = req.query;  // The region Id is masterRegion id 
-        if(!regionId){
+export const fetchRegionImages = async (req, res) => {
+    try {
+        const { regionId } = req.query;  // The region Id is masterRegion id 
+        if (!regionId) {
             return res.status(400).json({
-                success:false,
-                message:"Region Id not found"
+                success: false,
+                message: "Region Id not found"
             })
         }
 
-        const regionsImages = await RegionImage.findOne({masterRegionId:regionId})
+        const regionsImages = await RegionImage.findOne({ masterRegionId: regionId })
         return res.status(200).json({
-            success:true,
-            message:"Images fetched",
+            success: true,
+            message: "Images fetched",
             regionsImages
         })
     }
-    catch(error){
+    catch (error) {
         return res.status(500).json({
-            success:false,
-            message:error?.message || "Internal server error"
+            success: false,
+            message: error?.message || "Internal server error"
         })
     }
 }
@@ -257,79 +394,101 @@ export const getMasterRegions = async (req, res) => {
 }
 
 export const addRegionImages = async (req, res) => {
-  try {
-    const { regionId } = req.body;
-    if(!regionId){
-        return res.status(400).json({
-            success:false,
-            message:"Region id not found"
-        })
-    }
+    try {
+        const { regionId, imageLinks } = req.body;
+        if (!regionId) {
+            return res.status(400).json({
+                success: false,
+                message: "Region id not found"
+            })
+        }
+        let parsedImageLinks = [];
 
-    const findExistingRegionImages = await RegionImage.findOne({masterRegionId: regionId,})
-    if(findExistingRegionImages){
-        return res.status(409).json({
-            success:false,
-            message:"You already uploaded image for this region"
-        })
-    }
-    // Normalize files
-    let images = req.files?.images 
-    if (!images) {
-      return res.status(400).json({ success: false, message: "No images uploaded" });
-    }
-    if (!Array.isArray(images)) images = [images];
+        if (imageLinks) {
+            try {
+                parsedImageLinks = JSON.parse(imageLinks);
+            } catch (error) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid imageLinks format"
+                });
+            }
+        }
 
-    // Upload all images in parallel to Cloudinary
-    const uploadResults = await Promise.allSettled(
-        images.map((file) =>
-          uploadImageToCloudinary(file, process.env.REGION_IMAGES).then((uploaded) => ({
-            url: uploaded.secure_url,
-            public_id: uploaded.public_id,
-            size: uploaded.size,
-          }))
-        )
-      );
-      
-      // Separate successes and failures
-      const uploadedImages = uploadResults
-        .filter(result => result.status === "fulfilled")
-        .map(result => result.value);
-      
-      const failedImages = uploadResults
-        .filter(result => result.status === "rejected")
-        .map((result, idx) => ({ fileName: images[idx].name, error: result.reason.message }));
-      
-      if (uploadedImages.length === 0) {
-        return res.status(500).json({
-          success: false,
-          message: "All image uploads failed",
-          errors: failedImages,
+        const findExistingRegionImages = await RegionImage.findOne({ masterRegionId: regionId, })
+        if (findExistingRegionImages) {
+            return res.status(409).json({
+                success: false,
+                message: "You already uploaded image for this region"
+            })
+        }
+        // Normalize files
+        let images = req.files?.images
+        if (!images) {
+            return res.status(400).json({ success: false, message: "No images uploaded" });
+        }
+        if (!Array.isArray(images)) images = [images];
+        const MAX_SIZE = 2 * 1024 * 1024;
+
+        // Check image sizes
+        for (const file of images) {
+            if (file.size > MAX_SIZE) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Each image must be less than 2 MB",
+                });
+            }
+        }
+
+        // Upload all images in parallel to Cloudinary
+        const uploadResults = await Promise.allSettled(
+            images.map((file) =>
+                uploadImageToCloudinary(file, process.env.REGION_IMAGES).then((uploaded) => ({
+                    url: uploaded.secure_url,
+                    public_id: uploaded.public_id,
+                    size: uploaded.size,
+                }))
+            )
+        );
+
+        // Separate successes and failures
+        const uploadedImages = uploadResults
+            .filter(result => result.status === "fulfilled")
+            .map(result => result.value);
+
+        const failedImages = uploadResults
+            .filter(result => result.status === "rejected")
+            .map((result, idx) => ({ fileName: images[idx].name, error: result.reason.message }));
+
+        if (uploadedImages.length === 0) {
+            return res.status(500).json({
+                success: false,
+                message: "All image uploads failed",
+                errors: failedImages,
+            });
+        }
+
+        // Create new document with successfully uploaded images
+        const newRegionImages = await RegionImage.create({
+            masterRegionId: regionId,
+            images: uploadedImages,
+            updatedBy: req.user?.userId,
+            imageLinks: parsedImageLinks
         });
-      }
-      
-      // Create new document with successfully uploaded images
-      const newRegionImages = await RegionImage.create({
-        masterRegionId: regionId,
-        images: uploadedImages,
-        updatedBy: req.user?.userId,
-      });
-      
-      return res.status(201).json({
-        success: true,
-        message: "Images uploaded successfully",
-        data: {
-          newRegionImages,
-          failedImages, // optional: report which files failed
-        },
-      });
-  } catch (error) {
-    console.error("Add Region Images Error:", error);
-    return res.status(500).json({
-      success: false,
-      message: error?.message || "Internal server error",
-    });
-  }
+
+        return res.status(201).json({
+            success: true,
+            message: "Images uploaded successfully",
+            newRegionImages,
+            failedImages, // optional: report which files failed
+        });
+    } catch (error) {
+        console.error("Add Region Images Error:", error);
+        return res.status(500).json({
+            success: false,
+            message: error?.message || "Internal server error",
+        });
+    }
 };
 
 

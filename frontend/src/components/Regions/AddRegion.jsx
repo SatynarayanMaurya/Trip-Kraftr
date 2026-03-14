@@ -1,8 +1,10 @@
 import { useState, useRef, useEffect } from "react";
 import { useCommonHooks } from "../../hooks/useCommonHooks";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useRegionHooks } from "../../hooks/useRegionHooks";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+import { addNewRegion } from "../../redux/slices/regionSlice";
 
 // Dummy data
 const DUMMY_COUNTRIES = [
@@ -10,50 +12,12 @@ const DUMMY_COUNTRIES = [
   "Maldives", "Indonesia", "Vietnam", "Cambodia", "Japan",
 ];
 
-const DUMMY_REGIONS = {
-  India: ["Uttar Pradesh", "Maharashtra", "Rajasthan", "Kerala", "Goa", "Himachal Pradesh", "Uttarakhand", "Arunachal Pradesh", "Sikkim", "Karnataka"],
-  Thailand: ["Phuket", "Bangkok", "Chiang Mai", "Pattaya", "Koh Samui", "Krabi"],
-  Nepal: ["Kathmandu", "Pokhara", "Chitwan", "Lumbini"],
-  Bhutan: ["Thimphu", "Paro", "Punakha", "Wangdue"],
-  "Sri Lanka": ["Colombo", "Kandy", "Galle", "Ella"],
-  Maldives: ["Male", "Maafushi", "Baa Atoll"],
-  Indonesia: ["Bali", "Jakarta", "Lombok", "Yogyakarta"],
-  Vietnam: ["Hanoi", "Ho Chi Minh City", "Da Nang", "Hoi An"],
-  Cambodia: ["Siem Reap", "Phnom Penh", "Sihanoukville"],
-  Japan: ["Tokyo", "Kyoto", "Osaka", "Hokkaido"],
-};
-
-const DUMMY_REGION_IMAGES = {
-  "Uttar Pradesh": [
-    { id: 1, url: "https://images.unsplash.com/photo-1564507592333-c60657eea523?w=300&h=200&fit=crop", label: "Taj Mahal" },
-    { id: 2, url: "https://images.unsplash.com/photo-1587474260584-136574528ed5?w=300&h=200&fit=crop", label: "Varanasi Ghats" },
-    { id: 3, url: "https://images.unsplash.com/photo-1609920658906-8223bd289001?w=300&h=200&fit=crop", label: "Lucknow" },
-  ],
-  Maharashtra: [
-    { id: 4, url: "https://images.unsplash.com/photo-1529253355930-ddbe423a2ac7?w=300&h=200&fit=crop", label: "Mumbai Gateway" },
-    { id: 5, url: "https://images.unsplash.com/photo-1567157577867-05ccb1388e66?w=300&h=200&fit=crop", label: "Pune Hills" },
-  ],
-  Phuket: [
-    { id: 6, url: "https://images.unsplash.com/photo-1589394815804-964ed0be2eb5?w=300&h=200&fit=crop", label: "Patong Beach" },
-    { id: 7, url: "https://images.unsplash.com/photo-1516483638261-f4dbaf036963?w=300&h=200&fit=crop", label: "Big Buddha" },
-    { id: 8, url: "https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?w=300&h=200&fit=crop", label: "Phi Phi Islands" },
-  ],
-  default: [
-    { id: 9, url: "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=300&h=200&fit=crop", label: "Landscape 1" },
-    { id: 10, url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=200&fit=crop", label: "Mountains" },
-    { id: 11, url: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=300&h=200&fit=crop", label: "Seascape" },
-    { id: 12, url: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=300&h=200&fit=crop", label: "Forest" },
-  ],
-};
-
-function getRegionImages(region) {
-  return DUMMY_REGION_IMAGES[region] || DUMMY_REGION_IMAGES.default;
-}
 
 export default function AddRegion() {
   const { searchMasterCountry, searchMasterRegionOnly } = useCommonHooks();
   const { fetchRegionImages, addRegion } = useRegionHooks()
   const isProduction = useSelector((state) => state.user.isProduction)
+  
 
   const [countryLoading, setCountryLoading] = useState(false)
   const [submitLoading, setSubmitLoading] = useState(false)
@@ -71,6 +35,8 @@ export default function AddRegion() {
   const [countryInput, setCountryInput] = useState("");
   const [countrySuggestions, setCountrySuggestions] = useState([]);
   const [selectedCountry, setSelectedCountry] = useState("");
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
 
   const [regions, setRegions] = useState([]);
   const [selectedRegion, setSelectedRegion] = useState("");
@@ -157,7 +123,16 @@ export default function AddRegion() {
   const fetchImages = async (masterRegionId) => {
     try {
       const response = await fetchRegionImages(masterRegionId)
-      setRegionImages(response?.data?.regionsImages?.images)
+      const images = [
+        ...(response?.data?.regionsImages?.images || []),
+        ...(response?.data?.regionsImages?.imageLinks?.map((img,index) => ({
+          url: img,
+          size: 0,
+          public_id: null,
+          _id:index
+        })) || [])
+      ];
+      setRegionImages(images)
     }
     catch (error) {
       if (!isProduction) {
@@ -254,6 +229,7 @@ export default function AddRegion() {
       const response = await addRegion(form)
       toast.success(response?.data?.message)
       setSubmitLoading(false)
+      navigate(-1)
     }
     catch (error) {
       setSubmitLoading(false)
@@ -276,7 +252,7 @@ export default function AddRegion() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-800">Add New Region</h1>
         <p className="text-sm text-gray-500 mt-1">Select a country and configure region details</p>
-        <button className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mt-2 transition-colors">
+        <button onClick={()=>navigate(-1)} className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mt-2 transition-colors">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>

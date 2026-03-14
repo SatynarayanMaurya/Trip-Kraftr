@@ -6,39 +6,9 @@ import {SearchIcon,MapPinIcon,ChevronIcon,XIcon,ImageIcon,CheckIcon,EditIcon,Plu
 import { useSelector } from 'react-redux'
 import { toast } from 'react-toastify'
 
-// ─── Icons ────────────────────────────────────────────────────────────────────
-
-
-// ─── Dummy image data for selected region ─────────────────────────────────────
-const DUMMY_REGION_DATA = {
-  _id: '69ad2afd0ee523acf4a220ec',
-  masterRegionId: '69ac186468ebfef9457c215d',
-  images: [
-    {
-      _id: '69ad2afd0ee523acf4a220ec',
-      url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80',
-      public_id: 'TRIPKRAFTR_STAGING/REGION_IMAGES/file_1',
-      size: 107587,
-    },
-    {
-      _id: '69ad2afd0ee523acf4a220ed',
-      url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&q=80',
-      public_id: 'TRIPKRAFTR_STAGING/REGION_IMAGES/file_2',
-      size: 234560,
-    },
-    {
-      _id: '69ad2afd0ee523acf4a220ee',
-      url: 'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=800&q=80',
-      public_id: 'TRIPKRAFTR_STAGING/REGION_IMAGES/file_3',
-      size: 189430,
-    },
-  ],
-  updatedBy: '699f25e5fa8161dfe1557912',
-  createdAt: '2026-03-08T07:53:33.453+00:00',
-  updatedAt: '2026-03-08T07:53:33.453+00:00',
-}
 
 function formatBytes(bytes) {
+  if (bytes === 0) return '0 KB'
   if (!bytes) return '—'
   if (bytes < 1024) return `${bytes} B`
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
@@ -50,7 +20,6 @@ function RegionImages() {
   const { searchMasterRegion } = useCommonHooks();
   const {fetchRegionImages} = useRegionHooks()
   const isProduction = useSelector((state)=>state.user.isProduction)
-  const loading = useSelector((state)=>state.user.loading)
 
   const [query, setQuery]               = useState('')
   const [results, setResults]           = useState([])
@@ -114,7 +83,6 @@ function RegionImages() {
       setResults([])
       setRegionData(null)
       setDataLoading(true)
-      // TODO: replace with real API call — e.g. await getRegionImages(region._id)
       const res = await fetchRegionImages(region?._id)
       setRegionData(res?.data?.regionsImages)
       setDataLoading(false)
@@ -139,7 +107,16 @@ function RegionImages() {
     setDropdownOpen(false)
   }
 
-  const images = regionData?.images || []
+  const images = [
+    ...(regionData?.images || []),
+    ...(regionData?.imageLinks?.map((img,index) => ({
+      url: img,
+      size: 0,
+      public_id: null,
+      _id:index
+    })) || [])
+  ];
+
 
   return (
     <div className="min-h-screen bg-[#060d17] p-6 md:p-10">
@@ -318,13 +295,13 @@ function RegionImages() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {images?.map((img, idx) => (
                 <div
-                  key={img._id}
+                  key={img?._id}
                   className="group relative rounded-2xl overflow-hidden border border-[#1e2a3a] bg-[#0a1120] hover:border-yellow-400/30 transition-all duration-300"
                 >
                   {/* Image */}
                   <div className="relative aspect-video overflow-hidden bg-[#0f1623]">
                     <img
-                      src={img.url}
+                      src={img?.url}
                       alt={`Region image ${idx + 1}`}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       onError={e => { e.target.src = `https://placehold.co/800x450/0a1120/1e2a3a?text=Image+${idx+1}` }}
@@ -332,7 +309,7 @@ function RegionImages() {
                     {/* Overlay on hover */}
                     <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-between p-4">
                       <span className="text-xs text-slate-300 font-medium">
-                        {formatBytes(img.size)}
+                        {formatBytes(img?.size)}
                       </span>
                       <button
                         onClick={() => setLightbox(img)}
@@ -354,10 +331,10 @@ function RegionImages() {
 
                   {/* Meta */}
                   <div className="px-4 py-3">
-                    <p className="text-xs font-mono text-slate-500 truncate">{img.public_id}</p>
+                    <p className="text-xs font-mono text-slate-500 truncate">{img?.public_id || "via links"}</p>
                     <div className="flex items-center justify-between mt-1">
-                      <span className="text-xs text-slate-600 font-mono">{img._id?.slice(-8)}</span>
-                      <span className="text-xs text-slate-500">{formatBytes(img.size)}</span>
+                      {/* <span className="text-xs text-slate-600 font-mono">{img?._id?.slice(0,1)||img?._id}</span> */}
+                      <span className="text-xs text-slate-500">{formatBytes(img?.size)}</span>
                     </div>
                   </div>
                 </div>

@@ -3,7 +3,7 @@ import { apiConnector } from '../services/apiConnector'
 import { useDispatch, useSelector } from 'react-redux'
 import { setLoading } from '../redux/slices/userSlice'
 import { regionEndpoints, regionEndPointsSuperAdmin } from '../services/Apis/regionApis'
-import { addNewMasterRegion, addNewRegion, setAllRegions, setMasterRegionsByPage } from '../redux/slices/regionSlice'
+import { addNewMasterRegion, addNewRegion, deleteRegion, setAllRegions, setMasterRegionsByPage } from '../redux/slices/regionSlice'
 
 export const useRegionHooks = () => {
   const dispatch = useDispatch();
@@ -48,7 +48,20 @@ export const useRegionHooks = () => {
       dispatch(setLoading(false));
     }
   }
-
+  const getRegionById = async (regionId) => {   // For getting region by id for org_admin
+    try {
+      dispatch(setLoading(true));
+      const response = await apiConnector(
+        "GET",
+        `${regionEndpoints.GET_REGION_BY_ID}/${regionId}`
+      );
+      return response;
+    } catch (error) {
+      throw error;
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
   const getmasterRegions = async (page = 1, limit = 5) => {  // For super admin only
     try {
       const cachedPage = masterRegionsPages?.[page]
@@ -110,6 +123,38 @@ export const useRegionHooks = () => {
     }
   }
 
+  const updateRegionById = async (regionId,data) => {   // The region id is region id for table region
+    try {
+      dispatch(setLoading(true));
+      const response = await apiConnector(
+        "PUT",
+        `${regionEndpoints.UPDATE_REGION_BY_ID}/${regionId}`,data
+      )
+      return response;
+    } catch (error) {
+      throw error;
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }
 
-  return { addRegion, getRegions, addMasterRegion, getmasterRegions, addRegionImages, fetchRegionImages };
+  const deleteRegionById = async (regionId) => {   // The region id is region id for table region
+    try {
+      dispatch(setLoading(true));
+      const response = await apiConnector(
+        "DELETE",
+        `${regionEndpoints.DELETE_REGION_BY_ID}/${regionId}`
+      )
+      dispatch(deleteRegion(response?.data?.deletedRegion))
+      return response;
+    } catch (error) {
+      throw error;
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }
+
+
+
+  return { addRegion, getRegions, addMasterRegion, getmasterRegions, addRegionImages, fetchRegionImages,getRegionById,updateRegionById,deleteRegionById };
 };

@@ -16,6 +16,9 @@ const regionImagesSchema = new mongoose.Schema({
             size: { type: Number, default: null },  
         }
     ],
+    imageLinks:[
+        { type: String, default: null },     
+    ],
 
     updatedBy:{
         type:mongoose.Schema.Types.ObjectId,
