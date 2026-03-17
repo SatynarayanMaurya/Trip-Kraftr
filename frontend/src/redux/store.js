@@ -3,12 +3,14 @@ import planSlice from './slices/planSlice'
 import userSlice from './slices/userSlice'
 import organizationSlice from './slices/organizationSlice'
 import regionSlice from './slices/regionSlice'
+import subRegionSlice from "./slices/subRegionSlice"
 
 export const store = configureStore({
   reducer: {
     plan: planSlice,
     user: userSlice,
     organization: organizationSlice,
-    region: regionSlice
+    region: regionSlice,
+    subRegion:subRegionSlice
   },
 })

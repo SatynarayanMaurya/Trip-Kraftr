@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux"
 import { apiConnector } from "../services/apiConnector"
 import { regionEndpoints } from "../services/Apis/regionApis"
 import { setLoading } from "../redux/slices/userSlice"
+import { subRegionEndpoints } from "../services/Apis/subRegionApis"
 
 export const useCommonHooks = () => {
     const dispatch = useDispatch()
@@ -64,19 +65,35 @@ export const useCommonHooks = () => {
             ),
         300 
     )
+    // ---------- Region Search for org ( Actually for adding sub region we need region for suggestion ) ----------
+    const searchRegionForOrg = debounceSearch(
+        "searchRegionForOrg",
+        (searchTerm) =>
+            apiConnector(
+                "GET",
+                `${subRegionEndpoints.SEARCH_REGIONS_FOR_ORG}?regionName=${encodeURIComponent(searchTerm)}`
+            ),
+        300 
+    )
+    // ---------- Region Search for org ( Actually for adding sub region we need region for suggestion ) ----------
+    const searchSubRegionForOrg = debounceSearch(
+        "searchSubRegionForOrg",
+        (searchTerm,filter) =>
+            apiConnector(
+                "GET",
+                `${subRegionEndpoints.SEARCH_SUB_REGIONS}?search=${encodeURIComponent(searchTerm)}&filter=${encodeURIComponent(filter)}`
+            ),
+        300 
+    )
 
 
-    // ---------- Hotel Search (example) ----------
-    //   const searchHotel = debounceSearch(
-    //     "searchHotel",
-    //     (searchTerm) =>
-    //       apiConnector(
-    //         "GET",
-    //         `/hotel/search?query=${encodeURIComponent(searchTerm)}`
-    //       )
-    //   )
+
 
     return {
-        searchMasterRegion,searchMasterCountry,searchMasterRegionOnly
+        searchMasterRegion,
+        searchMasterCountry,
+        searchMasterRegionOnly,
+        searchRegionForOrg,
+        searchSubRegionForOrg
     }
 }

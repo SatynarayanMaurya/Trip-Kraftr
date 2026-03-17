@@ -182,15 +182,18 @@ function Regions() {
   const allRegions = useSelector((state) => state.region.allRegions);
   const isProduction = useSelector((state) => state.user.isProduction);
   const loading = useSelector((state)=>state.user.loading)
-
   
   const { getRegions } = useRegionHooks();
+  const [regionsFetched, setRegionsFetched] = useState(false);
   
   const fetchRegions = useCallback(async () => {
     try {
       if (allRegions?.length > 0) return;
+      // if(allRegions === null) return;  // If there are not any region present in db
+      if(regionsFetched) return ;
   
       const res = await getRegions();
+      setRegionsFetched(true)
     } catch (error) {
       if (!isProduction) {
         console.log("========= ERROR DEBUG START =========");
@@ -237,7 +240,7 @@ function Regions() {
               Regions
             </h1>
             <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#475569' }}>
-              {allRegions?.length} total · {allRegions.filter(r => r.is_active).length} active
+              {allRegions?.length} total · {allRegions?.filter(r => r?.is_active).length} active
             </p>
           </div>
           <button
@@ -269,8 +272,8 @@ function Regions() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '16px', marginBottom: '28px' }}>
         {[
           { label: 'TOTAL', value: allRegions?.length, color: '#f1f5f9' },
-          { label: 'ACTIVE', value: allRegions?.filter(r => r.is_active).length, color: '#4ade80' },
-          { label: 'INACTIVE', value: allRegions?.filter(r => !r.is_active).length, color: '#f87171' },
+          { label: 'ACTIVE', value: allRegions?.filter(r => r?.is_active)?.length, color: '#4ade80' },
+          { label: 'INACTIVE', value: allRegions?.filter(r => !r?.is_active).length, color: '#f87171' },
         ].map(stat => (
           <div key={stat.label} style={{
             background: 'linear-gradient(145deg, #1e2535, #1a2030)',

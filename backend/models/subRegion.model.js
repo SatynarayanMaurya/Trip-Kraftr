@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
 
-const regionSchema = new mongoose.Schema({
+const subRegionSchema = new mongoose.Schema({
 
-    masterRegionId:{   
+    regionId:{   
         type:mongoose.Schema.Types.ObjectId,
-        ref:"MasterRegion",
+        ref:"Region",
         required:true
     },
 
@@ -17,29 +17,10 @@ const regionSchema = new mongoose.Schema({
         type:String,
         default:null
     },
-    country:{
-        type:String,
-        default:null
-    },
-
-
     description:{
         type:String,
         default:null
     },
-
-    min_margin:{
-        type:Number,
-        default:0
-    },
-
-    max_margin:{
-        type:Number,
-        default:0
-    },
-    region_images: [{
-        type: String
-    }],
     
     is_active:{
         type:Boolean,
@@ -54,6 +35,9 @@ const regionSchema = new mongoose.Schema({
 },{ timestamps: true })
 
 // compound index
-regionSchema.index({ org_id: 1,name:1 })
+subRegionSchema.index(
+    { org_id: 1, name: 1,regionId: 1 },
+    { unique: true }
+  );
 
-export default mongoose.model("Region",regionSchema)
+export default mongoose.model("SubRegion",subRegionSchema)

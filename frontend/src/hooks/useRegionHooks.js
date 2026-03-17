@@ -62,6 +62,7 @@ export const useRegionHooks = () => {
       dispatch(setLoading(false));
     }
   };
+  
   const getmasterRegions = async (page = 1, limit = 5) => {  // For super admin only
     try {
       const cachedPage = masterRegionsPages?.[page]

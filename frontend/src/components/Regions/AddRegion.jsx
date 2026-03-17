@@ -108,7 +108,6 @@ export default function AddRegion() {
     if (form?.country !== "") {
       return
     }
-
     fetchCountries(countryInput)
   }, [countryInput]);
 

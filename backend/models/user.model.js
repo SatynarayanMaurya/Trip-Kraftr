@@ -61,13 +61,6 @@ const userSchema = new mongoose.Schema({
     },
 })
 
-// userSchema.index(
-//     { org_id: 1, phone: 1 },
-//     {
-//       unique: true,
-//       partialFilterExpression: { org_id: { $exists: true } }
-//     }
-//   );
 userSchema.index(
     {  phone: 1 },
   );

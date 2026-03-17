@@ -8,7 +8,7 @@ import { uploadImageToCloudinary } from "../utils/uploadToCloudinary.js";
 
 export const addRegion = async (req, res) => {
     try {
-        const { description, masterRegionId, min_margin, max_margin, region_images } = req.body
+        const {name, country,description, masterRegionId, min_margin, max_margin, region_images } = req.body
 
         const org_id = req.user.org_id;
 
@@ -40,7 +40,7 @@ export const addRegion = async (req, res) => {
             })
         }
 
-        const newRegion = await Region.create({ org_id, description, region_images, masterRegionId, min_margin: Number(min_margin), max_margin: Number(max_margin), updatedBy: req.user.userId })
+        const newRegion = await Region.create({name, country, org_id, description, region_images, masterRegionId, min_margin: Number(min_margin), max_margin: Number(max_margin), updatedBy: req.user.userId })
         await newRegion.populate({
             path: "masterRegionId",
             select: "name country _id is_active"
@@ -393,102 +393,216 @@ export const getMasterRegions = async (req, res) => {
     }
 }
 
+// export const addRegionImages = async (req, res) => {
+//     try {
+//         const { regionId, imageLinks } = req.body;
+//         if (!regionId) {
+//             return res.status(400).json({
+//                 success: false,
+//                 message: "Region id not found"
+//             })
+//         }
+//         let parsedImageLinks = [];
+
+//         if (imageLinks) {
+//             try {
+//                 parsedImageLinks = JSON.parse(imageLinks);
+//             } catch (error) {
+//                 return res.status(400).json({
+//                     success: false,
+//                     message: "Invalid imageLinks format"
+//                 });
+//             }
+//         }
+
+//         const findExistingRegionImages = await RegionImage.findOne({ masterRegionId: regionId, })
+//         if (findExistingRegionImages) {
+//             return res.status(409).json({
+//                 success: false,
+//                 message: "You already uploaded image for this region"
+//             })
+//         }
+//         // Normalize files
+//         let images = req.files?.images
+//         if (!images) {
+//             return res.status(400).json({ success: false, message: "No images uploaded" });
+//         }
+//         if (!Array.isArray(images)) images = [images];
+//         const MAX_SIZE = 2 * 1024 * 1024;
+
+//         // Check image sizes
+//         for (const file of images) {
+//             if (file.size > MAX_SIZE) {
+//                 return res.status(400).json({
+//                     success: false,
+//                     message: "Each image must be less than 2 MB",
+//                 });
+//             }
+//         }
+
+//         // Upload all images in parallel to Cloudinary
+//         const uploadResults = await Promise.allSettled(
+//             images.map((file) =>
+//                 uploadImageToCloudinary(file, process.env.REGION_IMAGES).then((uploaded) => ({
+//                     url: uploaded.secure_url,
+//                     public_id: uploaded.public_id,
+//                     size: uploaded.size,
+//                 }))
+//             )
+//         );
+
+//         // Separate successes and failures
+//         const uploadedImages = uploadResults
+//             .filter(result => result.status === "fulfilled")
+//             .map(result => result.value);
+
+//         const failedImages = uploadResults
+//             .filter(result => result.status === "rejected")
+//             .map((result, idx) => ({ fileName: images[idx].name, error: result.reason.message }));
+
+//         if (uploadedImages.length === 0) {
+//             return res.status(500).json({
+//                 success: false,
+//                 message: "All image uploads failed",
+//                 errors: failedImages,
+//             });
+//         }
+
+//         // Create new document with successfully uploaded images
+//         const newRegionImages = await RegionImage.create({
+//             masterRegionId: regionId,
+//             images: uploadedImages,
+//             updatedBy: req.user?.userId,
+//             imageLinks: parsedImageLinks
+//         });
+
+//         return res.status(201).json({
+//             success: true,
+//             message: "Images uploaded successfully",
+//             newRegionImages,
+//             failedImages, // optional: report which files failed
+//         });
+//     } catch (error) {
+//         console.error("Add Region Images Error:", error);
+//         return res.status(500).json({
+//             success: false,
+//             message: error?.message || "Internal server error",
+//         });
+//     }
+// };
+
+
 export const addRegionImages = async (req, res) => {
     try {
-        const { regionId, imageLinks } = req.body;
-        if (!regionId) {
-            return res.status(400).json({
-                success: false,
-                message: "Region id not found"
-            })
-        }
-        let parsedImageLinks = [];
-
-        if (imageLinks) {
-            try {
-                parsedImageLinks = JSON.parse(imageLinks);
-            } catch (error) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Invalid imageLinks format"
-                });
-            }
-        }
-
-        const findExistingRegionImages = await RegionImage.findOne({ masterRegionId: regionId, })
-        if (findExistingRegionImages) {
-            return res.status(409).json({
-                success: false,
-                message: "You already uploaded image for this region"
-            })
-        }
-        // Normalize files
-        let images = req.files?.images
-        if (!images) {
-            return res.status(400).json({ success: false, message: "No images uploaded" });
-        }
-        if (!Array.isArray(images)) images = [images];
-        const MAX_SIZE = 2 * 1024 * 1024;
-
-        // Check image sizes
-        for (const file of images) {
-            if (file.size > MAX_SIZE) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Each image must be less than 2 MB",
-                });
-            }
-        }
-
-        // Upload all images in parallel to Cloudinary
-        const uploadResults = await Promise.allSettled(
-            images.map((file) =>
-                uploadImageToCloudinary(file, process.env.REGION_IMAGES).then((uploaded) => ({
-                    url: uploaded.secure_url,
-                    public_id: uploaded.public_id,
-                    size: uploaded.size,
-                }))
-            )
-        );
-
-        // Separate successes and failures
-        const uploadedImages = uploadResults
-            .filter(result => result.status === "fulfilled")
-            .map(result => result.value);
-
-        const failedImages = uploadResults
-            .filter(result => result.status === "rejected")
-            .map((result, idx) => ({ fileName: images[idx].name, error: result.reason.message }));
-
-        if (uploadedImages.length === 0) {
-            return res.status(500).json({
-                success: false,
-                message: "All image uploads failed",
-                errors: failedImages,
-            });
-        }
-
-        // Create new document with successfully uploaded images
-        const newRegionImages = await RegionImage.create({
-            masterRegionId: regionId,
-            images: uploadedImages,
-            updatedBy: req.user?.userId,
-            imageLinks: parsedImageLinks
+      const { regionId, imageLinks } = req.body;
+  
+      if (!regionId) {
+        return res.status(400).json({
+          success: false,
+          message: "Region id not found",
         });
-
-        return res.status(201).json({
-            success: true,
-            message: "Images uploaded successfully",
-            newRegionImages,
-            failedImages, // optional: report which files failed
-        });
-    } catch (error) {
-        console.error("Add Region Images Error:", error);
-        return res.status(500).json({
+      }
+  
+      let parsedImageLinks = [];
+  
+      if (imageLinks) {
+        try {
+          parsedImageLinks = JSON.parse(imageLinks);
+        } catch (error) {
+          return res.status(400).json({
             success: false,
-            message: error?.message || "Internal server error",
+            message: "Invalid imageLinks format",
+          });
+        }
+      }
+  
+      const existingRegionImages = await RegionImage.findOne({
+        masterRegionId: regionId,
+      });
+  
+      if (existingRegionImages) {
+        return res.status(409).json({
+          success: false,
+          message: "You already uploaded images for this region",
         });
+      }
+  
+      // Normalize files
+      let images = req.files?.images;
+  
+      if (images && !Array.isArray(images)) {
+        images = [images];
+      }
+  
+      const MAX_SIZE = 2 * 1024 * 1024;
+      let uploadedImages = [];
+      let failedImages = [];
+  
+      if (images && images.length > 0) {
+        // Validate size
+        for (const file of images) {
+          if (file.size > MAX_SIZE) {
+            return res.status(400).json({
+              success: false,
+              message: "Each image must be less than 2 MB",
+            });
+          }
+        }
+  
+        // Upload images
+        const uploadResults = await Promise.allSettled(
+          images.map((file) =>
+            uploadImageToCloudinary(file, process.env.REGION_IMAGES).then(
+              (uploaded) => ({
+                url: uploaded.secure_url,
+                public_id: uploaded.public_id,
+                size: uploaded.size,
+              })
+            )
+          )
+        );
+  
+        uploadedImages = uploadResults
+          .filter((result) => result.status === "fulfilled")
+          .map((result) => result.value);
+  
+        failedImages = uploadResults
+          .map((result, idx) =>
+            result.status === "rejected"
+              ? { fileName: images[idx].name, error: result.reason.message }
+              : null
+          )
+          .filter(Boolean);
+      }
+  
+      // Ensure at least one source exists
+      if (uploadedImages?.length === 0 && parsedImageLinks?.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: "Please upload images or provide image links",
+        });
+      }
+  
+      // Save to DB
+      const newRegionImages = await RegionImage.create({
+        masterRegionId: regionId,
+        images: uploadedImages,
+        imageLinks: parsedImageLinks,
+        updatedBy: req.user?.userId,
+      });
+  
+      return res.status(201).json({
+        success: true,
+        message: "Region images saved successfully",
+        newRegionImages,
+        failedImages,
+      });
+    } catch (error) {
+      console.error("Add Region Images Error:", error);
+  
+      return res.status(500).json({
+        success: false,
+        message: error?.message || "Internal server error",
+      });
     }
 };
-
-

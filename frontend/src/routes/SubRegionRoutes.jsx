@@ -4,6 +4,7 @@ import Regions from "../pages/Regions"
 import AddRegion from "../components/Regions/AddRegion"
 import SubRegions from "../pages/SubRegions";
 import AddSubRegion from "../components/Sub Region/AddSubRegion";
+import UpdateSubRegion from "../components/Sub Region/UpdateSubRegion";
 
 export const subRegionRoutes = (
   <>
@@ -21,6 +22,15 @@ export const subRegionRoutes = (
       element={
         <RoleRoute allowedRoles={["org_admin"]}>
           <AddSubRegion />
+        </RoleRoute>
+      }
+    />
+
+    <Route
+      path="sub-regions/update-sub-region/:subRegionId"
+      element={
+        <RoleRoute allowedRoles={["org_admin"]}>
+          <UpdateSubRegion />
         </RoleRoute>
       }
     />

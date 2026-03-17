@@ -32,7 +32,9 @@ export const regionSlice = createSlice({
         },
 
         addNewRegion: (state, action) => {
+            
             state.allRegions.unshift(action.payload)
+            
         },
 
         updateRegion: (state, action) => {
