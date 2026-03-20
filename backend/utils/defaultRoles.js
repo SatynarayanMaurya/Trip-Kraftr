@@ -11,8 +11,16 @@
         "view_itinerary"
       ]
     },
+    // {
+    //   name: "travel_consultant",
+    //   permissions: [
+    //     "create_itinerary",
+    //     "edit_itinerary",
+    //     "view_itinerary"
+    //   ]
+    // },
     {
-      name: "travel_consultant",
+      name: "operational_consultant",
       permissions: [
         "create_itinerary",
         "edit_itinerary",
