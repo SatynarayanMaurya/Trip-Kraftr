@@ -3,7 +3,7 @@ import { apiConnector } from '../services/apiConnector'
 import { useDispatch, useSelector } from 'react-redux'
 import { setLoading } from '../redux/slices/userSlice'
 import { subRegionEndpoints } from '../services/Apis/subRegionApis'
-import { addNewSubRegion, setSubRegionsByPage, updateSubRegion } from '../redux/slices/subRegionSlice';
+import { addNewSubRegion, deleteSubRegion, setSubRegionsByPage, updateSubRegion } from '../redux/slices/subRegionSlice';
 
 export const useSubRegionHooks = () => {
   const dispatch = useDispatch();
@@ -92,6 +92,26 @@ export const useSubRegionHooks = () => {
       dispatch(setLoading(false))
     }
   }
+  // For Delete sub Region by Id
+  const deleteSubRegionById = async (subRegionId) => {  
+    try {
+
+      dispatch(setLoading(true))
+      
+      const response = await apiConnector(
+        "DELETE",
+        `${subRegionEndpoints.DELETE_SUB_REGIONS_BY_ID}/${subRegionId}`,
+      )
+      
+      dispatch(deleteSubRegion(response?.data?.deletedSubRegion?._id))
+      return response
+
+    } catch (error) {
+      throw error
+    } finally {
+      dispatch(setLoading(false))
+    }
+  }
 
 
 
@@ -101,6 +121,7 @@ export const useSubRegionHooks = () => {
         addSubRegion,
         getSubRegions,
         getSubRegionById,
-        updateSubRegionById
+        updateSubRegionById,
+        deleteSubRegionById
     };
 };

@@ -86,6 +86,7 @@ function MasterRegions() {
 
     const changePageLimit = (val)=>{
         dispatch(clearMasterRegions())
+        setCurrentPage(1)
         dispatch(setMasteRegionPageLimit(Number(val)))
     }
 

@@ -3,6 +3,7 @@ import { authMiddleware } from "../middlewares/auth.middleware.js";
 import { roleMiddleware } from "../middlewares/role.middleware.js";
 import { 
     addSubRegion, 
+    deleteSubRegionById, 
     getSubRegionById, 
     getSubRegions, 
     searchRegionForOrganization, 
@@ -19,6 +20,7 @@ subRegionRouter.get("/get-sub-regions",authMiddleware,roleMiddleware(["org_admin
 subRegionRouter.get("/search-sub-regions",authMiddleware,roleMiddleware(["org_admin","travel_consultant"]),searchSubRegions)
 subRegionRouter.get("/get-sub-regions-by-id/:subRegionId",authMiddleware,roleMiddleware(["org_admin","travel_consultant"]),getSubRegionById)
 subRegionRouter.put("/update-sub-regions-by-id/:subRegionId",authMiddleware,roleMiddleware(["org_admin","travel_consultant"]),updateSubRegionById)
+subRegionRouter.delete("/delete-sub-regions-by-id/:subRegionId",authMiddleware,roleMiddleware(["org_admin"]),deleteSubRegionById)
 
 
 export default subRegionRouter

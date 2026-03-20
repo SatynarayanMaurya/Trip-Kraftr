@@ -130,6 +130,90 @@ export const subRegionSlice = createSlice({
                 state.subRegionsPages[firstPage].unshift(updatedSubRegion);
               }
             }
+        },
+        deleteSubRegion: (state, action) => {
+            const subRegionId = action.payload;
+            const limit = state.paginationSubRegions?.limit || 5;
+          
+            let deletedPage = null;
+          
+            // ✅ Step 1: Find & delete
+            for (const page in state.subRegionsPages) {
+              const pageNum = Number(page);
+              const pageData = state.subRegionsPages[pageNum];
+          
+              const index = pageData.findIndex(
+                item => item._id === subRegionId
+              );
+          
+              if (index !== -1) {
+                const deletedItem = pageData[index];
+          
+                // update stats
+                if (deletedItem.is_active) {
+                  state.statsSubRegions.activeSubRegion--;
+                } else {
+                  state.statsSubRegions.inactiveSubRegion--;
+                }
+                state.statsSubRegions.totalSubRegion--;
+          
+                pageData.splice(index, 1);
+                deletedPage = pageNum;
+                break;
+              }
+            }
+          
+            if (deletedPage === null) return;
+          
+            // ✅ Step 2: Shift items forward
+            let currentPage = deletedPage;
+          
+            while (state.subRegionsPages[currentPage + 1]) {
+              const nextPage = currentPage + 1;
+          
+              if (state.subRegionsPages[nextPage].length === 0) {
+                delete state.subRegionsPages[nextPage];
+                break;
+              }
+          
+              // move first item from next page
+              const shiftedItem = state.subRegionsPages[nextPage].shift();
+              state.subRegionsPages[currentPage].push(shiftedItem);
+          
+              // if next page becomes empty → delete it
+              if (state.subRegionsPages[nextPage].length === 0) {
+                delete state.subRegionsPages[nextPage];
+                break;
+              }
+          
+              currentPage = nextPage;
+            }
+          
+            // ✅ Step 3: Cleanup empty pages (important)
+            for (const page in state.subRegionsPages) {
+              if (state.subRegionsPages[page].length === 0) {
+                delete state.subRegionsPages[page];
+              }
+            }
+          
+            // ✅ Step 4: Update pagination
+            if (state.paginationSubRegions) {
+              state.paginationSubRegions.totalRecords--;
+          
+              state.paginationSubRegions.totalPages = Math.max(
+                1,
+                Math.ceil(state.paginationSubRegions.totalRecords / limit)
+              );
+          
+              // adjust current page if it exceeds totalPages
+              if (
+                state.paginationSubRegions.currentPage >
+                state.paginationSubRegions.totalPages
+              ) {
+                state.paginationSubRegions.currentPage =
+                  state.paginationSubRegions.totalPages;
+              }
+            }
           },
 
         setSubRegionPageLimit: (state, action) => {
@@ -146,7 +230,8 @@ export const {
     setSubRegionsByPage,
     clearSubRegions,
     setSubRegionPageLimit,
-    updateSubRegion
+    updateSubRegion,
+    deleteSubRegion
 
 
 } = subRegionSlice.actions

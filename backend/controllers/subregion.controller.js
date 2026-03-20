@@ -210,6 +210,56 @@ export const updateSubRegionById = async (req, res) => {
 };
 
 
+export const deleteSubRegionById = async (req, res) => {
+  try {
+    const { subRegionId } = req.params;
+
+    if (!subRegionId) {
+      return res.status(400).json({
+        success: false,
+        message: "Sub Region Id is required",
+      });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(subRegionId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid Sub Region Id",
+      });
+    }
+
+    if (!req.user?.org_id) {
+      return res.status(400).json({
+        success: false,
+        message: "Organization id not found",
+      });
+    }
+
+    const deletedSubRegion = await SubRegion.findOneAndDelete({
+      org_id: req.user.org_id,
+      _id: subRegionId,
+    });
+
+    if (!deletedSubRegion) {
+      return res.status(404).json({
+        success: false,
+        message: "Sub Region not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Sub Region deleted successfully",
+      deletedSubRegion,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error?.message || "Internal Server Error",
+    });
+  }
+};
+
 export const searchSubRegions = async (req, res) => {
   try {
     const { search, filter } = req.query;

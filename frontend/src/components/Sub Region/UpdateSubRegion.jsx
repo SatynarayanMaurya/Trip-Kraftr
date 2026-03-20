@@ -127,7 +127,7 @@ export default function UpdateSubRegion() {
       setSubmitLoading(true)
       const res = await updateSubRegionById(originalData?._id, form) 
       toast.success(res?.data?.message || 'Sub-region updated successfully')
-      navigate(-1)
+      navigate('/sub-regions')
     } catch (error) {
       if (!isProduction) {
         console.log('========= ERROR DEBUG START =========')

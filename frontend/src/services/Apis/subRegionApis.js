@@ -8,5 +8,6 @@ export const subRegionEndpoints  = {
     SEARCH_SUB_REGIONS : BASE_URL + '/search-sub-regions',
     GET_SUB_REGIONS_BY_ID : BASE_URL + '/get-sub-regions-by-id',
     UPDATE_SUB_REGIONS_BY_ID : BASE_URL + '/update-sub-regions-by-id',
+    DELETE_SUB_REGIONS_BY_ID : BASE_URL + '/delete-sub-regions-by-id',
 }
 

@@ -5,6 +5,7 @@ import AddRegion from "../components/Regions/AddRegion"
 import SubRegions from "../pages/SubRegions";
 import AddSubRegion from "../components/Sub Region/AddSubRegion";
 import UpdateSubRegion from "../components/Sub Region/UpdateSubRegion";
+import ViewSubRegion from "../components/Sub Region/ViewSubRegion";
 
 export const subRegionRoutes = (
   <>
@@ -31,6 +32,15 @@ export const subRegionRoutes = (
       element={
         <RoleRoute allowedRoles={["org_admin"]}>
           <UpdateSubRegion />
+        </RoleRoute>
+      }
+    />
+
+    <Route
+      path="sub-regions/view-sub-region/:subRegionId"
+      element={
+        <RoleRoute allowedRoles={["org_admin"]}>
+          <ViewSubRegion />
         </RoleRoute>
       }
     />
