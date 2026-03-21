@@ -263,7 +263,6 @@ export const deleteSubRegionById = async (req, res) => {
 export const searchSubRegions = async (req, res) => {
   try {
     const { search, filter } = req.query;
-    console.log("Filter : ",filter)
 
     if (!req.user.org_id) {
       return res.status(401).json({

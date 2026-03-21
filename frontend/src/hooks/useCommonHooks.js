@@ -4,6 +4,7 @@ import { apiConnector } from "../services/apiConnector"
 import { regionEndpoints } from "../services/Apis/regionApis"
 import { setLoading } from "../redux/slices/userSlice"
 import { subRegionEndpoints } from "../services/Apis/subRegionApis"
+import { vehicleEndpoinsts } from "../services/Apis/vehicleApis"
 
 export const useCommonHooks = () => {
     const dispatch = useDispatch()
@@ -86,6 +87,25 @@ export const useCommonHooks = () => {
         300 
     )
 
+    // ---------- Search Vehicle with filter like search sort type and regionId ----------
+    const searchVehicles = debounceSearch(
+        "searchVehicles",
+        (search, sort, type, regionId,pageLimit) => {
+          const params = new URLSearchParams();
+      
+          if (search) params.append("search", search);
+          if (sort) params.append("sort", sort);
+          if (type) params.append("type", type);
+          if (regionId) params.append("regionId", regionId);
+          if (pageLimit) params.append("pageLimit", pageLimit);
+      
+          return apiConnector(
+            "GET",
+            `${vehicleEndpoinsts.SEARCH_VEHICLE}?${params.toString()}`
+          );
+        },
+        300
+      );
 
 
 
@@ -94,6 +114,8 @@ export const useCommonHooks = () => {
         searchMasterCountry,
         searchMasterRegionOnly,
         searchRegionForOrg,
-        searchSubRegionForOrg
+        searchSubRegionForOrg,
+        searchVehicles,
+
     }
 }

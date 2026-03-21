@@ -84,6 +84,24 @@ export const getRegions = async (req, res) => {
     }
 }
 
+export const getRegionForOrg = async(req,res)=>{  // This is for region suggestions
+    try{
+        const allRegions = await Region.find({org_id:req.user.org_id}).select("_id name country is_active")
+        return res.status(200).json({
+            success:true,
+            message:"All Regions fetched successfully",
+            allRegions
+        })
+
+    }
+    catch(error){
+        return res.status(500).json({
+            success:false,
+            message:error?.message || "Internal server Error"
+        })
+    }
+}
+
 export const getRegionById = async (req, res) => {
     try {
         const { regionId } = req.params

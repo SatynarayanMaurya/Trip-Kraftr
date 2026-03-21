@@ -8,9 +8,8 @@ import { useVehicleHooks } from '../../hooks/useVehicleHooks'
 
 const VEHICLE_TYPES = [
     'Sedan', 'SUV', 'Hatchback', 'Van', 'Minibus', 'Bus',
-    'Luxury Car', 'Convertible', 'Pickup Truck', 'Jeep',
+    'Coach', 'Luxury Car',"Tempo Traveller",
 ]
-
 export default function AddVehicle() {
     const navigate = useNavigate()
     const {  searchRegionForOrg } = useCommonHooks()   
@@ -138,12 +137,11 @@ export default function AddVehicle() {
                 transferPrice:   sameAsPrice ? form.pricePerDay : form.transferPrice,
                 vehicleImageUrl: form.vehicleImageUrl,
             }
-            console.log('=== AddVehicle Form Data ===', payload)
             setSubmitLoading(true)
             const response = await addVehicle(payload)
-            console.log("Response : ",response)
             toast.success(response?.data?.message)
             setSubmitLoading(false)
+            navigate(-1)
             // connect to DB here
         }
         catch(error){

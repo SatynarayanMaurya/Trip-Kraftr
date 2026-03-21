@@ -1,7 +1,7 @@
 
 import { apiConnector } from '../services/apiConnector'
 import { useDispatch, useSelector } from 'react-redux'
-import { setLoading } from '../redux/slices/userSlice'
+import { setAllRegionsForSuggestions, setLoading } from '../redux/slices/userSlice'
 import { regionEndpoints, regionEndPointsSuperAdmin } from '../services/Apis/regionApis'
 import { addNewMasterRegion, addNewRegion, deleteRegion, setAllRegions, setMasterRegionsByPage } from '../redux/slices/regionSlice'
 
@@ -48,6 +48,20 @@ export const useRegionHooks = () => {
       dispatch(setLoading(false));
     }
   }
+
+  const getRegionsForOrg = async () => { // For all regions for suggestions
+    try {
+      dispatch(setLoading(true));
+      const response = await apiConnector("GET", regionEndpoints.GET_REGIONS_FOR_ORG)
+      dispatch(setAllRegionsForSuggestions(response?.data?.allRegions))
+      return response;
+    } catch (error) {
+      throw error;
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }
+
   const getRegionById = async (regionId) => {   // For getting region by id for org_admin
     try {
       dispatch(setLoading(true));
@@ -157,5 +171,16 @@ export const useRegionHooks = () => {
 
 
 
-  return { addRegion, getRegions, addMasterRegion, getmasterRegions, addRegionImages, fetchRegionImages,getRegionById,updateRegionById,deleteRegionById };
+  return { 
+    addRegion, 
+    getRegions, 
+    addMasterRegion, 
+    getmasterRegions, 
+    addRegionImages, 
+    fetchRegionImages,
+    getRegionById,
+    updateRegionById,
+    deleteRegionById ,
+    getRegionsForOrg
+  };
 };

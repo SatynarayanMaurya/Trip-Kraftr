@@ -68,6 +68,7 @@ export const addVehicle = async (req, res) => {
             vendorName: normalizedVendorName
         });
 
+        await newVehicle.populate({path:'regionId',select:"_id name country is_active"})
         return res.status(201).json({
             success: true,
             message: "Vehicle added successfully",
@@ -89,3 +90,103 @@ export const addVehicle = async (req, res) => {
         });
     }
 };
+
+
+export const getVehicle = async(req,res)=>{
+    try {
+        const page = Math.max(parseInt(req.query.page) || 1, 1)
+        const limit = Math.max(parseInt(req.query.limit) || 5, 1)
+
+        const skip = (page - 1) * limit
+
+        // Fetch regions with pagination
+        const allVehicles = await Vehicle
+            .find({org_id:req.user.org_id})
+            .select("_id regionId vehicleType vehicleModel vehicleImageUrl transferPrice pricePerDay is_active org_id contactNo")
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
+            .lean()
+            .populate({path:"regionId",select:"_id name country is_active"})
+
+        // Counts
+        const [totalVehicle, activeVehicle] = await Promise.all([
+            Vehicle.countDocuments(),
+            Vehicle.countDocuments({ is_active: true })
+        ])
+
+        const inactiveVehicle = totalVehicle - activeVehicle
+        const totalPages = Math.ceil(totalVehicle / limit)
+
+        return res.status(200).json({
+            success: true,
+            message: "All Master Regions fetched successfully",
+            allVehicles,
+
+            pagination: {
+                currentPage: page,
+                totalPages,
+                limit,
+                totalRecords: totalVehicle
+            },
+            stats: {
+                totalVehicle,
+                activeVehicle,
+                inactiveVehicle
+            }
+        })
+
+    } 
+    catch(error){
+        return res.status(500).json({
+            success:false,
+            message:error?.message || "Internal server error"
+        })
+    }
+}
+
+
+export const searchVehicle = async(req,res)=>{
+    try{
+        const {search,sort,type, regionId,pageLimit} = req.query;
+        const query = {
+            org_id: req.user.org_id 
+          };
+      
+          if (search) {
+            query.vehicleModel = { $regex: `^${search.trim()}`, $options: "i" };
+          }
+          if(regionId){
+            query.regionId = new mongoose.Types.ObjectId(regionId)
+          }
+          if(type!=='All Type'){
+            query.vehicleType = type
+          }
+          const SORT_MAP = {
+            "Recently Added": { createdAt: -1 },
+            "Price: Low to High": { pricePerDay: 1 },
+            "Price: High to Low": { pricePerDay: -1 },
+            "Name: A to Z": { vehicleModel_lower: 1 }
+          };
+          const sortOption = SORT_MAP[sort] || { createdAt: -1 };
+
+          const searchedVehicle = await Vehicle
+          .find(query)
+          .sort(sortOption)
+          .limit(pageLimit||5)
+          .select("_id regionId vehicleType vehicleModel vehicleImageUrl transferPrice pricePerDay is_active org_id contactNo")
+          .populate({path:"regionId",select:"_id name country is_active"})
+
+        return res.status(200).json({
+            success:true,
+            message:"Searched vehicle founded",
+            searchedVehicle
+        })
+    }
+    catch(error){
+        return res.status(500).json({
+            success:false,
+            message:error?.message|| "Internal Server Error"
+        })
+    }
+}

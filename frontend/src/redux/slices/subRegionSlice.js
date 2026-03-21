@@ -74,10 +74,8 @@ export const subRegionSlice = createSlice({
         setSubRegionsByPage: (state, action) => {
             const { page, subRegions, pagination, stats } = action.payload
 
-            // store page data
             state.subRegionsPages[page] = subRegions
 
-            // update pagination & stats
             if (pagination) state.paginationSubRegions = pagination
             if (stats) state.statsSubRegions = stats
         },
@@ -85,7 +83,7 @@ export const subRegionSlice = createSlice({
         clearSubRegions: (state) => {
             state.subRegionsPages = {}
             state.paginationSubRegions = { currentPage: 1, totalPages: 1, limit: 5, totalRecords: 0 }
-            state.statsMasstatsSubRegionsterRegions = { totalSubRegion: 0, activeSubRegion: 0, inactiveSubRegion: 0 }
+            state.statsSubRegions = { totalSubRegion: 0, activeSubRegion: 0, inactiveSubRegion: 0 }
         },
 
         updateSubRegion: (state, action) => {

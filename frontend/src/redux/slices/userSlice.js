@@ -6,7 +6,9 @@ const initialState = {
     loading:false,
     isProduction:import.meta.env.VITE_NODE_ENV === 'production',
 
-    userDetails:null
+    userDetails:null,
+
+    allRegionsForSuggestions : null  // This is for suggestion of the region any where you need use it
 
 
 
@@ -30,9 +32,18 @@ export const userSlice = createSlice({
             state.userDetails = null
         },
 
+        setAllRegionsForSuggestions:(state,action)=>{
+            state.allRegionsForSuggestions = action.payload
+        }
+
 
     }
 })
 
-export const {setLoading,setUserDetails,clearUserDetails} = userSlice.actions
+export const {  
+    setLoading,
+    setUserDetails,
+    clearUserDetails,
+    setAllRegionsForSuggestions
+} = userSlice.actions
 export default userSlice.reducer

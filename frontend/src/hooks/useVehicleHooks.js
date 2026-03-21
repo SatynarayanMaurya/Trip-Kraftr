@@ -2,19 +2,18 @@
 import { apiConnector } from '../services/apiConnector'
 import { useDispatch, useSelector } from 'react-redux'
 import { setLoading } from '../redux/slices/userSlice'
-import { regionEndpoints, regionEndPointsSuperAdmin } from '../services/Apis/regionApis'
-import { addNewMasterRegion, addNewRegion, deleteRegion, setAllRegions, setMasterRegionsByPage } from '../redux/slices/regionSlice'
 import { vehicleEndpoinsts } from '../services/Apis/vehicleApis'
+import { addNewVehicle, setVehiclesByPage } from '../redux/slices/vehicleSlice'
 
 export const useVehicleHooks = () => {
   const dispatch = useDispatch();
-  const masterRegionsPages = useSelector((state) => state.region.masterRegionsPages)
+  const vehiclesPages = useSelector((state)=>state.vehicle.vehiclesPages)
 
   const addVehicle = async (vehicleDetails) => {  // For Normal Org_admin
     try {
       dispatch(setLoading(true));
       const response = await apiConnector("POST", vehicleEndpoinsts.ADD_VEHICLE, vehicleDetails)
-    //   dispatch(addNewRegion(response?.data?.newRegion))
+      dispatch(addNewVehicle(response?.data?.newVehicle))
       return response;
     } catch (error) {
       throw error;
@@ -22,25 +21,10 @@ export const useVehicleHooks = () => {
       dispatch(setLoading(false));
     }
   }
-
-  const getRegionById = async (regionId) => {   // For getting region by id for org_admin
-    try {
-      dispatch(setLoading(true));
-      const response = await apiConnector(
-        "GET",
-        `${regionEndpoints.GET_REGION_BY_ID}/${regionId}`
-      );
-      return response;
-    } catch (error) {
-      throw error;
-    } finally {
-      dispatch(setLoading(false));
-    }
-  };
   
-  const getmasterRegions = async (page = 1, limit = 5) => {  // For super admin only
+  const getVehicles = async (page = 1, limit = 5) => {  // For super admin only
     try {
-      const cachedPage = masterRegionsPages?.[page]
+      const cachedPage = vehiclesPages?.[page]
 
       if (cachedPage) return cachedPage   // 🚀 return cached data
 
@@ -48,13 +32,14 @@ export const useVehicleHooks = () => {
 
       const response = await apiConnector(
         "GET",
-        `${regionEndPointsSuperAdmin.GET_MASTER_REGION}?page=${page}&limit=${limit}`
+        `${vehicleEndpoinsts.GET_VEHICLE}?page=${page}&limit=${limit}`
       )
+    //   console.log("Response : ",response?.data)
 
       dispatch(
-        setMasterRegionsByPage({
+        setVehiclesByPage({
           page,
-          regions: response?.data?.allMasterRegion,
+          vehicles: response?.data?.allVehicles,
           pagination: response?.data?.pagination,
           stats: response?.data?.stats
         })
@@ -73,5 +58,9 @@ export const useVehicleHooks = () => {
 
 
 
-  return { addVehicle,  };
+  return { 
+    addVehicle,
+    getVehicles,
+
+    };
 };

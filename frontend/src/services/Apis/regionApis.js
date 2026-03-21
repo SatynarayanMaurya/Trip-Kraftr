@@ -4,6 +4,7 @@ const BASE_URL = import.meta.env.VITE_BACKEND_URL+"/api/v1"
 export const regionEndpoints  = {
     ADD_REGION : BASE_URL + '/add-region',
     GET_REGIONS : BASE_URL + '/get-regions',
+    GET_REGIONS_FOR_ORG : BASE_URL + '/get-regions-for-org',  // This is for suggestion 
     GET_REGION_BY_ID : BASE_URL + '/get-region-by-id',
     UPDATE_REGION_BY_ID : BASE_URL + '/update-region-by-id',
     DELETE_REGION_BY_ID : BASE_URL + '/delete-region-by-id',
