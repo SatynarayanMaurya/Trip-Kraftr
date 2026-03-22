@@ -102,6 +102,26 @@ export const getRegionForOrg = async(req,res)=>{  // This is for region suggesti
     }
 }
 
+export const getCountryForOrg = async (req, res) => {   // This is for country suggestions
+    try {
+      const countries = await Region.distinct("country", {
+        org_id: req.user.org_id
+      });
+  
+      return res.status(200).json({
+        success: true,
+        count: countries.length,
+        countries
+      });
+  
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: error?.message || "Internal Server Error"
+      });
+    }
+  };
+
 export const getRegionById = async (req, res) => {
     try {
         const { regionId } = req.params

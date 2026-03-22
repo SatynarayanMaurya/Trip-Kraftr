@@ -1,7 +1,7 @@
 
 import { apiConnector } from '../services/apiConnector'
 import { useDispatch, useSelector } from 'react-redux'
-import { setAllRegionsForSuggestions, setLoading } from '../redux/slices/userSlice'
+import { setAllCountryForSuggestions, setAllRegionsForSuggestions, setLoading } from '../redux/slices/userSlice'
 import { regionEndpoints, regionEndPointsSuperAdmin } from '../services/Apis/regionApis'
 import { addNewMasterRegion, addNewRegion, deleteRegion, setAllRegions, setMasterRegionsByPage } from '../redux/slices/regionSlice'
 
@@ -54,6 +54,19 @@ export const useRegionHooks = () => {
       dispatch(setLoading(true));
       const response = await apiConnector("GET", regionEndpoints.GET_REGIONS_FOR_ORG)
       dispatch(setAllRegionsForSuggestions(response?.data?.allRegions))
+      return response;
+    } catch (error) {
+      throw error;
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }
+
+  const getCountryForOrg = async () => { // For all country for suggestions
+    try {
+      dispatch(setLoading(true));
+      const response = await apiConnector("GET", regionEndpoints.GET_COUNTRY_FOR_ORG)
+      dispatch(setAllCountryForSuggestions(response?.data?.countries))
       return response;
     } catch (error) {
       throw error;
@@ -181,6 +194,7 @@ export const useRegionHooks = () => {
     getRegionById,
     updateRegionById,
     deleteRegionById ,
-    getRegionsForOrg
+    getRegionsForOrg,
+    getCountryForOrg
   };
 };

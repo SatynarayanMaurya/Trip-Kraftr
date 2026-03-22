@@ -208,17 +208,6 @@ export default function ViewSubRegion() {
                         </div>
                     </div>
 
-                    {/* ID info card */}
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-                        <h2 className="text-sm font-bold text-gray-700 mb-4 flex items-center gap-2">
-                            <span className="w-1 h-4 bg-gray-200 rounded-full inline-block" />
-                            System IDs
-                        </h2>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <IdField label="Sub-Region ID" value={data?._id} />
-                            <IdField label="Organisation ID" value={data?.org_id} />
-                        </div>
-                    </div>
 
                 </div>
 
@@ -306,15 +295,6 @@ export default function ViewSubRegion() {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                 </svg>
                                 Edit this Sub-Region
-                            </button>
-                            <button
-                                onClick={() => navigate(-1)}
-                                className="cursor-pointer w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-600 text-sm font-semibold hover:bg-gray-100 transition-colors"
-                            >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                                </svg>
-                                Back to All Sub-Regions
                             </button>
                         </div>
                     </div>

@@ -76,16 +76,24 @@ export const useCommonHooks = () => {
             ),
         300 
     )
-    // ---------- Region Search for org ( Actually for adding sub region we need region for suggestion ) ----------
+    // ---------- Subregion Search for org ( ) ----------
     const searchSubRegionForOrg = debounceSearch(
         "searchSubRegionForOrg",
-        (searchTerm,filter) =>
-            apiConnector(
-                "GET",
-                `${subRegionEndpoints.SEARCH_SUB_REGIONS}?search=${encodeURIComponent(searchTerm)}&filter=${encodeURIComponent(filter)}`
-            ),
-        300 
-    )
+        (searchTerm,filter,regionId,pageLimit) => {
+          const params = new URLSearchParams();
+      
+          if (searchTerm) params.append("search", searchTerm);
+          if (filter) params.append("filter", filter);
+          if (regionId) params.append("regionId", regionId);
+          if (pageLimit) params.append("pageLimit", pageLimit);
+      
+          return apiConnector(
+            "GET",
+            `${subRegionEndpoints.SEARCH_SUB_REGIONS}?${params.toString()}`
+          );
+        },
+        300
+      );
 
     // ---------- Search Vehicle with filter like search sort type and regionId ----------
     const searchVehicles = debounceSearch(

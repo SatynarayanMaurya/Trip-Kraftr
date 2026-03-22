@@ -182,7 +182,7 @@ export default function ViewRegion() {
                 {meta?.is_active ? "● Active" : "● Inactive"}
               </span>
             </div>
-            <InfoRow label="Master Region ID" value={meta?._id} mono />
+            {/* <InfoRow label="Master Region ID" value={meta?._id} mono /> */}
           </div>
         </div>
 
@@ -287,10 +287,6 @@ export default function ViewRegion() {
             <InfoRow label="Created At" value={formatDate(region?.createdAt)} />
             <InfoRow label="Updated At" value={formatDate(region?.updatedAt)} />
             <InfoRow label="Updated By" value={region?.updatedBy?.name} mono />
-            <InfoRow label="Organisation ID" value={region?.org_id} mono />
-          </div>
-          <div className="px-6 pb-5 grid grid-cols-2 md:grid-cols-4 gap-5">
-            <InfoRow label="Region ID" value={region?._id} mono />
           </div>
         </div>
 

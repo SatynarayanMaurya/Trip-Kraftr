@@ -8,6 +8,7 @@ import { useRegionHooks } from '../hooks/useRegionHooks'
 import { toast } from 'react-toastify'
 
 import RegionsSkeleton from '../components/Regions/RegionsSkeleton'
+import RegionDropDown from '../components/Common/RegionDropDown'
 
 
 const placeholderImages = [
@@ -16,7 +17,7 @@ const placeholderImages = [
   'https://custom-images.strikinglycdn.com/res/hrscywv4p/image/upload/c_limit,fl_lossy,h_9000,w_1200,f_auto,q_auto/1896345/628734_116385.jpeg',
 ]
 
-function RegionCard({ region, index, onEdit }) {
+function RegionCard({ region, index }) {
   const navigate = useNavigate()
   const imgSrc = region?.region_images?.[0] || placeholderImages?.[index % placeholderImages?.length]
 
@@ -91,20 +92,6 @@ function RegionCard({ region, index, onEdit }) {
             </span>
           </div>
         </div>
-
-        {/* Description */}
-        {/* <p style={{
-          fontSize: '12.5px',
-          color: '#64748b',
-          lineHeight: '1.55',
-          margin: '10px 0',
-          display: '-webkit-box',
-          WebkitLineClamp: 2,
-          WebkitBoxOrient: 'vertical',
-          overflow: 'hidden',
-        }}>
-          {region?.description}
-        </p> */}
 
         {/* Margin badges */}
         <div style={{ display: 'flex', gap: '8px', marginBottom: '14px' }}>
@@ -182,9 +169,46 @@ function Regions() {
   const allRegions = useSelector((state) => state.region.allRegions);
   const isProduction = useSelector((state) => state.user.isProduction);
   const loading = useSelector((state)=>state.user.loading)
+  const [allCountry, setAllCountry] = useState(['All Country'])
+  const [country, setCountry] = useState('All Country')
+  const allCountryForSuggestions = useSelector((state)=>state.user.allCountryForSuggestions)
   
-  const { getRegions } = useRegionHooks();
+  const { getRegions,getCountryForOrg } = useRegionHooks();
   const [regionsFetched, setRegionsFetched] = useState(false);
+
+  useEffect(() => {
+    if (!allCountryForSuggestions) return;
+  
+    const country = allCountryForSuggestions
+    setAllCountry(['All Country', ...country]);
+  }, [allCountryForSuggestions]);
+
+  
+  const fetchCountryForSuggestion = async()=>{
+    try{
+      if(allCountryForSuggestions && allCountryForSuggestions?.length > 0) return 
+      // setLoading(true)
+      await getCountryForOrg()
+      // setLoading(false)
+    }
+    catch(error){
+      // setLoading(false)
+      if (!isProduction) {
+        console.log("========= ERROR DEBUG START =========");
+        console.log("Error:", error);
+        console.log("Response:", error?.response);
+        console.log("========= ERROR DEBUG END =========");
+      }
+      toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin")
+    }
+  }
+
+  useEffect(()=>{
+    if(allCountryForSuggestions && allCountryForSuggestions?.length > 0) return 
+    else{
+      fetchCountryForSuggestion()
+    }
+  },[])
   
   const fetchRegions = useCallback(async () => {
     try {
@@ -217,13 +241,14 @@ function Regions() {
     fetchRegions();
   }, [fetchRegions]);
 
-  const filtered = allRegions?.filter(r =>
-    r?.masterRegionId?.name?.toLowerCase()?.includes(search?.toLowerCase())
-  )
+  const filtered = (!search && country === 'All Country')
+  ? allRegions
+  : allRegions?.filter(r =>
+      r?.masterRegionId?.name?.toLowerCase()?.startsWith(search?.toLowerCase()) &&
+      (country === 'All Country' ||
+        r?.masterRegionId?.country?.toLowerCase()?.includes(country?.toLowerCase()))
+    );
 
-  const handleEdit = (region) => {
-    // navigate(`edit-region/${region?._id}`)
-  }
 
   return (
     <div style={{ minHeight: '100vh', background: '#0f1623', padding: '32px', fontFamily: "'Segoe UI', sans-serif" }}>
@@ -288,33 +313,38 @@ function Regions() {
       </div>
 
       {/* Search */}
-      <div style={{ position: 'relative', marginBottom: '24px', maxWidth: '480px' }}>
-        <svg
-          width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#475569" strokeWidth="2"
-          style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }}
-        >
-          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-        </svg>
-        <input
-          type="text"
-          placeholder="Search by region name..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          style={{
-            width: '100%',
-            padding: '11px 14px 11px 40px',
-            background: '#1e2535',
-            border: '1px solid rgba(255,255,255,0.08)',
-            borderRadius: '10px',
-            color: '#f1f5f9',
-            fontSize: '14px',
-            outline: 'none',
-            boxSizing: 'border-box',
-            transition: 'border-color 0.15s',
-          }}
-          onFocus={e => e.target.style.borderColor = 'rgba(234,179,8,0.4)'}
-          onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.08)'}
-        />
+      <div className='flex gap-4 items-center' style={{ position: 'relative', marginBottom: '24px', }}>
+        <div style={{width: '480px' }}>
+          <svg
+            width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#475569" strokeWidth="2"
+            style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }}
+          >
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input
+            type="text"
+            placeholder="Search by region name..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '11px 14px 11px 40px',
+              background: '#1e2535',
+              border: '1px solid rgba(255,255,255,0.08)',
+              borderRadius: '10px',
+              color: '#f1f5f9',
+              fontSize: '14px',
+              outline: 'none',
+              boxSizing: 'border-box',
+              transition: 'border-color 0.15s',
+            }}
+            onFocus={e => e.target.style.borderColor = 'rgba(234,179,8,0.4)'}
+            onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.08)'}
+          />
+        </div>
+        <div>
+          <RegionDropDown value={country} onChange={(val)=>setCountry(val)} options={allCountry}/>
+        </div>
       </div>
 
       {/* Showing count */}
@@ -332,7 +362,7 @@ function Regions() {
             gap: '20px',
           }}>
             {filtered?.map((region, idx) => (
-              <RegionCard key={region?._id} region={region} index={idx} onEdit={handleEdit} />
+              <RegionCard key={region?._id} region={region} index={idx} />
             ))}
           </div>
         ) : (

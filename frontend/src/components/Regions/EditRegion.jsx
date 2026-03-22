@@ -232,10 +232,6 @@ export default function EditRegion() {
                             <p className="text-xs text-gray-400 mb-1 font-medium uppercase tracking-wide">Country</p>
                             <p className="text-sm font-semibold text-gray-700">{regionMeta?.country || "—"}</p>
                         </div>
-                        <div>
-                            <p className="text-xs text-gray-400 mb-1 font-medium uppercase tracking-wide">Region ID</p>
-                            <p className="text-xs font-mono text-gray-500 truncate">{originalRegion?._id || "—"}</p>
-                        </div>
                     </div>
                 </div>
 

@@ -1,6 +1,6 @@
 import express from "express";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
-import { addMasterRegion, addRegion, addRegionImages, deleteRegionById, fetchRegionImages, getMasterRegions, getRegionById, getRegionForOrg, getRegions, searchMasterCountries, searchMasterRegions, searchMasterRegionsOnly, updateRegionById } from "../controllers/region.controller.js";
+import { addMasterRegion, addRegion, addRegionImages, deleteRegionById, fetchRegionImages, getCountryForOrg, getMasterRegions, getRegionById, getRegionForOrg, getRegions, searchMasterCountries, searchMasterRegions, searchMasterRegionsOnly, updateRegionById } from "../controllers/region.controller.js";
 import { roleMiddleware } from "../middlewares/role.middleware.js";
 const regionRouter = express.Router()
 
@@ -12,6 +12,8 @@ regionRouter.get("/get-region-by-id/:regionId",authMiddleware,roleMiddleware(["o
 regionRouter.put("/update-region-by-id/:regionId",authMiddleware,roleMiddleware(["org_admin"]),updateRegionById)
 regionRouter.delete("/delete-region-by-id/:regionId",authMiddleware,roleMiddleware(["org_admin"]),deleteRegionById)
 regionRouter.get("/search-master-regions",authMiddleware,searchMasterRegions)
+regionRouter.get("/get-country-for-org",authMiddleware,getCountryForOrg)  // For country suggestions
+
 
 regionRouter.get("/fetch-regions-images",authMiddleware,roleMiddleware(["org_admin",'super_admin']),fetchRegionImages)
 regionRouter.get("/search-master-countries",authMiddleware,roleMiddleware(["org_admin",'super_admin']),searchMasterCountries)

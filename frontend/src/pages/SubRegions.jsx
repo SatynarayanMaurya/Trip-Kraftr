@@ -6,6 +6,7 @@ import { useCommonHooks } from '../hooks/useCommonHooks'       // swap with real
 import { toast } from 'react-toastify'
 import { useSubRegionHooks } from '../hooks/useSubRegionHooks'
 import { clearSubRegions, setSubRegionPageLimit } from '../redux/slices/subRegionSlice'
+import RegionDropDown from '../components/Common/RegionDropDown'
 
 function formatDate(iso) {
   return new Date(iso).toLocaleDateString('en-IN', {
@@ -39,6 +40,7 @@ function SubRegionSkeleton() {
 function SubRegions() {
   const navigate = useNavigate()
   const dispatch = useDispatch()
+  const {getRegionsForOrg} = useRegionHooks()
 
   // ── state ──────────────────────────────────────────────────────────────────
   const [search, setSearch] = useState('')
@@ -51,6 +53,46 @@ function SubRegions() {
   const [loading, setLoading] = useState(false)
   const [searchedSubRegions, setSearchedSubRegions] = useState([])
   const [isSearching, setIsSearching] = useState(false)
+  const [allRegions,setAllRegions] = useState( [])
+  let allRegionsForSuggestions = useSelector((state)=>state.user.allRegionsForSuggestions)
+  const [region,setRegion]= useState('All Region')
+  
+  useEffect(() => {
+    if (!allRegionsForSuggestions) return;
+  
+    const regions = allRegionsForSuggestions
+      .flatMap((val) => val?.name || []) 
+      .filter(Boolean); 
+  
+    setAllRegions(['All Region', ...regions]);
+  }, [allRegionsForSuggestions]);
+
+  
+  const fetchRegionsForSuggestion = async()=>{
+    try{
+      if(allRegionsForSuggestions && allRegionsForSuggestions?.length > 0) return 
+      setLoading(true)
+      await getRegionsForOrg()
+      setLoading(false)
+    }
+    catch(error){
+      setLoading(false)
+      if (!isProduction) {
+        console.log("========= ERROR DEBUG START =========");
+        console.log("Error:", error);
+        console.log("Response:", error?.response);
+        console.log("========= ERROR DEBUG END =========");
+      }
+      toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin")
+    }
+  }
+
+  useEffect(()=>{
+    if(allRegionsForSuggestions && allRegionsForSuggestions?.length > 0) return 
+    else{
+      fetchRegionsForSuggestion()
+    }
+  },[])
 
 
   const isProduction = useSelector((state) => state.user.isProduction)
@@ -75,7 +117,8 @@ function SubRegions() {
     try {
       setLoading(true)
       setIsSearching(true)
-      const res = await searchSubRegionForOrg(search, filter)     // ← replace with searchSubRegion
+      const regionId = allRegionsForSuggestions?.find((val)=>val?.name===region)?._id  
+      const res = await searchSubRegionForOrg(search, filter,regionId,pageLimit)     // ← replace with searchSubRegion
       setSearchedSubRegions(res?.data?.searchedSubRegions || [])
     } catch (error) {
       if (!isProduction) console.log(error)
@@ -87,13 +130,13 @@ function SubRegions() {
 
   // ── effects ────────────────────────────────────────────────────────────────
   useEffect(() => {
-    if (search.trim() !== '' || filter !== 'All') {
+    if (search.trim() !== '' || filter !== 'All' || region !== 'All Region') {
       searchSubRegions()
     } else {
       setIsSearching(false)
       setSearchedSubRegions([])
     }
-  }, [search, filter])
+  }, [search, filter,region,pageLimit])
 
   useEffect(() => {
     if (!currentPageSubRegions?.[currentPage]) {
@@ -153,13 +196,15 @@ function SubRegions() {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by sub-region or region..."
+            placeholder="Search by sub-region..."
             className="bg-transparent flex-1 outline-none text-gray-700 text-sm placeholder-gray-400"
           />
           {search && (
             <button onClick={() => setSearch('')} className="text-gray-400 hover:text-gray-600 text-xs font-bold">✕</button>
           )}
         </div>
+
+        <RegionDropDown value={region} onChange={(value)=>setRegion(value)} options={allRegions}/>
 
         <div className="flex bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
           {['All', 'Active', 'Inactive'].map((f) => (
@@ -318,7 +363,6 @@ function SubRegions() {
           <span>Rows per page</span>
           <select
             value={pageLimit}
-            disabled={isSearching}
             onChange={(e) => changePageLimit(e)}
             className="bg-gray-50 border border-gray-200 text-gray-700 text-sm px-3 py-2 rounded-lg outline-none focus:border-pink-400 cursor-pointer"
           >

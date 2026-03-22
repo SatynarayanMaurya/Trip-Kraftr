@@ -262,7 +262,8 @@ export const deleteSubRegionById = async (req, res) => {
 
 export const searchSubRegions = async (req, res) => {
   try {
-    const { search, filter } = req.query;
+    const { search, filter,regionId } = req.query;
+    console.log("RegionId : ",search, filter,regionId )
 
     if (!req.user.org_id) {
       return res.status(401).json({
@@ -271,9 +272,14 @@ export const searchSubRegions = async (req, res) => {
       });
     }
 
+    
     const query = {
       org_id: req.user.org_id // filter by org first for performance
     };
+    if (regionId) {
+      const regionObjId = new mongoose.Types.ObjectId(regionId);
+      query.regionId = regionObjId;
+    }
 
     // Prefix search (starts with search term)
     if (search) {

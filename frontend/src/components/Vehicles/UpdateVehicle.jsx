@@ -8,7 +8,7 @@ import { useVehicleHooks } from '../../hooks/useVehicleHooks'
 
 const VEHICLE_TYPES = [
   'Sedan', 'SUV', 'Hatchback', 'Van', 'Minibus', 'Bus',
-  'Luxury Car', 'Convertible', 'Pickup Truck', 'Jeep',
+    'Coach', 'Luxury Car',"Tempo Traveller",
 ]
 
 export default function UpdateVehicle() {

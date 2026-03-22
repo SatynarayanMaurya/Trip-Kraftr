@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  Car, MapPin, Map, LayoutGrid, Plus, Search, SlidersHorizontal,
-  Pencil, Trash2, ChevronDown, X, AlertTriangle
+  Car,  Map, LayoutGrid, Plus, Search, SlidersHorizontal,
+   ChevronDown, X
 } from 'lucide-react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useVehicleHooks } from '../hooks/useVehicleHooks'
@@ -14,54 +14,6 @@ import { useCommonHooks } from '../hooks/useCommonHooks'
 import VehicleCard from '../components/Vehicles/VehicleCard'
 import DeleteModal from '../components/DeleteModals/DeleteModal'
 
-// ── Dummy data ────────────────────────────────────────────────────────────
-const DUMMY_VEHICLES = [
-  {
-    _id: '69bce880b86f87342219122e',
-    regionId: { _id: '69b631aa516e096539851340', name: 'Explore Sikkim', country: 'India' },
-    pricePerDay: 4000, transferPrice: 5000,
-    contactNo: '8765432109', vehicleImageUrl: '',
-    vehicleModel: 'Toyota Camry', vehicleType: 'SUV',
-    vendorName: 'Swift Travels', is_active: true,
-    createdAt: '2026-03-20T06:26:08.039Z',
-  },
-  {
-    _id: '69bce880b86f87342219122f',
-    regionId: { _id: '69b631aa516e096539851341', name: 'Explore Sikkim', country: 'India' },
-    pricePerDay: 4000, transferPrice: 5000,
-    contactNo: '9876543210', vehicleImageUrl: '',
-    vehicleModel: 'Toyota Camry', vehicleType: 'SUV',
-    vendorName: 'Raju Travels', is_active: true,
-    createdAt: '2026-03-18T10:00:00.000Z',
-  },
-  {
-    _id: '69bce880b86f87342219123a',
-    regionId: { _id: '69b631aa516e096539851342', name: 'Explore Sikkim', country: 'India' },
-    pricePerDay: 4000, transferPrice: 5000,
-    contactNo: '9123456780', vehicleImageUrl: '',
-    vehicleModel: 'Toyota Camry', vehicleType: 'SUV',
-    vendorName: 'Mountain Cabs', is_active: true,
-    createdAt: '2026-03-15T08:00:00.000Z',
-  },
-  {
-    _id: '69bce880b86f87342219123b',
-    regionId: { _id: '69b631aa516e096539851343', name: 'Explore Sikkim', country: 'India' },
-    pricePerDay: 4000, transferPrice: 5000,
-    contactNo: '9000011111', vehicleImageUrl: '',
-    vehicleModel: 'Toyota Camry', vehicleType: 'SUV',
-    vendorName: 'Hill Riders', is_active: false,
-    createdAt: '2026-03-10T12:00:00.000Z',
-  },
-  {
-    _id: '69bce880b86f87342219123c',
-    regionId: { _id: '69b631aa516e096539851344', name: 'Europe Tour', country: 'France' },
-    pricePerDay: 8000, transferPrice: 9000,
-    contactNo: '9111122223', vehicleImageUrl: '',
-    vehicleModel: 'Mercedes E-Class', vehicleType: 'Luxury Car',
-    vendorName: 'Luxe Rides', is_active: true,
-    createdAt: '2026-03-05T09:00:00.000Z',
-  },
-]
 
 
 // const ALL_TYPES = ['All Type', 'Sedan', 'SUV', 'Van', 'Hatchback', 'Minibus', 'Coach', 'Luxury Car']
@@ -185,8 +137,8 @@ export default function Vehicle() {
     if (!allRegionsForSuggestions) return;
   
     const regions = allRegionsForSuggestions
-      .flatMap((val) => val?.name || []) // flatten arrays safely
-      .filter(Boolean); // remove undefined/null
+      .flatMap((val) => val?.name || []) 
+      .filter(Boolean); 
   
     setAllRegions(['All Region', ...regions]);
   }, [allRegionsForSuggestions]);
