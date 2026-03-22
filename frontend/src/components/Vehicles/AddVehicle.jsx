@@ -22,6 +22,7 @@ export default function AddVehicle() {
         contactNo: '',
         vehicleType: '',
         regionId: '',
+        capacity:'',
         regionName: '',
         vehicleModel: '',
         pricePerDay: '',
@@ -110,13 +111,13 @@ export default function AddVehicle() {
         if (!form.regionId)               e.region        = 'Please select a region.'
         if (!form.vehicleModel.trim())    e.vehicleModel  = 'Vehicle model is required.'
         if (form.pricePerDay === '')      e.pricePerDay   = 'Price per day is required.'
+        if (form.capacity === '')      e.capacity   = 'Capacity is required'
         else if (Number(form.pricePerDay) < 0) e.pricePerDay = 'Price cannot be negative.'
         if (!sameAsPrice) {
             if (form.transferPrice === '') e.transferPrice = 'Transfer price is required.'
             else if (Number(form.transferPrice) < 0) e.transferPrice = 'Price cannot be negative.'
         }
-        if (!form.vehicleImageUrl.trim()) e.vehicleImageUrl = 'Image URL is required.'
-        else if (!/^https?:\/\/.+/.test(form.vehicleImageUrl.trim())) e.vehicleImageUrl = 'Enter a valid URL starting with http(s).'
+        if (!/^https?:\/\/.+/.test(form.vehicleImageUrl.trim())) e.vehicleImageUrl = 'Enter a valid URL starting with http(s).'
         return e
     }
 
@@ -136,6 +137,7 @@ export default function AddVehicle() {
                 pricePerDay:     form.pricePerDay,
                 transferPrice:   sameAsPrice ? form.pricePerDay : form.transferPrice,
                 vehicleImageUrl: form.vehicleImageUrl,
+                capacity: form.capacity,
             }
             setSubmitLoading(true)
             const response = await addVehicle(payload)
@@ -418,6 +420,23 @@ export default function AddVehicle() {
                         </label>
                     </div>
 
+                     {/* capacity */}
+                     <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                            Capacity <span className="text-pink-500">*</span>
+                        </label>
+                        <input
+                            type="number"
+                            min="0"
+                            value={form.capacity}
+                            onChange={(e) => { setForm((f) => ({ ...f, capacity: e.target.value })); clearError('capacity') }}
+                            placeholder="0"
+                            className={inputBase('capacity')}
+                        />
+                        {errors.capacity && <p className="text-red-500 text-xs mt-1">{errors.capacity}</p>}
+                    </div>
+
+
                     {/* Vehicle Image URL */}
                     <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-1.5">
@@ -436,7 +455,7 @@ export default function AddVehicle() {
                                 <img
                                     src={form.vehicleImageUrl}
                                     alt="Vehicle preview"
-                                    className="w-full h-full object-cover"
+                                    className="w-full h-full object-contain"
                                     onError={(e) => { e.target.style.display = 'none' }}
                                     onLoad={(e) => { e.target.style.display = 'block' }}
                                 />

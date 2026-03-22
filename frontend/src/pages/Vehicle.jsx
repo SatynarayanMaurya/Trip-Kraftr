@@ -11,6 +11,8 @@ import VehicleSkeletonGrid from '../components/Vehicles/VehicleSkeleton'
 import { clearVehicles, setVehiclePageLimit } from '../redux/slices/vehicleSlice'
 import { useRegionHooks } from '../hooks/useRegionHooks'
 import { useCommonHooks } from '../hooks/useCommonHooks'
+import VehicleCard from '../components/Vehicles/VehicleCard'
+import DeleteModal from '../components/DeleteModals/DeleteModal'
 
 // ── Dummy data ────────────────────────────────────────────────────────────
 const DUMMY_VEHICLES = [
@@ -151,151 +153,12 @@ function StatCard({ children }) {
 }
 
 // ── Vehicle Card ──────────────────────────────────────────────────────────
-function VehicleCard({ vehicle, onEdit, onDelete }) {
-  const [imgError, setImgError] = useState(false)
-  const [hovered, setHovered] = useState(false)
-
-  return (
-    <div
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      className="bg-white rounded-2xl overflow-hidden"
-      style={{
-        border: hovered ? '1.5px solid #C9CDD6' : '1.5px solid #E5E7EB',
-        boxShadow: hovered
-          ? '0 10px 32px rgba(24,48,92,0.14), 0 2px 8px rgba(0,0,0,0.06)'
-          : '0 2px 10px rgba(0,0,0,0.07)',
-        transform: hovered ? 'translateY(-3px)' : 'translateY(0)',
-        transition: 'all 0.22s ease',
-      }}
-    >
-      {/* Image area */}
-      <div className="relative bg-[#ECEEF2] h-[150px] overflow-hidden">
-        {vehicle?.vehicleImageUrl && !imgError ? (
-          <img
-            src={vehicle.vehicleImageUrl}
-            alt={vehicle?.vehicleModel}
-            className="w-full h-full object-cover"
-            style={{
-              transform: hovered ? 'scale(1.05)' : 'scale(1)',
-              transition: 'transform 0.35s ease',
-            }}
-            onError={() => setImgError(true)}
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <Car size={38} className="text-[#BDC2CE]" strokeWidth={1.4} />
-          </div>
-        )}
-
-        {/* Edit / Delete */}
-        <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5">
-          <button
-            onClick={() => onEdit?.(vehicle)}
-            title="Edit"
-            className="w-7 h-7 rounded-lg bg-white flex items-center justify-center"
-            style={{
-              border: '1.5px solid #F3C6E0',
-              boxShadow: '0 1px 4px rgba(0,0,0,0.10)',
-              transition: 'all 0.15s ease',
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.background = '#FFF0F7'
-              e.currentTarget.style.borderColor = '#E91E8C'
-              e.currentTarget.style.boxShadow = '0 2px 8px rgba(233,30,140,0.20)'
-              e.currentTarget.style.transform = 'scale(1.08)'
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.background = '#fff'
-              e.currentTarget.style.borderColor = '#F3C6E0'
-              e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.10)'
-              e.currentTarget.style.transform = 'scale(1)'
-            }}
-          >
-            <Pencil size={13} className="text-[#E91E8C]" strokeWidth={2} />
-          </button>
-          <button
-            onClick={() => onDelete?.(vehicle)}
-            title="Delete"
-            className="w-7 h-7 rounded-lg bg-white flex items-center justify-center"
-            style={{
-              border: '1.5px solid #FECACA',
-              boxShadow: '0 1px 4px rgba(0,0,0,0.10)',
-              transition: 'all 0.15s ease',
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.background = '#FFF5F5'
-              e.currentTarget.style.borderColor = '#EF4444'
-              e.currentTarget.style.boxShadow = '0 2px 8px rgba(239,68,68,0.20)'
-              e.currentTarget.style.transform = 'scale(1.08)'
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.background = '#fff'
-              e.currentTarget.style.borderColor = '#FECACA'
-              e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.10)'
-              e.currentTarget.style.transform = 'scale(1)'
-            }}
-          >
-            <Trash2 size={13} className="text-[#EF4444]" strokeWidth={2} />
-          </button>
-        </div>
-
-        {/* Inactive badge */}
-        {!vehicle?.is_active && (
-          <div className="absolute top-2.5 left-2.5">
-            <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-red-100 text-red-500 border border-red-200">
-              Inactive
-            </span>
-          </div>
-        )}
-      </div>
-
-      {/* Card body */}
-      <div className="px-4 pt-3 pb-4">
-
-        {/* Type + Model row */}
-        <div className="flex items-center justify-between mb-1.5">
-          <div className="flex items-center gap-1.5">
-            <Car size={15} className="text-[#E91E8C] shrink-0" strokeWidth={2} />
-            <span className="text-sm font-bold text-[#18305C]">{vehicle?.vehicleType ?? '—'}</span>
-          </div>
-          <span className="text-sm font-bold text-[#18305C]">{vehicle?.vehicleModel ?? '—'}</span>
-        </div>
-
-        {/* Region */}
-        <div className="flex items-center gap-1 mb-3">
-          <MapPin size={13} className="text-[#E91E8C] shrink-0" strokeWidth={2.5} fill="#E91E8C" />
-          <span className="text-sm font-bold text-[#E91E8C]">{vehicle?.regionId?.name ?? '—'}</span>
-        </div>
-
-        {/* Divider */}
-        <div className="border-t border-gray-100 mb-3" />
-
-        {/* Pricing */}
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-[11px] text-gray-400 font-semibold mb-0.5">Daily Rate</p>
-            <p className="text-sm font-bold text-[#18305C]">
-              ₹ {vehicle?.pricePerDay?.toLocaleString('en-IN') ?? '—'}
-            </p>
-          </div>
-          <div className="text-right">
-            <p className="text-[11px] text-gray-400 font-semibold mb-0.5">Transfer</p>
-            <p className="text-sm font-bold text-[#18305C]">
-              ₹ {vehicle?.transferPrice?.toLocaleString('en-IN') ?? '—'}
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
 
 // ── Main ──────────────────────────────────────────────────────────────────
 export default function Vehicle() {
   const navigate = useNavigate()
   const dispatch = useDispatch()
-  const { getVehicles } = useVehicleHooks();
+  const { getVehicles, deleteVehicleForOrg } = useVehicleHooks();
   const {getRegionsForOrg} = useRegionHooks()
   const {searchVehicles} = useCommonHooks()
 
@@ -313,6 +176,7 @@ export default function Vehicle() {
   const pagination = useSelector((state) => state.vehicle.paginationVehicles)
   const pageLimit = useSelector((state) => state.vehicle.vehiclesPageLimit)
   const stats = useSelector((state) => state.vehicle.statsVehicles)
+  const insights = useSelector((state)=>state.vehicle.insights)
   const [isSearching, setIsSearching] = useState(false)
   const [allRegions,setAllRegions] = useState( [])
   let allRegionsForSuggestions = useSelector((state)=>state.user.allRegionsForSuggestions)
@@ -326,23 +190,6 @@ export default function Vehicle() {
   
     setAllRegions(['All Region', ...regions]);
   }, [allRegionsForSuggestions]);
-
-  // ── Stats ────────────────────────────────────────────────────────────
-  const total = pagination.totalRecords
-
-  const regionCounts = DUMMY_VEHICLES.reduce((acc, v) => {
-    const r = v?.regionId?.name ?? 'Unknown'
-    acc[r] = (acc[r] || 0) + 1
-    return acc
-  }, {})
-  const topRegion = Object.entries(regionCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? '—'
-
-  const typeCounts = DUMMY_VEHICLES.reduce((acc, v) => {
-    const t = v?.vehicleType ?? 'Unknown'
-    acc[t] = (acc[t] || 0) + 1
-    return acc
-  }, {})
-  const popularType = Object.entries(typeCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? '—'
 
 
   const searchVehicle = async()=>{
@@ -379,17 +226,40 @@ export default function Vehicle() {
     }
     searchVehicle()
 
-  },[search,region,type,sort])
+  },[search,region,type,sort,pageLimit])
 
   const filtered = isSearching ? searchedVehicles : currentPageVehicle
-  const handleEdit = (v) => navigate(`update-vehicle/${v?._id}`, { state: { vehicle: v } })
   const handleDelete = (v) => setDeleteTarget(v)
-  const confirmDelete = () => { console.log('Delete:', deleteTarget?._id); setDeleteTarget(null) }
+  const confirmDelete =async () => { 
+    try{
+      setFetchLoading(true)
+      const response = await deleteVehicleForOrg (deleteTarget?._id,deleteTarget?.regionId?._id )
+      toast.success(response?.data?.message)
+      setDeleteTarget(null) 
+      setFetchLoading(false)
+    }
+    catch(error){
+      setFetchLoading(false)
+      setDeleteTarget(null) 
+      if (!isProduction) {
+        console.log("========= ERROR DEBUG START =========");
+        console.log("Error:", error);
+        console.log("Response:", error?.response);
+        console.log("========= ERROR DEBUG END =========");
+      }
+      toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin")
+    }
+
+
+
+
+   
+  }
 
   const fetchVehilces = async () => {
     try {
       setFetchLoading(true)
-      await getVehicles(currentPage, pageLimit)
+      const res = await getVehicles(currentPage, pageLimit)
       setFetchLoading(false)
     }
     catch (error) {
@@ -447,6 +317,13 @@ export default function Vehicle() {
     dispatch(setVehiclePageLimit(Number(val)))
 }
 
+const resetFilter = ()=>{
+  setSearch('')
+  setRegion('All Region')
+  setType('All Type')
+  setSort('Recently Added')
+}
+
   return (
     <div className="min-h-screen bg-white font-sans" style={{ padding: '28px 32px' }}>
 
@@ -494,7 +371,7 @@ export default function Vehicle() {
           </div>
           <div>
             <p className="text-[10px] font-bold tracking-[0.14em] uppercase text-gray-400 mb-1.5">Total Vehicles</p>
-            <p className="text-[32px] font-bold text-[#18305C] leading-none">{total}</p>
+            <p className="text-[32px] font-bold text-[#18305C] leading-none">{pagination?.totalRecords||0}</p>
           </div>
         </StatCard>
 
@@ -504,11 +381,9 @@ export default function Vehicle() {
           </div>
           <div className="min-w-0">
             <p className="text-[10px] font-bold tracking-[0.14em] uppercase text-gray-400 mb-1.5">Top Region</p>
-            <p className="text-base font-bold text-[#18305C] truncate">{topRegion}</p>
+            <p className="text-base font-bold text-[#18305C] truncate">{insights?.topRegion?.name || "N/A"}</p>
             <div className="flex flex-wrap gap-x-3 mt-1.5">
-              {Object.entries(regionCounts).slice(0, 3).map(([r, c]) => (
-                <span key={r} className="text-[11px] text-gray-400 font-medium">{r.split(' ').pop()}: {c}</span>
-              ))}
+                <span className="text-[11px] text-gray-400 font-medium">{insights?.topRegion?.name || "N/A"}: {insights?.topRegion?.totalVehicles || "N/A"}</span>
             </div>
           </div>
         </StatCard>
@@ -519,11 +394,9 @@ export default function Vehicle() {
           </div>
           <div className="min-w-0">
             <p className="text-[10px] font-bold tracking-[0.14em] uppercase text-gray-400 mb-1.5">Popular Type</p>
-            <p className="text-base font-bold text-[#18305C] truncate">{popularType}</p>
+            <p className="text-base font-bold text-[#18305C] truncate">{insights?.topVehicleType?.vehicleType||"N/A"}</p>
             <div className="flex flex-wrap gap-x-3 mt-1.5">
-              {Object.entries(typeCounts).slice(0, 3).map(([t, c]) => (
-                <span key={t} className="text-[11px] text-gray-400 font-medium">{t}: {c}</span>
-              ))}
+                <span  className="text-[11px] text-gray-400 font-medium">{insights?.topVehicleType?.vehicleType||"N/A"}: {insights?.topVehicleType?.totalVehicles||"N/A"}</span>
             </div>
           </div>
         </StatCard>
@@ -549,7 +422,7 @@ export default function Vehicle() {
             onChange={(e) => setSearch(e.target.value)}
             onFocus={() => setSearchFocused(true)}
             onBlur={() => setSearchFocused(false)}
-            placeholder="Search by vehicle model and type"
+            placeholder="Search by vehicle model"
             className="bg-transparent flex-1 outline-none text-sm text-[#18305C] placeholder-gray-400 font-medium"
           />
           {search && (
@@ -570,6 +443,7 @@ export default function Vehicle() {
 
           <button
             className="w-10 h-10 flex items-center justify-center bg-white rounded-xl shrink-0"
+            onClick={()=>resetFilter()}
             style={{
               border: '1.5px solid #E5E7EB',
               boxShadow: '0 1px 6px rgba(0,0,0,0.09)',
@@ -605,7 +479,7 @@ export default function Vehicle() {
                 <VehicleCard
                   key={v?._id}
                   vehicle={v}
-                  onEdit={handleEdit}
+                  // onEdit={handleEdit}
                   onDelete={handleDelete}
                 />
               ))}
@@ -616,7 +490,7 @@ export default function Vehicle() {
       {filtered?.length > 0 && (
         <p className="text-xs text-gray-400 mt-5 font-medium">
           Showing <span className="text-[#18305C] font-bold">{filtered.length}</span> of{' '}
-          <span className="text-[#18305C] font-bold">{total}</span> vehicles
+          <span className="text-[#18305C] font-bold">{pagination?.totalRecords}</span> vehicles
         </p>
       )}
 
@@ -670,7 +544,6 @@ export default function Vehicle() {
 
           <select
             value={pageLimit}
-            disabled={isSearching}
             onChange={(e) => changePageLimit(Number(e.target.value))}
             className="bg-white border border-gray-200 text-[#18305C] text-sm px-3 py-2 rounded-lg outline-none focus:border-[#E91E8C] cursor-pointer"
             style={{
@@ -709,37 +582,7 @@ export default function Vehicle() {
 
       {/* ── Delete Modal ────────────────────────────────────────────────── */}
       {deleteTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm px-4">
-          <div
-            className="bg-white rounded-2xl p-6 w-full max-w-sm"
-            style={{ border: '1.5px solid #E5E7EB', boxShadow: '0 12px 40px rgba(0,0,0,0.18)' }}
-          >
-            <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
-              <AlertTriangle size={22} className="text-red-500" strokeWidth={2} />
-            </div>
-            <h3 className="text-center font-bold text-lg text-[#18305C] mb-1">Delete Vehicle?</h3>
-            <p className="text-center text-sm text-gray-500 mb-1">
-              <span className="font-bold text-[#18305C]">{deleteTarget?.vehicleModel}</span>
-            </p>
-            <p className="text-center text-xs text-gray-400 mb-6">This action cannot be undone.</p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setDeleteTarget(null)}
-                className="flex-1 py-2.5 rounded-xl text-sm font-bold text-[#18305C] transition-colors hover:bg-gray-50"
-                style={{ border: '1.5px solid #E5E7EB' }}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmDelete}
-                className="flex-1 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-bold transition-colors"
-                style={{ boxShadow: '0 2px 8px rgba(239,68,68,0.25)' }}
-              >
-                Yes, Delete
-              </button>
-            </div>
-          </div>
-        </div>
+        <DeleteModal onClose={()=>setDeleteTarget(null)} onDelete={confirmDelete} itemName = {deleteTarget?.vehicleModel} confirmText =  {deleteTarget?.vehicleModel}/>
       )}
     </div>
   )

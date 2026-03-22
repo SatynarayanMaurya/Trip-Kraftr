@@ -19,6 +19,11 @@ const vehicleSchema = new mongoose.Schema({
         type:Number,
         required:true
     },
+    capacity:{
+        type:Number,
+        required:true,
+        default:0
+    },
     transferPrice:{
         type:Number,
     },

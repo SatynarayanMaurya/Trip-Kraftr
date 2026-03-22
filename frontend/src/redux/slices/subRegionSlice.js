@@ -129,6 +129,7 @@ export const subRegionSlice = createSlice({
               }
             }
         },
+        
         deleteSubRegion: (state, action) => {
             const subRegionId = action.payload;
             const limit = state.paginationSubRegions?.limit || 5;
