@@ -262,9 +262,8 @@ export const deleteSubRegionById = async (req, res) => {
 
 export const searchSubRegions = async (req, res) => {
   try {
-    const { search, filter,regionId } = req.query;
-    console.log("RegionId : ",search, filter,regionId )
-
+    const { search, filter,regionId,pageLimit=10 } = req.query;
+    console.log("Region id : ",regionId)
     if (!req.user.org_id) {
       return res.status(401).json({
         success: false,
@@ -294,7 +293,7 @@ export const searchSubRegions = async (req, res) => {
     const searchedSubRegions = await SubRegion
       .find(query)
       .sort({ createdAt: -1 })
-      .limit(5).populate({path:"regionId",select:"_id name country is_active"})
+      .limit(pageLimit).populate({path:"regionId",select:"_id name country is_active"})
 
     return res.status(200).json({
       success: true,
@@ -350,3 +349,4 @@ export const searchRegionForOrganization = async(req,res)=>{   // For adding the
     }
 
 }
+

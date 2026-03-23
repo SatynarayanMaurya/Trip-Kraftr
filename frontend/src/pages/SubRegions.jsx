@@ -67,7 +67,6 @@ function SubRegions() {
     setAllRegions(['All Region', ...regions]);
   }, [allRegionsForSuggestions]);
 
-  
   const fetchRegionsForSuggestion = async()=>{
     try{
       if(allRegionsForSuggestions && allRegionsForSuggestions?.length > 0) return 

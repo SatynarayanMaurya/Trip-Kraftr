@@ -5,6 +5,7 @@ import { regionEndpoints } from "../services/Apis/regionApis"
 import { setLoading } from "../redux/slices/userSlice"
 import { subRegionEndpoints } from "../services/Apis/subRegionApis"
 import { vehicleEndpoinsts } from "../services/Apis/vehicleApis"
+import { hotelEndpoinsts } from "../services/Apis/hotelApis"
 
 export const useCommonHooks = () => {
     const dispatch = useDispatch()
@@ -79,7 +80,7 @@ export const useCommonHooks = () => {
     // ---------- Subregion Search for org ( ) ----------
     const searchSubRegionForOrg = debounceSearch(
         "searchSubRegionForOrg",
-        (searchTerm,filter,regionId,pageLimit) => {
+        (searchTerm,filter,regionId,pageLimit=10) => {
           const params = new URLSearchParams();
       
           if (searchTerm) params.append("search", searchTerm);
@@ -115,6 +116,26 @@ export const useCommonHooks = () => {
         300
       );
 
+    // ---------- Search Hotel with filter like search sort type and regionId ----------
+    const searchHotels = debounceSearch(
+        "searchHotels",
+        (search, regionId,category,subRegionId,pageLimit) => {
+          const params = new URLSearchParams();
+      
+          if (search) params.append("search", search);
+          if (category) params.append("category", category);
+          if (regionId) params.append("regionId", regionId);
+          if (subRegionId) params.append("subRegionId", subRegionId);
+          if (pageLimit) params.append("pageLimit", pageLimit);
+      
+          return apiConnector(
+            "GET",
+            `${hotelEndpoinsts.SEARCH_HOTEL}?${params.toString()}`
+          );
+        },
+        300
+      );
+
 
 
     return {
@@ -124,6 +145,7 @@ export const useCommonHooks = () => {
         searchRegionForOrg,
         searchSubRegionForOrg,
         searchVehicles,
+        searchHotels
 
     }
 }
