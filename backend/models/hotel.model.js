@@ -56,7 +56,7 @@ const hotelSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
-    aminities: [{
+    amenities: [{
         type: String,
     }],
 

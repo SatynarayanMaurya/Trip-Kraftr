@@ -15,8 +15,11 @@ export const addHotel = async (req, res) => {
             address,
             googleRating,
             regionId,
-            subRegionId
+            subRegionId,
+            amenities
         } = req.body;
+
+        const amenitiesArray = amenities ? JSON.parse(amenities) : [];
 
         // ✅ Basic validation
         if (!hotelName?.trim() || !contact || !regionId || !category) {
@@ -66,6 +69,7 @@ export const addHotel = async (req, res) => {
         // ✅ Build data object cleanly
         const data = {
             hotelName: hotelName.trim(),
+            amenities: amenitiesArray,
             hotelName_lower: hotelName.trim().toLowerCase(),
             contact,
             category,
@@ -174,11 +178,57 @@ export const getHotels = async (req, res) => {
     }
 }
 
+export const getHotelById = async (req, res) => {
+    try {
+        const { hotelId } = req.params;
+
+        if(!hotelId){
+            return res.status(400).json({
+                success:false,
+                message:"Hotel Id not found"
+            })
+        }
+        // Validate hotelId as a proper MongoDB ObjectId
+        if (!mongoose.Types.ObjectId.isValid(hotelId)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid Hotel ID"
+            });
+        }
+
+        // Fetch the hotel (org_id is already validated in middleware)
+        const foundHotel = await Hotel
+            .findOne({ org_id: req.user.org_id, _id: hotelId })
+            .populate({ path: "regionId", select: "_id name country" })
+            .populate({ path: "subRegionId", select: "_id name" });
+
+        if (!foundHotel) {
+            return res.status(404).json({
+                success: false,
+                message: "Hotel not found"
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Hotel found",
+            data: foundHotel
+        });
+
+    } catch (error) {
+        console.error("Error fetching hotel:", error);
+        return res.status(500).json({
+            success: false,
+            message: error?.message || "Internal Server Error"
+        });
+    }
+};
+
 
 // Search Hotels for org
 export const searchHotels = async (req, res) => {
     try {
-        const { search, category, regionId,subRegionId, pageLimit } = req.query;
+        const { search, category, regionId, subRegionId, pageLimit } = req.query;
         const query = {
             org_id: req.user.org_id
         };
@@ -192,7 +242,7 @@ export const searchHotels = async (req, res) => {
         if (subRegionId) {
             query.subRegionId = new mongoose.Types.ObjectId(subRegionId)
         }
-        if (category!=='All') {
+        if (category !== 'All') {
             query.category = category
         }
 

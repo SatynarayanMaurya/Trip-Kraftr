@@ -3,16 +3,38 @@ import { useNavigate } from 'react-router-dom'
 import {
   ArrowLeft, ChevronDown, Phone, Mail, MapPin,
   Star, Upload, X, Save, XCircle,
+  Wifi, Waves, ParkingCircle, Utensils, Dumbbell, Wind,
+  Tv, Coffee, ShowerHead, Car, Shirt, Baby,
+  Flame, Shield, Accessibility, BedDouble,
 } from 'lucide-react'
-import { useCommonHooks } from '../../hooks/useCommonHooks'   // swap path if needed
+import { useCommonHooks } from '../../hooks/useCommonHooks'
 import { useSelector } from 'react-redux'
 import { toast } from 'react-toastify'
 import { useRegionHooks } from '../../hooks/useRegionHooks'
 import { useHotelHooks } from '../../hooks/useHotelHooks'
 
 const CATEGORIES = ['Budget', 'Premium', 'Luxury']
-
 const MAX_IMAGES = 3
+
+// ── Amenities master list ─────────────────────────────────────────────────
+const AMENITIES_LIST = [
+  { key: 'wifi', label: 'Free Wi-Fi', },
+  { key: 'pool', label: 'Swimming Pool', },
+  { key: 'parking', label: 'Free Parking', },
+  { key: 'restaurant', label: 'Restaurant', },
+  { key: 'gym', label: 'Fitness Center', },
+  { key: 'ac', label: 'Air Conditioning', },
+  { key: 'tv', label: 'Smart TV', },
+  { key: 'breakfast', label: 'Breakfast', },
+  { key: 'hotwater', label: 'Hot Shower', },
+  { key: 'airportShuttle', label: 'Airport Shuttle', },
+  { key: 'laundry', label: 'Laundry', },
+  { key: 'kidsPlay', label: 'Kids Play Area', },
+  { key: 'bonfire', label: 'Bonfire', },
+  { key: 'security', label: '24/7 Security', },
+  { key: 'accessible', label: 'Accessible', },
+  { key: 'roomService', label: 'Room Service', Icon: BedDouble },
+]
 
 // ── Star display ──────────────────────────────────────────────────────────
 function StarDisplay({ value }) {
@@ -30,6 +52,54 @@ function StarDisplay({ value }) {
   )
 }
 
+function AmenityChip({ amenity, selected, onToggle }) {
+  const { label } = amenity
+  return (
+    <button
+      type="button"
+      onClick={() => onToggle(amenity.label)}
+      className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-semibold border transition-all select-none"
+      style={{
+        border: selected ? '1.5px solid #E91E8C' : '1.5px solid #E5E7EB',
+        background: selected ? '#FFF0F7' : '#FAFAFA',
+        color: selected ? '#E91E8C' : '#6B7280',
+        boxShadow: selected
+          ? '0 2px 8px rgba(233,30,140,0.13)'
+          : '0 1px 4px rgba(0,0,0,0.06)',
+        transform: selected ? 'translateY(-1px)' : 'translateY(0)',
+        transition: 'all 0.15s ease',
+      }}
+      onMouseEnter={e => {
+        if (!selected) {
+          e.currentTarget.style.borderColor = '#F9A8D4'
+          e.currentTarget.style.color = '#E91E8C'
+          e.currentTarget.style.background = '#FFF7FB'
+        }
+      }}
+      onMouseLeave={e => {
+        if (!selected) {
+          e.currentTarget.style.borderColor = '#E5E7EB'
+          e.currentTarget.style.color = '#6B7280'
+          e.currentTarget.style.background = '#FAFAFA'
+        }
+      }}
+    >
+      {/* <Icon size={15} strokeWidth={2} /> */}
+      {label}
+      {selected && (
+        <span
+          className="ml-0.5 w-4 h-4 rounded-full flex items-center justify-center"
+          style={{ background: '#E91E8C' }}
+        >
+          <svg width="8" height="8" viewBox="0 0 10 10" fill="none">
+            <path d="M2 5l2.5 2.5L8 2.5" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </span>
+      )}
+    </button>
+  )
+}
+
 export default function AddHotel() {
   const navigate = useNavigate()
   const [regionLoading, setRegionLoading] = useState(false)
@@ -38,9 +108,8 @@ export default function AddHotel() {
   const regionRef = useRef(null)
   const subRegionRef = useRef(null)
   const allRegionsForSuggestions = useSelector((state) => state.user.allRegionsForSuggestions)
-  // console.log("All Regions for dropdown : ",allRegionsForSuggestions)
   const isProduction = useSelector((state) => state?.user?.isProduction)
-  const { searchSubRegionForOrg } = useCommonHooks()   // swap with your real sub-region search hook
+  const { searchSubRegionForOrg } = useCommonHooks()
   const { getRegionsForOrg } = useRegionHooks()
   const { addHotel } = useHotelHooks()
 
@@ -50,28 +119,22 @@ export default function AddHotel() {
       setRegionLoading(true)
       await getRegionsForOrg()
       setRegionLoading(false)
-    }
-    catch (error) {
+    } catch (error) {
       getRegionsForOrg(false)
       if (!isProduction) {
-        console.log("========= ERROR DEBUG START =========");
-        console.log("Error:", error);
-        console.log("Response:", error?.response);
-        console.log("========= ERROR DEBUG END =========");
+        console.log('========= ERROR DEBUG START =========')
+        console.log('Error:', error)
+        console.log('Response:', error?.response)
+        console.log('========= ERROR DEBUG END =========')
       }
-      toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin")
+      toast.error(error?.response?.data?.message || error?.message || 'Error fetching regions')
     }
   }
 
-
   useEffect(() => {
     if (allRegionsForSuggestions && allRegionsForSuggestions?.length > 0) return
-    else {
-      fetchRegionsForSuggestion()
-    }
+    fetchRegionsForSuggestion()
   }, [])
-
-
 
   // ── Form state ────────────────────────────────────────────────────────
   const [form, setForm] = useState({
@@ -87,18 +150,25 @@ export default function AddHotel() {
     googleRating: '',
   })
 
+  // ── Amenities state — default: wifi, pool, parking selected ──────────
+  const [selectedAmenities, setSelectedAmenities] = useState([])
+
+  const toggleAmenity = (key) => {
+    setSelectedAmenities((prev) =>
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+    )
+  }
+
   const [categoryOpen, setCategoryOpen] = useState(false)
   const [regionOpen, setRegionOpen] = useState(false)
-  const [images, setImages] = useState([])   // [{ file, preview }]
+  const [images, setImages] = useState([])
   const [errors, setErrors] = useState({})
   const [submitLoading, setSubmitLoading] = useState(false)
 
-  // Sub-region search state
   const [subRegionInput, setSubRegionInput] = useState('')
   const [subRegionSuggestions, setSubRegionSuggestions] = useState([])
   const [subRegionLoading, setSubRegionLoading] = useState(false)
 
-  // ── Close dropdowns on outside click ─────────────────────────────────
   useEffect(() => {
     const h = (e) => {
       if (categoryRef.current && !categoryRef.current.contains(e.target)) setCategoryOpen(false)
@@ -109,12 +179,10 @@ export default function AddHotel() {
     return () => document.removeEventListener('mousedown', h)
   }, [])
 
-  // ── Cleanup object URLs on unmount ────────────────────────────────────
   useEffect(() => {
     return () => images.forEach((img) => URL.revokeObjectURL(img.preview))
   }, [images])
 
-  // ── Sub-region search on input change ─────────────────────────────────
   useEffect(() => {
     if (!form.regionId) { setSubRegionSuggestions([]); return }
     if (subRegionInput.trim().length < 1) { setSubRegionSuggestions([]); return }
@@ -140,7 +208,6 @@ export default function AddHotel() {
     fetchSubRegion()
   }, [subRegionInput])
 
-  // ── Helpers ───────────────────────────────────────────────────────────
   const clearError = (field) =>
     setErrors((p) => { const e = { ...p }; delete e[field]; return e })
 
@@ -165,7 +232,6 @@ export default function AddHotel() {
     clearError('subRegionId')
   }
 
-  // ── Image upload ──────────────────────────────────────────────────────
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files || [])
     const remaining = MAX_IMAGES - images.length
@@ -185,7 +251,6 @@ export default function AddHotel() {
     })
   }
 
-  // ── Validation ────────────────────────────────────────────────────────
   const validate = () => {
     const e = {}
     if (!form.hotelName.trim()) e.hotelName = 'Hotel name is required.'
@@ -201,62 +266,43 @@ export default function AddHotel() {
     return e
   }
 
-  // ── Submit ────────────────────────────────────────────────────────────
   const handleSubmit = async () => {
     const e = validate()
     setErrors(e)
     if (Object.keys(e).length !== 0) return
     try {
       setSubmitLoading(true)
-      const payload = {
-        hotelName: form.hotelName,
-        category: form.category,
-        regionId: form.regionId,
-        subRegionId: form.subRegionId || undefined,
-        contact: form.contact,
-        email: form.email || undefined,
-        address: form.address || undefined,
-        googleRating: form.googleRating !== '' ? Number(form.googleRating) : undefined,
-        images: images.map((i) => i.file),
-      }
-      const formData = new FormData();
+      const formData = new FormData()
 
-      formData.append("hotelName", form.hotelName);
-      formData.append("category", form.category);
-      formData.append("regionId", form.regionId);
+      formData.append('hotelName', form.hotelName)
+      formData.append('category', form.category)
+      formData.append('regionId', form.regionId)
+      if (form.subRegionId) formData.append('subRegionId', form.subRegionId)
+      formData.append('contact', form.contact)
+      if (form.email) formData.append('email', form.email)
+      if (form.address) formData.append('address', form.address)
+      if (form.googleRating !== '') formData.append('googleRating', Number(form.googleRating))
 
-      if (form.subRegionId) formData.append("subRegionId", form.subRegionId);
-      formData.append("contact", form.contact);
+      formData.append('amenities', JSON.stringify(selectedAmenities))
 
-      if (form.email) formData.append("email", form.email);
-      if (form.address) formData.append("address", form.address);
+      images.forEach((img) => formData.append('images', img.file))
 
-      if (form.googleRating !== '') {
-        formData.append("googleRating", Number(form.googleRating));
-      }
-
-      // ✅ Append multiple images
-      images.forEach((img) => {
-        formData.append("images", img.file);
-      });
       const response = await addHotel(formData)
       toast.success(response?.data?.message)
       navigate(-1)
-    }
-    catch (error) {
+    } catch (error) {
       if (!isProduction) {
-        console.log("========= ERROR DEBUG START =========");
-        console.log("Error:", error);
-        console.log("Response:", error?.response);
-        console.log("========= ERROR DEBUG END =========");
+        console.log('========= ERROR DEBUG START =========')
+        console.log('Error:', error)
+        console.log('Response:', error?.response)
+        console.log('========= ERROR DEBUG END =========')
       }
-      toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin")
+      toast.error(error?.response?.data?.message || error?.message || 'Error adding hotel')
     } finally {
       setSubmitLoading(false)
     }
   }
 
-  // ── Input class ───────────────────────────────────────────────────────
   const inputCls = (field) =>
     `w-full px-4 py-2.5 rounded-lg border text-sm text-[#18305C] outline-none transition-all bg-white placeholder-gray-400
     ${errors[field]
@@ -283,7 +329,10 @@ export default function AddHotel() {
       </div>
 
       {/* ── Form Card ───────────────────────────────────────────────────── */}
-      <div className="bg-white border border-gray-200 rounded-2xl shadow-[0_2px_12px_rgba(0,0,0,0.07)] p-6 md:p-8 max-w-4xl mx-auto">
+      <div
+        className="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 max-w-4xl mx-auto"
+        style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.07)' }}
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
 
           {/* Hotel Name */}
@@ -339,7 +388,7 @@ export default function AddHotel() {
             )}
           </div>
 
-          {/* Region — dropdown from list */}
+          {/* Region */}
           <div className="relative" ref={regionRef}>
             <label className="block text-sm font-semibold text-[#18305C] mb-1.5">
               Region <span className="text-[#E91E8C]">*</span>
@@ -364,7 +413,7 @@ export default function AddHotel() {
                 </span>
               </div>
               <div className="flex items-center gap-1.5 shrink-0 ml-2">
-                {form.regionId && form.regionName && (
+                {form.regionId && (
                   <span className="text-[11px] text-gray-400">
                     {allRegionsForSuggestions?.find((r) => r._id === form.regionId)?.country}
                   </span>
@@ -373,7 +422,6 @@ export default function AddHotel() {
               </div>
             </button>
             {errors.regionId && <p className="text-red-500 text-xs mt-1">{errors.regionId}</p>}
-
             {regionOpen && (
               <div className="absolute z-30 mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.12)] overflow-hidden">
                 <div className="max-h-52 overflow-y-auto">
@@ -385,9 +433,7 @@ export default function AddHotel() {
                         ${form.regionId === r._id ? 'bg-[#E91E8C] text-white font-semibold' : 'text-[#18305C] hover:bg-pink-50'}`}
                     >
                       <span>{r.name}</span>
-                      <span className={`text-xs ${form.regionId === r._id ? 'text-pink-100' : 'text-gray-400'}`}>
-                        {r.country}
-                      </span>
+                      <span className={`text-xs ${form.regionId === r._id ? 'text-pink-100' : 'text-gray-400'}`}>{r.country}</span>
                     </button>
                   ))}
                 </div>
@@ -395,7 +441,7 @@ export default function AddHotel() {
             )}
           </div>
 
-          {/* Sub-Region — searchable, disabled until region selected */}
+          {/* Sub-Region */}
           <div className="relative" ref={subRegionRef}>
             <label className="block text-sm font-semibold text-[#18305C] mb-1.5">
               Sub-Region
@@ -416,11 +462,10 @@ export default function AddHotel() {
                   ${!form.regionId
                     ? 'bg-gray-50 border-gray-200 cursor-not-allowed text-gray-400'
                     : form.subRegionId
-                      ? 'border-[#E91E8C] bg-pink-50/20 focus:border-[#E91E8C] focus:ring-2 focus:ring-pink-100 '
+                      ? 'border-[#E91E8C] bg-pink-50/20 focus:border-[#E91E8C] focus:ring-2 focus:ring-pink-100'
                       : 'border-gray-300 focus:border-[#E91E8C] focus:ring-2 focus:ring-pink-100 bg-white'
                   }`}
               />
-              {/* Right icon */}
               <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
                 {subRegionLoading ? (
                   <svg className="animate-spin h-4 w-4 text-[#E91E8C]" viewBox="0 0 24 24">
@@ -436,13 +481,9 @@ export default function AddHotel() {
                 ) : null}
               </div>
             </div>
-
-            {/* No results hint */}
             {!subRegionLoading && subRegionInput.trim().length >= 1 && subRegionSuggestions.length === 0 && !form.subRegionId && form.regionId && (
               <p className="text-xs text-gray-400 mt-1">No sub-regions found for "{subRegionInput}"</p>
             )}
-
-            {/* Suggestions */}
             {subRegionSuggestions.length > 0 && (
               <div className="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.12)] overflow-hidden">
                 <div className="max-h-48 overflow-y-auto">
@@ -451,10 +492,7 @@ export default function AddHotel() {
                       key={sr?._id}
                       onClick={() => handleSubRegionSelect(sr)}
                       className={`w-full text-left px-4 py-2.5 text-sm transition-colors
-                        ${form.subRegionId === sr?._id
-                          ? 'bg-[#E91E8C] text-white font-semibold'
-                          : 'text-[#18305C] hover:bg-pink-50'
-                        }`}
+                        ${form.subRegionId === sr?._id ? 'bg-[#E91E8C] text-white font-semibold' : 'text-[#18305C] hover:bg-pink-50'}`}
                     >
                       {sr?.name}
                     </button>
@@ -502,10 +540,10 @@ export default function AddHotel() {
           <div>
             <label className="block text-sm font-semibold text-[#18305C] mb-1.5">Address</label>
             <textarea
-              type="text"
               value={form.address}
               onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
               placeholder="Enter full address"
+              rows={3}
               className={inputCls('address')}
             />
           </div>
@@ -578,6 +616,74 @@ export default function AddHotel() {
             {errors.googleRating && <p className="text-red-500 text-xs mt-1">{errors.googleRating}</p>}
           </div>
 
+        </div>
+
+        {/* ── Amenities ──────────────────────────────────────────────────── */}
+        <div className="mt-7">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <label className="block text-sm font-semibold text-[#18305C]">Amenities</label>
+              <p className="text-[11px] text-gray-400 mt-0.5">
+                Select all amenities available at this property
+                <span className="ml-2 font-semibold text-[#E91E8C]">
+                  {selectedAmenities.length} selected
+                </span>
+              </p>
+            </div>
+            {selectedAmenities?.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setSelectedAmenities([])}
+                className="text-xs text-gray-400 hover:text-red-400 font-semibold transition-colors flex items-center gap-1"
+              >
+                <X size={12} />
+                Clear all
+              </button>
+            )}
+          </div>
+
+          {/* Divider */}
+          <div
+            className="rounded-xl p-4"
+            style={{ border: '1.5px solid #F0F0F0', background: '#FAFAFA' }}
+          >
+            <div className="flex flex-wrap gap-2.5">
+              {AMENITIES_LIST?.map((amenity) => (
+                <AmenityChip
+                  key={amenity.key}
+                  amenity={amenity}
+                  selected={selectedAmenities.includes(amenity.label)}
+                  onToggle={toggleAmenity}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Selected summary pills */}
+          {selectedAmenities?.length > 0 && (
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {selectedAmenities.map((key) => {
+                const found = AMENITIES_LIST.find((a) => a.label === key)
+                if (!found) return null
+                return (
+                  <span
+                    key={key}
+                    className="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full"
+                    style={{ background: '#FFF0F7', color: '#E91E8C', border: '1px solid #FADADF' }}
+                  >
+                    {found.label}
+                    <button
+                      type="button"
+                      onClick={() => toggleAmenity(key)}
+                      className="ml-0.5 hover:opacity-70 transition-opacity"
+                    >
+                      <X size={10} strokeWidth={2.5} />
+                    </button>
+                  </span>
+                )
+              })}
+            </div>
+          )}
         </div>
       </div>
 
