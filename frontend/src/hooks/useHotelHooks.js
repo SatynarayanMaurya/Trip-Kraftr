@@ -53,6 +53,26 @@ export const useHotelHooks = () => {
     }
   }
 
+      // For getting Hotels by Id
+  const getHotelById = async (hotelId) => {  
+    try {
+
+      dispatch(setLoading(true))
+
+      const response = await apiConnector(
+        "GET",
+        `${hotelEndpoinsts.GET_HOTEL_BY_ID}/${hotelId}`
+      )
+
+      return response
+
+    } catch (error) {
+      throw error
+    } finally {
+      dispatch(setLoading(false))
+    }
+  }
+
 
 
 
@@ -61,6 +81,7 @@ export const useHotelHooks = () => {
     return {
         addHotel,
         getHotels,
+        getHotelById
 
     };
 };

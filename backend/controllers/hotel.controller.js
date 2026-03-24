@@ -182,6 +182,7 @@ export const getHotelById = async (req, res) => {
     try {
         const { hotelId } = req.params;
 
+        console.log("Hotel Id : ",hotelId)
         if(!hotelId){
             return res.status(400).json({
                 success:false,
@@ -212,7 +213,7 @@ export const getHotelById = async (req, res) => {
         return res.status(200).json({
             success: true,
             message: "Hotel found",
-            data: foundHotel
+            foundHotel
         });
 
     } catch (error) {

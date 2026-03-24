@@ -205,7 +205,7 @@ export default function Hotels() {
 
   const clearFilters = () => { setFilterRegion('All'); setFilterSub('All'); setFilterCat('All') }
   const handleEdit = (h) => navigate(`update-hotel/${h?._id}`, { state: { hotel: h } })
-  const handleView = (h) => navigate(`view-hotel/${h?._id}`, { state: { hotel: h } })
+  const handleView = (h) => navigate(`view-hotel/${h?._id}`)
   const handleDelete = (h) => setDeleteTarget(h)
   const confirmDelete = () => { console.log('Delete:', deleteTarget?._id); setDeleteTarget(null) }
 
