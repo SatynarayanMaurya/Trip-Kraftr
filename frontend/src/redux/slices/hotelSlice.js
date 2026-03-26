@@ -87,9 +87,68 @@ export const hotelSlice = createSlice({
             if (stats) state.statsHotels = stats
         },
 
+        updateHotel: (state, action) => {
+          const updatedHotel = action.payload;
+          let found = false;
+      
+          for (const page in state.hotelsPages) {
+              const pageData = state.hotelsPages[page];
+      
+              const index = pageData.findIndex(
+                  hotel => hotel._id === updatedHotel._id
+              );
+      
+              if (index !== -1) {
+                  const previousHotel = pageData[index];
+      
+                  // ✅ Update stats ONLY if is_active changed
+                  if (previousHotel.is_active !== updatedHotel.is_active) {
+                      if (updatedHotel.is_active) {
+                          state.statsHotels.activeHotel += 1;
+                          state.statsHotels.inactiveHotel -= 1;
+                      } else {
+                          state.statsHotels.activeHotel -= 1;
+                          state.statsHotels.inactiveHotel += 1;
+                      }
+                  }
+      
+                  // ✅ Replace hotel
+                  pageData[index] = updatedHotel;
+      
+                  found = true;
+                  break;
+              }
+          }
+      
+          // ✅ If not found → add to first page
+          if (!found) {
+              const firstPage = 1;
+              const limit = state.HotelPageLimit || 4;
+      
+              if (!state.hotelsPages[firstPage]) {
+                  state.hotelsPages[firstPage] = [updatedHotel];
+              } else {
+                  state.hotelsPages[firstPage].unshift(updatedHotel);
+      
+                  // ✅ Maintain pagination consistency
+                  if (state.hotelsPages[firstPage].length > limit) {
+                      if (state.hotelsPages[2]) {
+                          const overflowItem = state.hotelsPages[firstPage].pop();
+                          state.hotelsPages[2].unshift(overflowItem);
+                      } else {
+                          state.hotelsPages[firstPage] =
+                              state.hotelsPages[firstPage].slice(0, limit);
+                      }
+                  }
+              }
+          }
+      },
+
         clearHotels :(state,action)=>{
             state.hotelsPages = {}
         },
+
+
 
         setHotelPageLimit :  (state,action)=>{
             state.HotelPageLimit = Number(action.payload)
@@ -102,7 +161,8 @@ export const {
     addNewHotel,
     setHotelsByPage,
     clearHotels,
-    setHotelPageLimit
+    setHotelPageLimit,
+    updateHotel
 
 } = hotelSlice.actions
 

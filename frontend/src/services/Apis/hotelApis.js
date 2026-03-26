@@ -5,6 +5,7 @@ export const hotelEndpoinsts  = {
     ADD_HOTEL : BASE_URL + '/add-hotel',
     GET_HOTEL : BASE_URL + '/get-hotels',
     GET_HOTEL_BY_ID : BASE_URL + '/get-hotel-by-id',
+    UPDATE_HOTEL_BY_ID : BASE_URL + '/update-hotel-by-id',
     SEARCH_HOTEL : BASE_URL + '/search-hotels',
 }
 

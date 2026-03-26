@@ -204,7 +204,7 @@ export default function Hotels() {
   }
 
   const clearFilters = () => { setFilterRegion('All'); setFilterSub('All'); setFilterCat('All') }
-  const handleEdit = (h) => navigate(`update-hotel/${h?._id}`, { state: { hotel: h } })
+  const handleEdit = (h) => navigate(`update-hotel/${h?._id}`)
   const handleView = (h) => navigate(`view-hotel/${h?._id}`)
   const handleDelete = (h) => setDeleteTarget(h)
   const confirmDelete = () => { console.log('Delete:', deleteTarget?._id); setDeleteTarget(null) }
@@ -232,7 +232,7 @@ export default function Hotels() {
         </button>
         <button
           onClick={() => navigate('add-hotel')}
-          className="flex items-center gap-2 px-4 py-2.5 bg-[#E91E8C] hover:bg-pink-600 text-white text-sm font-semibold rounded-xl transition-colors whitespace-nowrap"
+          className="flex items-center gap-2 px-4 py-2.5 bg-[#ED5F8D] hover:bg-[#ED5F8D] text-white text-sm font-semibold rounded-xl transition-colors whitespace-nowrap"
           style={{ boxShadow: '0 2px 8px rgba(233,30,140,0.30)' }}
         >
           <Plus size={15} />

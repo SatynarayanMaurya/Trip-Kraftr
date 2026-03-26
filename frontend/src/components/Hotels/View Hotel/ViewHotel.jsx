@@ -9,20 +9,7 @@ import {
   BedDouble, CheckSquare, Image as ImageIcon,
 } from 'lucide-react'
 
-// ── Amenity icon map ───────────────────────────────────────────────────────
-const AMENITY_ICONS = {
-  'Free Wi-Fi':          <Wifi size={13} />,
-  'WiFi':                <Wifi size={13} />,
-  'Air Conditioning':    <Wind size={13} />,
-  'AC':                  <Wind size={13} />,
-  'TV':                  <Tv size={13} />,
-  'Room Service':        <Clock size={13} />,
-  '24 – Hour Room Service': <Clock size={13} />,
-  'Restaurant':          <UtensilsCrossed size={13} />,
-}
 
-const getAmenityIcon = (name) =>
-  AMENITY_ICONS[name] ?? <CheckSquare size={13} />
 
 // ── Category badge style ───────────────────────────────────────────────────
 const categoryStyle = (cat) => {
@@ -236,7 +223,7 @@ export default function ViewHotel() {
           </div>
           <div className="flex items-center gap-3 shrink-0">
             <button
-              onClick={() => navigate(`../update-hotel/${hotelDetails?._id}`, { state: { hotel: hotelDetails } })}
+              onClick={() => navigate(`/hotels/update-hotel/${hotelDetails?._id}`, { state: { hotel: hotelDetails } })}
               className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-[#E91E8C] hover:bg-pink-50 transition-colors"
               title="Edit"
             >
@@ -298,7 +285,7 @@ export default function ViewHotel() {
       {/* ── Manage Rooms button — bottom right ────────────────────────── */}
       <div className="flex justify-end">
         <button
-          onClick={() => navigate(`../manage-rooms/${hotelDetails?._id}`)}
+          onClick={() => navigate("manage-rooms", { state: { hotel:hotelDetails } })}
           className="flex items-center gap-2 px-6 py-3 bg-[#E91E8C] hover:bg-pink-600 text-white text-sm font-bold rounded-xl transition-colors"
           style={{ boxShadow: '0 4px 14px rgba(233,30,140,0.35)' }}
         >

@@ -1,0 +1,339 @@
+import React, { useState } from "react";
+import { X, BedDouble, Users, User, Baby } from "lucide-react";
+import { useSelector } from "react-redux";
+import { useRoomHooks } from "../../../hooks/useRoomHooks";
+import { toast } from "react-toastify";
+
+function AddRoom({ onClose,hotelId }) {
+
+    const isProduction = useSelector((state)=>state.user.isProduction)
+    const {addRoom} = useRoomHooks()
+    const [formData, setFormData] = useState({
+        roomName: "",
+        capacity: "",
+        adult: "",
+        children: "",
+    });
+
+    const [errors, setErrors] = useState({});
+    const [submitError, setSubmitError] = useState("");
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+
+        // Only allow numbers for numeric fields
+        if (["capacity", "adult", "children"].includes(name)) {
+            if (value !== "" && !/^\d+$/.test(value)) return;
+        }
+
+        setFormData((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+
+        // Remove field error while typing
+        setErrors((prev) => ({
+            ...prev,
+            [name]: "",
+        }));
+
+        setSubmitError("");
+    };
+
+    const validateForm = () => {
+        const newErrors = {};
+        const roomName = formData.roomName.trim();
+        const capacity = Number(formData.capacity);
+        const adult = Number(formData.adult);
+        const children = Number(formData.children);
+
+        // Required validations
+        if (!roomName) newErrors.roomName = "Room name is required.";
+        if (formData.capacity === "") newErrors.capacity = "Capacity is required.";
+        if (formData.adult === "") newErrors.adult = "Adult count is required.";
+        if (formData.children === "") newErrors.children = "Children count is required.";
+
+        // Positive / valid number validations
+        if (formData.capacity !== "" && capacity <= 0) {
+            newErrors.capacity = "Capacity must be greater than 0.";
+        }
+
+        if (formData.adult !== "" && adult < 0) {
+            newErrors.adult = "Adult count cannot be negative.";
+        }
+
+        if (formData.children !== "" && children < 0) {
+            newErrors.children = "Children count cannot be negative.";
+        }
+
+        // Capacity match validation only when all numeric values exist
+        if (
+            formData.capacity !== "" &&
+            formData.adult !== "" &&
+            formData.children !== "" &&
+            capacity > 0
+        ) {
+            const total = adult + children;
+
+            if (total !== capacity) {
+                setSubmitError(
+                    `Adult + Children must be exactly equal to Capacity. Current total is ${total}, but capacity is ${capacity}.`
+                );
+            }
+        }
+
+        setErrors(newErrors);
+
+        return Object.keys(newErrors).length === 0;
+    };
+
+    const handleSubmit = async(e) => {
+        try {
+
+
+            e.preventDefault();
+
+            const isValid = validateForm();
+
+            const capacity = Number(formData.capacity);
+            const adult = Number(formData.adult);
+            const children = Number(formData.children);
+
+            if (!isValid) return;
+
+            if (adult + children !== capacity) {
+                return;
+            }
+
+            const payload = {
+                roomName: formData.roomName.trim(),
+                capacity,
+                adult,
+                children,
+                hotelId
+            };
+
+            // console.log("Room Added:", payload);
+            const response = await addRoom(payload)
+            console.log("response : ",response)
+            toast.success(response?.data?.message)
+            
+            // Reset after submit
+            setFormData({
+                roomName: "",
+                capacity: "",
+                adult: "",
+                children: "",
+            });
+            setErrors({});
+            setSubmitError("");
+
+            if (onClose) onClose();
+        }
+        catch (error) {
+            if (!isProduction) {
+                console.log("========= ERROR DEBUG START =========");
+                console.log("Error:", error);
+                console.log("Response:", error?.response);
+                console.log("========= ERROR DEBUG END =========");
+            }
+            toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin")
+        }
+
+
+
+    };
+
+
+    const totalGuests =
+        (Number(formData.adult) || 0) + (Number(formData.children) || 0);
+    const capacityValue = Number(formData.capacity) || 0;
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+            <div className="w-full max-w-2xl rounded-3xl bg-white shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                {/* Header */}
+                <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5 bg-gradient-to-r from-pink-50 to-white">
+                    <div>
+                        <h2 className="text-2xl font-bold text-slate-800">Add New Room</h2>
+                        <p className="text-sm text-slate-500 mt-1">
+                            Add room details with exact guest capacity.
+                        </p>
+                    </div>
+
+                    <button
+                        onClick={onClose}
+                        className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
+                    >
+                        <X size={20} />
+                    </button>
+                </div>
+
+                {/* Body */}
+                <form onSubmit={handleSubmit} className="p-6">
+                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                        {/* Room Name */}
+                        <div className="md:col-span-2">
+                            <label className="mb-2 block text-sm font-semibold text-slate-700">
+                                Room Name
+                            </label>
+                            <div className="relative">
+                                <BedDouble
+                                    size={18}
+                                    className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                                />
+                                <input
+                                    type="text"
+                                    name="roomName"
+                                    value={formData.roomName}
+                                    onChange={handleChange}
+                                    placeholder="Enter room name"
+                                    className={`w-full rounded-2xl border bg-white py-3 pl-11 pr-4 text-sm outline-none transition ${errors.roomName
+                                            ? "border-red-400 focus:border-red-500"
+                                            : "border-slate-300 focus:border-pink-500"
+                                        }`}
+                                />
+                            </div>
+                            {errors.roomName && (
+                                <p className="mt-2 text-sm text-red-500">{errors.roomName}</p>
+                            )}
+                        </div>
+
+                        {/* Capacity */}
+                        <div>
+                            <label className="mb-2 block text-sm font-semibold text-slate-700">
+                                Capacity
+                            </label>
+                            <div className="relative">
+                                <Users
+                                    size={18}
+                                    className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                                />
+                                <input
+                                    type="text"
+                                    name="capacity"
+                                    value={formData.capacity}
+                                    onChange={handleChange}
+                                    placeholder="Enter capacity"
+                                    className={`w-full rounded-2xl border bg-white py-3 pl-11 pr-4 text-sm outline-none transition ${errors.capacity
+                                            ? "border-red-400 focus:border-red-500"
+                                            : "border-slate-300 focus:border-pink-500"
+                                        }`}
+                                />
+                            </div>
+                            {errors.capacity && (
+                                <p className="mt-2 text-sm text-red-500">{errors.capacity}</p>
+                            )}
+                        </div>
+
+                        {/* Adult */}
+                        <div>
+                            <label className="mb-2 block text-sm font-semibold text-slate-700">
+                                Adult
+                            </label>
+                            <div className="relative">
+                                <User
+                                    size={18}
+                                    className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                                />
+                                <input
+                                    type="text"
+                                    name="adult"
+                                    value={formData.adult}
+                                    onChange={handleChange}
+                                    placeholder="Enter adult count"
+                                    className={`w-full rounded-2xl border bg-white py-3 pl-11 pr-4 text-sm outline-none transition ${errors.adult
+                                            ? "border-red-400 focus:border-red-500"
+                                            : "border-slate-300 focus:border-pink-500"
+                                        }`}
+                                />
+                            </div>
+                            {errors.adult && (
+                                <p className="mt-2 text-sm text-red-500">{errors.adult}</p>
+                            )}
+                        </div>
+
+                        {/* Children */}
+                        <div>
+                            <label className="mb-2 block text-sm font-semibold text-slate-700">
+                                Children
+                            </label>
+                            <div className="relative">
+                                <Baby
+                                    size={18}
+                                    className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                                />
+                                <input
+                                    type="text"
+                                    name="children"
+                                    value={formData.children}
+                                    onChange={handleChange}
+                                    placeholder="Enter children count"
+                                    className={`w-full rounded-2xl border bg-white py-3 pl-11 pr-4 text-sm outline-none transition ${errors.children
+                                            ? "border-red-400 focus:border-red-500"
+                                            : "border-slate-300 focus:border-pink-500"
+                                        }`}
+                                />
+                            </div>
+                            {errors.children && (
+                                <p className="mt-2 text-sm text-red-500">{errors.children}</p>
+                            )}
+                        </div>
+
+                        {/* Live Summary */}
+                        {/* <div className="rounded-2xl border border-pink-100 bg-pink-50 px-4 py-4 md:col-span-2">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold text-slate-700">
+                    Occupancy Summary
+                  </p>
+                  <p className="text-sm text-slate-500 mt-1">
+                    Adult + Children must exactly match room capacity.
+                  </p>
+                </div>
+
+                <div className="rounded-xl bg-white px-4 py-2 shadow-sm border border-slate-200">
+                  <p className="text-sm font-medium text-slate-700">
+                    Total Guests:{" "}
+                    <span className="font-bold text-pink-600">{totalGuests}</span>{" "}
+                    / Capacity:{" "}
+                    <span className="font-bold text-slate-800">
+                      {capacityValue}
+                    </span>
+                  </p>
+                </div>
+              </div>
+            </div> */}
+
+                        {/* Capacity Error */}
+                        {submitError && (
+                            <div className="md:col-span-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3">
+                                <p className="text-sm font-medium text-red-600">{submitError}</p>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Footer */}
+                    <div className="mt-8 flex items-center justify-end gap-3">
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="rounded-2xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                        >
+                            Cancel
+                        </button>
+
+                        <button
+                            type="submit"
+                            className="rounded-2xl bg-pink-500 px-6 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-pink-600"
+                        >
+                            Add Room
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+}
+
+export default AddRoom;

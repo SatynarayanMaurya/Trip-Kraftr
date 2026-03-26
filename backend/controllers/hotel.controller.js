@@ -1,7 +1,7 @@
 
 import mongoose from "mongoose";
 import Hotel from "../models/hotel.model.js"
-import { uploadImageToCloudinary } from "../utils/uploadToCloudinary.js";
+import { deleteImageFromCloudinary, uploadImageToCloudinary } from "../utils/uploadToCloudinary.js";
 
 
 
@@ -218,6 +218,151 @@ export const getHotelById = async (req, res) => {
 
     } catch (error) {
         console.error("Error fetching hotel:", error);
+        return res.status(500).json({
+            success: false,
+            message: error?.message || "Internal Server Error"
+        });
+    }
+};
+
+
+
+export const updateHotelById = async (req, res) => {
+    try {
+        const { hotelId } = req.params;
+
+        // ✅ Validate ObjectId
+        if (!mongoose.Types.ObjectId.isValid(hotelId)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid Hotel ID"
+            });
+        }
+
+        const {
+            address,
+            category,
+            contact,
+            email,
+            googleRating,
+            hotelName,
+            regionId,
+            subRegionId,
+            amenities,
+            imagesToDelete
+        } = req.body;
+
+        const amenitiesArray = amenities ? JSON.parse(amenities) : [];
+        const imagesToDeleteArray = imagesToDelete ? JSON.parse(imagesToDelete) : [];
+
+        let images = req.files?.images || [];
+        if (images && !Array.isArray(images)) {
+            images = [images];
+        }
+
+        // ✅ Find hotel first
+        const hotel = await Hotel.findById(hotelId);
+        if (!hotel) {
+            return res.status(404).json({
+                success: false,
+                message: "Hotel not found"
+            });
+        }
+
+        // =========================
+        // ✅ DELETE OLD IMAGES
+        // =========================
+        if (imagesToDeleteArray.length > 0) {
+            await Promise.allSettled(
+                imagesToDeleteArray.map((publicId) =>
+                    deleteImageFromCloudinary(publicId)
+                )
+            );
+
+            // Remove from DB
+            hotel.images = hotel.images.filter(
+                (img) => !imagesToDeleteArray.includes(img.public_id)
+            );
+        }
+
+        // =========================
+        // ✅ UPLOAD NEW IMAGES
+        // =========================
+        const MAX_SIZE = 1 * 1024 * 1024; // 1MB
+
+        for (const file of images) {
+            if (file.size > MAX_SIZE) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Each image must be less than 1 MB"
+                });
+            }
+        }
+
+        if (images.length > 0) {
+            const uploadResults = await Promise.allSettled(
+                images.map((file) =>
+                    uploadImageToCloudinary(file, process.env.HOTEL_IMAGES)
+                )
+            );
+
+            const uploadedImages = uploadResults
+                .filter(r => r.status === "fulfilled")
+                .map(r => ({
+                    url: r.value.secure_url,
+                    public_id: r.value.public_id,
+                    size: r.value.size
+                }));
+
+            hotel.images = [...hotel.images, ...uploadedImages];
+        }
+
+        // =========================
+        // ✅ UPDATE FIELDS
+        // =========================
+        if (hotelName) {
+            hotel.hotelName = hotelName.trim();
+            hotel.hotelName_lower = hotelName.trim().toLowerCase();
+        }
+
+        if (contact) hotel.contact = contact;
+        if (category) hotel.category = category;
+        if (email) hotel.email = email.trim();
+        if (address) hotel.address = address.trim();
+
+        if (regionId && mongoose.Types.ObjectId.isValid(regionId)) {
+            hotel.regionId = new mongoose.Types.ObjectId(regionId);
+        }
+
+        if (subRegionId && mongoose.Types.ObjectId.isValid(subRegionId)) {
+            hotel.subRegionId = new mongoose.Types.ObjectId(subRegionId);
+        }
+
+        if (googleRating !== undefined && googleRating !== '') {
+            hotel.googleRating = Number(googleRating);
+        }
+
+        if (amenities) {
+            hotel.amenities = amenitiesArray;
+        }
+
+        // ✅ Save updated hotel
+        await hotel.save();
+
+        await hotel.populate([
+            { path: "regionId", select: "_id name country" },
+            { path: "subRegionId", select: "_id name" }
+        ]);
+
+        return res.status(200).json({
+            success: true,
+            message: "Hotel updated successfully",
+            updatedHotel :hotel
+        });
+
+    } catch (error) {
+        console.error("Update Hotel Error:", error);
+
         return res.status(500).json({
             success: false,
             message: error?.message || "Internal Server Error"

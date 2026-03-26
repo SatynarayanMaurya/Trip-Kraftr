@@ -36,3 +36,24 @@ export const uploadImageToCloudinary = (file, folder) => {
       .end(file.data); // send the buffer
   });
 };
+
+
+export const deleteImageFromCloudinary = (publicId) => {
+  return new Promise((resolve, reject) => {
+    if (!publicId) {
+      return reject(new Error("Public ID is required"));
+    }
+
+    cloudinary.uploader.destroy(
+      publicId,
+      { resource_type: "image" }, // important if not default
+      (error, result) => {
+        if (error) return reject(error);
+
+        resolve({
+          result: result.result, // "ok" or "not found"
+        });
+      }
+    );
+  });
+};

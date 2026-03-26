@@ -3,7 +3,7 @@ import { apiConnector } from '../services/apiConnector'
 import { useDispatch, useSelector } from 'react-redux'
 import { setLoading } from '../redux/slices/userSlice'
 import { hotelEndpoinsts } from '../services/Apis/hotelApis'
-import { addNewHotel, setHotelsByPage } from '../redux/slices/hotelSlice';
+import { addNewHotel, setHotelsByPage, updateHotel } from '../redux/slices/hotelSlice';
 
 export const useHotelHooks = () => {
     const dispatch = useDispatch();
@@ -73,6 +73,27 @@ export const useHotelHooks = () => {
     }
   }
 
+      // For getting Hotels by Id
+  const updateHotelById = async (hotelId,hotelDetails) => {  
+    try {
+
+      dispatch(setLoading(true))
+
+      const response = await apiConnector(
+        "PUT",
+        `${hotelEndpoinsts.UPDATE_HOTEL_BY_ID}/${hotelId}`,hotelDetails,{ "Content-Type": "multipart/form-data" }
+      )
+
+      dispatch(updateHotel(response?.data?.updatedHotel))
+      return response
+
+    } catch (error) {
+      throw error
+    } finally {
+      dispatch(setLoading(false))
+    }
+  }
+
 
 
 
@@ -81,7 +102,8 @@ export const useHotelHooks = () => {
     return {
         addHotel,
         getHotels,
-        getHotelById
+        getHotelById,
+        updateHotelById
 
     };
 };
