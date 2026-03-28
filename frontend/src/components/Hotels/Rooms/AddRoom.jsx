@@ -153,7 +153,7 @@ function AddRoom({ onClose,hotelId }) {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
             <div className="w-full max-w-2xl rounded-3xl bg-white shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
                 {/* Header */}
-                <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5 bg-gradient-to-r from-pink-50 to-white">
+                <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5 bg-linear-to-r from-pink-50 to-white">
                     <div>
                         <h2 className="text-2xl font-bold text-slate-800">Add New Room</h2>
                         <p className="text-sm text-slate-500 mt-1">

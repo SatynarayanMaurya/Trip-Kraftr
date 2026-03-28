@@ -73,7 +73,7 @@ export const addRoom = async (req, res) => {
         return res.status(201).json({
             success: true,
             message: "Room added successfully",
-            data: newRoom
+            newRoom
         });
 
     } catch (error) {

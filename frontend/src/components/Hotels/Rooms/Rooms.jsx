@@ -29,6 +29,7 @@ function Rooms() {
 
     const [hotelDetails, setHotelDetails] = useState(null)
     const { hotel } = location.state || {};
+    // console.log("All Rooms : ",allRooms)
 
 
 
@@ -218,12 +219,12 @@ function Rooms() {
 
                                         <td className="px-5 py-4">
                                             <div className="flex items-center justify-center gap-4">
-                                                <button onClick={()=>navigate(`manage-rates`)}
+                                                {/* <button onClick={()=>navigate(`manage-rates`)}
                                                     className="text-[#1d3561] transition hover:text-pink-500"
                                                     title="Edit Room"
                                                 >
                                                     <Eye size={17}/>
-                                                </button>
+                                                </button> */}
                                                 <button
                                                     className="text-[#1d3561] transition hover:text-pink-500"
                                                     title="Edit Room"
@@ -250,7 +251,8 @@ function Rooms() {
             {/* Footer Buttons */}
             {!fetchLoading && allRooms?.length > 0 && (
                 <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
-                    <button className="rounded-xl bg-pink-500 px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-pink-600">
+                    <button 
+                    onClick={()=>navigate(`manage-rates`,{state:{rooms:allRooms,hotel:hotelDetails}})} className="rounded-xl bg-pink-500 px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-pink-600">
                         Manage Rates
                     </button>
 
