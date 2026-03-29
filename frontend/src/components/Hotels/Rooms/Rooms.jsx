@@ -9,11 +9,14 @@ import {
     Hotel,
     Eye,
     Users,
+    Save,
+    X,
 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { useRoomHooks } from "../../../hooks/useRoomHooks";
 import { useHotelHooks } from "../../../hooks/useHotelHooks";
+import { ArrowLeft } from 'lucide-react'
 
 function Rooms() {
 
@@ -22,16 +25,24 @@ function Rooms() {
     const navigate = useNavigate()
     const [isAddRoom, setIsAddRoom] = useState(false);
     const isProduction = useSelector((state) => state.user.isProduction)
-    const { getRooms } = useRoomHooks();
+    const { getRooms, updateRoomById} = useRoomHooks();
     const { getHotelById } = useHotelHooks()
-    const [allRooms, setAllRooms] = useState([])
+    const allRooms = useSelector((state) => state.room.allRooms?.[hotelId])
     const [fetchLoading, setFetchLoading] = useState(false)
 
     const [hotelDetails, setHotelDetails] = useState(null)
     const { hotel } = location.state || {};
-    // console.log("All Rooms : ",allRooms)
 
-
+    // =========================
+    // INLINE EDIT STATES
+    // =========================
+    const [editingRoomId, setEditingRoomId] = useState(null)
+    const [editingRoomData, setEditingRoomData] = useState({
+        roomName: "",
+        capacity: "",
+        adult: "",
+        children: "",
+    })
 
     const fetchHotelDetails = async () => {
         try {
@@ -67,8 +78,7 @@ function Rooms() {
     const fetchRooms = async () => {
         try {
             setFetchLoading(true)
-            const response = await getRooms(hotelId)
-            setAllRooms(response?.data?.allRooms)
+            await getRooms(hotelId)
             setFetchLoading(false)
         }
         catch (error) {
@@ -85,9 +95,109 @@ function Rooms() {
 
     useEffect(() => {
         if (hotelId) {
-            fetchRooms()
+            if (!allRooms) {
+                fetchRooms()
+            }
         }
     }, [hotelId])
+
+    // =========================
+    // INLINE EDIT FUNCTIONS
+    // =========================
+    const handleEditClick = (room) => {
+        setEditingRoomId(room._id)
+        setEditingRoomData({
+            roomName: room.roomName || "",
+            capacity: room.capacity?.toString() || "",
+            adult: room.adult?.toString() || "",
+            children: room.children?.toString() || "",
+        })
+    }
+
+    const handleCancelEdit = () => {
+        setEditingRoomId(null)
+        setEditingRoomData({
+            roomName: "",
+            capacity: "",
+            adult: "",
+            children: "",
+        })
+    }
+
+    const handleEditChange = (field, value) => {
+        if (["capacity", "adult", "children"].includes(field)) {
+            if (value !== "" && !/^\d+$/.test(value)) return
+        }
+
+        setEditingRoomData((prev) => ({
+            ...prev,
+            [field]: value,
+        }))
+    }
+
+    const handleSaveEdit = async (roomId) => {
+        try {
+            const roomName = editingRoomData.roomName.trim()
+            const capacity = Number(editingRoomData.capacity)
+            const adult = Number(editingRoomData.adult)
+            const children = Number(editingRoomData.children)
+
+            if (
+                !roomName ||
+                editingRoomData.capacity === "" ||
+                editingRoomData.adult === "" ||
+                editingRoomData.children === ""
+            ) {
+                toast.error("All fields are required")
+                return
+            }
+
+            if (capacity <= 0) {
+                toast.error("Capacity must be greater than 0")
+                return
+            }
+
+            if (adult + children !== capacity) {
+                toast.error("Adult + Children must be equal to Capacity")
+                return
+            }
+
+            const updatedRoom = {
+                hotelId,
+                roomId,
+                roomName,
+                capacity,
+                adult,
+                children,
+            }
+
+            // console.log("Updated Room Data:", updatedRoom)
+            const response = await updateRoomById(updatedRoom)
+
+            toast.success(response?.data?.message)
+
+            setEditingRoomId(null)
+            setEditingRoomData({
+                roomName: "",
+                capacity: "",
+                adult: "",
+                children: "",
+            })
+        }
+        catch (error) {
+            if (!isProduction) {
+                console.log("========= ERROR DEBUG START =========");
+                console.log("Error:", error);
+                console.log("Response:", error?.response);
+                console.log("========= ERROR DEBUG END =========");
+            }
+            toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin")
+        }
+
+    }
+
+    const inputClass =
+        "w-full min-w-[90px] rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-[#1d3561] outline-none transition focus:border-pink-500 focus:ring-2 focus:ring-pink-100"
 
     return (
         <div className="min-h-screen bg-[#f8f8fb] p-4 md:p-6">
@@ -97,6 +207,13 @@ function Rooms() {
                 <p className="mt-1 text-sm text-gray-500">
                     Define room types, capacities, and standard amenities.
                 </p>
+                <button
+                    onClick={() => navigate(-1)}
+                    className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-[#18305C] mt-3 transition-colors cursor-pointer"
+                >
+                    <ArrowLeft size={15} />
+                    Back to List
+                </button>
             </div>
 
             {/* Hotel Info + Action */}
@@ -189,59 +306,137 @@ function Rooms() {
                             </thead>
 
                             <tbody>
-                                {allRooms?.map((room, index) => (
-                                    <tr
-                                        key={room._id}
-                                        className={`text-sm text-gray-700 ${index !== allRooms?.length - 1
+                                {allRooms?.map((room, index) => {
+                                    const isEditing = editingRoomId === room._id
+
+                                    return (
+                                        <tr
+                                            key={room._id}
+                                            className={`text-sm text-gray-700 ${index !== allRooms?.length - 1
                                                 ? "border-b border-dashed border-gray-300"
                                                 : ""
-                                            } hover:bg-gray-50 transition`}
-                                    >
-                                        <td className="px-5 py-4 font-medium text-[#1d3561]">
-                                            {room.roomName}
-                                        </td>
+                                                } hover:bg-gray-50 transition`}
+                                        >
+                                            {/* Room Name */}
+                                            <td className="px-5 py-4 font-medium text-[#1d3561]">
+                                                {isEditing ? (
+                                                    <input
+                                                        type="text"
+                                                        value={editingRoomData.roomName}
+                                                        onChange={(e) =>
+                                                            handleEditChange("roomName", e.target.value)
+                                                        }
+                                                        className={inputClass}
+                                                        placeholder="Room Name"
+                                                    />
+                                                ) : (
+                                                    room.roomName
+                                                )}
+                                            </td>
 
-                                        <td className="px-5 py-4">{room.capacity}</td>
+                                            {/* Capacity */}
+                                            <td className="px-5 py-4">
+                                                {isEditing ? (
+                                                    <input
+                                                        type="text"
+                                                        value={editingRoomData.capacity}
+                                                        onChange={(e) =>
+                                                            handleEditChange("capacity", e.target.value)
+                                                        }
+                                                        className={inputClass}
+                                                        placeholder="Capacity"
+                                                    />
+                                                ) : (
+                                                    room.capacity
+                                                )}
+                                            </td>
 
-                                        <td className="px-5 py-4">
-                                            <div className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-1.5">
-                                                <Users size={14} className="text-gray-400" />
-                                                <span>{room.adult}</span>
-                                            </div>
-                                        </td>
+                                            {/* Adult */}
+                                            <td className="px-5 py-4">
+                                                {isEditing ? (
+                                                    <input
+                                                        type="text"
+                                                        value={editingRoomData.adult}
+                                                        onChange={(e) =>
+                                                            handleEditChange("adult", e.target.value)
+                                                        }
+                                                        className={inputClass}
+                                                        placeholder="Adult"
+                                                    />
+                                                ) : (
+                                                    <div className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-1.5">
+                                                        <Users size={14} className="text-gray-400" />
+                                                        <span>{room.adult}</span>
+                                                    </div>
+                                                )}
+                                            </td>
 
-                                        <td className="px-5 py-4">
-                                            <div className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-1.5">
-                                                <Users size={14} className="text-gray-400" />
-                                                <span>{room.children}</span>
-                                            </div>
-                                        </td>
+                                            {/* Children */}
+                                            <td className="px-5 py-4">
+                                                {isEditing ? (
+                                                    <input
+                                                        type="text"
+                                                        value={editingRoomData.children}
+                                                        onChange={(e) =>
+                                                            handleEditChange("children", e.target.value)
+                                                        }
+                                                        className={inputClass}
+                                                        placeholder="Children"
+                                                    />
+                                                ) : (
+                                                    <div className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-1.5">
+                                                        <Users size={14} className="text-gray-400" />
+                                                        <span>{room.children}</span>
+                                                    </div>
+                                                )}
+                                            </td>
 
-                                        <td className="px-5 py-4">
-                                            <div className="flex items-center justify-center gap-4">
-                                                {/* <button onClick={()=>navigate(`manage-rates`)}
-                                                    className="text-[#1d3561] transition hover:text-pink-500"
-                                                    title="Edit Room"
-                                                >
-                                                    <Eye size={17}/>
-                                                </button> */}
-                                                <button
-                                                    className="text-[#1d3561] transition hover:text-pink-500"
-                                                    title="Edit Room"
-                                                >
-                                                    <Pencil size={17} />
-                                                </button>
+                                            {/* Actions */}
+                                            <td className="px-5 py-4">
+                                                <div className="flex items-center justify-center gap-3">
+                                                    {isEditing ? (
+                                                        <>
+                                                            <button
+                                                                onClick={() => handleSaveEdit(room._id)}
+                                                                className="inline-flex items-center gap-1 rounded-lg bg-pink-500 px-3 py-2 text-xs font-semibold text-white transition hover:bg-pink-600"
+                                                                title="Save Room"
+                                                            >
+                                                                <Save size={14} />
+                                                                Save
+                                                            </button>
 
-                                                <button
-                                                    className="text-[#1d3561] transition hover:text-red-500"
-                                                    title="Delete Room"
-                                                >
-                                                    <Trash2 size={17} />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
+                                                            <button
+                                                                onClick={handleCancelEdit}
+                                                                className="inline-flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-semibold text-gray-700 transition hover:bg-gray-50"
+                                                                title="Cancel Edit"
+                                                            >
+                                                                <X size={14} />
+                                                                Cancel
+                                                            </button>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <button
+                                                                onClick={() => handleEditClick(room)}
+                                                                className="text-[#1d3561] transition hover:text-pink-500"
+                                                                title="Edit Room"
+                                                            >
+                                                                <Pencil size={17} />
+                                                            </button>
+
+                                                            <button
+                                                                className="text-[#1d3561] transition hover:text-red-500"
+                                                                title="Delete Room"
+                                                            >
+                                                                <Trash2 size={17} />
+                                                            </button>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    )
+                                })}
                             </tbody>
                         </table>
                     </div>
@@ -251,8 +446,8 @@ function Rooms() {
             {/* Footer Buttons */}
             {!fetchLoading && allRooms?.length > 0 && (
                 <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
-                    <button 
-                    onClick={()=>navigate(`manage-rates`,{state:{rooms:allRooms,hotel:hotelDetails}})} className="rounded-xl bg-pink-500 px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-pink-600">
+                    <button
+                        onClick={() => navigate(`manage-rates`, { state: { rooms: allRooms, hotel: hotelDetails } })} className="rounded-xl bg-pink-500 px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-pink-600">
                         Manage Rates
                     </button>
 

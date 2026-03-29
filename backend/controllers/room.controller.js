@@ -120,3 +120,90 @@ export const getRoomsOfHotels = async(req,res)=>{
         })
     }
 }
+
+
+export const updateRoomById = async(req,res)=>{
+    try{
+        const {hotelId, roomId, roomName, capacity, adult, children } = req.body
+        if (!hotelId) {
+            return res.status(400).json({
+                success: false,
+                message: "Hotel Id is required"
+            });
+        }
+
+        if(!roomId){
+            return res.status(400).json({
+                success:false,
+                message:"Room Id not found"
+            })
+        }
+
+        // ✅ Validate MongoDB ObjectId
+        if (!mongoose.Types.ObjectId.isValid(hotelId)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid Hotel Id"
+            });
+        }
+
+        // ✅ Validate required fields
+        if (!roomName?.trim()) {
+            return res.status(400).json({
+                success: false,
+                message: "Room name is required"
+            });
+        }
+
+        // Convert to numbers
+        const cap = Number(capacity);
+        const ad = Number(adult);
+        const child = Number(children);
+
+        // ✅ Validate numeric fields
+        if ([cap, ad, child].some(val => isNaN(val))) {
+            return res.status(400).json({
+                success: false,
+                message: "Capacity, adult and children must be valid numbers"
+            });
+        }
+
+        // ✅ Validate non-negative values
+        if (cap <= 0 || ad < 0 || child < 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid capacity, adult or children values"
+            });
+        }
+
+        // ✅ Business logic validation
+        if (cap !== ad + child) {
+            return res.status(400).json({
+                success: false,
+                message: "Capacity must be equal to adult + children"
+            });
+        }
+
+        const updatedRoom = await Room.findOneAndUpdate({org_id:req.user.org_id,hotelId:hotelId,_id:roomId},{$set:{roomName:roomName?.trim(),roomName_lower:roomName?.trim()?.toLowerCase(),capacity:cap,adult:ad,children:child}})
+
+        if(updatedRoom){
+            return res.status(200).json({
+                success:true,
+                message:"Room Updated",
+                updatedRoom
+            })
+        }
+        else{
+            return res.status(404).json({
+                success:false,
+                message:"Room Not found"
+            })
+        }
+    }
+    catch(error){
+        return res.status(500).json({
+            success:false,
+            message:error?.message || "Internal Server Error"
+        })
+    }
+}

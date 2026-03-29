@@ -55,7 +55,7 @@ const roomRateSchema = new mongoose.Schema(
           required: true,
         },
 
-        roomName: {
+        roomNameSnapshot: {
           type: String,
           default: null,
         },

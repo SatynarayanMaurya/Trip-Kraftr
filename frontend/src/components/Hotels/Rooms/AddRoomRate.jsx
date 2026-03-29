@@ -138,7 +138,7 @@ function AddRoomRate({ onClose, hotelId ,allRooms}) {
 
                 roomRates: formData.roomRates.map((room) => ({
                     roomId: room.roomId,
-                    roomName: room.roomNameSnapshot,
+                    roomNameSnapshot: room.roomNameSnapshot,
                     ep: room.ep === "" ? 0 : Number(room.ep),
                     cp: room.cp === "" ? 0 : Number(room.cp),
                     map: room.map === "" ? 0 : Number(room.map),
@@ -172,11 +172,8 @@ function AddRoomRate({ onClose, hotelId ,allRooms}) {
                 },
             };
 
-            console.log("Final Room Rate Payload:", payload);
-
             const response = await addRoomRate(payload)
-            console.log("Response : ",response)
-            // toast.success(response?.data?.message )
+            toast.success(response?.data?.message )
             if (onClose) onClose();
         }
         catch (error) {

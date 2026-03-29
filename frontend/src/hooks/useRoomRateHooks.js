@@ -20,6 +20,32 @@ export const useRoomRateHooks = () => {
         }
     }
 
+    const getRoomRates = async (hotelId) => {  // For Normal Org_admin
+        try {
+            dispatch(setLoading(true));
+            const response = await apiConnector("GET", `${roomRateEndpoints.GET_ROOM_RATES}/${hotelId}`, )
+            // dispatch(addNewHotel(response?.data?.newHotel))
+            return response;
+        } catch (error) {
+            throw error;
+        } finally {
+            dispatch(setLoading(false));
+        }
+    }
+
+    const updateRoomRate = async (hotelId,roomRateDetails) => {  // For Normal Org_admin
+        try {
+            dispatch(setLoading(true));
+            const response = await apiConnector("PUT", `${roomRateEndpoints.UPDATE_ROOM_RATE}/${hotelId}`, roomRateDetails)
+            // dispatch(addNewHotel(response?.data?.newHotel))
+            return response;
+        } catch (error) {
+            throw error;
+        } finally {
+            dispatch(setLoading(false));
+        }
+    }
+
 
  
 
@@ -27,6 +53,8 @@ export const useRoomRateHooks = () => {
 
     return {
         addRoomRate,
+        getRoomRates,
+        updateRoomRate
 
     };
 };
