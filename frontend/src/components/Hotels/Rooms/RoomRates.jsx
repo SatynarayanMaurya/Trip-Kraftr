@@ -400,8 +400,6 @@ function RoomRates() {
         return;
       }
   
-      console.log("New Copied Rate Plan Data:", draft);
-      toast.success("Copied rate data logged in console");
       const payload ={
         ...draft,
         hotelId:hotelId
