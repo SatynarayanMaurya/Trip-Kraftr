@@ -81,7 +81,7 @@ function DeleteModal({ onClose, onDelete, itemName = "item", confirmText = "DELE
               ref={inputRef}
               type="text"
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={(e) => setInput(e.target.value?.trim())}
               onKeyDown={handleKeyDown}
               placeholder={`Type ${confirmText}`}
               className={`w-full px-4 py-2.5 rounded-xl border text-sm font-mono outline-none transition-all

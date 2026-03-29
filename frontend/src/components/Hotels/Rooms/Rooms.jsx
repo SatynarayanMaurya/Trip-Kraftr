@@ -17,6 +17,7 @@ import { toast } from "react-toastify";
 import { useRoomHooks } from "../../../hooks/useRoomHooks";
 import { useHotelHooks } from "../../../hooks/useHotelHooks";
 import { ArrowLeft } from 'lucide-react'
+import DeleteModal from "../../DeleteModals/DeleteModal";
 
 function Rooms() {
 
@@ -25,13 +26,15 @@ function Rooms() {
     const navigate = useNavigate()
     const [isAddRoom, setIsAddRoom] = useState(false);
     const isProduction = useSelector((state) => state.user.isProduction)
-    const { getRooms, updateRoomById} = useRoomHooks();
+    const { getRooms, updateRoomById, deleteRoomById } = useRoomHooks();
     const { getHotelById } = useHotelHooks()
     const allRooms = useSelector((state) => state.room.allRooms?.[hotelId])
     const [fetchLoading, setFetchLoading] = useState(false)
 
     const [hotelDetails, setHotelDetails] = useState(null)
     const { hotel } = location.state || {};
+    const [deletingRoomDetails, setDeletingRoomDetails] = useState(null)
+    const [isDeletingModal, setIsDeletingModal] = useState(false)
 
     // =========================
     // INLINE EDIT STATES
@@ -194,6 +197,25 @@ function Rooms() {
             toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin")
         }
 
+    }
+
+    const deleteRoom = async () => {
+        try {
+            setFetchLoading(true)
+            const response = await deleteRoomById(hotelId, deletingRoomDetails?._id)
+            toast.success(response?.data?.message)
+            setFetchLoading(false)
+        }
+        catch (error) {
+            setFetchLoading(false)
+            if (!isProduction) {
+                console.log("========= ERROR DEBUG START =========");
+                console.log("Error:", error);
+                console.log("Response:", error?.response);
+                console.log("========= ERROR DEBUG END =========");
+            }
+            toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin")
+        }
     }
 
     const inputClass =
@@ -425,6 +447,10 @@ function Rooms() {
                                                             </button>
 
                                                             <button
+                                                                onClick={() => {
+                                                                    setDeletingRoomDetails(room)
+                                                                    setIsDeletingModal(true)
+                                                                }}
                                                                 className="text-[#1d3561] transition hover:text-red-500"
                                                                 title="Delete Room"
                                                             >
@@ -462,6 +488,13 @@ function Rooms() {
                 <AddRoom
                     hotelId={hotelId}
                     onClose={() => setIsAddRoom(false)}
+                />
+            )}
+
+            {/* Delete Room Popup */}
+            {isDeletingModal && (
+                <DeleteModal
+                    onClose={()=>setIsDeletingModal(false)} onDelete={()=>deleteRoom()}  itemName = {deletingRoomDetails?.roomName} confirmText = {deletingRoomDetails?.roomName}
                 />
             )}
         </div>

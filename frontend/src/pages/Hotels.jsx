@@ -12,6 +12,7 @@ import { clearHotels, setHotelPageLimit } from '../redux/slices/hotelSlice'
 import { toast } from 'react-toastify'
 import { useRegionHooks } from '../hooks/useRegionHooks'
 import { useCommonHooks } from '../hooks/useCommonHooks'
+import DeleteModal from '../components/DeleteModals/DeleteModal'
 
 
 const CATEGORIES = ['All', 'Budget', 'Premium', 'Luxury']
@@ -70,7 +71,7 @@ function FilterSelect({ label, value, onChange, options }) {
 export default function Hotels() {
   const navigate = useNavigate()
   const dispatch = useDispatch()
-  const { getHotels, } = useHotelHooks();
+  const { getHotels,deleteHotelById } = useHotelHooks();
   const { getRegionsForOrg} = useRegionHooks()
   const {searchHotels} = useCommonHooks()
 
@@ -85,6 +86,9 @@ export default function Hotels() {
   const pagination = useSelector((state) => state.hotel.paginationHotels)
   const pageLimit = useSelector((state) => state.hotel.HotelPageLimit)
   const [searchedHotels, setSearchedHotels ] = useState([])
+
+  const [isDeleteModal, setIsDeleteModal] = useState(false)
+  const [deleteHotelDetails, setDeleteHotelDetails] = useState(null)
 
   const [isSearching, setIsSearching] = useState(false)
   const [fetchLoading, setFetchLoading] = useState(false)
@@ -206,8 +210,25 @@ export default function Hotels() {
   const clearFilters = () => { setFilterRegion('All'); setFilterSub('All'); setFilterCat('All') }
   const handleEdit = (h) => navigate(`update-hotel/${h?._id}`)
   const handleView = (h) => navigate(`view-hotel/${h?._id}`)
-  const handleDelete = (h) => setDeleteTarget(h)
-  const confirmDelete = () => { console.log('Delete:', deleteTarget?._id); setDeleteTarget(null) }
+
+  const deleteHotel = async()=>{
+    try{
+      setFetchLoading(true)
+      const response = await deleteHotelById(deleteHotelDetails?._id, deleteHotelDetails?.regionId?._id)
+      toast.success(response?.data?.message)
+      setFetchLoading(false)
+    }
+    catch(error){
+      setFetchLoading(false)
+      if (!isProduction) {
+        console.log("========= ERROR DEBUG START =========");
+        console.log("Error:", error);
+        console.log("Response:", error?.response);
+        console.log("========= ERROR DEBUG END =========");
+      }
+      toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin")
+    }
+  }
 
   return (
     <div className="min-h-screen bg-white p-6 md:p-8 ">
@@ -345,7 +366,11 @@ export default function Hotels() {
                     key={h._id}
                     hotel={h}
                     onEdit={handleEdit}
-                    onDelete={handleDelete}
+                    onDelete={()=>{
+                      setIsDeleteModal(true)
+                      setDeleteHotelDetails(h)
+                    }
+                    }
                     onView={handleView}
                   />
                 ))}
@@ -440,35 +465,10 @@ export default function Hotels() {
 
       </div>
 
-      {/* ── Delete Modal ─────────────────────────────────────────────────── */}
-      {deleteTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm px-4">
-          <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-6 w-full max-w-sm">
-            <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
-              <Trash2 size={22} className="text-red-500" />
-            </div>
-            <h3 className="text-center font-bold text-lg text-[#18305C] mb-1">Delete Hotel?</h3>
-            <p className="text-center text-sm text-gray-500 mb-1">
-              <span className="font-semibold text-[#18305C]">{deleteTarget?.hotelName}</span>
-            </p>
-            <p className="text-center text-xs text-gray-400 mb-6">This action cannot be undone.</p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setDeleteTarget(null)}
-                className="flex-1 py-2.5 border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmDelete}
-                className="flex-1 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-semibold transition-colors"
-              >
-                Yes, Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Delete Hotel  */}
+      {isDeleteModal &&
+        <DeleteModal onClose={()=>setIsDeleteModal(false)} onDelete={()=>deleteHotel()} itemName = {deleteHotelDetails?.hotelName} confirmText = {deleteHotelDetails?.hotelName}/>
+      }
     </div>
   )
 }

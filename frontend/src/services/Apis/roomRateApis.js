@@ -5,5 +5,6 @@ export const roomRateEndpoints  = {
     ADD_ROOM_RATE : BASE_URL + '/add-room-rate',
     GET_ROOM_RATES : BASE_URL + '/get-room-rates',
     UPDATE_ROOM_RATE : BASE_URL + '/update-room-rates',
+    DELETE_ROOM_RATE : BASE_URL + '/delete-room-rate',
 }
 

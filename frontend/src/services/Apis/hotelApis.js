@@ -7,5 +7,6 @@ export const hotelEndpoinsts  = {
     GET_HOTEL_BY_ID : BASE_URL + '/get-hotel-by-id',
     UPDATE_HOTEL_BY_ID : BASE_URL + '/update-hotel-by-id',
     SEARCH_HOTEL : BASE_URL + '/search-hotels',
+    DELETE_HOTEL : BASE_URL + '/delete-hotel',
 }
 

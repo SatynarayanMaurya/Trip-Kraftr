@@ -2,7 +2,8 @@
 import mongoose from "mongoose";
 import Hotel from "../models/hotel.model.js"
 import { deleteImageFromCloudinary, uploadImageToCloudinary } from "../utils/uploadToCloudinary.js";
-
+import Room from "../models/room.model.js"
+import RoomRate from "../models/roomRate.model.js"
 
 
 export const addHotel = async (req, res) => {
@@ -182,11 +183,11 @@ export const getHotelById = async (req, res) => {
     try {
         const { hotelId } = req.params;
 
-        console.log("Hotel Id : ",hotelId)
-        if(!hotelId){
+        console.log("Hotel Id : ", hotelId)
+        if (!hotelId) {
             return res.status(400).json({
-                success:false,
-                message:"Hotel Id not found"
+                success: false,
+                message: "Hotel Id not found"
             })
         }
         // Validate hotelId as a proper MongoDB ObjectId
@@ -357,7 +358,7 @@ export const updateHotelById = async (req, res) => {
         return res.status(200).json({
             success: true,
             message: "Hotel updated successfully",
-            updatedHotel :hotel
+            updatedHotel: hotel
         });
 
     } catch (error) {
@@ -366,6 +367,82 @@ export const updateHotelById = async (req, res) => {
         return res.status(500).json({
             success: false,
             message: error?.message || "Internal Server Error"
+        });
+    }
+};
+
+
+export const deleteHotelById = async (req, res) => {
+    const session = await mongoose.startSession();
+
+    try {
+        const { hotelId, regionId } = req.body;
+
+        if (!hotelId || !regionId) {
+            return res.status(400).json({
+                success: false,
+                message: "HotelId and RegionId are required",
+            });
+        }
+
+        session.startTransaction();
+
+        // 1. Delete hotel
+        const deletedHotel = await Hotel.findOneAndDelete(
+            {
+                org_id: req.user.org_id,
+                regionId,
+                _id: hotelId,
+            },
+            { session }
+        );
+
+        if (!deletedHotel) {
+            await session.abortTransaction();
+            session.endSession();
+
+            return res.status(404).json({
+                success: false,
+                message: "Hotel not found",
+            });
+        }
+
+        // 2. Delete related rooms
+        const deletedRoom = await Room.deleteMany(
+            {
+                org_id: req.user.org_id,
+                hotelId,
+            },
+            { session }
+        );
+
+        // 3. Delete room rates
+        const deletedRoomRate = await RoomRate.deleteMany(
+            {
+                org_id: req.user.org_id,
+                hotelId,
+            },
+            { session }
+        );
+
+        await session.commitTransaction();
+        session.endSession();
+
+        return res.status(200).json({
+            success: true,
+            message: "Hotel Deleted Successfully",
+            deletedHotel,
+            roomsDeletedCount: deletedRoom.deletedCount,
+            roomRatesDeletedCount: deletedRoomRate.deletedCount,
+        });
+
+    } catch (error) {
+        await session.abortTransaction();
+        session.endSession();
+
+        return res.status(500).json({
+            success: false,
+            message: error?.message || "Internal Server Error",
         });
     }
 };

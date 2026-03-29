@@ -17,15 +17,17 @@ import {
   ChevronDown,
   ChevronRight,
   CalendarDays,
+  Trash2,
   Hotel,
   ArrowLeft
 } from "lucide-react";
+import DeleteModal from "../../DeleteModals/DeleteModal";
 
 function RoomRates() {
   const navigate = useNavigate()
   const { getHotelById } = useHotelHooks();
   const { getRooms } = useRoomHooks();
-  const { getRoomRates,updateRoomRate,addRoomRate } = useRoomRateHooks();
+  const { getRoomRates,updateRoomRate,addRoomRate,deleteRoomRate } = useRoomRateHooks();
 
   const [isAddRoomRate, setIsAddRoomRate] = useState(false);
   const isProduction = useSelector((state) => state.user.isProduction);
@@ -35,13 +37,15 @@ function RoomRates() {
   const [allRooms, setAllRooms] = useState([]);
   const [fetchLoading, setFetchLoading] = useState(false);
   const { rooms, hotel } = location.state || {};
-  const [allRoomRates, setAllRoomRates] = useState([]);
+  const allRoomRates = useSelector((state)=>state.roomRate.allRoomRates?.[hotelId])
 
   // UI States
   const [expandedIds, setExpandedIds] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [editingData, setEditingData] = useState(null);
   const [copiedDrafts, setCopiedDrafts] = useState([]);
+  const [isDeleteModal, setIsDeleteModal] = useState(false)
+  const [deletingRoomRateDetails, setDeletingRoomRateDetails] = useState(null)
 
   // -----------------------------
   // Fetch hotel details
@@ -120,8 +124,6 @@ function RoomRates() {
       setFetchLoading(true);
       const response = await getRoomRates(hotelId);
       const rates = response?.data?.allRoomRates || [];
-      setAllRoomRates(rates);
-
       // First one expanded by default
       if (rates.length > 0) {
         setExpandedIds([rates[0]._id]);
@@ -145,7 +147,9 @@ function RoomRates() {
 
   useEffect(() => {
     if (hotelId) {
-      fetchRoomRates();
+      if(!allRoomRates){
+        fetchRoomRates();
+      }
     }
   }, [hotelId]);
 
@@ -158,6 +162,24 @@ function RoomRates() {
     return d.toLocaleDateString("en-GB");
   };
 
+  const deleteThisRoomRate = async()=>{
+    try{
+      setFetchLoading(true)
+      const response = await deleteRoomRate(hotelId,deletingRoomRateDetails?._id)
+      toast.success(response?.data?.message)
+      setFetchLoading(false)
+    }
+    catch(error){
+      setFetchLoading(false)
+      if (!isProduction) {
+        console.log("========= ERROR DEBUG START =========");
+        console.log("Error:", error);
+        console.log("Response:", error?.response);
+        console.log("========= ERROR DEBUG END =========");
+      }
+      toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin")
+    }
+  }
 
   const formatDateForInput = (date) => {
     if (!date) return "";
@@ -274,10 +296,8 @@ function RoomRates() {
         return;
       }
 
-      console.log("Updated new Rate Plan Data:", editingData);
       const response = await updateRoomRate(hotelId,editingData)
-      console.log("Response : ",response)
-      toast.success("Updated data logged in console");
+      toast.success(response?.data?.message);
       setEditingId(null);
       setEditingData(null);
     }
@@ -386,14 +406,16 @@ function RoomRates() {
         ...draft,
         hotelId:hotelId
       }
+      setFetchLoading(true)
       const response  = await addRoomRate(payload)
-      console.log("Response : ",response)
-  
+      toast.success(response?.data?.message)
+      setFetchLoading(false)
       setCopiedDrafts((prev) =>
         prev.filter((item) => item.draftId !== draft.draftId)
-      );
-    }
-    catch(error){
+    );
+  }
+  catch(error){
+      setFetchLoading(false)
       if (!isProduction) {
         console.log("========= ERROR DEBUG START =========");
         console.log("Error:", error);
@@ -556,7 +578,7 @@ function RoomRates() {
                 <button
                   type="button"
                   onClick={() => startEdit(rate)}
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#ED5F8D] text-white shadow-sm transition hover:bg-pink-600"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#ED5F8D] text-white shadow-sm transition hover:bg-pink-600 cursor-pointer"
                   title="Edit"
                 >
                   <Pencil size={16} />
@@ -564,8 +586,21 @@ function RoomRates() {
 
                 <button
                   type="button"
+                  // onClick={() => handleCopyRate(rate)}
+                  onClick={()=>{
+                    setDeletingRoomRateDetails(rate)
+                    setIsDeleteModal(true)
+                  }}
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-red-400 text-white shadow-sm transition hover:bg-red-600 cursor-pointer"
+                  title="Delete"
+                >
+                  <Trash2 size={16} />
+                </button>
+
+                <button
+                  type="button"
                   onClick={() => handleCopyRate(rate)}
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#ED5F8D] text-white shadow-sm transition hover:bg-pink-600"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#ED5F8D] text-white shadow-sm transition hover:bg-pink-600 cursor-pointer"
                   title="Copy"
                 >
                   <Copy size={16} />
@@ -822,157 +857,16 @@ function RoomRates() {
           allRooms={allRooms}
         />
       )}
+
+      {/* Delete Room Rate Popup */}
+      {isDeleteModal && (
+        <DeleteModal
+          onClose={() => setIsDeleteModal(false)}
+          onDelete={()=>deleteThisRoomRate()} itemName = {deletingRoomRateDetails?.ratePlanName} confirmText = {deletingRoomRateDetails?.ratePlanName} 
+        />
+      )}
     </div>
   );
 }
 
 export default RoomRates;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// import React, { useEffect, useState } from 'react'
-// import {useLocation, useParams} from 'react-router-dom'
-// import AddRoomRate from './AddRoomRate'
-// import { useSelector } from 'react-redux'
-// import { toast } from 'react-toastify'
-// import { useHotelHooks } from '../../../hooks/useHotelHooks'
-// import { useRoomHooks } from '../../../hooks/useRoomHooks'
-// import { useRoomRateHooks } from '../../../hooks/useRoomRateHooks'
-
-// function RoomRates() {
-//   const {getHotelById} = useHotelHooks()
-//   const {getRooms,} = useRoomHooks()
-//   const {getRoomRates} = useRoomRateHooks()
-//     const [isAddRoomRate, setIsAddRoomRate] = useState(false)
-//     const isProduction = useSelector((state)=>state.user.isProduction)
-//     const {hotelId} = useParams()
-//     const [hotelDetails, setHotelDetails] = useState({})
-//     const location = useLocation()
-//     const [allRooms, setAllRooms] = useState([])
-//     const [fetchLoading, setFetchLoading] = useState(false)
-//     const {rooms,hotel} = location.state||{}
-//     const [allRoomRates, setAllRoomRates] = useState([])
-
-
-//     const fetchHotelDetails = async () => {
-//       try {
-//           setFetchLoading(true)
-//           const response = await getHotelById(hotelId)
-//           const data = response?.data?.foundHotel
-//           setHotelDetails(data)
-//       } catch (error) {
-//           if (!isProduction) {
-//               console.log('========= ERROR DEBUG START =========')
-//               console.log('Error:', error)
-//               console.log('Response:', error?.response)
-//               console.log('========= ERROR DEBUG END =========')
-//           }
-//           toast.error(error?.response?.data?.message || error?.message || 'Error fetching hotel details')
-//       } finally {
-//           setFetchLoading(false)
-//       }
-//   }
-
-//   useEffect(() => {
-//       if (hotel) {
-//           setHotelDetails(hotel)
-//       }
-//       else {
-//           fetchHotelDetails()
-//       }
-
-//   }, [hotelId])
-
-
-
-//   const fetchRooms = async () => {
-//       try {
-//           setFetchLoading(true)
-//           console.log("Going to fetch : Rooms")
-//           const response = await getRooms(hotelId)
-//           setAllRooms(response?.data?.allRooms)
-//           setFetchLoading(false)
-//       }
-//       catch (error) {
-//           setFetchLoading(false)
-//           if (!isProduction) {
-//               console.log("========= ERROR DEBUG START =========");
-//               console.log("Error:", error);
-//               console.log("Response:", error?.response);
-//               console.log("========= ERROR DEBUG END =========");
-//           }
-//           toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin")
-//       }
-//   }
-
-//   useEffect(() => {
-//       if (hotelId) {
-//         if(rooms){
-//           setAllRooms(rooms)
-//         }
-//         else{
-//           fetchRooms()
-//         }
-//       }
-//   }, [hotelId])
-
-//   const fetchRoomRates = async()=>{
-//     try{
-//       setFetchLoading(true)
-//       const response = await getRoomRates(hotelId)
-//       // console.log("Response : ",response)
-//       setAllRoomRates(response?.data?.allRoomRates)
-//       setFetchLoading(false)
-//     }
-//     catch(error){
-//       setFetchLoading(false)
-//       if (!isProduction) {
-//         console.log("========= ERROR DEBUG START =========");
-//         console.log("Error:", error);
-//         console.log("Response:", error?.response);
-//         console.log("========= ERROR DEBUG END =========");
-//       }
-//       toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin")
-//     }
-//   }
-
-//   useEffect(()=>{
-//     fetchRoomRates()
-//   },[])
-
-
-//     console.log("Room rates : ",allRoomRates)
-
-
-//   return (
-//     <div>RoomRates
-//         <button onClick={()=>setIsAddRoomRate(true)} className='bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg'>Add Room Rate</button>
-//         {
-//             isAddRoomRate&&
-//             <AddRoomRate onClose={()=>setIsAddRoomRate(false)} hotelId={hotelId} allRooms={allRooms}/>
-//         }
-//     </div>
-//   )
-// }
-
-// export default RoomRates

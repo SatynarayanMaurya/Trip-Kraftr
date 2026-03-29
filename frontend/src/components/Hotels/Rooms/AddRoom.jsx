@@ -4,10 +4,11 @@ import { useSelector } from "react-redux";
 import { useRoomHooks } from "../../../hooks/useRoomHooks";
 import { toast } from "react-toastify";
 
-function AddRoom({ onClose,hotelId }) {
+function AddRoom({ onClose, hotelId }) {
 
-    const isProduction = useSelector((state)=>state.user.isProduction)
-    const {addRoom} = useRoomHooks()
+    const isProduction = useSelector((state) => state.user.isProduction)
+    const [loading, setLoading] = useState(false)
+    const { addRoom } = useRoomHooks()
     const [formData, setFormData] = useState({
         roomName: "",
         capacity: "",
@@ -87,7 +88,7 @@ function AddRoom({ onClose,hotelId }) {
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSubmit = async(e) => {
+    const handleSubmit = async (e) => {
         try {
 
 
@@ -114,10 +115,11 @@ function AddRoom({ onClose,hotelId }) {
             };
 
             // console.log("Room Added:", payload);
+            setLoading(true)
             const response = await addRoom(payload)
-            console.log("response : ",response)
             toast.success(response?.data?.message)
-            
+            setLoading(false)
+
             // Reset after submit
             setFormData({
                 roomName: "",
@@ -131,6 +133,7 @@ function AddRoom({ onClose,hotelId }) {
             if (onClose) onClose();
         }
         catch (error) {
+            setLoading(false)
             if (!isProduction) {
                 console.log("========= ERROR DEBUG START =========");
                 console.log("Error:", error);
@@ -143,11 +146,6 @@ function AddRoom({ onClose,hotelId }) {
 
 
     };
-
-
-    const totalGuests =
-        (Number(formData.adult) || 0) + (Number(formData.children) || 0);
-    const capacityValue = Number(formData.capacity) || 0;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
@@ -189,8 +187,8 @@ function AddRoom({ onClose,hotelId }) {
                                     onChange={handleChange}
                                     placeholder="Enter room name"
                                     className={`w-full rounded-2xl border bg-white py-3 pl-11 pr-4 text-sm outline-none transition ${errors.roomName
-                                            ? "border-red-400 focus:border-red-500"
-                                            : "border-slate-300 focus:border-pink-500"
+                                        ? "border-red-400 focus:border-red-500"
+                                        : "border-slate-300 focus:border-pink-500"
                                         }`}
                                 />
                             </div>
@@ -216,8 +214,8 @@ function AddRoom({ onClose,hotelId }) {
                                     onChange={handleChange}
                                     placeholder="Enter capacity"
                                     className={`w-full rounded-2xl border bg-white py-3 pl-11 pr-4 text-sm outline-none transition ${errors.capacity
-                                            ? "border-red-400 focus:border-red-500"
-                                            : "border-slate-300 focus:border-pink-500"
+                                        ? "border-red-400 focus:border-red-500"
+                                        : "border-slate-300 focus:border-pink-500"
                                         }`}
                                 />
                             </div>
@@ -243,8 +241,8 @@ function AddRoom({ onClose,hotelId }) {
                                     onChange={handleChange}
                                     placeholder="Enter adult count"
                                     className={`w-full rounded-2xl border bg-white py-3 pl-11 pr-4 text-sm outline-none transition ${errors.adult
-                                            ? "border-red-400 focus:border-red-500"
-                                            : "border-slate-300 focus:border-pink-500"
+                                        ? "border-red-400 focus:border-red-500"
+                                        : "border-slate-300 focus:border-pink-500"
                                         }`}
                                 />
                             </div>
@@ -270,8 +268,8 @@ function AddRoom({ onClose,hotelId }) {
                                     onChange={handleChange}
                                     placeholder="Enter children count"
                                     className={`w-full rounded-2xl border bg-white py-3 pl-11 pr-4 text-sm outline-none transition ${errors.children
-                                            ? "border-red-400 focus:border-red-500"
-                                            : "border-slate-300 focus:border-pink-500"
+                                        ? "border-red-400 focus:border-red-500"
+                                        : "border-slate-300 focus:border-pink-500"
                                         }`}
                                 />
                             </div>
@@ -280,30 +278,6 @@ function AddRoom({ onClose,hotelId }) {
                             )}
                         </div>
 
-                        {/* Live Summary */}
-                        {/* <div className="rounded-2xl border border-pink-100 bg-pink-50 px-4 py-4 md:col-span-2">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <p className="text-sm font-semibold text-slate-700">
-                    Occupancy Summary
-                  </p>
-                  <p className="text-sm text-slate-500 mt-1">
-                    Adult + Children must exactly match room capacity.
-                  </p>
-                </div>
-
-                <div className="rounded-xl bg-white px-4 py-2 shadow-sm border border-slate-200">
-                  <p className="text-sm font-medium text-slate-700">
-                    Total Guests:{" "}
-                    <span className="font-bold text-pink-600">{totalGuests}</span>{" "}
-                    / Capacity:{" "}
-                    <span className="font-bold text-slate-800">
-                      {capacityValue}
-                    </span>
-                  </p>
-                </div>
-              </div>
-            </div> */}
 
                         {/* Capacity Error */}
                         {submitError && (
@@ -313,7 +287,7 @@ function AddRoom({ onClose,hotelId }) {
                         )}
                     </div>
 
-                    {/* Footer */}
+                    {/* Footer
                     <div className="mt-8 flex items-center justify-end gap-3">
                         <button
                             type="button"
@@ -328,6 +302,60 @@ function AddRoom({ onClose,hotelId }) {
                             className="rounded-2xl bg-pink-500 px-6 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-pink-600"
                         >
                             Add Room
+                        </button>
+                    </div> */}
+                    <div className="mt-8 flex items-center justify-end gap-3">
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            disabled={loading}
+                            className={`rounded-2xl border px-5 py-3 text-sm font-semibold transition 
+      ${loading
+                                    ? "border-slate-200 text-slate-400 cursor-not-allowed"
+                                    : "border-slate-300 text-slate-700 hover:bg-slate-100"
+                                }`}
+                        >
+                            Cancel
+                        </button>
+
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className={`flex items-center justify-center gap-2 rounded-2xl px-6 py-3 text-sm font-semibold text-white shadow-md transition
+      ${loading
+                                    ? "bg-pink-300 cursor-not-allowed"
+                                    : "bg-pink-500 hover:bg-pink-600"
+                                }`}
+                        >
+                            {loading ? (
+                                <>
+                                    {/* Spinner */}
+                                    <svg
+                                        className="h-4 w-4 animate-spin"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <circle
+                                            className="opacity-25"
+                                            cx="12"
+                                            cy="12"
+                                            r="10"
+                                            stroke="currentColor"
+                                            strokeWidth="4"
+                                        />
+                                        <path
+                                            className="opacity-75"
+                                            fill="currentColor"
+                                            d="M4 12a8 8 0 018-8v8H4z"
+                                        />
+                                    </svg>
+
+                                    Saving...
+                                </>
+                            ) : (
+                                "Add Room"
+                            )}
                         </button>
                     </div>
                 </form>

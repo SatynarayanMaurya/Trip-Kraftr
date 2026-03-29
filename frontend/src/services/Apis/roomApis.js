@@ -5,5 +5,6 @@ export const roomEndpoints  = {
     ADD_ROOM : BASE_URL + '/add-room',
     GET_ROOMS : BASE_URL + '/get-rooms',
     UPDATE_ROOM_BY_ID : BASE_URL + '/update-room-by-id',
+    DELETE_ROOM_BY_ID : BASE_URL + '/delete-room-by-id',
 }
 

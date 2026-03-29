@@ -5,6 +5,8 @@ const initialState = {
 
     hotelsPages: {},
 
+    hotelDetails :{},  // This is only for storing a single hotel details according for view details
+
     HotelPageLimit: 4,
 
     paginationHotels: {
@@ -148,10 +150,75 @@ export const hotelSlice = createSlice({
             state.hotelsPages = {}
         },
 
-
-
         setHotelPageLimit :  (state,action)=>{
             state.HotelPageLimit = Number(action.payload)
+        },
+
+        setHotelDetails: (state, action) => {
+          const { hotelId, hotel } = action.payload || {};
+        
+          if (!hotelId || !hotel) return;
+        
+          state.hotelDetails[hotelId] = hotel;
+        },
+
+        deleteHotelReducer: (state, action) => {
+          const deletedHotel = action.payload;
+          let found = false;
+        
+          for (const page in state.hotelsPages) {
+            let pageData = state.hotelsPages[page];
+        
+            const index = pageData.findIndex(
+              hotel => hotel._id === deletedHotel._id
+            );
+        
+            if (index !== -1) {
+              const removedHotel = pageData[index];
+        
+              // ✅ Update stats
+              if (removedHotel.is_active) {
+                state.statsHotels.activeHotel -= 1;
+              } else {
+                state.statsHotels.inactiveHotel -= 1;
+              }
+        
+              state.statsHotels.totalHotel -= 1;
+        
+              // ✅ Remove hotel
+              pageData.splice(index, 1);
+        
+              found = true;
+        
+              // ✅ Maintain pagination consistency
+              const currentPage = Number(page);
+              let nextPage = currentPage + 1;
+        
+              while (state.hotelsPages[nextPage]?.length) {
+                const nextPageData = state.hotelsPages[nextPage];
+        
+                // Move first item from next page → current page
+                pageData.push(nextPageData.shift());
+        
+                // Move forward
+                pageData = state.hotelsPages[nextPage];
+                nextPage++;
+              }
+        
+              break;
+            }
+          }
+        
+          // ✅ Update pagination
+          if (found && state.paginationHotels) {
+            state.paginationHotels.totalRecords -= 1;
+        
+            const limit = state.HotelPageLimit || 4;
+        
+            state.paginationHotels.totalPages = Math.ceil(
+              state.paginationHotels.totalRecords / limit
+            );
+          }
         }
 
     }
@@ -162,7 +229,9 @@ export const {
     setHotelsByPage,
     clearHotels,
     setHotelPageLimit,
-    updateHotel
+    updateHotel,
+    setHotelDetails,
+    deleteHotelReducer
 
 } = hotelSlice.actions
 

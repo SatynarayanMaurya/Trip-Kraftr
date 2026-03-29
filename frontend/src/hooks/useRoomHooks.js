@@ -3,7 +3,8 @@ import { apiConnector } from '../services/apiConnector'
 import { useDispatch, useSelector } from 'react-redux'
 import { setLoading } from '../redux/slices/userSlice'
 import { roomEndpoints } from '../services/Apis/roomApis';
-import { setRooms } from '../redux/slices/roomSlice';
+import { addSingleRoom, deleteSingleRoom, setRooms, updateSingleRoom } from '../redux/slices/roomSlice';
+import { deleteRoomRateForHotel } from '../redux/slices/roomRateSlice';
 
 export const useRoomHooks = () => {
     const dispatch = useDispatch();
@@ -13,7 +14,8 @@ export const useRoomHooks = () => {
         try {
             dispatch(setLoading(true));
             const response = await apiConnector("POST", roomEndpoints.ADD_ROOM, roomDetails)
-            // dispatch(addNewHotel(response?.data?.newHotel))
+            dispatch(addSingleRoom({hotelId:roomDetails?.hotelId, room:response?.data?.newRoom}))
+            dispatch(deleteRoomRateForHotel({hotelId:roomDetails?.hotelId}))
             return response;
         } catch (error) {
             throw error;
@@ -25,7 +27,6 @@ export const useRoomHooks = () => {
     const getRooms = async (hotelId) => {  // For Normal Org_admin
         try {
             const cachedPage = allRooms?.[hotelId]
-
             if (cachedPage) return cachedPage 
             dispatch(setLoading(true));
             const response = await apiConnector("GET", `${roomEndpoints.GET_ROOMS}?hotelId=${hotelId}`)
@@ -42,7 +43,21 @@ export const useRoomHooks = () => {
         try {
             dispatch(setLoading(true));
             const response = await apiConnector("PUT", `${roomEndpoints.UPDATE_ROOM_BY_ID}`,roomDetails)
-            // dispatch(setRooms({hotelId:hotelId,rooms:response?.data?.allRooms}))
+            dispatch(updateSingleRoom({hotelId:roomDetails?.hotelId,room:response?.data?.updatedRoom}))
+            return response;
+        } catch (error) {
+            throw error;
+        } finally {
+            dispatch(setLoading(false));
+        }
+    }
+
+    const deleteRoomById = async (hotelId, roomId) => {  // For Normal Org_admin
+        try {
+            dispatch(setLoading(true));
+            const response = await apiConnector("DELETE", `${roomEndpoints.DELETE_ROOM_BY_ID}`,{hotelId,roomId})
+            dispatch(deleteSingleRoom({hotelId, roomId}))
+            dispatch(deleteRoomRateForHotel({hotelId:hotelId}))
             return response;
         } catch (error) {
             throw error;
@@ -59,7 +74,8 @@ export const useRoomHooks = () => {
     return {
         addRoom,
         getRooms,
-        updateRoomById
+        updateRoomById,
+        deleteRoomById
 
     };
 };

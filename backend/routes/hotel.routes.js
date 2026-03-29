@@ -1,7 +1,7 @@
 import express from "express";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
 import { roleMiddleware } from "../middlewares/role.middleware.js";
-import { addHotel, getHotelById, getHotels, searchHotels, updateHotelById } from "../controllers/hotel.controller.js";
+import { addHotel, deleteHotelById, getHotelById, getHotels, searchHotels, updateHotelById } from "../controllers/hotel.controller.js";
 const hotelRouter = express.Router()
 
 
@@ -10,8 +10,6 @@ hotelRouter.get("/get-hotels",authMiddleware,roleMiddleware(["org_admin","operat
 hotelRouter.get("/get-hotel-by-id/:hotelId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),getHotelById)
 hotelRouter.put("/update-hotel-by-id/:hotelId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),updateHotelById)
 hotelRouter.get("/search-hotels",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),searchHotels)
-// vehicleRouter.put("/update-vehicle/:vehicleId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),updateVehicleById)
-// vehicleRouter.delete("/delete-vehicle/:vehicleId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),deleteVehicleById)
-// vehicleRouter.get("/search-vehicles",authMiddleware,searchVehicle)
+hotelRouter.delete("/delete-hotel",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),deleteHotelById)
 
 export default hotelRouter

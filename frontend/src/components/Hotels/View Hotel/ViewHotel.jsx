@@ -103,17 +103,13 @@ export default function ViewHotel() {
   const { hotelId }  = useParams()
   const navigate     = useNavigate()
 
-  const [hotelDetails, setHotelDetails] = useState(null)
+  const hotelDetails = useSelector((state)=>state.hotel.hotelDetails?.[hotelId])
   const [fetchLoading, setFetchLoading] = useState(false)
-  const [isActive,     setIsActive]     = useState(false)
 
   const fetchHotelDetails = async () => {
     try {
       setFetchLoading(true)
-      const response = await getHotelById(hotelId)
-      const data = response?.data?.foundHotel
-      setHotelDetails(data)
-      setIsActive(data?.is_active ?? false)
+      await getHotelById(hotelId)
     } catch (error) {
       if (!isProduction) {
         console.log('========= ERROR DEBUG START =========')
@@ -142,16 +138,15 @@ export default function ViewHotel() {
       {/* ── Page title ────────────────────────────────────────────────── */}
       <div className="mb-5">
         <h1 className="text-2xl font-bold text-[#18305C]">Hotel Details</h1>
-        <p className="text-sm text-gray-400 mt-0.5">Choose Path</p>
+        <p className="text-sm text-gray-400 mt-0.5">The hotel provides comfortable rooms, essential amenities, and quality services for a pleasant stay.</p>
+        <button
+                    onClick={() => navigate(-1)}
+                    className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-[#18305C] mt-3 transition-colors cursor-pointer"
+                >
+                    <ArrowLeft size={15} />
+                    Back to List
+                </button>
       </div>
-
-      {/* ── Back button ───────────────────────────────────────────────── */}
-      <button
-        onClick={() => navigate(-1)}
-        className="w-9 h-9 rounded-lg bg-[#E91E8C] hover:bg-pink-600 flex items-center justify-center transition-colors shadow-sm shadow-pink-200 mb-5 shrink-0"
-      >
-        <ArrowLeft size={16} className="text-white" />
-      </button>
 
       {/* ── Hotel name + region pills ─────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-5">
@@ -229,7 +224,8 @@ export default function ViewHotel() {
             >
               <Pencil size={15} />
             </button>
-            <Toggle checked={isActive} onChange={setIsActive} />
+            {/* <Toggle checked={isActive} onChange={setIsActive} /> */}
+            <Toggle checked={hotelDetails?.is_active} />
           </div>
         </div>
 

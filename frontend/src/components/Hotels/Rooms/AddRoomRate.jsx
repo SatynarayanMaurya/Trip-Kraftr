@@ -4,10 +4,11 @@ import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { useRoomRateHooks } from "../../../hooks/useRoomRateHooks";
 
-function AddRoomRate({ onClose, hotelId ,allRooms}) {
+function AddRoomRate({ onClose, hotelId, allRooms }) {
 
-    const isProduction = useSelector((state)=>state.user.isProduction)
-    const {addRoomRate} = useRoomRateHooks()
+    const isProduction = useSelector((state) => state.user.isProduction)
+    const { addRoomRate } = useRoomRateHooks()
+    const [loading, setLoading] = useState(false)
     // console.log("allRooms : ",allRooms)
 
     const initialRoomRates = allRooms?.map((room) => ({
@@ -122,7 +123,7 @@ function AddRoomRate({ onClose, hotelId ,allRooms}) {
     // ---------------------------------------
     // Submit
     // ---------------------------------------
-    const handleSubmit =async (e) => {
+    const handleSubmit = async (e) => {
         try {
 
             e.preventDefault();
@@ -172,11 +173,14 @@ function AddRoomRate({ onClose, hotelId ,allRooms}) {
                 },
             };
 
+            setLoading(true)
             const response = await addRoomRate(payload)
-            toast.success(response?.data?.message )
+            toast.success(response?.data?.message)
+            setLoading(false)
             if (onClose) onClose();
         }
         catch (error) {
+            setLoading(false)
             if (!isProduction) {
                 console.log("========= ERROR DEBUG START =========");
                 console.log("Error:", error);
@@ -239,8 +243,8 @@ function AddRoomRate({ onClose, hotelId ,allRooms}) {
                                     onChange={handleBasicChange}
                                     placeholder="e.g. Diwali Offer"
                                     className={`${inputStyle} ${errors.ratePlanName
-                                            ? "border-red-400 focus:border-red-500"
-                                            : ""
+                                        ? "border-red-400 focus:border-red-500"
+                                        : ""
                                         }`}
                                 />
                             </div>
@@ -267,8 +271,8 @@ function AddRoomRate({ onClose, hotelId ,allRooms}) {
                                     value={formData.fromDate}
                                     onChange={handleBasicChange}
                                     className={`${inputStyle} ${errors.fromDate
-                                            ? "border-red-400 focus:border-red-500"
-                                            : ""
+                                        ? "border-red-400 focus:border-red-500"
+                                        : ""
                                         }`}
                                 />
                             </div>
@@ -322,8 +326,8 @@ function AddRoomRate({ onClose, hotelId ,allRooms}) {
                                         <tr
                                             key={room.roomId}
                                             className={`text-sm text-slate-700 hover:bg-slate-50 transition ${index !== formData.roomRates.length - 1
-                                                    ? "border-b border-dashed border-slate-300"
-                                                    : ""
+                                                ? "border-b border-dashed border-slate-300"
+                                                : ""
                                                 }`}
                                         >
                                             <td className="px-4 py-2">
@@ -507,22 +511,63 @@ function AddRoomRate({ onClose, hotelId ,allRooms}) {
                         </div>
                     </div>
 
-                    {/* Footer */}
+
+                    {/* Action  */}
                     <div className="mt-5 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
                         <button
                             type="button"
                             onClick={onClose}
-                            className="rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+                            disabled={loading}
+                            className={`rounded-xl border bg-white px-5 py-2.5 text-sm font-semibold shadow-sm transition
+      ${loading
+                                    ? "border-slate-200 text-slate-400 cursor-not-allowed"
+                                    : "border-slate-300 text-slate-700 hover:bg-slate-50"
+                                }`}
                         >
                             Cancel
                         </button>
 
                         <button
                             type="submit"
-                            className="inline-flex items-center justify-center gap-2 rounded-xl bg-pink-500 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition hover:bg-pink-600"
+                            disabled={loading}
+                            className={`inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-md transition
+      ${loading
+                                    ? "bg-pink-300 cursor-not-allowed"
+                                    : "bg-pink-500 hover:bg-pink-600"
+                                }`}
                         >
-                            <Save size={16} />
-                            Save
+                            {loading ? (
+                                <>
+                                    {/* Spinner */}
+                                    <svg
+                                        className="h-4 w-4 animate-spin"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <circle
+                                            className="opacity-25"
+                                            cx="12"
+                                            cy="12"
+                                            r="10"
+                                            stroke="currentColor"
+                                            strokeWidth="4"
+                                        />
+                                        <path
+                                            className="opacity-75"
+                                            fill="currentColor"
+                                            d="M4 12a8 8 0 018-8v8H4z"
+                                        />
+                                    </svg>
+
+                                    Saving...
+                                </>
+                            ) : (
+                                <>
+                                    <Save size={16} />
+                                    Save
+                                </>
+                            )}
                         </button>
                     </div>
                 </form>
@@ -535,491 +580,3 @@ export default AddRoomRate;
 
 
 
-
-
-
-
-
-
-
-
-
-
-// import React, { useMemo, useState } from "react";
-// import {
-//   X,
-//   CalendarDays,
-//   Save,
-//   Tag,
-//   IndianRupee,
-//   BedDouble,
-// } from "lucide-react";
-
-// function AddRoomRate({ isOpen = true, onClose }) {
-//   // ---------------------------------------
-//   // Dummy rooms for now
-//   // ---------------------------------------
-//   const dummyRooms = useMemo(
-//     () => [
-//       { id: "1", roomName: "Deluxe Garden View" },
-//       { id: "2", roomName: "Luxury Suite" },
-//       { id: "3", roomName: "Extra Mattress" },
-//       { id: "4", roomName: "Family Room" },
-//     ],
-//     []
-//   );
-
-//   const initialRates = dummyRooms.map((room) => ({
-//     roomId: room.id,
-//     roomName: room.roomName,
-//     ep: "",
-//     cp: "",
-//     map: "",
-//     ap: "",
-//   }));
-
-//   const [formData, setFormData] = useState({
-//     ratePlanName: "",
-//     fromDate: "",
-//     toDate: "",
-//     roomRates: initialRates,
-//   });
-
-//   const [errors, setErrors] = useState({});
-//   const [rowErrors, setRowErrors] = useState({});
-
-//   if (!isOpen) return null;
-
-//   const handleBasicChange = (e) => {
-//     const { name, value } = e.target;
-
-//     setFormData((prev) => ({
-//       ...prev,
-//       [name]: value,
-//     }));
-
-//     setErrors((prev) => ({
-//       ...prev,
-//       [name]: "",
-//     }));
-//   };
-
-//   const handleRateChange = (roomId, field, value) => {
-//     // only numbers allowed
-//     if (value !== "" && !/^\d+$/.test(value)) return;
-
-//     setFormData((prev) => ({
-//       ...prev,
-//       roomRates: prev.roomRates.map((room) =>
-//         room.roomId === roomId ? { ...room, [field]: value } : room
-//       ),
-//     }));
-
-//     setRowErrors((prev) => ({
-//       ...prev,
-//       [roomId]: {
-//         ...prev[roomId],
-//         [field]: "",
-//       },
-//     }));
-//   };
-
-//   const validateForm = () => {
-//     const newErrors = {};
-//     const newRowErrors = {};
-
-//     // Basic validations
-//     if (!formData.ratePlanName.trim()) {
-//       newErrors.ratePlanName = "Rate plan name is required.";
-//     }
-
-//     if (!formData.fromDate) {
-//       newErrors.fromDate = "From date is required.";
-//     }
-
-//     if (!formData.toDate) {
-//       newErrors.toDate = "To date is required.";
-//     }
-
-//     if (formData.fromDate && formData.toDate) {
-//       const from = new Date(formData.fromDate);
-//       const to = new Date(formData.toDate);
-
-//       if (to < from) {
-//         newErrors.toDate = "To date cannot be earlier than From date.";
-//       }
-//     }
-
-//     // Room rate validations
-//     formData.roomRates.forEach((room) => {
-//       const roomFieldErrors = {};
-
-//       if (room.ep === "") roomFieldErrors.ep = "Required";
-//       if (room.cp === "") roomFieldErrors.cp = "Required";
-//       if (room.map === "") roomFieldErrors.map = "Required";
-//       if (room.ap === "") roomFieldErrors.ap = "Required";
-
-//       if (Object.keys(roomFieldErrors).length > 0) {
-//         newRowErrors[room.roomId] = roomFieldErrors;
-//       }
-//     });
-
-//     setErrors(newErrors);
-//     setRowErrors(newRowErrors);
-
-//     return (
-//       Object.keys(newErrors).length === 0 &&
-//       Object.keys(newRowErrors).length === 0
-//     );
-//   };
-
-//   const handleSubmit = (e) => {
-//     e.preventDefault();
-
-//     const isValid = validateForm();
-//     if (!isValid) return;
-
-//     const payload = {
-//       ratePlanName: formData.ratePlanName.trim(),
-//       fromDate: formData.fromDate,
-//       toDate: formData.toDate,
-//       roomRates: formData.roomRates.map((room) => ({
-//         roomId: room.roomId,
-//         roomName: room.roomName,
-//         ep: Number(room.ep),
-//         cp: Number(room.cp),
-//         map: Number(room.map),
-//         ap: Number(room.ap),
-//       })),
-//     };
-
-//     console.log("Room Rate Payload:", payload);
-
-//     if (onClose) onClose();
-//   };
-
-//   const inputStyle =
-//     "w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-10 pr-4 text-sm outline-none transition focus:border-pink-500";
-//   const tableInputStyle =
-//     "w-full min-w-[90px] rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-pink-500";
-
-//   return (
-//     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6">
-//       <div className="w-full max-w-6xl overflow-hidden rounded-3xl bg-white shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-//         {/* Header */}
-//         <div className="flex items-start justify-between border-b border-slate-200 bg-gradient-to-r from-pink-50 to-white px-6 py-5">
-//           <div>
-//             <h2 className="text-2xl font-bold text-[#1d3561]">
-//               Add Room Rate
-//             </h2>
-//             <p className="mt-1 text-sm text-slate-500">
-//               Create a seasonal or special pricing plan for room categories.
-//             </p>
-//           </div>
-
-//           <button
-//             type="button"
-//             onClick={onClose}
-//             className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
-//           >
-//             <X size={20} />
-//           </button>
-//         </div>
-
-//         {/* Form */}
-//         <form onSubmit={handleSubmit} className="p-6">
-//           {/* Top Fields */}
-//           <div className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
-//             {/* Rate Plan Name */}
-//             <div>
-//               <label className="mb-2 block text-sm font-semibold text-slate-700">
-//                 Rate Plan Name
-//               </label>
-//               <div className="relative">
-//                 <Tag
-//                   size={18}
-//                   className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
-//                 />
-//                 <input
-//                   type="text"
-//                   name="ratePlanName"
-//                   value={formData.ratePlanName}
-//                   onChange={handleBasicChange}
-//                   placeholder="e.g. Diwali Offer"
-//                   className={`${inputStyle} ${
-//                     errors.ratePlanName
-//                       ? "border-red-400 focus:border-red-500"
-//                       : ""
-//                   }`}
-//                 />
-//               </div>
-//               {errors.ratePlanName && (
-//                 <p className="mt-2 text-sm text-red-500">
-//                   {errors.ratePlanName}
-//                 </p>
-//               )}
-//             </div>
-
-//             {/* From Date */}
-//             <div>
-//               <label className="mb-2 block text-sm font-semibold text-slate-700">
-//                 From
-//               </label>
-//               <div className="relative">
-//                 <CalendarDays
-//                   size={18}
-//                   className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
-//                 />
-//                 <input
-//                   type="date"
-//                   name="fromDate"
-//                   value={formData.fromDate}
-//                   onChange={handleBasicChange}
-//                   className={`${inputStyle} ${
-//                     errors.fromDate
-//                       ? "border-red-400 focus:border-red-500"
-//                       : ""
-//                   }`}
-//                 />
-//               </div>
-//               {errors.fromDate && (
-//                 <p className="mt-2 text-sm text-red-500">{errors.fromDate}</p>
-//               )}
-//             </div>
-
-//             {/* To Date */}
-//             <div>
-//               <label className="mb-2 block text-sm font-semibold text-slate-700">
-//                 To
-//               </label>
-//               <div className="relative">
-//                 <CalendarDays
-//                   size={18}
-//                   className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
-//                 />
-//                 <input
-//                   type="date"
-//                   name="toDate"
-//                   value={formData.toDate}
-//                   onChange={handleBasicChange}
-//                   className={`${inputStyle} ${
-//                     errors.toDate ? "border-red-400 focus:border-red-500" : ""
-//                   }`}
-//                 />
-//               </div>
-//               {errors.toDate && (
-//                 <p className="mt-2 text-sm text-red-500">{errors.toDate}</p>
-//               )}
-//             </div>
-//           </div>
-
-//           {/* Table Card */}
-//           <div className="overflow-hidden rounded-2xl border border-slate-200 shadow-sm">
-//             <div className="border-b border-slate-200 bg-slate-50 px-5 py-4">
-//               <h3 className="text-lg font-bold text-[#1d3561]">
-//                 Room Rate Matrix
-//               </h3>
-//               <p className="mt-1 text-sm text-slate-500">
-//                 Enter pricing for each room category under all meal plans.
-//               </p>
-//             </div>
-
-//             <div className="overflow-x-auto">
-//               <table className="min-w-full">
-//                 <thead className="bg-[#f2f2f5]">
-//                   <tr className="text-left text-sm font-bold text-[#1d3561]">
-//                     <th className="px-5 py-4 min-w-[250px]">Room Category</th>
-//                     <th className="px-5 py-4 min-w-[140px]">EP</th>
-//                     <th className="px-5 py-4 min-w-[140px]">CP</th>
-//                     <th className="px-5 py-4 min-w-[140px]">MAP</th>
-//                     <th className="px-5 py-4 min-w-[140px]">AP</th>
-//                   </tr>
-//                 </thead>
-
-//                 <tbody>
-//                   {formData.roomRates.map((room, index) => (
-//                     <tr
-//                       key={room.roomId}
-//                       className={`text-sm text-slate-700 ${
-//                         index !== formData.roomRates.length - 1
-//                           ? "border-b border-dashed border-slate-300"
-//                           : ""
-//                       } hover:bg-slate-50 transition`}
-//                     >
-//                       {/* Room Name */}
-//                       <td className="px-5 py-4">
-//                         <div className="flex items-center gap-3 font-medium text-[#1d3561]">
-//                           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-pink-50">
-//                             <BedDouble size={18} className="text-pink-500" />
-//                           </div>
-//                           <span>{room.roomName}</span>
-//                         </div>
-//                       </td>
-
-//                       {/* EP */}
-//                       <td className="px-5 py-4 align-top">
-//                         <div className="space-y-1">
-//                           <div className="relative">
-//                             <IndianRupee
-//                               size={15}
-//                               className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-//                             />
-//                             <input
-//                               type="text"
-//                               value={room.ep}
-//                               onChange={(e) =>
-//                                 handleRateChange(
-//                                   room.roomId,
-//                                   "ep",
-//                                   e.target.value
-//                                 )
-//                               }
-//                               placeholder="Enter EP"
-//                               className={`${tableInputStyle} pl-8 ${
-//                                 rowErrors?.[room.roomId]?.ep
-//                                   ? "border-red-400 focus:border-red-500"
-//                                   : ""
-//                               }`}
-//                             />
-//                           </div>
-//                           {rowErrors?.[room.roomId]?.ep && (
-//                             <p className="text-xs text-red-500">
-//                               {rowErrors[room.roomId].ep}
-//                             </p>
-//                           )}
-//                         </div>
-//                       </td>
-
-//                       {/* CP */}
-//                       <td className="px-5 py-4 align-top">
-//                         <div className="space-y-1">
-//                           <div className="relative">
-//                             <IndianRupee
-//                               size={15}
-//                               className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-//                             />
-//                             <input
-//                               type="text"
-//                               value={room.cp}
-//                               onChange={(e) =>
-//                                 handleRateChange(
-//                                   room.roomId,
-//                                   "cp",
-//                                   e.target.value
-//                                 )
-//                               }
-//                               placeholder="Enter CP"
-//                               className={`${tableInputStyle} pl-8 ${
-//                                 rowErrors?.[room.roomId]?.cp
-//                                   ? "border-red-400 focus:border-red-500"
-//                                   : ""
-//                               }`}
-//                             />
-//                           </div>
-//                           {rowErrors?.[room.roomId]?.cp && (
-//                             <p className="text-xs text-red-500">
-//                               {rowErrors[room.roomId].cp}
-//                             </p>
-//                           )}
-//                         </div>
-//                       </td>
-
-//                       {/* MAP */}
-//                       <td className="px-5 py-4 align-top">
-//                         <div className="space-y-1">
-//                           <div className="relative">
-//                             <IndianRupee
-//                               size={15}
-//                               className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-//                             />
-//                             <input
-//                               type="text"
-//                               value={room.map}
-//                               onChange={(e) =>
-//                                 handleRateChange(
-//                                   room.roomId,
-//                                   "map",
-//                                   e.target.value
-//                                 )
-//                               }
-//                               placeholder="Enter MAP"
-//                               className={`${tableInputStyle} pl-8 ${
-//                                 rowErrors?.[room.roomId]?.map
-//                                   ? "border-red-400 focus:border-red-500"
-//                                   : ""
-//                               }`}
-//                             />
-//                           </div>
-//                           {rowErrors?.[room.roomId]?.map && (
-//                             <p className="text-xs text-red-500">
-//                               {rowErrors[room.roomId].map}
-//                             </p>
-//                           )}
-//                         </div>
-//                       </td>
-
-//                       {/* AP */}
-//                       <td className="px-5 py-4 align-top">
-//                         <div className="space-y-1">
-//                           <div className="relative">
-//                             <IndianRupee
-//                               size={15}
-//                               className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-//                             />
-//                             <input
-//                               type="text"
-//                               value={room.ap}
-//                               onChange={(e) =>
-//                                 handleRateChange(
-//                                   room.roomId,
-//                                   "ap",
-//                                   e.target.value
-//                                 )
-//                               }
-//                               placeholder="Enter AP"
-//                               className={`${tableInputStyle} pl-8 ${
-//                                 rowErrors?.[room.roomId]?.ap
-//                                   ? "border-red-400 focus:border-red-500"
-//                                   : ""
-//                               }`}
-//                             />
-//                           </div>
-//                           {rowErrors?.[room.roomId]?.ap && (
-//                             <p className="text-xs text-red-500">
-//                               {rowErrors[room.roomId].ap}
-//                             </p>
-//                           )}
-//                         </div>
-//                       </td>
-//                     </tr>
-//                   ))}
-//                 </tbody>
-//               </table>
-//             </div>
-//           </div>
-
-//           {/* Footer Buttons */}
-//           <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-//             <button
-//               type="button"
-//               onClick={onClose}
-//               className="rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
-//             >
-//               Cancel
-//             </button>
-
-//             <button
-//               type="submit"
-//               className="inline-flex items-center justify-center gap-2 rounded-xl bg-pink-500 px-6 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-pink-600"
-//             >
-//               <Save size={17} />
-//               Save Rate Plan
-//             </button>
-//           </div>
-//         </form>
-//       </div>
-//     </div>
-//   );
-// }
-
-// export default AddRoomRate;

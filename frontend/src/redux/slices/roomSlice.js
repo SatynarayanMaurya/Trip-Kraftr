@@ -27,7 +27,7 @@ export const roomSlice = createSlice({
     },
 
     // Add single room
-    addRoom: (state, action) => {
+    addSingleRoom: (state, action) => {
       const { hotelId, room } = action.payload
 
       if (!state.allRooms[hotelId]) {
@@ -49,22 +49,57 @@ export const roomSlice = createSlice({
         rooms[index] = room
       }
     },
+    updateSingleRoom: (state, action) => {
+      const { hotelId, room } = action.payload || {};
 
-    // Delete a room
-    removeRoom: (state, action) => {
-      const { hotelId, roomId } = action.payload
+      if (!hotelId || !room?._id) return;
 
-      const rooms = state.allRooms[hotelId]
-      if (!rooms) return
+      const rooms = state.allRooms?.[hotelId];
+      if (!rooms) return;
 
-      state.allRooms[hotelId] = rooms.filter(r => r.id !== roomId)
+      const index = rooms.findIndex(r => r._id === room._id);
+
+      if (index !== -1) {
+        rooms[index] = room; // update
+      } else {
+        rooms.push(room); // add if not exists
+      }
+    },
+
+    deleteSingleRoom: (state, action) => {
+      const { hotelId, roomId } = action.payload || {};
+
+      if (!hotelId || !roomId) return;
+
+      const rooms = state.allRooms?.[hotelId];
+      if (!rooms) return;
+
+      const index = rooms.findIndex(r => r._id === roomId);
+
+      if (index !== -1) {
+        rooms.splice(index, 1); // ✅ actually removes the room
+      }
+    },
+
+
+    deleteRoomForHotel: (state, action) => {
+      const { hotelId } = action.payload || {};
+
+      if (!hotelId || !state.allRooms) return;
+
+      delete state.allRooms[hotelId];
     }
+
 
   }
 })
 
 export const {
-    setRooms
+  setRooms,
+  addSingleRoom,
+  updateSingleRoom,
+  deleteSingleRoom,
+  deleteRoomForHotel
 } = roomSlice.actions
 
 export default roomSlice.reducer
