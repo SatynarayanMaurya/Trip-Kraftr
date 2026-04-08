@@ -120,7 +120,7 @@ export default function AddHotel() {
       await getRegionsForOrg()
       setRegionLoading(false)
     } catch (error) {
-      getRegionsForOrg(false)
+      setRegionLoading(false)
       if (!isProduction) {
         console.log('========= ERROR DEBUG START =========')
         console.log('Error:', error)

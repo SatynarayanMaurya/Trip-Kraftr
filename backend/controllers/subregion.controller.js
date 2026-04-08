@@ -150,6 +150,30 @@ export const getSubRegionById = async (req, res)=>{
   }
 }
 
+export const getSubRegionsForOrg = async (req, res) => { // This is for suggestion of the sub region for org
+  try{
+    const {regionId} = req.params;
+    if(!regionId){
+      return res.status(400).json({
+        success:false,
+        message:"Region Id not found"
+      })
+    }
+    const allSubRegions = await SubRegion.find({org_id:req.user.org_id,regionId:regionId}).select("_id name")
+    return res.status(200).json({
+      success:true,
+      message:"All Sub Regions fetched",
+      allSubRegions
+    })
+  }
+  catch(error){
+    return res.status(500).json({
+      success:false,
+      message:error?.message || "Internal Server Error"
+    })
+  }
+}
+
 export const updateSubRegionById = async (req, res) => {
   try {
     const { subRegionId } = req.params;
@@ -263,7 +287,6 @@ export const deleteSubRegionById = async (req, res) => {
 export const searchSubRegions = async (req, res) => {
   try {
     const { search, filter,regionId,pageLimit=10 } = req.query;
-    console.log("Region id : ",regionId)
     if (!req.user.org_id) {
       return res.status(401).json({
         success: false,

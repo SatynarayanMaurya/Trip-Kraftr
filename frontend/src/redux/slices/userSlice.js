@@ -9,6 +9,7 @@ const initialState = {
     userDetails:null,
 
     allRegionsForSuggestions : null , // This is for suggestion of the region any where you need use it
+    allSubRegionsForSuggestions : null , // This is for suggestion of the sub region any where you need use it
 
     allCountryForSuggestions:null
 
@@ -38,6 +39,10 @@ export const userSlice = createSlice({
             state.allRegionsForSuggestions = action.payload
         },
 
+        setAllSubRegionsForSuggestions:(state,action)=>{
+            state.allSubRegionsForSuggestions = action.payload
+        },
+
         setAllCountryForSuggestions:(state,action)=>{
             state.allCountryForSuggestions = action.payload
         }
@@ -51,7 +56,8 @@ export const {
     setUserDetails,
     clearUserDetails,
     setAllRegionsForSuggestions,
-    setAllCountryForSuggestions
+    setAllCountryForSuggestions,
+    setAllSubRegionsForSuggestions
 
 
 } = userSlice.actions

@@ -113,15 +113,25 @@ export const useSubRegionHooks = () => {
     }
   }
 
-
-
-
-
+  // For getting sub region for org for suggestion
+  const getSubRegionsForSuggestion = async (regionId) => {
+    try {
+      dispatch(setLoading(true));
+      const response = await apiConnector("GET", `${subRegionEndpoints.GET_SUB_REGIONS_FOR_ORG}/${regionId}`);
+      // dispatch(setAllSubRegionsForSuggestions(response?.data?.subRegions));
+      return response;
+    } catch (error) {
+      throw error;
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }
   return {
         addSubRegion,
         getSubRegions,
         getSubRegionById,
         updateSubRegionById,
-        deleteSubRegionById
+        deleteSubRegionById,
+        getSubRegionsForSuggestion
     };
 };

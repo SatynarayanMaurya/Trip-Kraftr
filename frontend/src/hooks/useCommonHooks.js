@@ -6,6 +6,7 @@ import { setLoading } from "../redux/slices/userSlice"
 import { subRegionEndpoints } from "../services/Apis/subRegionApis"
 import { vehicleEndpoinsts } from "../services/Apis/vehicleApis"
 import { hotelEndpoinsts } from "../services/Apis/hotelApis"
+import { placeEndpoints } from "../services/Apis/placeApis"
 
 export const useCommonHooks = () => {
     const dispatch = useDispatch()
@@ -137,6 +138,25 @@ export const useCommonHooks = () => {
       );
 
 
+          // ---------- Subregion Search for org ( ) ----------
+    const searchPlaces = debounceSearch(
+        "searchSubRegionForOrg",
+        (searchTerm,regionId,pageLimit=10) => {
+          const params = new URLSearchParams();
+      
+          if (searchTerm) params.append("search", searchTerm);
+          if (regionId) params.append("regionId", regionId);
+          if (pageLimit) params.append("pageLimit", pageLimit);
+      
+          return apiConnector(
+            "GET",
+            `${placeEndpoints.SEAECH_PLACE}?${params.toString()}`
+          );
+        },
+        300
+      );
+
+
 
     return {
         searchMasterRegion,
@@ -145,7 +165,8 @@ export const useCommonHooks = () => {
         searchRegionForOrg,
         searchSubRegionForOrg,
         searchVehicles,
-        searchHotels
+        searchHotels,
+        searchPlaces
 
     }
 }

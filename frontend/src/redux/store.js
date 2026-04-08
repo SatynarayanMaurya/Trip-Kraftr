@@ -8,6 +8,7 @@ import vehilceSlice from './slices/vehicleSlice'
 import hotelSlice from './slices/hotelSlice'
 import roomSlice from './slices/roomSlice'
 import roomRateSlice from './slices/roomRateSlice'
+import placeSlice from './slices/placeSlice'
 export const store = configureStore({
   reducer: {
     plan: planSlice,
@@ -19,5 +20,6 @@ export const store = configureStore({
     hotel:hotelSlice,
     room:roomSlice,
     roomRate:roomRateSlice,
+    place:placeSlice,
   },
 })
