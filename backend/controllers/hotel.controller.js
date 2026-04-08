@@ -262,7 +262,8 @@ export const updateHotelById = async (req, res) => {
         }
 
         // ✅ Find hotel first
-        const hotel = await Hotel.findById(hotelId);
+        // const hotel = await Hotel.findById(hotelId);
+        const hotel = await Hotel.findOne({org_id:req.user.org_id,_id:hotelId});
         if (!hotel) {
             return res.status(404).json({
                 success: false,

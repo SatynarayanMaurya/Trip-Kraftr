@@ -4,6 +4,8 @@ const initialState = {
 
     placesPages: {},
 
+    individualPlaces:{}, // This contain a single place but details about that it is used when we update the place
+
     placesPageLimit: 10,
 
     paginationPlaces: {
@@ -73,33 +75,20 @@ export const placeSlice = createSlice({
             state.paginationPlaces = { currentPage: 1, totalPages: 1, limit: 5, totalRecords: 0 }
         },
 
-        updateSubRegion: (state, action) => {
-            const updatedSubRegion = action.payload;
+        updatePlace: (state, action) => {
+            const updatedPlace = action.payload;
+            // state.individualPlaces[updatePlace?._id] = updatePlace
           
             let found = false;
           
-            for (const page in state.subRegionsPages) {
-                const pageData = state.subRegionsPages[page];
-              const index = state.subRegionsPages[page].findIndex(
-                subRegion => subRegion._id === updatedSubRegion._id
+            for (const page in state.placesPages) {
+                const pageData = state.placesPages[page];
+              const index = state.placesPages[page].findIndex(
+                place => place._id === updatedPlace._id
               );
           
               if (index !== -1) {
-                const previousSubRegion = pageData[index];
-          
-                // ✅ Update stats ONLY if is_active changed
-                if (previousSubRegion.is_active !== updatedSubRegion.is_active) {
-                  if (updatedSubRegion.is_active) {
-                    state.statsSubRegions.activeSubRegion += 1;
-                    state.statsSubRegions.inactiveSubRegion -= 1;
-                  } else {
-                    state.statsSubRegions.activeSubRegion -= 1;
-                    state.statsSubRegions.inactiveSubRegion += 1;
-                  }
-                }
-          
-                // ✅ Update actual data
-                pageData[index] = updatedSubRegion;
+                pageData[index] = updatedPlace;
           
                 found = true;
                 break;
@@ -109,10 +98,10 @@ export const placeSlice = createSlice({
             // Optional: if not found, add to first page
             if (!found) {
               const firstPage = 1;
-              if (!state.subRegionsPages[firstPage]) {
-                state.subRegionsPages[firstPage] = [updatedSubRegion];
+              if (!state.placesPages[firstPage]) {
+                state.placesPages[firstPage] = [updatedPlace];
               } else {
-                state.subRegionsPages[firstPage].unshift(updatedSubRegion);
+                state.placesPages[firstPage].unshift(updatedPlace);
               }
             }
         },
@@ -194,7 +183,20 @@ export const placeSlice = createSlice({
 
         setPlacePageLimit: (state, action) => {
             state.placesPageLimit = action.payload
+        },
+
+        setIndividualPlaces: (state, action) => {
+          const placeDetails = action.payload;
+        
+          if (!state.individualPlaces) {
+            state.individualPlaces = {};
+          }
+        
+          state.individualPlaces[placeDetails._id] = placeDetails;
         }
+
+
+        
 
 
     }
@@ -206,7 +208,9 @@ export const {
     addNewPlace,
     setPlacePageLimit,
     clearPlaces,
-    deletePlace
+    deletePlace,
+    setIndividualPlaces,
+    updatePlace
 
 
 } = placeSlice.actions

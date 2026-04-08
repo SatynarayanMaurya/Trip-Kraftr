@@ -1,6 +1,6 @@
 
 import Place from "../models/place.model.js"
-import { uploadImageToCloudinary } from "../utils/uploadToCloudinary.js";
+import { deleteImageFromCloudinary, uploadImageToCloudinary } from "../utils/uploadToCloudinary.js";
 import mongoose from "mongoose";
 
 export const addPlace = async (req, res) => {
@@ -149,6 +149,163 @@ export const getPlaces = async (req, res) => {
     }
 }
 
+export const getPlaceById = async (req, res) => {
+    try {
+        const { placeId } = req.params;
+
+        if (!placeId) {
+            return res.status(400).json({
+                success: false,
+                message: "Place Id not found"
+            });
+        }
+
+        // ✅ ObjectId validation
+        if (!mongoose.Types.ObjectId.isValid(placeId)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid Place Id"
+            });
+        }
+
+        const findPlace = await Place
+            .findOne({ org_id: req.user.org_id, _id: placeId })
+            .lean()
+            .populate({path:"regionId",select:"_id name country"})
+            .populate({path:"subRegionId",select:"_id name"})
+
+        if (!findPlace) {
+            return res.status(404).json({
+                success: false,
+                message: "Place Not found"
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Place found",
+            findPlace
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error?.message || "Internal Server Error"
+        });
+    }
+};
+
+export const updatePlaceById = async (req, res) => {
+    try {
+        const { placeId } = req.params;
+
+        const {
+            placeName,
+            regionId,
+            subRegionId,
+            category,
+            mapLink,
+            description,
+            notes
+        } = req.body;
+
+        if(!placeName?.trim() || !category || !regionId){
+            return res.status(400).json({
+                success:false,
+                message:"Required field are missing"
+            })
+        }
+
+        const image = req?.files?.newImage;
+
+        // ✅ Validate placeId
+        if (!mongoose.Types.ObjectId.isValid(placeId)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid Place Id"
+            });
+        }
+
+        // ✅ Find existing place
+        const existingPlace = await Place.findOne({
+            org_id: req.user.org_id,
+            _id: placeId
+        });
+
+        if (!existingPlace) {
+            return res.status(404).json({
+                success: false,
+                message: "Place not found"
+            });
+        }
+
+        let imageUrl = existingPlace.imageUrl;
+        let imagePublicId = existingPlace.imagePublicId;
+
+        // ✅ Image handling
+        if (image) {
+            // delete old image
+            if (imagePublicId) {
+                await deleteImageFromCloudinary(imagePublicId);
+            }
+
+            const result = await uploadImageToCloudinary(
+                image,
+                process.env.PLACE_IMAGES
+            );
+
+            if (!result?.secure_url) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Image upload failed"
+                });
+            }
+
+            imageUrl = result.secure_url;
+            imagePublicId = result.public_id;
+        }
+
+        // ✅ Build update payload dynamically
+        const updatePayload = {};
+
+        if (placeName?.trim()) updatePayload.placeName = placeName.trim();
+        if (regionId && mongoose.Types.ObjectId.isValid(regionId)) {
+            updatePayload.regionId = regionId;
+        }
+        if (subRegionId && mongoose.Types.ObjectId.isValid(subRegionId)) {
+            updatePayload.subRegionId = subRegionId;
+        }
+        if (category) updatePayload.category = category;
+        if (mapLink) updatePayload.mapLink = mapLink;
+        if (description) updatePayload.description = description;
+        if (notes) updatePayload.notes = notes;
+
+        updatePayload.imageUrl = imageUrl;
+        updatePayload.imagePublicId = imagePublicId;
+
+        // ✅ Update
+        const updatedPlace = await Place.findOneAndUpdate(
+            { org_id: req.user.org_id, _id: placeId },
+            { $set: updatePayload },
+            { new: true }
+        )
+            .populate({ path: "regionId", select: "_id name country" })
+            .populate({ path: "subRegionId", select: "_id name" })
+            .lean();
+
+        return res.status(200).json({
+            success: true,
+            message: "Place Updated Successfully",
+            updatedPlace
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error?.message || "Internal Server Error"
+        });
+    }
+};
 
 export const searchPlaces = async (req, res) => {
     try {

@@ -3,11 +3,12 @@ import { apiConnector } from '../services/apiConnector'
 import { useDispatch, useSelector } from 'react-redux'
 import { setLoading } from '../redux/slices/userSlice'
 import { placeEndpoints } from '../services/Apis/placeApis'
-import { addNewPlace, deletePlace, setPlacesByPage } from '../redux/slices/placeSlice';
+import { addNewPlace, deletePlace, setIndividualPlaces, setPlacesByPage, updatePlace } from '../redux/slices/placeSlice';
 
 export const usePlaceHooks = () => {
     const dispatch = useDispatch();
     const placesPages = useSelector((state)=>state.place.placesPages)
+    const individualPlaces = useSelector((state)=>state.place.individualPlaces)
 
     const addPlace = async (placeDetails) => {  // For Normal Org_admin
         try {
@@ -22,7 +23,7 @@ export const usePlaceHooks = () => {
         }
     }
 
-    // For getting sub region with paginated
+    // For getting place with paginated
     const getPlaces = async (page = 1, limit = 5) => {
         try {
               const cachedPage = placesPages?.[page]
@@ -43,6 +44,54 @@ export const usePlaceHooks = () => {
                 })
               )
 
+            return response
+
+        } catch (error) {
+            throw error
+        } finally {
+            dispatch(setLoading(false))
+        }
+    }
+
+    // For getting sub region with paginated
+    const getPlaceById = async (placeId) => {
+        try {
+
+            const cachedPage = individualPlaces?.[placeId]
+
+              if (cachedPage) return cachedPage
+
+            dispatch(setLoading(true))
+
+            const response = await apiConnector(
+                "GET",
+                `${placeEndpoints.GET_PLACE_BY_ID}/${placeId}`
+            )
+
+            dispatch(setIndividualPlaces(response?.data?.findPlace))
+
+            return response
+
+        } catch (error) {
+            throw error
+        } finally {
+            dispatch(setLoading(false))
+        }
+    }
+
+    // For getting sub region with paginated
+    const updatePlaceById = async (placeDetails) => {
+        try {
+
+            dispatch(setLoading(true))
+
+            const response = await apiConnector(
+                "PUT",
+                `${placeEndpoints.UPDATE_PLACE_BY_ID}/${placeDetails?._id}`,placeDetails, { "Content-Type": "multipart/form-data" }
+            )
+
+            dispatch(updatePlace(response?.data?.updatedPlace))
+            dispatch(setIndividualPlaces(response?.data?.updatedPlace))
             return response
 
         } catch (error) {
@@ -82,6 +131,8 @@ export const usePlaceHooks = () => {
     return {
         addPlace,
         getPlaces,
-        deletePlaceById
+        getPlaceById,
+        deletePlaceById,
+        updatePlaceById
     };
 };

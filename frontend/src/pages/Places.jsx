@@ -27,7 +27,7 @@ function Places() {
 
   const { getPlaces, deletePlaceById } = usePlaceHooks()
   const { searchPlaces } = useCommonHooks()
-  const {getRegionsForOrg} = useRegionHooks()
+  const { getRegionsForOrg } = useRegionHooks()
 
   const dispatch = useDispatch()
   const navigate = useNavigate()
@@ -54,17 +54,17 @@ function Places() {
   const currentPagePlaces = useSelector((state) => state.place.placesPages?.[currentPage]);
   const pageLimit = useSelector((state) => state.place.placesPageLimit)
 
-  const [allRegions,setAllRegions] = useState( [])
-  let allRegionsForSuggestions = useSelector((state)=>state.user.allRegionsForSuggestions)
+  const [allRegions, setAllRegions] = useState([])
+  let allRegionsForSuggestions = useSelector((state) => state.user.allRegionsForSuggestions)
 
-  const fetchRegionsForSuggestion = async()=>{
-    try{
-      if(allRegionsForSuggestions && allRegionsForSuggestions?.length > 0) return 
+  const fetchRegionsForSuggestion = async () => {
+    try {
+      if (allRegionsForSuggestions && allRegionsForSuggestions?.length > 0) return
       setFetchLoading(true)
       await getRegionsForOrg()
       setFetchLoading(false)
     }
-    catch(error){
+    catch (error) {
       setFetchLoading(false)
       if (!isProduction) {
         console.log("========= ERROR DEBUG START =========");
@@ -76,22 +76,22 @@ function Places() {
     }
   }
 
-  useEffect(()=>{
-    if(allRegionsForSuggestions && allRegionsForSuggestions?.length > 0) return 
-    else{
+  useEffect(() => {
+    if (allRegionsForSuggestions && allRegionsForSuggestions?.length > 0) return
+    else {
       fetchRegionsForSuggestion()
     }
-  },[])
+  }, [])
 
   // console.log("All Regions : ",allRegions)
 
   useEffect(() => {
     if (!allRegionsForSuggestions) return;
-  
+
     const regions = allRegionsForSuggestions
-      .flatMap((val) => val?.name || []) 
-      .filter(Boolean); 
-  
+      .flatMap((val) => val?.name || [])
+      .filter(Boolean);
+
     setAllRegions(['Region', ...regions]);
   }, [allRegionsForSuggestions]);
 
@@ -100,8 +100,8 @@ function Places() {
     try {
       setIsSearching(true)
       setFetchLoading(true)
-      const regionId = allRegionsForSuggestions?.find((region)=>region?.name ===selectedRegion)?._id
-      const response = await searchPlaces(search, regionId||null, pageLimit)
+      const regionId = allRegionsForSuggestions?.find((region) => region?.name === selectedRegion)?._id
+      const response = await searchPlaces(search, regionId || null, pageLimit)
       setSearchedPlaces(response?.data?.searchedPlaces)
       setFetchLoading(false)
     }
@@ -146,14 +146,14 @@ function Places() {
 
   }, [currentPage, pageLimit])
 
-  useEffect(()=>{
-    if(search !== "" || selectedRegion !== 'Region'){
+  useEffect(() => {
+    if (search !== "" || selectedRegion !== 'Region') {
       fetchSearchPlace()
     }
-    else{
+    else {
       setIsSearching(false)
     }
-  },[search,pageLimit,selectedRegion])
+  }, [search, pageLimit, selectedRegion])
 
   // const pageLimit = 10
 
@@ -173,14 +173,14 @@ function Places() {
     dispatch(clearPlaces())
   }
 
-  const deletePlace = async()=>{
-    try{
+  const deletePlace = async () => {
+    try {
       setFetchLoading(true)
       const response = await deletePlaceById(deletePlaceDetails?._id)
       toast.success(response?.data?.message)
       setFetchLoading(false)
     }
-    catch(error){
+    catch (error) {
       setFetchLoading(false)
       if (!isProduction) {
         console.log("========= ERROR DEBUG START =========");
@@ -388,7 +388,11 @@ function Places() {
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "10px" }}>
                     {/* Edit icon */}
                     <button
-                      onClick={() => handleEdit(place._id)}
+                      onClick={() =>
+                        navigate(`update-place/${place?._id}`, {
+                          state: { place: place }
+                        })
+                      }
                       style={{
                         background: "none", border: "none", cursor: "pointer",
                         padding: "4px", display: "flex", alignItems: "center",
@@ -493,8 +497,8 @@ function Places() {
 
       {/* Delete Modal  */}
       {
-        isDeleteModal && 
-        <DeleteModal onClose={()=>setIsDeleteModal(false)} onDelete={deletePlace} itemName ={deletePlaceDetails?.placeName} confirmText = {deletePlaceDetails?.placeName}/>
+        isDeleteModal &&
+        <DeleteModal onClose={() => setIsDeleteModal(false)} onDelete={deletePlace} itemName={deletePlaceDetails?.placeName} confirmText={deletePlaceDetails?.placeName} />
       }
     </div>
   );

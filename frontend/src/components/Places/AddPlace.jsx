@@ -199,23 +199,6 @@ function AddPlace() {
     }
   };
 
-  const handleCancel = () => {
-    setFormData({
-      regionId: "",
-      subRegionId: "",
-      region: "",
-      subRegion: "",
-      placeName: "",
-      category: "",
-      notes: "",
-      description: "",
-      mapLink: "",
-      image: null,
-      preview: null,
-    });
-    setErrors({});
-  };
-
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       {/* Page Header */}
@@ -478,7 +461,7 @@ function AddPlace() {
                 </div>
 
                 {/* Preview thumbnail or placeholder */}
-                <div className="w-16 h-16 rounded-lg border border-gray-200 overflow-hidden bg-gray-200 flex items-center justify-center flex-shrink-0">
+                <div className="w-16 h-16 rounded-lg border border-gray-200 overflow-hidden bg-gray-200 flex items-center justify-center shrink-0">
                   {formData.preview ? (
                     <img
                       src={formData.preview}
