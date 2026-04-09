@@ -60,8 +60,8 @@ function MainLayout() {
         </button>
 
         <div className="w-8 h-8 bg-[#ED5F8D] rounded-full flex items-center justify-center text-sm font-semibold text-white">
-              {userDetails?.name?.split(" ")?.[0]?.[0]||"X"}
-            </div>
+          {userDetails?.name?.split(" ")?.[0]?.[0] || "X"}
+        </div>
       </div>
 
       {/* 🔹 Overlay */}
@@ -86,23 +86,27 @@ function MainLayout() {
           shadow-lg md:shadow-none
         `}
       >
-        {/* Close button (mobile) */}
-        <div className="md:hidden flex justify-end p-4 text-white">
-          <button
-            onClick={() => setIsSidebarOpen(false)}
-            className="p-2 rounded-lg hover:bg-gray-100 transition"
-          >
-            <X size={24} />
-          </button>
+
+        {/* ✅ Floating Close Button */}
+        <button
+          onClick={() => setIsSidebarOpen(false)}
+          className="md:hidden absolute top-4 right-4 z-50 p-2 rounded-full bg-white/10 backdrop-blur hover:bg-white/20 transition text-white"
+        >
+          <X size={22} />
+        </button>
+
+        {/* ✅ Sidebar Content */}
+        <div className="h-full overflow-y-auto md:overflow-hidden pt-6">
+          <Sidebar />
         </div>
 
-        <Sidebar />
       </div>
 
       {/* 🔹 Main Content */}
       <div className="flex-1 h-screen overflow-y-auto md:ml-0 pt-[60px] md:pt-0">
         <Outlet />
       </div>
+
     </div>
   )
 }
