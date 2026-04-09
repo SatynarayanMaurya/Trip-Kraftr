@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  Car,  Map, LayoutGrid, Plus, Search, SlidersHorizontal,
-   ChevronDown, X
+  Car, Map, LayoutGrid, Plus, Search, SlidersHorizontal,
+  ChevronDown, X
 } from 'lucide-react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useVehicleHooks } from '../hooks/useVehicleHooks'
@@ -18,8 +18,8 @@ import DeleteModal from '../components/DeleteModals/DeleteModal'
 
 // const ALL_TYPES = ['All Type', 'Sedan', 'SUV', 'Van', 'Hatchback', 'Minibus', 'Coach', 'Luxury Car']
 const ALL_TYPES = [
-  'All Type','Sedan', 'SUV', 'Hatchback', 'Van', 'Minibus', 'Bus',
-    'Coach', 'Luxury Car',"Tempo Traveller",
+  'All Type', 'Sedan', 'SUV', 'Hatchback', 'Van', 'Minibus', 'Bus',
+  'Coach', 'Luxury Car', "Tempo Traveller",
 ]
 const SORT_OPTIONS = ['Recently Added', 'Price: Low to High', 'Price: High to Low', 'Name: A to Z']
 
@@ -111,8 +111,8 @@ export default function Vehicle() {
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const { getVehicles, deleteVehicleForOrg } = useVehicleHooks();
-  const {getRegionsForOrg} = useRegionHooks()
-  const {searchVehicles} = useCommonHooks()
+  const { getRegionsForOrg } = useRegionHooks()
+  const { searchVehicles } = useCommonHooks()
 
   const [search, setSearch] = useState('')
   const [region, setRegion] = useState('All Region')
@@ -124,37 +124,37 @@ export default function Vehicle() {
   const isProduction = useSelector((state) => state.user.isProduction)
   const [fetchLoading, setFetchLoading] = useState(false)
   const currentPageVehicle = useSelector((state) => state.vehicle.vehiclesPages?.[currentPage])
-  const [searchedVehicles , setSearchedVehicles] = useState([])
+  const [searchedVehicles, setSearchedVehicles] = useState([])
   const pagination = useSelector((state) => state.vehicle.paginationVehicles)
   const pageLimit = useSelector((state) => state.vehicle.vehiclesPageLimit)
   const stats = useSelector((state) => state.vehicle.statsVehicles)
-  const insights = useSelector((state)=>state.vehicle.insights)
+  const insights = useSelector((state) => state.vehicle.insights)
   const [isSearching, setIsSearching] = useState(false)
-  const [allRegions,setAllRegions] = useState( [])
-  let allRegionsForSuggestions = useSelector((state)=>state.user.allRegionsForSuggestions)
+  const [allRegions, setAllRegions] = useState([])
+  let allRegionsForSuggestions = useSelector((state) => state.user.allRegionsForSuggestions)
 
   useEffect(() => {
     if (!allRegionsForSuggestions) return;
-  
+
     const regions = allRegionsForSuggestions
-      .flatMap((val) => val?.name || []) 
-      .filter(Boolean); 
-  
+      .flatMap((val) => val?.name || [])
+      .filter(Boolean);
+
     setAllRegions(['All Region', ...regions]);
   }, [allRegionsForSuggestions]);
 
 
-  const searchVehicle = async()=>{
-    try{
+  const searchVehicle = async () => {
+    try {
       setFetchLoading(true)
       setIsSearching(true)
-      const regionId = allRegionsForSuggestions?.find((val)=>val?.name===region)?._id
-      const response = await searchVehicles(search, sort, type, regionId,pageLimit)
+      const regionId = allRegionsForSuggestions?.find((val) => val?.name === region)?._id
+      const response = await searchVehicles(search, sort, type, regionId, pageLimit)
       setSearchedVehicles(response?.data?.searchedVehicle || [])
       setFetchLoading(false)
-      
+
     }
-    catch(error){
+    catch (error) {
       setFetchLoading(false)
       setIsSearching(false)
       if (!isProduction) {
@@ -171,28 +171,28 @@ export default function Vehicle() {
 
   }
 
-  useEffect(()=>{
-    if(search === "" && type ==="All Type" && sort==='Recently Added' && region ==="All Region"){
+  useEffect(() => {
+    if (search === "" && type === "All Type" && sort === 'Recently Added' && region === "All Region") {
       setIsSearching(false)
-      return ;
+      return;
     }
     searchVehicle()
 
-  },[search,region,type,sort,pageLimit])
+  }, [search, region, type, sort, pageLimit])
 
   const filtered = isSearching ? searchedVehicles : currentPageVehicle
   const handleDelete = (v) => setDeleteTarget(v)
-  const confirmDelete =async () => { 
-    try{
+  const confirmDelete = async () => {
+    try {
       setFetchLoading(true)
-      const response = await deleteVehicleForOrg (deleteTarget?._id,deleteTarget?.regionId?._id )
+      const response = await deleteVehicleForOrg(deleteTarget?._id, deleteTarget?.regionId?._id)
       toast.success(response?.data?.message)
-      setDeleteTarget(null) 
+      setDeleteTarget(null)
       setFetchLoading(false)
     }
-    catch(error){
+    catch (error) {
       setFetchLoading(false)
-      setDeleteTarget(null) 
+      setDeleteTarget(null)
       if (!isProduction) {
         console.log("========= ERROR DEBUG START =========");
         console.log("Error:", error);
@@ -205,7 +205,7 @@ export default function Vehicle() {
 
 
 
-   
+
   }
 
   const fetchVehilces = async () => {
@@ -226,14 +226,14 @@ export default function Vehicle() {
     }
   }
 
-  const fetchRegionsForSuggestion = async()=>{
-    try{
-      if(allRegionsForSuggestions && allRegionsForSuggestions?.length > 0) return 
+  const fetchRegionsForSuggestion = async () => {
+    try {
+      if (allRegionsForSuggestions && allRegionsForSuggestions?.length > 0) return
       setFetchLoading(true)
       await getRegionsForOrg()
       setFetchLoading(false)
     }
-    catch(error){
+    catch (error) {
       setFetchLoading(false)
       if (!isProduction) {
         console.log("========= ERROR DEBUG START =========");
@@ -250,31 +250,31 @@ export default function Vehicle() {
   }
 
   useEffect(() => {
-    if(!currentPageVehicle?.[currentPage]){
+    if (!currentPageVehicle?.[currentPage]) {
       fetchVehilces()
     }
-    
-  }, [currentPage,pageLimit])
 
-  useEffect(()=>{
-    if(allRegionsForSuggestions && allRegionsForSuggestions?.length > 0) return 
-    else{
+  }, [currentPage, pageLimit])
+
+  useEffect(() => {
+    if (allRegionsForSuggestions && allRegionsForSuggestions?.length > 0) return
+    else {
       fetchRegionsForSuggestion()
     }
-  },[])
+  }, [])
 
-  const changePageLimit = (val)=>{
+  const changePageLimit = (val) => {
     dispatch(clearVehicles())
     setCurrentPage(1)
     dispatch(setVehiclePageLimit(Number(val)))
-}
+  }
 
-const resetFilter = ()=>{
-  setSearch('')
-  setRegion('All Region')
-  setType('All Type')
-  setSort('Recently Added')
-}
+  const resetFilter = () => {
+    setSearch('')
+    setRegion('All Region')
+    setType('All Type')
+    setSort('Recently Added')
+  }
 
   return (
     <div className="min-h-screen bg-white font-sans" style={{ padding: '28px 32px' }}>
@@ -323,7 +323,7 @@ const resetFilter = ()=>{
           </div>
           <div>
             <p className="text-[10px] font-bold tracking-[0.14em] uppercase text-gray-400 mb-1.5">Total Vehicles</p>
-            <p className="text-[32px] font-bold text-[#18305C] leading-none">{pagination?.totalRecords||0}</p>
+            <p className="text-[32px] font-bold text-[#18305C] leading-none">{pagination?.totalRecords || 0}</p>
           </div>
         </StatCard>
 
@@ -335,7 +335,7 @@ const resetFilter = ()=>{
             <p className="text-[10px] font-bold tracking-[0.14em] uppercase text-gray-400 mb-1.5">Top Region</p>
             <p className="text-base font-bold text-[#18305C] truncate">{insights?.topRegion?.name || "N/A"}</p>
             <div className="flex flex-wrap gap-x-3 mt-1.5">
-                <span className="text-[11px] text-gray-400 font-medium">{insights?.topRegion?.name || "N/A"}: {insights?.topRegion?.totalVehicles || "N/A"}</span>
+              <span className="text-[11px] text-gray-400 font-medium">{insights?.topRegion?.name || "N/A"}: {insights?.topRegion?.totalVehicles || "N/A"}</span>
             </div>
           </div>
         </StatCard>
@@ -346,9 +346,9 @@ const resetFilter = ()=>{
           </div>
           <div className="min-w-0">
             <p className="text-[10px] font-bold tracking-[0.14em] uppercase text-gray-400 mb-1.5">Popular Type</p>
-            <p className="text-base font-bold text-[#18305C] truncate">{insights?.topVehicleType?.vehicleType||"N/A"}</p>
+            <p className="text-base font-bold text-[#18305C] truncate">{insights?.topVehicleType?.vehicleType || "N/A"}</p>
             <div className="flex flex-wrap gap-x-3 mt-1.5">
-                <span  className="text-[11px] text-gray-400 font-medium">{insights?.topVehicleType?.vehicleType||"N/A"}: {insights?.topVehicleType?.totalVehicles||"N/A"}</span>
+              <span className="text-[11px] text-gray-400 font-medium">{insights?.topVehicleType?.vehicleType || "N/A"}: {insights?.topVehicleType?.totalVehicles || "N/A"}</span>
             </div>
           </div>
         </StatCard>
@@ -395,7 +395,7 @@ const resetFilter = ()=>{
 
           <button
             className="w-10 h-10 flex items-center justify-center bg-white rounded-xl shrink-0"
-            onClick={()=>resetFilter()}
+            onClick={() => resetFilter()}
             style={{
               border: '1.5px solid #E5E7EB',
               boxShadow: '0 1px 6px rgba(0,0,0,0.09)',
@@ -448,22 +448,23 @@ const resetFilter = ()=>{
 
 
       {/* Pagination */}
+
       <div
-        className="flex items-center justify-between mt-6 bg-white rounded-xl px-5 py-3"
+        className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mt-6 bg-white rounded-xl px-4 md:px-5 py-4"
         style={{
           border: '1.5px solid #E5E7EB',
           boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
         }}
       >
 
-        {/* Left Controls */}
-        <div className="flex items-center gap-3">
+        {/* 🔹 Left Controls */}
+        <div className="flex items-center gap-3 flex-wrap justify-between md:justify-start">
 
           <button
             disabled={currentPage === 1 || isSearching}
             onClick={() => setCurrentPage(currentPage - 1)}
             className={`px-4 py-2 rounded-lg text-sm font-semibold border transition-all duration-200
-        ${currentPage === 1 || isSearching
+      ${currentPage === 1 || isSearching
                 ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
                 : 'bg-[#E91E8C] border-[#E91E8C] text-white hover:bg-[#C81878] cursor-pointer'
               }`}
@@ -471,7 +472,7 @@ const resetFilter = ()=>{
             ← Prev
           </button>
 
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-gray-400 whitespace-nowrap">
             Page <span className="text-[#18305C] font-semibold">{currentPage || 1}</span> of{" "}
             <span className="text-[#18305C] font-semibold">{pagination?.totalPages || 0}</span>
           </p>
@@ -480,7 +481,7 @@ const resetFilter = ()=>{
             disabled={currentPage === pagination?.totalPages || isSearching}
             onClick={() => setCurrentPage(Number(currentPage + 1))}
             className={`px-4 py-2 rounded-lg text-sm font-semibold border transition-all duration-200
-        ${currentPage === pagination?.totalPages || isSearching
+      ${currentPage === pagination?.totalPages || isSearching
                 ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
                 : 'bg-[#E91E8C] border-[#E91E8C] text-white hover:bg-[#C81878] cursor-pointer'
               }`}
@@ -490,8 +491,8 @@ const resetFilter = ()=>{
 
         </div>
 
-        {/* Limit */}
-        <div className="flex items-center gap-3 text-sm text-gray-400">
+        {/* 🔹 Limit */}
+        <div className="flex items-center justify-between md:justify-start gap-3 text-sm text-gray-400 w-full md:w-auto">
           <span>Limit</span>
 
           <select
@@ -509,8 +510,8 @@ const resetFilter = ()=>{
           </select>
         </div>
 
-        {/* Go to page */}
-        <div className="flex items-center gap-3 text-sm text-gray-400">
+        {/* 🔹 Go to page */}
+        <div className="flex items-center justify-between md:justify-start gap-3 text-sm text-gray-400 w-full md:w-auto">
           <span>Go to page</span>
 
           <select
@@ -534,7 +535,7 @@ const resetFilter = ()=>{
 
       {/* ── Delete Modal ────────────────────────────────────────────────── */}
       {deleteTarget && (
-        <DeleteModal onClose={()=>setDeleteTarget(null)} onDelete={confirmDelete} itemName = {deleteTarget?.vehicleModel} confirmText =  {deleteTarget?.vehicleModel}/>
+        <DeleteModal onClose={() => setDeleteTarget(null)} onDelete={confirmDelete} itemName={deleteTarget?.vehicleModel} confirmText={deleteTarget?.vehicleModel} />
       )}
     </div>
   )

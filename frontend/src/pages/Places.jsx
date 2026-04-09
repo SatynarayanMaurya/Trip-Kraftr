@@ -26,6 +26,8 @@ const PINK = "#ED5F8D";
 function Places() {
 
   const { getPlaces, deletePlaceById } = usePlaceHooks()
+  
+  const [isGlobal, setIsGlobal] = useState(true);
   const { searchPlaces } = useCommonHooks()
   const { getRegionsForOrg } = useRegionHooks()
 
@@ -101,7 +103,7 @@ function Places() {
       setIsSearching(true)
       setFetchLoading(true)
       const regionId = allRegionsForSuggestions?.find((region) => region?.name === selectedRegion)?._id
-      const response = await searchPlaces(search, regionId || null, pageLimit)
+      const response = await searchPlaces(search, regionId || null, pageLimit,isGlobal)
       setSearchedPlaces(response?.data?.searchedPlaces)
       setFetchLoading(false)
     }
@@ -192,7 +194,6 @@ function Places() {
     }
 
   }
-
 
   return (
     <div style={{ padding: "28px 32px", backgroundColor: "#f5f6fa", minHeight: "100vh", }}>
@@ -334,6 +335,16 @@ function Places() {
               ))}
             </div>
           )}
+        </div>
+
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={isGlobal}
+            onChange={(e) => setIsGlobal(e.target.checked)}
+            className="w-4 h-4"
+          />
+          <label>Global Search</label>
         </div>
 
         {/* Filter sliders icon */}

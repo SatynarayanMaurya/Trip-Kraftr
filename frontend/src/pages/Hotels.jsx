@@ -71,9 +71,9 @@ function FilterSelect({ label, value, onChange, options }) {
 export default function Hotels() {
   const navigate = useNavigate()
   const dispatch = useDispatch()
-  const { getHotels,deleteHotelById } = useHotelHooks();
-  const { getRegionsForOrg} = useRegionHooks()
-  const {searchHotels} = useCommonHooks()
+  const { getHotels, deleteHotelById } = useHotelHooks();
+  const { getRegionsForOrg } = useRegionHooks()
+  const { searchHotels } = useCommonHooks()
 
   const [search, setSearch] = useState('')
   const [filterRegion, setFilterRegion] = useState('All')
@@ -85,7 +85,7 @@ export default function Hotels() {
   const currentPageHotels = useSelector((state) => state.hotel.hotelsPages?.[currentPage])
   const pagination = useSelector((state) => state.hotel.paginationHotels)
   const pageLimit = useSelector((state) => state.hotel.HotelPageLimit)
-  const [searchedHotels, setSearchedHotels ] = useState([])
+  const [searchedHotels, setSearchedHotels] = useState([])
 
   const [isDeleteModal, setIsDeleteModal] = useState(false)
   const [deleteHotelDetails, setDeleteHotelDetails] = useState(null)
@@ -93,18 +93,18 @@ export default function Hotels() {
   const [isSearching, setIsSearching] = useState(false)
   const [fetchLoading, setFetchLoading] = useState(false)
   const isProduction = useSelector((state) => state.user.isProduction)
-  
-  const [allRegions,setAllRegions] = useState( [])
-  let allRegionsForSuggestions = useSelector((state)=>state.user.allRegionsForSuggestions)
 
-  const fetchRegionsForSuggestion = async()=>{
-    try{
-      if(allRegionsForSuggestions && allRegionsForSuggestions?.length > 0) return 
+  const [allRegions, setAllRegions] = useState([])
+  let allRegionsForSuggestions = useSelector((state) => state.user.allRegionsForSuggestions)
+
+  const fetchRegionsForSuggestion = async () => {
+    try {
+      if (allRegionsForSuggestions && allRegionsForSuggestions?.length > 0) return
       setFetchLoading(true)
       await getRegionsForOrg()
       setFetchLoading(false)
     }
-    catch(error){
+    catch (error) {
       setFetchLoading(false)
       if (!isProduction) {
         console.log("========= ERROR DEBUG START =========");
@@ -116,20 +116,20 @@ export default function Hotels() {
     }
   }
 
-  useEffect(()=>{
-    if(allRegionsForSuggestions && allRegionsForSuggestions?.length > 0) return 
-    else{
+  useEffect(() => {
+    if (allRegionsForSuggestions && allRegionsForSuggestions?.length > 0) return
+    else {
       fetchRegionsForSuggestion()
     }
-  },[])
+  }, [])
 
   useEffect(() => {
     if (!allRegionsForSuggestions) return;
-  
+
     const regions = allRegionsForSuggestions
-      .flatMap((val) => val?.name || []) 
-      .filter(Boolean); 
-  
+      .flatMap((val) => val?.name || [])
+      .filter(Boolean);
+
     setAllRegions(['All', ...regions]);
   }, [allRegionsForSuggestions]);
 
@@ -151,16 +151,16 @@ export default function Hotels() {
     }
   }
 
-  const searchHotel = async()=>{
-    try{
+  const searchHotel = async () => {
+    try {
       setIsSearching(true)
       setFetchLoading(true)
-      const regionId = allRegionsForSuggestions?.find((val)=>val?.name===filterRegion)?._id 
-      const response = await searchHotels (search, regionId,filterCat,null,pageLimit)
+      const regionId = allRegionsForSuggestions?.find((val) => val?.name === filterRegion)?._id
+      const response = await searchHotels(search, regionId, filterCat, null, pageLimit)
       setSearchedHotels(response?.data?.searchedHotels)
       setFetchLoading(false)
     }
-    catch(error){
+    catch (error) {
       setIsSearching(false)
       setFetchLoading(false)
       if (!isProduction) {
@@ -177,14 +177,14 @@ export default function Hotels() {
 
   }
 
-  useEffect(()=>{
-    if(search !== ""||filterCat!=='All'||filterRegion!=='All'||filterSub!=='All'){
+  useEffect(() => {
+    if (search !== "" || filterCat !== 'All' || filterRegion !== 'All' || filterSub !== 'All') {
       searchHotel()
     }
-    else{
+    else {
       setIsSearching(false)
     }
-  },[search,filterCat,filterRegion,filterSub,pageLimit])
+  }, [search, filterCat, filterRegion, filterSub, pageLimit])
 
 
   useEffect(() => {
@@ -194,31 +194,31 @@ export default function Hotels() {
 
   }, [currentPage, pageLimit])
 
-  const filtered = isSearching? searchedHotels : currentPageHotels
+  const filtered = isSearching ? searchedHotels : currentPageHotels
 
   const activeFilters =
     (filterRegion !== 'All' ? 1 : 0) +
     (filterSub !== 'All' ? 1 : 0) +
     (filterCat !== 'All' ? 1 : 0)
 
-    const changePageLimit = (val)=>{
-      dispatch(clearHotels())
-      setCurrentPage(1)
-      dispatch(setHotelPageLimit(Number(val)))
+  const changePageLimit = (val) => {
+    dispatch(clearHotels())
+    setCurrentPage(1)
+    dispatch(setHotelPageLimit(Number(val)))
   }
 
   const clearFilters = () => { setFilterRegion('All'); setFilterSub('All'); setFilterCat('All') }
   const handleEdit = (h) => navigate(`update-hotel/${h?._id}`)
   const handleView = (h) => navigate(`view-hotel/${h?._id}`)
 
-  const deleteHotel = async()=>{
-    try{
+  const deleteHotel = async () => {
+    try {
       setFetchLoading(true)
       const response = await deleteHotelById(deleteHotelDetails?._id, deleteHotelDetails?.regionId?._id)
       toast.success(response?.data?.message)
       setFetchLoading(false)
     }
-    catch(error){
+    catch (error) {
       setFetchLoading(false)
       if (!isProduction) {
         console.log("========= ERROR DEBUG START =========");
@@ -241,7 +241,7 @@ export default function Hotels() {
 
       {/* ── Action buttons — right aligned, above the card ───────────────── */}
       <div className="flex items-center justify-end gap-2.5 mb-5 flex-wrap">
-        <button className="flex items-center gap-2 px-4 py-2.5 border border-gray-300 text-[#18305C] text-sm font-semibold rounded-xl hover:bg-gray-50 transition-colors whitespace-nowrap"
+        {/* <button className="flex items-center gap-2 px-4 py-2.5 border border-gray-300 text-[#18305C] text-sm font-semibold rounded-xl hover:bg-gray-50 transition-colors whitespace-nowrap"
           style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.07)' }}>
           <Upload size={15} />
           Bulk Import
@@ -250,7 +250,7 @@ export default function Hotels() {
           style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.07)' }}>
           <Download size={15} />
           Export
-        </button>
+        </button> */}
         <button
           onClick={() => navigate('add-hotel')}
           className="flex items-center gap-2 px-4 py-2.5 bg-[#ED5F8D] hover:bg-[#ED5F8D] text-white text-sm font-semibold rounded-xl transition-colors whitespace-nowrap"
@@ -366,7 +366,7 @@ export default function Hotels() {
                     key={h._id}
                     hotel={h}
                     onEdit={handleEdit}
-                    onDelete={()=>{
+                    onDelete={() => {
                       setIsDeleteModal(true)
                       setDeleteHotelDetails(h)
                     }
@@ -381,93 +381,106 @@ export default function Hotels() {
 
       {/* Pagination */}
       <div
-        className="flex items-center justify-between mt-6 bg-white rounded-xl px-5 py-3"
+        className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mt-6 bg-white rounded-xl px-4 md:px-5 py-4"
         style={{
           border: '1.5px solid #E5E7EB',
           boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
         }}
       >
 
-        {/* Left Controls */}
-        <div className="flex items-center gap-3">
+        {/* 🔹 Left Controls */}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full md:w-auto">
 
-          <button
-            disabled={currentPage === 1 || isSearching}
-            onClick={() => setCurrentPage(currentPage - 1)}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold border transition-all duration-200
+          {/* Row: Prev → Page → Next */}
+          <div className="flex items-center justify-between sm:justify-start gap-3 w-full">
+
+            {/* Prev */}
+            <button
+              disabled={currentPage === 1 || isSearching}
+              onClick={() => setCurrentPage(currentPage - 1)}
+              className={`px-4 py-2 rounded-lg text-sm font-semibold border transition-all duration-200 w-full sm:w-auto
         ${currentPage === 1 || isSearching
-                ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
-                : 'bg-[#E91E8C] border-[#E91E8C] text-white hover:bg-[#C81878] cursor-pointer'
-              }`}
-          >
-            ← Prev
-          </button>
+                  ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'bg-[#ED5F8D] border-[#E91E8C] text-white hover:bg-[#C81878] cursor-pointer'
+                }`}
+            >
+              ← Prev
+            </button>
 
-          <p className="text-sm text-gray-400">
-            Page <span className="text-[#18305C] font-semibold">{currentPage || 1}</span> of{" "}
-            <span className="text-[#18305C] font-semibold">{pagination?.totalPages || 0}</span>
-          </p>
+            {/* Page Info */}
+            <p className="text-sm text-gray-400 whitespace-nowrap">
+              Page <span className="text-[#18305C] font-semibold">{currentPage || 1}</span> of{" "}
+              <span className="text-[#18305C] font-semibold">{pagination?.totalPages || 0}</span>
+            </p>
 
-          <button
-            disabled={currentPage === pagination?.totalPages || isSearching}
-            onClick={() => setCurrentPage(Number(currentPage + 1))}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold border transition-all duration-200
+            {/* Next */}
+            <button
+              disabled={currentPage === pagination?.totalPages || isSearching}
+              onClick={() => setCurrentPage(Number(currentPage + 1))}
+              className={`px-4 py-2 rounded-lg text-sm font-semibold border transition-all duration-200 w-full sm:w-auto
         ${currentPage === pagination?.totalPages || isSearching
-                ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
-                : 'bg-[#E91E8C] border-[#E91E8C] text-white hover:bg-[#C81878] cursor-pointer'
-              }`}
-          >
-            Next →
-          </button>
+                  ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'bg-[#ED5F8D] border-[#E91E8C] text-white hover:bg-[#C81878] cursor-pointer'
+                }`}
+            >
+              Next →
+            </button>
+
+          </div>
 
         </div>
 
-        {/* Limit */}
-        <div className="flex items-center gap-3 text-sm text-gray-400">
-          <span>Limit</span>
+        {/* 🔹 Right Controls */}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 w-full md:w-auto">
 
-          <select
-            value={pageLimit}
-            onChange={(e) => changePageLimit(Number(e.target.value))}
-            className="bg-white border border-gray-200 text-[#18305C] text-sm px-3 py-2 rounded-lg outline-none focus:border-[#E91E8C] cursor-pointer"
-            style={{
-              boxShadow: '0 1px 6px rgba(0,0,0,0.06)',
-            }}
-          >
-            <option value="4">4</option>
-            <option value="8">8</option>
-            <option value="12">12</option>
-            <option value="16">16</option>
-            <option value="20">20</option>
-          </select>
-        </div>
+          {/* Limit */}
+          <div className="flex items-center justify-between sm:justify-start gap-3 text-sm text-gray-400 w-full sm:w-auto">
+            <span>Limit</span>
 
-        {/* Go to page */}
-        <div className="flex items-center gap-3 text-sm text-gray-400">
-          <span>Go to page</span>
+            <select
+              value={pageLimit}
+              onChange={(e) => changePageLimit(Number(e.target.value))}
+              className="w-[100px] bg-white border border-gray-200 text-[#18305C] text-sm px-3 py-2 rounded-lg outline-none focus:border-[#E91E8C] cursor-pointer"
+              style={{
+                boxShadow: '0 1px 6px rgba(0,0,0,0.06)',
+              }}
+            >
+              <option value="4">4</option>
+              <option value="8">8</option>
+              <option value="12">12</option>
+              <option value="16">16</option>
+              <option value="20">20</option>
+            </select>
+          </div>
 
-          <select
-            value={currentPage}
-            disabled={isSearching}
-            onChange={(e) => setCurrentPage(Number(e.target.value))}
-            className="bg-white border border-gray-200 text-[#18305C] text-sm px-3 py-2 rounded-lg outline-none focus:border-[#E91E8C] cursor-pointer"
-            style={{
-              boxShadow: '0 1px 6px rgba(0,0,0,0.06)',
-            }}
-          >
-            {Array.from({ length: pagination?.totalPages || 1 }, (_, index) => (
-              <option key={index} value={index + 1}>
-                {index + 1}
-              </option>
-            ))}
-          </select>
+          {/* Go to page */}
+          <div className="flex items-center justify-between sm:justify-start gap-3 text-sm text-gray-400 w-full sm:w-auto">
+            <span>Go to page</span>
+
+            <select
+              value={currentPage}
+              disabled={isSearching}
+              onChange={(e) => setCurrentPage(Number(e.target.value))}
+              className="w-[100px] bg-white border border-gray-200 text-[#18305C] text-sm px-3 py-2 rounded-lg outline-none focus:border-[#E91E8C] cursor-pointer"
+              style={{
+                boxShadow: '0 1px 6px rgba(0,0,0,0.06)',
+              }}
+            >
+              {Array.from({ length: pagination?.totalPages || 1 }, (_, index) => (
+                <option key={index} value={index + 1}>
+                  {index + 1}
+                </option>
+              ))}
+            </select>
+          </div>
+
         </div>
 
       </div>
 
       {/* Delete Hotel  */}
       {isDeleteModal &&
-        <DeleteModal onClose={()=>setIsDeleteModal(false)} onDelete={()=>deleteHotel()} itemName = {deleteHotelDetails?.hotelName} confirmText = {deleteHotelDetails?.hotelName}/>
+        <DeleteModal onClose={() => setIsDeleteModal(false)} onDelete={() => deleteHotel()} itemName={deleteHotelDetails?.hotelName} confirmText={deleteHotelDetails?.hotelName} />
       }
     </div>
   )

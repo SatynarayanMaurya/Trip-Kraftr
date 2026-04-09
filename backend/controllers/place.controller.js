@@ -309,11 +309,14 @@ export const updatePlaceById = async (req, res) => {
 
 export const searchPlaces = async (req, res) => {
     try {
-        const { search, regionId, pageLimit = 10 } = req.query;
+        const { search, regionId, pageLimit = 10 ,isGlobal} = req.query;
 
-        const query = {
-            org_id: req.user.org_id // filter by org first for performance
-        };
+        const query = {}
+            // org_id: req.user.org_id // filter by org first for performance
+        if(!isGlobal){
+            query.org_id = req.user.org_id
+        }
+        
         if (regionId) {
             const regionObjId = new mongoose.Types.ObjectId(regionId);
             query.regionId = regionObjId;

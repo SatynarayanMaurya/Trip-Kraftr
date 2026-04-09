@@ -141,12 +141,13 @@ export const useCommonHooks = () => {
           // ---------- Subregion Search for org ( ) ----------
     const searchPlaces = debounceSearch(
         "searchSubRegionForOrg",
-        (searchTerm,regionId,pageLimit=10) => {
+        (searchTerm,regionId,pageLimit=10,isGlobal) => {
           const params = new URLSearchParams();
       
           if (searchTerm) params.append("search", searchTerm);
           if (regionId) params.append("regionId", regionId);
           if (pageLimit) params.append("pageLimit", pageLimit);
+          params.append("isGlobal", isGlobal);
       
           return apiConnector(
             "GET",
