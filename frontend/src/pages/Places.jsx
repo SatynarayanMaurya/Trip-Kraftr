@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { useCommonHooks } from "../hooks/useCommonHooks";
 import { useRegionHooks } from "../hooks/useRegionHooks";
 import DeleteModal from "../components/DeleteModals/DeleteModal";
+import { Eye } from "lucide-react";
 
 const dummyPlaces = [
   { id: 1, placeName: "Nichiphula Waterfall", notes: "Nichiphula Waterfall", region: "Assam", subRegion: "Guwahati", category: "Leisure" },
@@ -397,24 +398,18 @@ function Places() {
                 <td style={{ padding: "15px 20px", color: "#6c757d", fontSize: "13px" }}>{place.category}</td>
                 <td style={{ padding: "15px 24px" }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "10px" }}>
-                    {/* Edit icon */}
+                    {/* View icon */}
                     <button
-                      onClick={() =>
-                        navigate(`update-place/${place?._id}`, {
-                          state: { place: place }
-                        })
-                      }
+                      onClick={() => navigate(`view-place/${place?._id}`)}
                       style={{
-                        background: "none", border: "none", cursor: "pointer",
+                        background: "none", border: "none", cursor: "pointer",color:PINK,
                         padding: "4px", display: "flex", alignItems: "center",
                         borderRadius: "6px"
                       }}
                       onMouseEnter={e => e.currentTarget.style.backgroundColor = "#fff5f8"}
                       onMouseLeave={e => e.currentTarget.style.backgroundColor = "transparent"}
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke={PINK} strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                      </svg>
+                      <Eye size={16}/>
                     </button>
                     {/* Delete icon */}
                     <button

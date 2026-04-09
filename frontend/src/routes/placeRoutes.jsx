@@ -5,6 +5,7 @@ import RoleRoute from "../utils/RoleRoutes"
 import Places from '../pages/Places'
 import AddPlace from '../components/Places/AddPlace'
 import UpdatePlace from '../components/Places/UpdatePlace'
+import ViewPlace from '../components/Places/ViewPlace'
 
 export const PlaceRoutes = (
     <>
@@ -31,6 +32,15 @@ export const PlaceRoutes = (
             element={
                 <RoleRoute allowedRoles={["org_admin"]}>
                     <UpdatePlace />
+                </RoleRoute>
+            }
+        />
+
+        <Route
+            path="places/view-place/:placeId"
+            element={
+                <RoleRoute allowedRoles={["org_admin"]}>
+                    <ViewPlace />
                 </RoleRoute>
             }
         />

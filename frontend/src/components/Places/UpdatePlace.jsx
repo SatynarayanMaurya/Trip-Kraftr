@@ -44,7 +44,7 @@ function UpdatePlace() {
 
     const [newImage, setNewImage] = useState(null); // File | null — only set when user uploads a new image
 
-    const categories = ["Adventure", "Cultural", "Relaxation"];
+    const categories = ["Leisure", "Adventure", "Wildlife", "Cultural",  "Others"];
 
     // ─── Populate form when placeDetails loads ────────────────────────────────
     useEffect(() => {
@@ -207,17 +207,11 @@ function UpdatePlace() {
                 existingImageUrl: formData.existingImageUrl,
             };
 
-            // console.log("Update Place Payload:", payload);
             setSubmitLoading(true)
             const response = await updatePlaceById(payload)
             setSubmitLoading(false)
             toast.success(response?.data?.message)
-            navigate(-1)
-            // TODO: replace console.log with actual API call e.g.:
-            // const response = await updatePlace(placeId, form)
-            // toast.success(response?.data?.message)
-            // setSubmitLoading(false)
-            // navigate(-1)
+            navigate('/places')
         }
         catch (error) {
             if (!isProduction) {

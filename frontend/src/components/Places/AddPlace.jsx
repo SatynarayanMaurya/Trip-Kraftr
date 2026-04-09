@@ -37,7 +37,7 @@ function AddPlace() {
     (state) => state.user.allRegionsForSuggestions
   );
 
-  const categories = ["Adventure", "Cultural", "Relaxation"];
+  const categories = ["Leisure", "Adventure", "Wildlife", "Cultural",  "Others"];
 
   const fetchRegionsForSuggestion = async () => {
     try {
