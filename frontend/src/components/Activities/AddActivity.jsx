@@ -6,14 +6,17 @@ import { toast } from "react-toastify";
 import { usePlaceHooks } from "../../hooks/usePlaceHooks";
 import { Save, ArrowLeft } from 'lucide-react'
 import { useNavigate } from "react-router-dom";
+import { useActivityHooks } from "../../hooks/useActivityHooks";
 function AddPlace() {
   const { getRegionsForOrg } = useRegionHooks();
+
   const { getSubRegionsForSuggestion } = useSubRegionHooks();
   const [regionLoading, setRegionLoading] = useState(false);
   const [subRegionLoading, setSubRegionLoading] = useState(false);
   const [allSubRegions, setAllSubRegion] = useState([]);
   const isProduction = useSelector((state) => state.user.isProduction);
   const { addPlace } = usePlaceHooks();
+  const {addActivity} = useActivityHooks()
   const [submitLoading, setSubmitLoading] = useState(false)
   const navigate = useNavigate()
 
@@ -22,11 +25,11 @@ function AddPlace() {
     subRegionId: "",
     region: "",
     subRegion: "",
-    placeName: "",
+    activityName: "",
     category: "",
     notes: "",
     description: "",
-    mapLink: "",
+    price: "",
     image: null,
     preview: null,
   });
@@ -146,7 +149,7 @@ function AddPlace() {
   const validate = () => {
     const newErrors = {};
     if (!formData.region) newErrors.region = "Region is required";
-    if (!formData.placeName) newErrors.placeName = "Place name is required";
+    if (!formData.activityName) newErrors.placeName = "Activity name is required";
     if (!formData.category) newErrors.category = "Category is required";
     return newErrors;
   };
@@ -164,20 +167,25 @@ function AddPlace() {
       const form = new FormData();
 
       form.append("regionId", formData.regionId);
-      form.append("regionName", formData.region);
       form.append("subRegionId", formData.subRegionId);
-      form.append("placeName", formData.placeName);
+      form.append("activityName", formData.activityName);
       form.append("category", formData.category);
       form.append("description", formData.description);
       form.append("notes", formData.notes);
-      form.append("mapLink", formData.mapLink);
+      form.append("price", formData.price);
 
       if (formData.image) {
         form.append("image", formData.image);
       }
 
+    //   for (let [key, value] of form.entries()) {
+    //     console.log(key, value);
+    //   }
+
+      
+
       setSubmitLoading(true)
-      const response = await addPlace(form)
+      const response = await addActivity(form)
       // console.log("Response : ",response)
       toast.success(response?.data?.message)
       setSubmitLoading(false)
@@ -204,7 +212,7 @@ function AddPlace() {
     <div className="p-6 bg-gray-50 min-h-screen">
       {/* Page Header */}
       <div className="flex flex-col gap-2 mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Add New Place</h1>
+        <h1 className="text-2xl font-bold text-gray-800">Add New Activity</h1>
         <button
           onClick={() => navigate(-1)}
           className="flex items-center gap-2 text-sm text-gray-500  hover:text-[#18305C] cursor-pointer w-fit"
@@ -301,25 +309,25 @@ function AddPlace() {
             </div>
           </div>
 
-          {/* Row 2 - Place Name & Category */}
+          {/* Row 2 - Activity Name & Category */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                Place Name <span className="text-pink-500">*</span>
+                Activity Name <span className="text-pink-500">*</span>
               </label>
               <input
                 type="text"
-                name="placeName"
-                placeholder="Enter Place Name"
-                value={formData.placeName}
+                name="activityName"
+                placeholder="Enter Activity Name"
+                value={formData.activityName}
                 onChange={handleChange}
                 className={`w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-transparent transition-all ${errors.placeName
                     ? "border-red-400 ring-1 ring-red-300"
                     : "border-gray-300"
                   }`}
               />
-              {errors.placeName && (
-                <p className="mt-1 text-xs text-red-500">{errors.placeName}</p>
+              {errors.activityName && (
+                <p className="mt-1 text-xs text-red-500">{errors.activityName}</p>
               )}
             </div>
 
@@ -381,7 +389,7 @@ function AddPlace() {
           {/* Place Description */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-              Place Description
+              Activity Description
             </label>
             <textarea
               name="description"
@@ -392,17 +400,17 @@ function AddPlace() {
             />
           </div>
 
-          {/* Row 3 - Map Link & Images */}
+          {/* Row 3 - Price & Images */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                Google Map link (optional)
+                Price
               </label>
               <input
-                type="text"
-                name="mapLink"
-                placeholder="https://maps.google.com"
-                value={formData.mapLink}
+                type="number"
+                name="price"
+                placeholder="$300"
+                value={formData.price}
                 onChange={handleChange}
                 className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-transparent transition-all"
               />

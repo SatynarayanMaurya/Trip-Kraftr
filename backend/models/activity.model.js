@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const placeSchema = new mongoose.Schema({
+const activitySchema = new mongoose.Schema({
     org_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Organization",
@@ -13,17 +13,12 @@ const placeSchema = new mongoose.Schema({
         required: true
     },
 
-    regionName: {
-        type: String,
-        default: null
-    },
-
     subRegionId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "SubRegion"
     },
 
-    placeName: {
+    activityName: {
         type: String,
         required: true,
         trim: true
@@ -37,7 +32,10 @@ const placeSchema = new mongoose.Schema({
     description: String,
     notes: String,
 
-    mapLink: String,
+    price: {
+        type: Number,
+        required: true,
+    },
 
     imageUrl: String,
     imagePublicId: String
@@ -45,9 +43,9 @@ const placeSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Case-insensitive unique index
-placeSchema.index(
-    { org_id: 1, regionId: 1, placeName: 1 },
+activitySchema.index(
+    { org_id: 1, regionId: 1, activityName: 1 },
     { unique: true }
 );
 
-export default mongoose.model("Place", placeSchema);
+export default mongoose.model("Activity", activitySchema);

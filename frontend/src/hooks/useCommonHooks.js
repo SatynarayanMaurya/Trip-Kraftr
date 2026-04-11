@@ -7,6 +7,7 @@ import { subRegionEndpoints } from "../services/Apis/subRegionApis"
 import { vehicleEndpoinsts } from "../services/Apis/vehicleApis"
 import { hotelEndpoinsts } from "../services/Apis/hotelApis"
 import { placeEndpoints } from "../services/Apis/placeApis"
+import { activityEndpoints } from "../services/Apis/activityApis"
 
 export const useCommonHooks = () => {
     const dispatch = useDispatch()
@@ -140,18 +141,37 @@ export const useCommonHooks = () => {
 
           // ---------- Subregion Search for org ( ) ----------
     const searchPlaces = debounceSearch(
-        "searchSubRegionForOrg",
-        (searchTerm,regionId,pageLimit=10,isGlobal) => {
+        "searchPlaceForOrgOrGlobal",
+        (searchTerm,regionId,regionName,pageLimit=10,isGlobal) => {
           const params = new URLSearchParams();
       
           if (searchTerm) params.append("search", searchTerm);
           if (regionId) params.append("regionId", regionId);
           if (pageLimit) params.append("pageLimit", pageLimit);
+          if (regionName) params.append("regionName", regionName);
           params.append("isGlobal", isGlobal);
       
           return apiConnector(
             "GET",
             `${placeEndpoints.SEAECH_PLACE}?${params.toString()}`
+          );
+        },
+        300
+      );
+
+          // ---------- Subregion Search for org ( ) ----------
+    const searchActivities = debounceSearch(
+        "searchActivities",
+        (searchTerm,regionId,pageLimit=10) => {
+          const params = new URLSearchParams();
+      
+          if (searchTerm) params.append("search", searchTerm);
+          if (regionId) params.append("regionId", regionId);
+          if (pageLimit) params.append("pageLimit", pageLimit);
+      
+          return apiConnector(
+            "GET",
+            `${activityEndpoints.SEARCH_ACTIVITY}?${params.toString()}`
           );
         },
         300
@@ -167,7 +187,8 @@ export const useCommonHooks = () => {
         searchSubRegionForOrg,
         searchVehicles,
         searchHotels,
-        searchPlaces
+        searchPlaces,
+        searchActivities
 
     }
 }

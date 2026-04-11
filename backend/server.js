@@ -21,6 +21,7 @@ import hotelRouter from "./routes/hotel.routes.js";
 import roomRouter from "./routes/room.routes.js";
 import roomRateRouter from "./routes/roomRate.routes.js";
 import placeRouter from "./routes/place.routes.js";
+import activityRouter from "./routes/activity.routes.js";
 
 // Step 1: Initialize critical services (DB + Cloudinary)
 const initializeServices = async () => {
@@ -58,6 +59,7 @@ initializeServices().then(() => {
   app.use("/api/v1", roomRouter);
   app.use("/api/v1", roomRateRouter);
   app.use("/api/v1", placeRouter);
+  app.use("/api/v1", activityRouter);
 
   app.get("/", (req, res) => {
     res.send("<h1>TripKraftr Backend is running successfully</h1>");

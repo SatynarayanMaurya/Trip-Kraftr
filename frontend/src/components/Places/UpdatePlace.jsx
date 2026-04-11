@@ -195,6 +195,7 @@ function UpdatePlace() {
             const payload = {
                 _id:placeDetails?._id,
                 regionId: formData.regionId,
+                regionName: formData.region,
                 subRegionId: formData.subRegionId,
                 placeName: formData.placeName,
                 category: formData.category,

@@ -9,17 +9,6 @@ import { useRegionHooks } from "../hooks/useRegionHooks";
 import DeleteModal from "../components/DeleteModals/DeleteModal";
 import { Eye } from "lucide-react";
 
-const dummyPlaces = [
-  { id: 1, placeName: "Nichiphula Waterfall", notes: "Nichiphula Waterfall", region: "Assam", subRegion: "Guwahati", category: "Leisure" },
-  { id: 2, placeName: "Nichiphula Waterfall", notes: "Nichiphula Waterfall", region: "Assam", subRegion: "Guwahati", category: "Leisure" },
-  { id: 3, placeName: "Nichiphula Waterfall", notes: "Nichiphula Waterfall", region: "Assam", subRegion: "Guwahati", category: "Leisure" },
-  { id: 4, placeName: "Nichiphula Waterfall", notes: "Nichiphula Waterfall", region: "Assam", subRegion: "Guwahati", category: "Leisure" },
-  { id: 5, placeName: "Nichiphula Waterfall", notes: "Nichiphula Waterfall", region: "Assam", subRegion: "Guwahati", category: "Leisure" },
-  { id: 6, placeName: "Nichiphula Waterfall", notes: "Nichiphula Waterfall", region: "Assam", subRegion: "Guwahati", category: "Leisure" },
-];
-
-const subRegionOptions = ["All", "Guwahati", "Delhi", "Mumbai"];
-const regionOptions = ["All", "Assam", "Asia", "Europe"];
 
 const BLUE = "#08255B";
 const PINK = "#ED5F8D";
@@ -27,6 +16,7 @@ const PINK = "#ED5F8D";
 function Places() {
 
   const { getPlaces, deletePlaceById } = usePlaceHooks()
+  const userDetails = useSelector((state)=>state.user.userDetails)
   
   const [isGlobal, setIsGlobal] = useState(true);
   const { searchPlaces } = useCommonHooks()
@@ -36,7 +26,6 @@ function Places() {
   const navigate = useNavigate()
 
   const [search, setSearch] = useState("");
-  const [selectedSubRegion, setSelectedSubRegion] = useState("Sub-Region");
   const [selectedRegion, setSelectedRegion] = useState("Region");
 
   const [subRegionOpen, setSubRegionOpen] = useState(false);
@@ -104,7 +93,7 @@ function Places() {
       setIsSearching(true)
       setFetchLoading(true)
       const regionId = allRegionsForSuggestions?.find((region) => region?.name === selectedRegion)?._id
-      const response = await searchPlaces(search, regionId || null, pageLimit,isGlobal)
+      const response = await searchPlaces(search, regionId || null,selectedRegion||null, pageLimit,isGlobal)
       setSearchedPlaces(response?.data?.searchedPlaces)
       setFetchLoading(false)
     }
@@ -156,7 +145,7 @@ function Places() {
     else {
       setIsSearching(false)
     }
-  }, [search, pageLimit, selectedRegion])
+  }, [search, pageLimit, selectedRegion,isGlobal])
 
   // const pageLimit = 10
 
@@ -195,6 +184,8 @@ function Places() {
     }
 
   }
+
+
 
   return (
     <div style={{ padding: "28px 32px", backgroundColor: "#f5f6fa", minHeight: "100vh", }}>
@@ -391,7 +382,16 @@ function Places() {
                 onMouseEnter={e => e.currentTarget.style.backgroundColor = "#fafbff"}
                 onMouseLeave={e => e.currentTarget.style.backgroundColor = "transparent"}
               >
-                <td style={{ padding: "15px 24px", color: BLUE, fontWeight: "600", fontSize: "13.5px" }}>{place.placeName}</td>
+                <td style={{ padding: "15px 24px", color: BLUE, fontWeight: "600", fontSize: "13.5px" }}>
+                  <div>{place.placeName}</div>
+                  {
+                    isSearching&&
+                    (userDetails?.org_id === place?.org_id  ? 
+                    <span style={{  color: "#32cd32", fontSize: "10px" }}>you</span>:
+                    <span style={{  color: "red", fontSize: "10px" }}>other</span>)
+                  }
+                  </td>
+
                 <td style={{ padding: "15px 20px", color: "#8a94a6", fontSize: "13px" }}>{place.notes}</td>
                 <td style={{ padding: "15px 20px", color: "#6c757d", fontSize: "13px" }}>{place.regionId?.name}</td>
                 <td style={{ padding: "15px 20px", color: "#6c757d", fontSize: "13px" }}>{place.subRegionId?.name}</td>

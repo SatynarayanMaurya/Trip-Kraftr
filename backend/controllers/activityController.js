@@ -1,23 +1,23 @@
 
-import Place from "../models/place.model.js"
+import Activity from "../models/activity.model.js"
 import { deleteImageFromCloudinary, uploadImageToCloudinary } from "../utils/uploadToCloudinary.js";
 import mongoose from "mongoose";
 
-export const addPlace = async (req, res) => {
+export const addActivity = async (req, res) => {
     try {
         const {
-            placeName,
+            activityName,
             regionId,
             regionName,
             subRegionId,
             category,
-            mapLink,
+            price,
             description,
             notes
         } = req.body;
 
         // ✅ Basic validation
-        if (!placeName?.trim() || !regionId || !category) {
+        if (!activityName?.trim() || !regionId || !category) {
             return res.status(400).json({
                 success: false,
                 message: "Required fields are missing"
@@ -39,7 +39,7 @@ export const addPlace = async (req, res) => {
             });
         }
 
-        const cleanedPlaceName = placeName.trim();
+        const cleanedActivityName = activityName.trim();
 
         // ✅ Image handling
         const image = req?.files?.image;
@@ -49,7 +49,7 @@ export const addPlace = async (req, res) => {
         if (image) {
             const response = await uploadImageToCloudinary(
                 image,
-                process.env.PLACE_IMAGES
+                process.env.ACTIVITY_IMAGES
             );
 
             if (!response?.secure_url) {
@@ -66,37 +66,36 @@ export const addPlace = async (req, res) => {
         // ✅ Build payload (ONLY allowed fields)
         const payload = {
             org_id: req.user.org_id,
-            placeName: cleanedPlaceName,
+            activityName: cleanedActivityName,
             regionId,
             regionName,
-            category
+            category, price
         };
 
         if (subRegionId) payload.subRegionId = subRegionId;
-        if (mapLink) payload.mapLink = mapLink;
         if (description) payload.description = description;
         if (notes) payload.notes = notes;
         if (imageUrl) payload.imageUrl = imageUrl;
         if (imagePublicId) payload.imagePublicId = imagePublicId;
 
         // ✅ Create place
-        const newPlace = await Place.create(payload);
+        const newActivity = await Activity.create(payload);
 
-        await newPlace.populate([
+        await newActivity.populate([
             { path: "regionId", select: "_id name country" },
             { path: "subRegionId", select: "_id name" }
         ]);
         return res.status(201).json({
             success: true,
-            message: "Place Added Successfully",
-            newPlace
+            message: "Activity Added Successfully",
+            newActivity
         });
 
     } catch (error) {
         if (error.code === 11000) {
             return res.status(409).json({
                 success: false,
-                message: "Place already exists in this region"
+                message: "Activity already exists in this region"
             });
         }
 
@@ -108,38 +107,38 @@ export const addPlace = async (req, res) => {
 };
 
 
-export const getPlaces = async (req, res) => {
+export const getActivities = async (req, res) => {
     try {
         const page = Math.max(parseInt(req.query.page) || 1, 1)
         const limit = Math.max(parseInt(req.query.limit) || 5, 1)
 
         const skip = (page - 1) * limit;
 
-        const allPlaces = await Place
+        const allActivities = await Activity
             .find({ org_id: req.user.org_id })
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)
             .lean()
-            .select("_id regionId subRegionId org_id placeName notes category")
+            .select("_id regionId subRegionId org_id activityName price notes category")
             .populate({ path: "regionId", select: "_id name country" })
             .populate({ path: "subRegionId", select: "_id name" })
 
         // Counts
-        const totalPlace = await Place.countDocuments({ org_id: req.user.org_id })
+        const totalActivities = await Activity.countDocuments({ org_id: req.user.org_id })
 
-        const totalPages = Math.ceil(totalPlace / limit)
+        const totalPages = Math.ceil(totalActivities / limit)
 
         return res.status(200).json({
             success: true,
-            message: "All Places fetched successfully",
-            allPlaces,
+            message: "All Activities fetched successfully",
+            allActivities,
 
             pagination: {
                 currentPage: page,
                 totalPages,
                 limit,
-                totalRecords: totalPlace
+                totalRecords: totalActivities
             },
         })
     }
@@ -173,8 +172,8 @@ export const getPlaceById = async (req, res) => {
         const findPlace = await Place
             .findOne({ org_id: req.user.org_id, _id: placeId })
             .lean()
-            .populate({path:"regionId",select:"_id name country"})
-            .populate({path:"subRegionId",select:"_id name"})
+            .populate({ path: "regionId", select: "_id name country" })
+            .populate({ path: "subRegionId", select: "_id name" })
 
         if (!findPlace) {
             return res.status(404).json({
@@ -211,10 +210,10 @@ export const updatePlaceById = async (req, res) => {
             notes
         } = req.body;
 
-        if(!placeName?.trim() || !category || !regionId){
+        if (!placeName?.trim() || !category || !regionId) {
             return res.status(400).json({
-                success:false,
-                message:"Required field are missing"
+                success: false,
+                message: "Required field are missing"
             })
         }
 
@@ -309,46 +308,39 @@ export const updatePlaceById = async (req, res) => {
     }
 };
 
-export const searchPlaces = async (req, res) => {
+export const searchActivity = async (req, res) => {
     try {
-        const { search, regionId,regionName, pageLimit = 10 ,isGlobal} = req.query;
+        const { search, regionId, pageLimit = 10 } = req.query;
 
 
         const query = {}
-        if(isGlobal === 'true'){
-            if (regionName) {
-                query.regionName = regionName;
-            }
+        query.org_id = req.user.org_id
+        if (regionId) {
+            const regionObjId = new mongoose.Types.ObjectId(regionId);
+            query.regionId = regionObjId;
         }
-        else{
-            query.org_id = req.user.org_id
-            if (regionId) {
-                const regionObjId = new mongoose.Types.ObjectId(regionId);
-                query.regionId = regionObjId;
-            }
-        }
-        
-        
+
+
 
         // Prefix search (starts with search term)
         if (search) {
-            query.placeName = { $regex: `^${search.trim()}`, $options: "i" };
+            query.activityName = { $regex: `^${search.trim()}`, $options: "i" };
         }
 
         // Find and limit results
 
-        const searchedPlaces = await Place
+        const searchedActivities = await Activity
             .find(query)
             .sort({ createdAt: -1 })
             .limit(pageLimit)
-            .select("_id regionId subRegionId org_id placeName notes category")
+            .select("_id regionId subRegionId price activityName notes category")
             .populate({ path: "regionId", select: "_id name country" })
             .populate({ path: "subRegionId", select: "_id name" })
 
         return res.status(200).json({
             success: true,
-            message: "Subregion search results",
-            searchedPlaces,
+            message: "Activity search results",
+            searchedActivities,
         });
 
     } catch (err) {
@@ -363,39 +355,51 @@ export const searchPlaces = async (req, res) => {
 
 export const deletePlaceById = async (req, res) => {
     try {
-        const { placeId } = req.params;
+        const { activityId } = req.params;
 
-        if (!placeId) {
+        if (!activityId) {
             return res.status(400).json({
                 success: false,
-                message: "Place Id is required",
+                message: "Activity Id is required",
             });
         }
 
-        if (!mongoose.Types.ObjectId.isValid(placeId)) {
+        if (!mongoose.Types.ObjectId.isValid(activityId)) {
             return res.status(400).json({
                 success: false,
-                message: "Invalid Place Id",
+                message: "Invalid Activity Id",
             });
         }
 
-        const deletedPlace = await Place.findOneAndDelete({
+        // 🔥 Single DB query
+        const deletedActivity = await Activity.findOneAndDelete({
             org_id: req.user.org_id,
-            _id: placeId,
+            _id: activityId,
         });
 
-        if (!deletedPlace) {
+        if (!deletedActivity) {
             return res.status(404).json({
                 success: false,
-                message: "Place not found",
+                message: "Activity not found",
             });
+        }
+
+        // 🔥 Delete image AFTER DB success
+        if (deletedActivity.public_id) {
+            try {
+                await deleteImageFromCloudinary(deletedActivity.public_id);
+            } catch (err) {
+                console.error("Cloudinary delete failed:", err.message);
+                // optional: don't fail API because DB already deleted
+            }
         }
 
         return res.status(200).json({
             success: true,
-            message: "Place deleted successfully",
-            deletedPlace,
+            message: "Activity deleted successfully",
+            deletedActivity,
         });
+
     } catch (error) {
         return res.status(500).json({
             success: false,
