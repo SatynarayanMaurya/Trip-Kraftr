@@ -135,7 +135,7 @@ function ViewPlace() {
 
           {/* Row 2 — Place Name & Category */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Field label="Activity Name" value={placeDetails?.placeName} />
+            <Field label="Place Name" value={placeDetails?.placeName} />
             <Field label="Category">
               <div className="flex items-center gap-2 px-3 py-2.5 bg-gray-50 border border-gray-100 rounded-lg min-h-[40px]">
                 {placeDetails?.category ? (

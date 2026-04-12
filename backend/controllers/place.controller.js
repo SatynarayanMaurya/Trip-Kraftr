@@ -173,8 +173,8 @@ export const getPlaceById = async (req, res) => {
         const findPlace = await Place
             .findOne({ org_id: req.user.org_id, _id: placeId })
             .lean()
-            .populate({path:"regionId",select:"_id name country"})
-            .populate({path:"subRegionId",select:"_id name"})
+            .populate({ path: "regionId", select: "_id name country" })
+            .populate({ path: "subRegionId", select: "_id name" })
 
         if (!findPlace) {
             return res.status(404).json({
@@ -211,10 +211,10 @@ export const updatePlaceById = async (req, res) => {
             notes
         } = req.body;
 
-        if(!placeName?.trim() || !category || !regionId){
+        if (!placeName?.trim() || !category || !regionId) {
             return res.status(400).json({
-                success:false,
-                message:"Required field are missing"
+                success: false,
+                message: "Required field are missing"
             })
         }
 
@@ -311,24 +311,24 @@ export const updatePlaceById = async (req, res) => {
 
 export const searchPlaces = async (req, res) => {
     try {
-        const { search, regionId,regionName, pageLimit = 10 ,isGlobal} = req.query;
+        const { search, regionId, regionName, pageLimit = 10, isGlobal } = req.query;
 
 
         const query = {}
-        if(isGlobal === 'true'){
+        if (isGlobal === 'true') {
             if (regionName) {
                 query.regionName = regionName;
             }
         }
-        else{
+        else {
             query.org_id = req.user.org_id
             if (regionId) {
                 const regionObjId = new mongoose.Types.ObjectId(regionId);
                 query.regionId = regionObjId;
             }
         }
-        
-        
+
+
 
         // Prefix search (starts with search term)
         if (search) {
@@ -389,6 +389,14 @@ export const deletePlaceById = async (req, res) => {
                 success: false,
                 message: "Place not found",
             });
+        }
+        // 🔥 Delete image AFTER DB success
+        if (deletedPlace.imagePublicId) {
+            try {
+                await deleteImageFromCloudinary(deletedPlace.imagePublicId);
+            } catch (err) {
+                console.error("Cloudinary delete failed:", err.message);
+            }
         }
 
         return res.status(200).json({

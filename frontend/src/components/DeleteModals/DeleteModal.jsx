@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useSelector } from "react-redux";
+import { toast } from "react-toastify";
 
 function DeleteModal({ onClose, onDelete, itemName = "item", confirmText = "DELETE" }) {
   const [input, setInput] = useState("");
   const [shake, setShake] = useState(false);
+  const [loading, setLoading] = useState(false)
   const inputRef = useRef(null);
-
+  const isProduction = useSelector((state) => state.user.isProduction)
   const isMatch = input === confirmText;
 
   useEffect(() => {
@@ -18,15 +21,30 @@ function DeleteModal({ onClose, onDelete, itemName = "item", confirmText = "DELE
     return () => window.removeEventListener("keydown", handler);
   }, [onClose]);
 
-  const handleDelete = () => {
-    if (!isMatch) {
-      setShake(true);
-      setTimeout(() => setShake(false), 500);
-      return;
+  const handleDelete = async () => {
+    try {
+      if (!isMatch) {
+        setShake(true);
+        setTimeout(() => setShake(false), 500);
+        return;
+      }
+      setLoading(true)
+      await onDelete();
+      setLoading(false)
+      setInput("");
+      onClose();
     }
-    onDelete();
-    setInput("");
-    onClose();
+    catch (error) {
+      setLoading(false)
+      if (!isProduction) {
+        console.log("========= ERROR DEBUG START =========");
+        console.log("Error:", error);
+        console.log("Response:", error?.response);
+        console.log("========= ERROR DEBUG END =========");
+      }
+      toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin")
+    }
+
   };
 
   const handleKeyDown = (e) => {
@@ -121,7 +139,7 @@ function DeleteModal({ onClose, onDelete, itemName = "item", confirmText = "DELE
             >
               Cancel
             </button>
-            <button
+            {/* <button
               onClick={handleDelete}
               disabled={!isMatch}
               className={`px-5 py-2.5 text-sm font-semibold rounded-xl transition-all flex items-center gap-2
@@ -135,6 +153,53 @@ function DeleteModal({ onClose, onDelete, itemName = "item", confirmText = "DELE
                   d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
               </svg>
               Delete {itemName}
+            </button> */}
+            <button
+              onClick={handleDelete}
+              disabled={!isMatch || loading}
+              className={`px-5 py-2.5 text-sm font-semibold rounded-xl transition-all flex items-center gap-2
+    ${isMatch && !loading
+                  ? "bg-red-500 hover:bg-red-600 text-white shadow-sm shadow-red-200 active:scale-[0.97]"
+                  : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                }`}
+            >
+              {loading ? (
+                <svg
+                  className="w-4 h-4 animate-spin"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z"
+                  />
+                </svg>
+              ) : (
+                <svg
+                  className="w-3.5 h-3.5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                  />
+                </svg>
+              )}
+
+              {loading ? "Deleting..." : `Delete ${itemName}`}
             </button>
           </div>
 

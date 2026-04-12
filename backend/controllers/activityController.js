@@ -150,42 +150,42 @@ export const getActivities = async (req, res) => {
     }
 }
 
-export const getPlaceById = async (req, res) => {
+export const getActivityById = async (req, res) => {
     try {
-        const { placeId } = req.params;
+        const { activityId } = req.params;
 
-        if (!placeId) {
+        if (!activityId) {
             return res.status(400).json({
                 success: false,
-                message: "Place Id not found"
+                message: "Activity Id not found"
             });
         }
 
         // ✅ ObjectId validation
-        if (!mongoose.Types.ObjectId.isValid(placeId)) {
+        if (!mongoose.Types.ObjectId.isValid(activityId)) {
             return res.status(400).json({
                 success: false,
-                message: "Invalid Place Id"
+                message: "Invalid Activity Id"
             });
         }
 
-        const findPlace = await Place
-            .findOne({ org_id: req.user.org_id, _id: placeId })
+        const findActivity = await Activity
+            .findOne({ org_id: req.user.org_id, _id: activityId })
             .lean()
             .populate({ path: "regionId", select: "_id name country" })
             .populate({ path: "subRegionId", select: "_id name" })
 
-        if (!findPlace) {
+        if (!findActivity) {
             return res.status(404).json({
                 success: false,
-                message: "Place Not found"
+                message: "Activity Not found"
             });
         }
 
         return res.status(200).json({
             success: true,
-            message: "Place found",
-            findPlace
+            message: "Activity found",
+            findActivity
         });
 
     } catch (error) {
@@ -196,21 +196,21 @@ export const getPlaceById = async (req, res) => {
     }
 };
 
-export const updatePlaceById = async (req, res) => {
+export const updateActivityById = async (req, res) => {
     try {
-        const { placeId } = req.params;
+        const { activityId } = req.params;
 
         const {
-            placeName,
+            activityName,
             regionId,
             subRegionId,
             category,
-            mapLink,
+            price,
             description,
             notes
         } = req.body;
 
-        if (!placeName?.trim() || !category || !regionId) {
+        if (!activityName?.trim() || !category || !regionId || !price) {
             return res.status(400).json({
                 success: false,
                 message: "Required field are missing"
@@ -220,28 +220,28 @@ export const updatePlaceById = async (req, res) => {
         const image = req?.files?.newImage;
 
         // ✅ Validate placeId
-        if (!mongoose.Types.ObjectId.isValid(placeId)) {
+        if (!mongoose.Types.ObjectId.isValid(activityId)) {
             return res.status(400).json({
                 success: false,
-                message: "Invalid Place Id"
+                message: "Invalid Activity Id"
             });
         }
 
         // ✅ Find existing place
-        const existingPlace = await Place.findOne({
+        const existingActivity = await Activity.findOne({
             org_id: req.user.org_id,
-            _id: placeId
+            _id: activityId
         });
 
-        if (!existingPlace) {
+        if (!existingActivity) {
             return res.status(404).json({
                 success: false,
-                message: "Place not found"
+                message: "Activity not found"
             });
         }
 
-        let imageUrl = existingPlace.imageUrl;
-        let imagePublicId = existingPlace.imagePublicId;
+        let imageUrl = existingActivity.imageUrl;
+        let imagePublicId = existingActivity.imagePublicId;
 
         // ✅ Image handling
         if (image) {
@@ -252,7 +252,7 @@ export const updatePlaceById = async (req, res) => {
 
             const result = await uploadImageToCloudinary(
                 image,
-                process.env.PLACE_IMAGES
+                process.env.ACTIVITY_IMAGES
             );
 
             if (!result?.secure_url) {
@@ -269,7 +269,7 @@ export const updatePlaceById = async (req, res) => {
         // ✅ Build update payload dynamically
         const updatePayload = {};
 
-        if (placeName?.trim()) updatePayload.placeName = placeName.trim();
+        if (activityName?.trim()) updatePayload.activityName = activityName.trim();
         if (regionId && mongoose.Types.ObjectId.isValid(regionId)) {
             updatePayload.regionId = regionId;
         }
@@ -277,7 +277,7 @@ export const updatePlaceById = async (req, res) => {
             updatePayload.subRegionId = subRegionId;
         }
         if (category) updatePayload.category = category;
-        if (mapLink) updatePayload.mapLink = mapLink;
+        if (price) updatePayload.price = Number(price);
         if (description) updatePayload.description = description;
         if (notes) updatePayload.notes = notes;
 
@@ -285,8 +285,8 @@ export const updatePlaceById = async (req, res) => {
         updatePayload.imagePublicId = imagePublicId;
 
         // ✅ Update
-        const updatedPlace = await Place.findOneAndUpdate(
-            { org_id: req.user.org_id, _id: placeId },
+        const updatedActivity = await Activity.findOneAndUpdate(
+            { org_id: req.user.org_id, _id: activityId },
             { $set: updatePayload },
             { new: true }
         )
@@ -296,8 +296,8 @@ export const updatePlaceById = async (req, res) => {
 
         return res.status(200).json({
             success: true,
-            message: "Place Updated Successfully",
-            updatedPlace
+            message: "Activity Updated Successfully",
+            updatedActivity
         });
 
     } catch (error) {
@@ -353,7 +353,7 @@ export const searchActivity = async (req, res) => {
 
 
 
-export const deletePlaceById = async (req, res) => {
+export const deleteActivityById = async (req, res) => {
     try {
         const { activityId } = req.params;
 
@@ -385,9 +385,9 @@ export const deletePlaceById = async (req, res) => {
         }
 
         // 🔥 Delete image AFTER DB success
-        if (deletedActivity.public_id) {
+        if (deletedActivity?.imagePublicId) {
             try {
-                await deleteImageFromCloudinary(deletedActivity.public_id);
+                await deleteImageFromCloudinary(deletedActivity.imagePublicId);
             } catch (err) {
                 console.error("Cloudinary delete failed:", err.message);
                 // optional: don't fail API because DB already deleted

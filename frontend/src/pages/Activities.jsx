@@ -16,10 +16,9 @@ import ActivitySkeleton from "../components/Activities/ActivitySkeleton";
 const BLUE = "#08255B";
 const PINK = "#ED5F8D";
 
-function Places() {
+function Activities() {
 
-    const { getPlaces, deletePlaceById } = usePlaceHooks()
-    const { addActivity, getActivities } = useActivityHooks()
+    const {  getActivities,deleteActivityById } = useActivityHooks()
     const userDetails = useSelector((state) => state.user.userDetails)
 
     const [isGlobal, setIsGlobal] = useState(true);
@@ -39,7 +38,7 @@ function Places() {
     const [isSearching, setIsSearching] = useState(false)
     const [searchedActivities, setSearchedActivities] = useState([])
 
-    const [deletePlaceDetails, setDeletePlaceDetails] = useState(null);
+    const [deleteActivityDetails, setDeleteActivityDetails] = useState(null);
     const [isDeleteModal, setIsDeleteModal] = useState(false)
 
     const pagination = useSelector((state) => state.activity.paginationActivities)
@@ -154,8 +153,8 @@ function Places() {
 
     const filtered = isSearching ? searchedActivities : currentPageActivities
 
-    const handleDelete = (placeDetails) => {
-        setDeletePlaceDetails(placeDetails)
+    const handleDelete = (activityDetails) => {
+        setDeleteActivityDetails(activityDetails)
         setIsDeleteModal(true)
     }
 
@@ -166,10 +165,10 @@ function Places() {
         dispatch(clearActivity())
     }
 
-    const deletePlace = async () => {
+    const deleteActivity = async () => {
         try {
             setFetchLoading(true)
-            const response = await deletePlaceById(deletePlaceDetails?._id)
+            const response = await deleteActivityById(deleteActivityDetails?._id)
             toast.success(response?.data?.message)
             setFetchLoading(false)
         }
@@ -184,6 +183,11 @@ function Places() {
             toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin")
         }
 
+    }
+
+    const resetFilter = ()=>{
+        setSearch("");
+        setSelectedRegion("Region")
     }
 
     return (
@@ -228,7 +232,7 @@ function Places() {
                     </svg>
                     <input
                         type="text"
-                        placeholder="Search by Place Name"
+                        placeholder="Search by Activity Name"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         style={{
@@ -286,7 +290,7 @@ function Places() {
 
 
                 {/* Filter sliders icon */}
-                <button style={{
+                <button onClick={resetFilter} style={{
                     display: "flex", alignItems: "center", justifyContent: "center",
                     backgroundColor: "#fff", border: "1px solid #eaecf0",
                     borderRadius: "10px", padding: "10px 12px",
@@ -344,7 +348,7 @@ function Places() {
                                             <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "10px" }}>
                                                 {/* View icon */}
                                                 <button
-                                                    onClick={() => navigate(`view-place/${activity?._id}`)}
+                                                    onClick={() => navigate(`view-activity/${activity?._id}`)}
                                                     style={{
                                                         background: "none", border: "none", cursor: "pointer", color: PINK,
                                                         padding: "4px", display: "flex", alignItems: "center",
@@ -448,10 +452,10 @@ function Places() {
             {/* Delete Modal  */}
             {
                 isDeleteModal &&
-                <DeleteModal onClose={() => setIsDeleteModal(false)} onDelete={deletePlace} itemName={deletePlaceDetails?.placeName} confirmText={deletePlaceDetails?.placeName} />
+                <DeleteModal onClose={() => setIsDeleteModal(false)} onDelete={deleteActivity} itemName={deleteActivityDetails?.activityName} confirmText={deleteActivityDetails?.activityName} />
             }
         </div>
     );
 }
 
-export default Places;
+export default Activities;

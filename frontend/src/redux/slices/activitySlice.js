@@ -73,20 +73,20 @@ export const activitySlice = createSlice({
             state.paginationActivities = { currentPage: 1, totalPages: 1, limit: 5, totalRecords: 0 }
         },
 
-        updatePlace: (state, action) => {
-            const updatedPlace = action.payload;
+        updateActivity: (state, action) => {
+            const updatedActivity = action.payload;
             // state.individualPlaces[updatePlace?._id] = updatePlace
           
             let found = false;
           
-            for (const page in state.placesPages) {
-                const pageData = state.placesPages[page];
-              const index = state.placesPages[page].findIndex(
-                place => place._id === updatedPlace._id
+            for (const page in state.activitiesPages) {
+                const pageData = state.activitiesPages[page];
+              const index = state.activitiesPages[page].findIndex(
+                activity => activity._id === updatedActivity._id
               );
           
               if (index !== -1) {
-                pageData[index] = updatedPlace;
+                pageData[index] = updatedActivity;
           
                 found = true;
                 break;
@@ -96,27 +96,27 @@ export const activitySlice = createSlice({
             // Optional: if not found, add to first page
             if (!found) {
               const firstPage = 1;
-              if (!state.placesPages[firstPage]) {
-                state.placesPages[firstPage] = [updatedPlace];
+              if (!state.activitiesPages[firstPage]) {
+                state.activitiesPages[firstPage] = [updatedActivity];
               } else {
-                state.placesPages[firstPage].unshift(updatedPlace);
+                state.activitiesPages[firstPage].unshift(updatedActivity);
               }
             }
         },
         
-        deletePlace: (state, action) => {
-            const placeId = action.payload;
-            const limit = state.paginationPlaces?.limit || 5;
+        deleteActivity: (state, action) => {
+            const activityId = action.payload;
+            const limit = state.paginationActivities?.limit || 5;
           
             let deletedPage = null;
           
             // ✅ Step 1: Find & delete
-            for (const page in state.placesPages) {
+            for (const page in state.activitiesPages) {
               const pageNum = Number(page);
-              const pageData = state.placesPages[pageNum];
+              const pageData = state.activitiesPages[pageNum];
           
               const index = pageData.findIndex(
-                item => item._id === placeId
+                item => item._id === activityId
               );
           
               if (index !== -1) {
@@ -131,21 +131,21 @@ export const activitySlice = createSlice({
             // ✅ Step 2: Shift items forward
             let currentPage = deletedPage;
           
-            while (state.placesPages[currentPage + 1]) {
+            while (state.activitiesPages[currentPage + 1]) {
               const nextPage = currentPage + 1;
           
-              if (state.placesPages[nextPage].length === 0) {
-                delete state.placesPages[nextPage];
+              if (state.activitiesPages[nextPage].length === 0) {
+                delete state.activitiesPages[nextPage];
                 break;
               }
           
               // move first item from next page
-              const shiftedItem = state.placesPages[nextPage].shift();
-              state.placesPages[currentPage].push(shiftedItem);
+              const shiftedItem = state.activitiesPages[nextPage].shift();
+              state.activitiesPages[currentPage].push(shiftedItem);
           
               // if next page becomes empty → delete it
-              if (state.placesPages[nextPage].length === 0) {
-                delete state.placesPages[nextPage];
+              if (state.activitiesPages[nextPage].length === 0) {
+                delete state.activitiesPages[nextPage];
                 break;
               }
           
@@ -153,28 +153,28 @@ export const activitySlice = createSlice({
             }
           
             // ✅ Step 3: Cleanup empty pages (important)
-            for (const page in state.placesPages) {
-              if (state.placesPages[page].length === 0) {
-                delete state.placesPages[page];
+            for (const page in state.activitiesPages) {
+              if (state.activitiesPages[page].length === 0) {
+                delete state.activitiesPages[page];
               }
             }
           
             // ✅ Step 4: Update pagination
-            if (state.paginationPlaces) {
-              state.paginationPlaces.totalRecords--;
+            if (state.paginationActivities) {
+              state.paginationActivities.totalRecords--;
           
-              state.paginationPlaces.totalPages = Math.max(
+              state.paginationActivities.totalPages = Math.max(
                 1,
-                Math.ceil(state.paginationPlaces.totalRecords / limit)
+                Math.ceil(state.paginationActivities.totalRecords / limit)
               );
           
               // adjust current page if it exceeds totalPages
               if (
-                state.paginationPlaces.currentPage >
-                state.paginationPlaces.totalPages
+                state.paginationActivities.currentPage >
+                state.paginationActivities.totalPages
               ) {
-                state.paginationPlaces.currentPage =
-                  state.paginationPlaces.totalPages;
+                state.paginationActivities.currentPage =
+                  state.paginationActivities.totalPages;
               }
             }
           },
@@ -183,14 +183,14 @@ export const activitySlice = createSlice({
             state.activitiesPerPages = action.payload
         },
 
-        setIndividualPlaces: (state, action) => {
-          const placeDetails = action.payload;
+        setIndividualActivity: (state, action) => {
+          const activityDetails = action.payload;
         
-          if (!state.individualPlaces) {
-            state.individualPlaces = {};
+          if (!state.individualActivity) {
+            state.individualActivity = {};
           }
         
-          state.individualPlaces[placeDetails._id] = placeDetails;
+          state.individualActivity[activityDetails._id] = activityDetails;
         }
 
 
@@ -204,7 +204,10 @@ export const {
     addNewActivity,
     setActivitiesByPage,
     setActivityPageLimit,
-    clearActivity
+    clearActivity,
+    deleteActivity,
+    setIndividualActivity,
+    updateActivity
 
 
 } = activitySlice.actions
