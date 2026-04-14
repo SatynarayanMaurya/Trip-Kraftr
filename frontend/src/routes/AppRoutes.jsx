@@ -16,6 +16,7 @@ import { masterRegionRoutes } from './MasterRegionRoutes'
 import { regionImagesRoutes } from './RegionImagesRoutes'
 import { PlaceRoutes } from './placeRoutes'
 import { ActivityRoutes } from './ActivityRoutes'
+import { PolicyRoutes } from './PolicyRoutes'
 
 
 function AppRoutes() {
@@ -36,6 +37,7 @@ function AppRoutes() {
         {subRegionRoutes}
         {PlaceRoutes}
         {ActivityRoutes}
+        {PolicyRoutes}
 
         <Route path="*" element={<NotFound />} />
       </Route>

@@ -2,10 +2,8 @@ import { createSlice } from '@reduxjs/toolkit'
 
 const initialState = {
 
-    // placesPages: {},
     activitiesPages: {},
 
-    // individualPlaces:{}, // This contain a single place but details about that it is used when we update the place
     individualActivity:{}, // This contain a single place but details about that it is used when we update the place
 
     activitiesPerPages: 10,

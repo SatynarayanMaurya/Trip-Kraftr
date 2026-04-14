@@ -8,6 +8,7 @@ import {
   Shield,
   ChevronDown,
   ChevronRight,
+  Siren,
 } from "lucide-react";
 
 import hotel_icon from "../../assets/sidebar/hotel_icon_sidebar.png";
@@ -43,11 +44,15 @@ function Sidebar() {
   );
 
   const staticMenuTabs = [
-    "Customise Trips",
-    "Manage Group Trips",
-    "Manage B2B Trips",
-    "My Sample Trips",
-  ]
+    { name: "Customise Trips", icon: <Building2 size={18}/>, path: "/", roles:['org_admin'] },
+    { name: "Manage Group Trips", icon:  <Building2 size={18}/>, path: "/", roles:['org_admin'] },
+    { name: "Manage B2B Trips", icon: <Building2 size={18}/>, path: "/", roles:['org_admin'] },
+    { name: "My Sample Trips", icon: <Building2 size={18}/>, path: "/" , roles:['org_admin'] },
+    { name: "Policies", icon: <Siren  size={18}/>, path: "/policies" , roles:['org_admin'] },
+  ];
+  const filteredStaticTabs = staticMenuTabs.filter(tab =>
+    tab.roles.includes(userDetails?.role)
+  );
 
   const supplierTabClicked = ()=>{
     setOpenAdmin(false);
@@ -156,24 +161,35 @@ function Sidebar() {
           <div className="pt-4" />
 
           {/* Static Menu Items */}
-          {staticMenuTabs?.map((item) => (
-            <div
-              key={item}
-              className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#244A78] cursor-pointer"
-            >
-              <Settings size={18} />
-              <span>{item}</span>
-            </div>
+          {filteredStaticTabs?.map((tab) => (
+            // <div
+            //   key={item?.name}
+            //   className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#244A78] cursor-pointer"
+            // >
+            //   <Settings size={18} />
+            //   <span>{item?.name}</span>
+            // </div>
+            <NavLink
+                    to={tab?.path}
+                    key={tab?.name}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 px-3 py-2 cursor-pointer transition-all ${isActive
+                        ? "bg-[#FEF4F8] text-black rounded-tl-full rounded-bl-full"
+                        : "hover:bg-[#244A78] rounded-lg text-white"
+                      }`
+                    }
+                  >
+                    {() => (
+                      <>
+                        <span>{tab?.icon}</span>
+                        <span className="text-sm font-medium">
+                          {tab.name}
+                        </span>
+                      </>
+                    )}
+                  </NavLink>
           ))}
 
-          {/* Policies */}
-          <div className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-[#244A78] cursor-pointer">
-            <div className="flex items-center gap-3">
-              <Shield size={18} />
-              <span>Policies</span>
-            </div>
-            <ChevronRight size={16} />
-          </div>
 
           {/* Admin */}
           <div>
