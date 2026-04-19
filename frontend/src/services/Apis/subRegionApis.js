@@ -4,6 +4,7 @@ const BASE_URL = import.meta.env.VITE_BACKEND_URL+"/api/v1"
 export const subRegionEndpoints  = {
     ADD_SUB_REGIONS : BASE_URL + '/add-sub-regions',
     GET_SUB_REGIONS : BASE_URL + '/get-sub-regions',
+    GET_SUB_REGIONS_FOR_REGIONS : BASE_URL + '/get-sub-regions-for-regions',
     GET_SUB_REGIONS_FOR_ORG : BASE_URL + '/get-sub-regions-for-org',  // This is for suggestion of the sub region for org
     SEARCH_REGIONS_FOR_ORG : BASE_URL + '/search-regions-for-org',
     SEARCH_SUB_REGIONS : BASE_URL + '/search-sub-regions',

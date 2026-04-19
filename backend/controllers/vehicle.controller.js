@@ -398,3 +398,33 @@ export const deleteVehicleById = async (req, res) => {
         });
     }
 };
+
+
+export const getVehiclesByRegionIds = async (req, res) => {
+  try {
+    const regionIds = req.query.regionIds.split(",");
+
+    const allVehicles = await Vehicle
+      .find({
+        org_id: req.user.org_id,
+        regionId: { $in: regionIds.map(id => new mongoose.Types.ObjectId(id)) },
+        is_active:true
+      })
+      .sort({ createdAt: -1 })
+      .lean()
+      .select("_id capacity pricePerDay regionId vehicleImageUrl vehicleModel vehicleType")
+      .populate({ path: "regionId", select: "_id name" });
+
+    return res.status(200).json({
+      success: true,
+      message: "Filtered Vehicles fetched successfully",
+      allVehicles
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error?.message || "Internal Server Error"
+    });
+  }
+};

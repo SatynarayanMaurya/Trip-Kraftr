@@ -196,6 +196,33 @@ export const getActivityById = async (req, res) => {
     }
 };
 
+export const getActivitiesBySubRegionIds = async (req, res) => {
+    try {
+      const subRegionIds = req.query.subRegionIds.split(",");
+  
+      const allActivities = await Activity
+        .find({
+          org_id: req.user.org_id,
+          subRegionId: { $in: subRegionIds.map(id => new mongoose.Types.ObjectId(id)) }
+        })
+        .sort({ createdAt: -1 })
+        .lean()
+        .select("_id regionId subRegionId activityName price")
+  
+      return res.status(200).json({
+        success: true,
+        message: "Filtered Activities fetched successfully",
+        allActivities
+      });
+  
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: error?.message || "Internal Server Error"
+      });
+    }
+  };
+
 export const updateActivityById = async (req, res) => {
     try {
         const { activityId } = req.params;

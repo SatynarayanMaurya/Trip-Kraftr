@@ -1,7 +1,7 @@
 
 import Region from "../models/region.model.js"
 import SubRegion from "../models/subRegion.model.js"
-import  mongoose from 'mongoose';
+import mongoose from 'mongoose';
 
 
 export const addSubRegion = async (req, res) => {
@@ -34,7 +34,7 @@ export const addSubRegion = async (req, res) => {
       description,
     });
 
-    await newSubRegion.populate({path:"regionId",select:"_id name country is_active"})
+    await newSubRegion.populate({ path: "regionId", select: "_id name country is_active" })
 
     return res.status(201).json({
       success: true,
@@ -55,121 +55,149 @@ export const addSubRegion = async (req, res) => {
     // 6️⃣ Handle other unexpected errors
     return res.status(500).json({
       success: false,
-      message: err.message||"Something went wrong",
+      message: err.message || "Something went wrong",
     });
   }
 };
 
 
 export const getSubRegions = async (req, res) => {
-    try {
-        const page = Math.max(parseInt(req.query.page) || 1, 1)
-        const limit = Math.max(parseInt(req.query.limit) || 5, 1)
+  try {
+    const page = Math.max(parseInt(req.query.page) || 1, 1)
+    const limit = Math.max(parseInt(req.query.limit) || 5, 1)
 
-        const skip = (page - 1) * limit
+    const skip = (page - 1) * limit
 
-        if(!req.user.org_id){
-          return res.status(401).json({
-            success:false,
-            message:"Organization id not found"
-          })
-        }
-
-        // Fetch regions with pagination
-        const allSubRegion = await SubRegion
-            .find({org_id:req.user.org_id})
-            .sort({ createdAt: -1 })
-            .skip(skip)
-            .limit(limit)
-            .lean()
-            .populate({path:"regionId",select:"_id name country"})
-
-        // Counts
-        const [totalSubRegion, activeSubRegion] = await Promise.all([
-            SubRegion.countDocuments({org_id:req.user.org_id}),
-            SubRegion.countDocuments({ is_active: true,org_id:req.user.org_id })
-        ])
-
-        const inactiveSubRegion = totalSubRegion - activeSubRegion
-        const totalPages = Math.ceil(totalSubRegion / limit)
-
-        return res.status(200).json({
-            success: true,
-            message: "All sub Regions fetched successfully",
-            allSubRegion,
-
-            pagination: {
-                currentPage: page,
-                totalPages,
-                limit,
-                totalRecords: totalSubRegion
-            },
-            stats: {
-                totalSubRegion,
-                activeSubRegion,
-                inactiveSubRegion
-            }
-        })
-
-    } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: error?.message || "Internal Server Error"
-        })
+    if (!req.user.org_id) {
+      return res.status(401).json({
+        success: false,
+        message: "Organization id not found"
+      })
     }
+
+    // Fetch regions with pagination
+    const allSubRegion = await SubRegion
+      .find({ org_id: req.user.org_id })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean()
+      .populate({ path: "regionId", select: "_id name country" })
+
+    // Counts
+    const [totalSubRegion, activeSubRegion] = await Promise.all([
+      SubRegion.countDocuments({ org_id: req.user.org_id }),
+      SubRegion.countDocuments({ is_active: true, org_id: req.user.org_id })
+    ])
+
+    const inactiveSubRegion = totalSubRegion - activeSubRegion
+    const totalPages = Math.ceil(totalSubRegion / limit)
+
+    return res.status(200).json({
+      success: true,
+      message: "All sub Regions fetched successfully",
+      allSubRegion,
+
+      pagination: {
+        currentPage: page,
+        totalPages,
+        limit,
+        totalRecords: totalSubRegion
+      },
+      stats: {
+        totalSubRegion,
+        activeSubRegion,
+        inactiveSubRegion
+      }
+    })
+
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error?.message || "Internal Server Error"
+    })
+  }
 }
 
-export const getSubRegionById = async (req, res)=>{
-  try{
-    const { subRegionId} = req.params;
-    if(!subRegionId){
+
+export const getSubRegionsByRegionIds = async (req, res) => {
+  try {
+    const regionIds = req.query.regionIds.split(",");
+
+    const allSubRegions = await SubRegion
+      .find({
+        org_id: req.user.org_id,
+        regionId: { $in: regionIds.map(id => new mongoose.Types.ObjectId(id)) }
+      })
+      .sort({ createdAt: -1 })
+      .lean()
+      .select("_id regionId name is_active")
+
+    return res.status(200).json({
+      success: true,
+      message: "Filtered sub Regions fetched successfully",
+      allSubRegions
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error?.message || "Internal Server Error"
+    });
+  }
+};
+
+export const getSubRegionById = async (req, res) => {
+  try {
+    const { subRegionId } = req.params;
+    if (!subRegionId) {
       return res.status(400).json({
-        success:false,
-        message:"Sub Region Id not found"
+        success: false,
+        message: "Sub Region Id not found"
       })
     }
-    if(!req.user.org_id){
+    if (!req.user.org_id) {
       return res.status(401).json({
-        success:false,
-        message:"Organization id not found"
+        success: false,
+        message: "Organization id not found"
       })
     }
 
-    const findSubRegion = await SubRegion.findOne({org_id:req.user.org_id,_id:subRegionId}).populate({path:"regionId",select:"_id name country"})
+    const findSubRegion = await SubRegion.findOne({ org_id: req.user.org_id, _id: subRegionId }).populate({ path: "regionId", select: "_id name country" })
     return res.status(200).json({
-      success:true,
-      message:"Sub Region finded",
+      success: true,
+      message: "Sub Region finded",
       findSubRegion
     })
   }
-  catch(error){
+  catch (error) {
     return res.status(500).json({
-      success:false,
-      message:error?.message || "Internal Server Error"
+      success: false,
+      message: error?.message || "Internal Server Error"
     })
   }
 }
 
 export const getSubRegionsForOrg = async (req, res) => { // This is for suggestion of the sub region for org
-  try{
-    const {regionId} = req.params;
-    if(!regionId){
+  try {
+    const { regionId } = req.params;
+    if (!regionId) {
       return res.status(400).json({
-        success:false,
-        message:"Region Id not found"
+        success: false,
+        message: "Region Id not found"
       })
     }
-    const allSubRegions = await SubRegion.find({org_id:req.user.org_id,regionId:regionId}).select("_id name")
+    const allSubRegions = await SubRegion.find({ org_id: req.user.org_id, regionId: regionId }).select("_id name")
     return res.status(200).json({
-      success:true,
-      message:"All Sub Regions fetched",
+      success: true,
+      message: "All Sub Regions fetched",
       allSubRegions
     })
   }
-  catch(error){
+  catch (error) {
     return res.status(500).json({
-      success:false,
-      message:error?.message || "Internal Server Error"
+      success: false,
+      message: error?.message || "Internal Server Error"
     })
   }
 }
@@ -217,7 +245,7 @@ export const updateSubRegionById = async (req, res) => {
         message: "Sub Region not found",
       });
     }
-    await updatedSubRegion.populate({path:"regionId",select:"_id name country"})
+    await updatedSubRegion.populate({ path: "regionId", select: "_id name country" })
     return res.status(200).json({
       success: true,
       message: "Updated successfully",
@@ -286,7 +314,7 @@ export const deleteSubRegionById = async (req, res) => {
 
 export const searchSubRegions = async (req, res) => {
   try {
-    const { search, filter,regionId,pageLimit=10 } = req.query;
+    const { search, filter, regionId, pageLimit = 10 } = req.query;
     if (!req.user.org_id) {
       return res.status(401).json({
         success: false,
@@ -294,7 +322,7 @@ export const searchSubRegions = async (req, res) => {
       });
     }
 
-    
+
     const query = {
       org_id: req.user.org_id // filter by org first for performance
     };
@@ -316,7 +344,7 @@ export const searchSubRegions = async (req, res) => {
     const searchedSubRegions = await SubRegion
       .find(query)
       .sort({ createdAt: -1 })
-      .limit(pageLimit).populate({path:"regionId",select:"_id name country is_active"})
+      .limit(pageLimit).populate({ path: "regionId", select: "_id name country is_active" })
 
     return res.status(200).json({
       success: true,
@@ -327,49 +355,49 @@ export const searchSubRegions = async (req, res) => {
   } catch (err) {
     return res.status(500).json({
       success: false,
-      message: err.message||"Something went wrong",
+      message: err.message || "Something went wrong",
     });
   }
 };
 
-export const searchRegionForOrganization = async(req,res)=>{   // For adding the subregion we need to search region first
-    try{
-        const { regionName } = req.query;
+export const searchRegionForOrganization = async (req, res) => {   // For adding the subregion we need to search region first
+  try {
+    const { regionName } = req.query;
 
-        if (!req.user.org_id) {
-          return res.status(401).json({
-            success: false,
-            message: "Org id not found"
-          });
-        }
-        
-        const query = {
-          org_id: req.user.org_id,
-          is_active: true
-        };
-        
-        if (regionName) {
-          query.name = { $regex: `${regionName}`, $options: "i" };
-        }
-        
-        const searchedRegions = await Region
-          .find(query)
-          .sort({ createdAt: -1 })
-          .limit(5);
-        
-        return res.status(200).json({
-          success: true,
-          message: "Region searched",
-          searchedRegions
-        });
+    if (!req.user.org_id) {
+      return res.status(401).json({
+        success: false,
+        message: "Org id not found"
+      });
     }
 
-    catch(error){
-        return res.status(500).json({
-            success:false,
-            message:error?.message || "Internal server error"
-        })
+    const query = {
+      org_id: req.user.org_id,
+      is_active: true
+    };
+
+    if (regionName) {
+      query.name = { $regex: `${regionName}`, $options: "i" };
     }
+
+    const searchedRegions = await Region
+      .find(query)
+      .sort({ createdAt: -1 })
+      .limit(5);
+
+    return res.status(200).json({
+      success: true,
+      message: "Region searched",
+      searchedRegions
+    });
+  }
+
+  catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error?.message || "Internal server error"
+    })
+  }
 
 }
 

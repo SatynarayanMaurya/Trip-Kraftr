@@ -3,7 +3,7 @@ import { apiConnector } from '../services/apiConnector'
 import { useDispatch, useSelector } from 'react-redux'
 import { setLoading } from '../redux/slices/userSlice'
 import { hotelEndpoinsts } from '../services/Apis/hotelApis'
-import { addNewHotel, deleteHotelReducer, setHotelDetails, setHotelsByPage, updateHotel } from '../redux/slices/hotelSlice';
+import { addNewHotel, deleteHotelReducer, setHotelDetails, setHotelsByPage, setHotelsBySubRegionKey, updateHotel } from '../redux/slices/hotelSlice';
 import { deleteRoomRateForHotel } from '../redux/slices/roomRateSlice';
 import { deleteRoomForHotel } from '../redux/slices/roomSlice';
 
@@ -11,6 +11,7 @@ export const useHotelHooks = () => {
   const dispatch = useDispatch();
   const hotelsPages = useSelector((state) => state.hotel.hotelsPages)
   const hotelDetails = useSelector((state) => state.hotel.hotelDetails)
+  const hotelsBysubRegionKey = useSelector((state)=>state.hotel.hotelsBysubRegionKey)
 
   const addHotel = async (hotelDetails) => {  // For Normal Org_admin
     try {
@@ -80,6 +81,33 @@ export const useHotelHooks = () => {
     }
   }
 
+
+  const getHotelsBySubRegionIds = async (subRegionIds) => {  
+    try {
+      const subRegionKey = subRegionIds?.join(",")
+      const cachedPage = hotelsBysubRegionKey?.[subRegionKey]
+      if (cachedPage) return cachedPage
+
+      dispatch(setLoading(true))
+
+      const response = await apiConnector(
+        "GET",
+        `${hotelEndpoinsts.GET_HOTEL_BY_SUB_REGION_ID}?subRegionIds=${subRegionIds.join(",")}`
+      );
+
+      if(response?.data?.success){
+        dispatch(setHotelsBySubRegionKey({key:subRegionKey,data:response?.data?.allHotels}))
+      }
+
+      return response
+
+    } catch (error) {
+      throw error
+    } finally {
+      dispatch(setLoading(false))
+    }
+  }
+
   // For update Hotels by Id
   const updateHotelById = async (hotelId, hotelDetails) => {
     try {
@@ -134,7 +162,8 @@ export const useHotelHooks = () => {
     getHotels,
     getHotelById,
     updateHotelById,
-    deleteHotelById
+    deleteHotelById,
+    getHotelsBySubRegionIds
 
   };
 };

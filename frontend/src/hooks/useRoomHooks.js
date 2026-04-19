@@ -3,12 +3,13 @@ import { apiConnector } from '../services/apiConnector'
 import { useDispatch, useSelector } from 'react-redux'
 import { setLoading } from '../redux/slices/userSlice'
 import { roomEndpoints } from '../services/Apis/roomApis';
-import { addSingleRoom, deleteSingleRoom, setRooms, updateSingleRoom } from '../redux/slices/roomSlice';
+import { addSingleRoom, deleteSingleRoom, setRooms, setRoomTypesForHotelId, updateSingleRoom } from '../redux/slices/roomSlice';
 import { deleteRoomRateForHotel } from '../redux/slices/roomRateSlice';
 
 export const useRoomHooks = () => {
     const dispatch = useDispatch();
     const allRooms = useSelector((state)=>state.room.allRooms)
+    const roomTypesForHotelId = useSelector((state)=>state.room.roomTypesForHotelId)
 
     const addRoom = async (roomDetails) => {  // For Normal Org_admin
         try {
@@ -31,6 +32,21 @@ export const useRoomHooks = () => {
             dispatch(setLoading(true));
             const response = await apiConnector("GET", `${roomEndpoints.GET_ROOMS}?hotelId=${hotelId}`)
             dispatch(setRooms({hotelId:hotelId,rooms:response?.data?.allRooms}))
+            return response;
+        } catch (error) {
+            throw error;
+        } finally {
+            dispatch(setLoading(false));
+        }
+    }
+
+    const getRoomsTypeForHotelId = async (hotelId) => {  // For Normal Org_admin
+        try {
+            const cachedPage = roomTypesForHotelId?.[hotelId]
+            if (cachedPage) return cachedPage 
+            dispatch(setLoading(true));
+            const response = await apiConnector("GET", `${roomEndpoints.GET_ROOMS_TYPE_FOR_HOTELID}?hotelId=${hotelId}`)
+            dispatch(setRoomTypesForHotelId({key:hotelId,data:response?.data?.allRoomType}))
             return response;
         } catch (error) {
             throw error;
@@ -75,7 +91,8 @@ export const useRoomHooks = () => {
         addRoom,
         getRooms,
         updateRoomById,
-        deleteRoomById
+        deleteRoomById,
+        getRoomsTypeForHotelId
 
     };
 };

@@ -1,7 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit'
 
 const initialState = {
-  allRooms: {}
+  allRooms: {},
+  roomTypesForHotelId:{}
 }
 
 export const roomSlice = createSlice({
@@ -88,6 +89,17 @@ export const roomSlice = createSlice({
       if (!hotelId || !state.allRooms) return;
 
       delete state.allRooms[hotelId];
+    },
+
+    
+    setRoomTypesForHotelId: (state, action) => {
+      const { key, data } = action.payload;
+    
+      if (!state.roomTypesForHotelId) {
+        state.roomTypesForHotelId = {};
+      }
+    
+      state.roomTypesForHotelId[key] = data;
     }
 
 
@@ -99,7 +111,8 @@ export const {
   addSingleRoom,
   updateSingleRoom,
   deleteSingleRoom,
-  deleteRoomForHotel
+  deleteRoomForHotel,
+  setRoomTypesForHotelId
 } = roomSlice.actions
 
 export default roomSlice.reducer

@@ -3,11 +3,12 @@ import { apiConnector } from '../services/apiConnector'
 import { useDispatch, useSelector } from 'react-redux'
 import { setLoading } from '../redux/slices/userSlice'
 import { vehicleEndpoinsts } from '../services/Apis/vehicleApis'
-import { addNewVehicle, deleteVehicle, setVehiclesByPage, updateVehicle } from '../redux/slices/vehicleSlice'
+import { addNewVehicle, deleteVehicle, setVehiclesByPage, setVehiclesByRegionKey, updateVehicle } from '../redux/slices/vehicleSlice'
 
 export const useVehicleHooks = () => {
   const dispatch = useDispatch();
   const vehiclesPages = useSelector((state)=>state.vehicle.vehiclesPages)
+  const vehiclesByRegionKey = useSelector((state)=>state.vehicle.vehiclesByRegionKey)
 
   const addVehicle = async (vehicleDetails) => {  // For Normal Org_admin
     try {
@@ -44,6 +45,32 @@ export const useVehicleHooks = () => {
           insights:response?.data?.insights
         })
       )
+
+      return response
+
+    } catch (error) {
+      throw error
+    } finally {
+      dispatch(setLoading(false))
+    }
+  }
+  
+  const getVehiclesByRegionIds = async (regionIds) => {  
+    try {
+      const regionKey = regionIds?.join(",")
+      const cachedPage = vehiclesByRegionKey?.[regionKey]
+
+      if (cachedPage) return cachedPage
+      dispatch(setLoading(true))
+
+      const response = await apiConnector(
+        "GET",
+        `${vehicleEndpoinsts.GET_VEHICLE_BY_REGION_IDS}?regionIds=${regionIds.join(",")}`
+      );
+
+      if(response?.data?.success){
+        dispatch(setVehiclesByRegionKey({key:regionKey,data:response?.data?.allVehicles}))
+      }
 
       return response
 
@@ -104,6 +131,7 @@ export const useVehicleHooks = () => {
     addVehicle,
     getVehicles,
     updateVehicleForOrg,
-    deleteVehicleForOrg
+    deleteVehicleForOrg,
+    getVehiclesByRegionIds
     };
 };

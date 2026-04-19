@@ -5,6 +5,8 @@ const initialState = {
 
     subRegionsPages: {},
 
+    subRegionByRegionKey: {},
+
     subRegionsPageLimit: 5,
 
     paginationSubRegions: {
@@ -217,8 +219,18 @@ export const subRegionSlice = createSlice({
 
         setSubRegionPageLimit: (state, action) => {
             state.subRegionsPageLimit = action.payload
-        }
+        },
 
+
+        setSubRegionsByRegionKey: (state, action) => {
+          const { key, subRegions } = action.payload;
+        
+          if (!state.subRegionByRegionKey) {
+            state.subRegionByRegionKey = {};
+          }
+        
+          state.subRegionByRegionKey[key] = subRegions;
+        }
 
     }
 })
@@ -230,7 +242,8 @@ export const {
     clearSubRegions,
     setSubRegionPageLimit,
     updateSubRegion,
-    deleteSubRegion
+    deleteSubRegion,
+    setSubRegionsByRegionKey
 
 
 } = subRegionSlice.actions

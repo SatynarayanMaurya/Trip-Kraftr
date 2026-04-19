@@ -4,6 +4,7 @@ const initialState = {
 
 
     hotelsPages: {},
+    hotelsBysubRegionKey: {},
 
     hotelDetails :{},  // This is only for storing a single hotel details according for view details
 
@@ -219,7 +220,20 @@ export const hotelSlice = createSlice({
               state.paginationHotels.totalRecords / limit
             );
           }
+        },
+
+        
+
+        setHotelsBySubRegionKey: (state, action) => {
+          const { key, data } = action.payload;
+        
+          if (!state.hotelsBysubRegionKey) {
+            state.hotelsBysubRegionKey = {};
+          }
+        
+          state.hotelsBysubRegionKey[key] = data;
         }
+
 
     }
 })
@@ -227,6 +241,7 @@ export const hotelSlice = createSlice({
 export const {
     addNewHotel,
     setHotelsByPage,
+    setHotelsBySubRegionKey,
     clearHotels,
     setHotelPageLimit,
     updateHotel,

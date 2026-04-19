@@ -17,6 +17,7 @@ import { regionImagesRoutes } from './RegionImagesRoutes'
 import { PlaceRoutes } from './placeRoutes'
 import { ActivityRoutes } from './ActivityRoutes'
 import { PolicyRoutes } from './PolicyRoutes'
+import { GroupTripsRoutes } from './GroupTripsRoutes'
 
 
 function AppRoutes() {
@@ -38,6 +39,7 @@ function AppRoutes() {
         {PlaceRoutes}
         {ActivityRoutes}
         {PolicyRoutes}
+        {GroupTripsRoutes}
 
         <Route path="*" element={<NotFound />} />
       </Route>

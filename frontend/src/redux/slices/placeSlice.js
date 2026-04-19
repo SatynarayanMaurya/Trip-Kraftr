@@ -3,6 +3,7 @@ import { createSlice } from '@reduxjs/toolkit'
 const initialState = {
 
     placesPages: {},
+    placesBySubRegionKey:{},
 
     individualPlaces:{}, // This contain a single place but details about that it is used when we update the place
 
@@ -193,6 +194,17 @@ export const placeSlice = createSlice({
           }
         
           state.individualPlaces[placeDetails._id] = placeDetails;
+        },
+
+        
+        setPlacesBySubRegionKey: (state, action) => {
+          const { key, data } = action.payload;
+        
+          if (!state.placesBySubRegionKey) {
+            state.placesBySubRegionKey = {};
+          }
+        
+          state.placesBySubRegionKey[key] = data;
         }
 
 
@@ -210,7 +222,8 @@ export const {
     clearPlaces,
     deletePlace,
     setIndividualPlaces,
-    updatePlace
+    updatePlace,
+    setPlacesBySubRegionKey
 
 
 } = placeSlice.actions

@@ -9,7 +9,8 @@ import {
     searchRegionForOrganization, 
     searchSubRegions, 
     updateSubRegionById,
-    getSubRegionsForOrg } 
+    getSubRegionsForOrg, 
+    getSubRegionsByRegionIds} 
 from "../controllers/subregion.controller.js";
 
 const subRegionRouter = express.Router()
@@ -19,6 +20,7 @@ subRegionRouter.post("/add-sub-regions",authMiddleware,roleMiddleware(["org_admi
 subRegionRouter.get("/search-regions-for-org",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),searchRegionForOrganization)
 subRegionRouter.get("/get-sub-regions",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),getSubRegions)
 subRegionRouter.get("/get-sub-regions-for-org/:regionId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),getSubRegionsForOrg)
+subRegionRouter.get("/get-sub-regions-for-regions",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),getSubRegionsByRegionIds)
 subRegionRouter.get("/search-sub-regions",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),searchSubRegions)
 subRegionRouter.get("/get-sub-regions-by-id/:subRegionId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),getSubRegionById)
 subRegionRouter.put("/update-sub-regions-by-id/:subRegionId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),updateSubRegionById)

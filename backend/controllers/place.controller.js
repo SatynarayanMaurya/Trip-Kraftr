@@ -197,6 +197,34 @@ export const getPlaceById = async (req, res) => {
     }
 };
 
+
+export const getPlacesBySubRegionIds = async (req, res) => {
+    try {
+      const subRegionIds = req.query.subRegionIds.split(",");
+  
+      const allPlaces = await Place
+        .find({
+          org_id: req.user.org_id,
+          subRegionId: { $in: subRegionIds.map(id => new mongoose.Types.ObjectId(id)) }
+        })
+        .sort({ createdAt: -1 })
+        .lean()
+        .select("_id regionId subRegionId placeName")
+  
+      return res.status(200).json({
+        success: true,
+        message: "Filtered places fetched successfully",
+        allPlaces
+      });
+  
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: error?.message || "Internal Server Error"
+      });
+    }
+  };
+
 export const updatePlaceById = async (req, res) => {
     try {
         const { placeId } = req.params;

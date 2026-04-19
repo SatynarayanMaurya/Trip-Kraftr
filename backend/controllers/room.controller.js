@@ -137,7 +137,6 @@ export const addRoom = async (req, res) => {
 export const getRoomsOfHotels = async (req, res) => {
     try {
         const { hotelId } = req.query;
-        console.log("Hotel Id : ", hotelId)
         if (!hotelId) {
             return res.status(400).json({
                 success: false,
@@ -159,6 +158,35 @@ export const getRoomsOfHotels = async (req, res) => {
         })
     }
 }
+
+
+export const getRoomsTypeForHotelId = async (req, res) => {
+    try {
+      const hotelId = req.query.hotelId;
+  
+      const allRoomType = await Room
+        .find({
+          org_id: req.user.org_id,
+          hotelId: new mongoose.Types.ObjectId(hotelId),
+        })
+        .sort({ createdAt: -1 })
+        .lean()
+        .select("_id roomName")
+  
+      return res.status(200).json({
+        success: true,
+        message: "Rooms Type fetched successfully",
+        allRoomType
+      });
+  
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: error?.message || "Internal Server Error"
+      });
+    }
+};
+
 
 
 export const updateRoomById = async (req, res) => {

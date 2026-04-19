@@ -3,11 +3,12 @@ import { apiConnector } from '../services/apiConnector'
 import { useDispatch, useSelector } from 'react-redux'
 import { setLoading } from '../redux/slices/userSlice'
 import { subRegionEndpoints } from '../services/Apis/subRegionApis'
-import { addNewSubRegion, deleteSubRegion, setSubRegionsByPage, updateSubRegion } from '../redux/slices/subRegionSlice';
+import { addNewSubRegion, deleteSubRegion, setSubRegionsByPage, setSubRegionsByRegionKey, updateSubRegion } from '../redux/slices/subRegionSlice';
 
 export const useSubRegionHooks = () => {
   const dispatch = useDispatch();
   const subRegionsPages = useSelector((state)=>state.subRegion.subRegionsPages)
+  const subRegionByRegionKey = useSelector((state)=>state.subRegion.subRegionByRegionKey)
 
   const addSubRegion = async (subRegionDetails) => {  // For Normal Org_admin
     try {
@@ -19,6 +20,34 @@ export const useSubRegionHooks = () => {
       throw error;
     } finally {
       dispatch(setLoading(false));
+    }
+  }
+
+  // For getting sub region with paginated
+
+  const getSubRegionsByRegionIds = async (regionIds) => {  
+    try {
+      const regionKey = regionIds?.join(",")
+      const cachedPage = subRegionByRegionKey?.[regionKey]
+
+      if (cachedPage) return cachedPage
+      dispatch(setLoading(true))
+
+      const response = await apiConnector(
+        "GET",
+        `${subRegionEndpoints.GET_SUB_REGIONS_FOR_REGIONS}?regionIds=${regionIds.join(",")}`
+      );
+
+      if(response?.data?.success){
+        dispatch(setSubRegionsByRegionKey({key:regionKey,subRegions:response?.data?.allSubRegions}))
+      }
+
+      return response
+
+    } catch (error) {
+      throw error
+    } finally {
+      dispatch(setLoading(false))
     }
   }
 
@@ -52,6 +81,7 @@ export const useSubRegionHooks = () => {
       dispatch(setLoading(false))
     }
   }
+
 
   // For getting sub region by id 
   const getSubRegionById = async (subRegionId) => {  
@@ -132,6 +162,7 @@ export const useSubRegionHooks = () => {
         getSubRegionById,
         updateSubRegionById,
         deleteSubRegionById,
-        getSubRegionsForSuggestion
+        getSubRegionsForSuggestion,
+        getSubRegionsByRegionIds
     };
 };

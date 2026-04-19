@@ -227,6 +227,37 @@ export const getHotelById = async (req, res) => {
 };
 
 
+export const getHotelsBySubRegionIds = async (req, res) => {
+    try {
+      const subRegionIds = req.query.subRegionIds.split(",");
+  
+      const allHotels = await Hotel
+        .find({
+          org_id: req.user.org_id,
+          subRegionId: { $in: subRegionIds.map(id => new mongoose.Types.ObjectId(id)) },
+          is_active:true
+        })
+        .sort({ createdAt: -1 })
+        .lean()
+        .select("_id regionId subRegionId hotelName category")
+        // .populate({ path: "regionId", select: "_id name country" })
+        // .populate({ path: "subRegionId", select: "_id name" })
+  
+      return res.status(200).json({
+        success: true,
+        message: "Hotels fetched successfully",
+        allHotels
+      });
+  
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: error?.message || "Internal Server Error"
+      });
+    }
+};
+
+
 
 export const updateHotelById = async (req, res) => {
     try {

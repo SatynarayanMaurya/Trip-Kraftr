@@ -178,12 +178,6 @@ function AddPlace() {
         form.append("image", formData.image);
       }
 
-    //   for (let [key, value] of form.entries()) {
-    //     console.log(key, value);
-    //   }
-
-      
-
       setSubmitLoading(true)
       const response = await addActivity(form)
       // console.log("Response : ",response)

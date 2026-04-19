@@ -6,6 +6,7 @@ const initialState = {
     allMasterRegions: null,
 
     vehiclesPages: {},
+    vehiclesByRegionKey: {},
 
     vehiclesPageLimit: 4,
 
@@ -220,6 +221,17 @@ export const vehilceSlice = createSlice({
             state.statsVehicles = { totalVehicle: 0, activeVehicle: 0, inactiveVehicle: 0 }
         },
 
+        setVehiclesByRegionKey: (state, action) => {
+          const { key, data } = action.payload;
+        
+          if (!state.vehiclesByRegionKey) {
+            state.vehiclesByRegionKey = {};
+          }
+        
+          state.vehiclesByRegionKey[key] = data;
+        }
+
+
 
     }
 })
@@ -230,7 +242,8 @@ export const {
     setVehiclePageLimit,
     clearVehicles,
     updateVehicle,
-    deleteVehicle
+    deleteVehicle,
+    setVehiclesByRegionKey
 
 
 } = vehilceSlice.actions

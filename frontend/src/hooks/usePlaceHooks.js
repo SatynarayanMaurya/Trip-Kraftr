@@ -3,12 +3,13 @@ import { apiConnector } from '../services/apiConnector'
 import { useDispatch, useSelector } from 'react-redux'
 import { setLoading } from '../redux/slices/userSlice'
 import { placeEndpoints } from '../services/Apis/placeApis'
-import { addNewPlace, deletePlace, setIndividualPlaces, setPlacesByPage, updatePlace } from '../redux/slices/placeSlice';
+import { addNewPlace, deletePlace, setIndividualPlaces, setPlacesByPage, setPlacesBySubRegionKey, updatePlace } from '../redux/slices/placeSlice';
 
 export const usePlaceHooks = () => {
     const dispatch = useDispatch();
     const placesPages = useSelector((state)=>state.place.placesPages)
     const individualPlaces = useSelector((state)=>state.place.individualPlaces)
+    const placesBySubRegionKey = useSelector((state)=>state.place.placesBySubRegionKey)
 
     const addPlace = async (placeDetails) => {  // For Normal Org_admin
         try {
@@ -79,6 +80,33 @@ export const usePlaceHooks = () => {
         }
     }
 
+    
+  const getPlacesBySubRegionIds = async (subRegionIds) => {  
+    try {
+      const subRegionKey = subRegionIds?.join(",")
+      const cachedPage = placesBySubRegionKey?.[subRegionKey]
+      if (cachedPage) return cachedPage
+
+      dispatch(setLoading(true))
+
+      const response = await apiConnector(
+        "GET",
+        `${placeEndpoints.GET_PLACE_BY_SUBREGION_IDS}?subRegionIds=${subRegionKey}`
+      );
+
+      if(response?.data?.success){
+        dispatch(setPlacesBySubRegionKey({key:subRegionKey,data:response?.data?.allPlaces}))
+      }
+
+      return response
+
+    } catch (error) {
+      throw error
+    } finally {
+      dispatch(setLoading(false))
+    }
+  }
+
     // For getting sub region with paginated
     const updatePlaceById = async (placeDetails) => {
         try {
@@ -133,6 +161,7 @@ export const usePlaceHooks = () => {
         getPlaces,
         getPlaceById,
         deletePlaceById,
-        updatePlaceById
+        updatePlaceById,
+        getPlacesBySubRegionIds
     };
 };
