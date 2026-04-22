@@ -11,6 +11,7 @@ import roomRateSlice from './slices/roomRateSlice'
 import placeSlice from './slices/placeSlice'
 import activitySlice from './slices/activitySlice'
 import policySlice from './slices/policySlice'
+import groupTripSlice from './slices/groupTripSlice'
 export const store = configureStore({
   reducer: {
     plan: planSlice,
@@ -25,5 +26,6 @@ export const store = configureStore({
     place:placeSlice,
     activity:activitySlice,
     policy:policySlice,
+    groupTrip:groupTripSlice,
   },
 })

@@ -12,6 +12,5 @@ placeRouter.get("/search-places",authMiddleware,roleMiddleware(["org_admin","ope
 placeRouter.get("/get-place-by-id/:placeId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),getPlaceById)
 placeRouter.delete("/delete-place/:placeId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),deletePlaceById)
 placeRouter.put("/update-place-by-id/:placeId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),updatePlaceById)
-// placeRouter.get("/search-vehicles",authMiddleware,searchVehicle)
 
 export default placeRouter

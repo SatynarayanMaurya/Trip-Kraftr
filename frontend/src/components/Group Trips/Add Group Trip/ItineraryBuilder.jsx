@@ -51,7 +51,7 @@ function SubRegionDropdowns({ dayData, allSubRegions, onDayChange, subRegionLoad
                                 disabled={subRegionLoading || isLocked}
                             >
                                 <option value="">
-                                    {isLocked ? `Select Sub-Region ${fields.findIndex(f => f.key === dependsOn) + 1} first` : 'e.g. Arunachal Pradesh'}
+                                    {isLocked ? `Select Sub-Region ${fields.findIndex(f => f.key === dependsOn) + 1} first` : 'e.g. Aasam'}
                                 </option>
                                 {!isLocked && getFiltered(exclude).map(s => (
                                     <option key={s._id} value={s._id}>{s.name}</option>
@@ -71,27 +71,11 @@ function HotelDetails({ dayData, hotelsForActiveDay, roomTypesForActiveDay, hote
     const hotelType = dayData?.hotelDetails?.hotelType ?? 'inventory';
     const isInventory = hotelType === 'inventory';
 
-    // const updateHotel = (field, value) => {
-    //     if(field === 'roomType'){
-    //         if(isInventory){
-    //             const findRoom = roomTypesForActiveDay?.find((val)=>val?._id === value)
-    //             onDayChange('hotelDetails', { ...dayData?.hotelDetails, ['roomTypeId']: value });
-    //             onDayChange('hotelDetails', { ...dayData?.hotelDetails, [field]: findRoom?.roomName });
-    //         }
-    //         else{
-    //             onDayChange('hotelDetails', { ...dayData?.hotelDetails, [field]: value });
-    //         }
-    //     }
-    //     else{
-    //         onDayChange('hotelDetails', { ...dayData?.hotelDetails, [field]: value });
-    //     }
-    // };
 
     const updateHotel = (field, value) => {
         if (field === 'roomType') {
             if (isInventory) {
                 const findRoom = roomTypesForActiveDay?.find(r => r._id === value);
-                // Single call — both roomTypeId and roomType set together
                 onDayChange('hotelDetails', {
                     ...dayData?.hotelDetails,
                     roomTypeId: value,
@@ -101,7 +85,7 @@ function HotelDetails({ dayData, hotelsForActiveDay, roomTypesForActiveDay, hote
                 // Manual — only store the typed name, clear any old inventory id
                 onDayChange('hotelDetails', {
                     ...dayData?.hotelDetails,
-                    roomTypeId: '',
+                    roomTypeId: null,
                     roomType: value,
                 });
             }
@@ -633,13 +617,16 @@ function ItineraryBuilder({
     const currentDay = itineraryBuilder?.daysDetails?.[activeDay - 1];
 
     const updateDayField = (field, value) => {
+        if(value === ''){
+            value = null
+        }
         let updates = { [field]: value };
 
         // If clearing a subregion, cascade-clear the dependent ones
         if (field === 'subRegion1' && !value) {
-            updates = { subRegion1: '', subRegion2: '', subRegion3: '' };
+            updates = { subRegion1: null, subRegion2: null, subRegion3: null };
         } else if (field === 'subRegion2' && !value) {
-            updates = { subRegion2: '', subRegion3: '' };
+            updates = { subRegion2:null, subRegion3: null };
         }
 
         // Apply all updates at once

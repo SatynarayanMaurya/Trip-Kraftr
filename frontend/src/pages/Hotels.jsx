@@ -241,16 +241,6 @@ export default function Hotels() {
 
       {/* ── Action buttons — right aligned, above the card ───────────────── */}
       <div className="flex items-center justify-end gap-2.5 mb-5 flex-wrap">
-        {/* <button className="flex items-center gap-2 px-4 py-2.5 border border-gray-300 text-[#18305C] text-sm font-semibold rounded-xl hover:bg-gray-50 transition-colors whitespace-nowrap"
-          style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.07)' }}>
-          <Upload size={15} />
-          Bulk Import
-        </button>
-        <button className="flex items-center gap-2 px-4 py-2.5 border border-gray-300 text-[#18305C] text-sm font-semibold rounded-xl hover:bg-gray-50 transition-colors"
-          style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.07)' }}>
-          <Download size={15} />
-          Export
-        </button> */}
         <button
           onClick={() => navigate('add-hotel')}
           className="flex items-center gap-2 px-4 py-2.5 bg-[#ED5F8D] hover:bg-[#ED5F8D] text-white text-sm font-semibold rounded-xl transition-colors whitespace-nowrap"

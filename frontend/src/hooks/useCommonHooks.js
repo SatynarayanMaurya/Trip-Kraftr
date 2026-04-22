@@ -8,6 +8,7 @@ import { vehicleEndpoinsts } from "../services/Apis/vehicleApis"
 import { hotelEndpoinsts } from "../services/Apis/hotelApis"
 import { placeEndpoints } from "../services/Apis/placeApis"
 import { activityEndpoints } from "../services/Apis/activityApis"
+import { groupTripEndpoints } from "../services/Apis/groupTripApis"
 
 export const useCommonHooks = () => {
     const dispatch = useDispatch()
@@ -177,6 +178,24 @@ export const useCommonHooks = () => {
         300
       );
 
+          // ---------- Subregion Search for org ( ) ----------
+    const searchGroupTrips = debounceSearch(
+        "searchGroupTrips",
+        (searchTerm,regionId,pageLimit=10) => {
+          const params = new URLSearchParams();
+      
+          if (searchTerm) params.append("search", searchTerm);
+          if (regionId) params.append("regionId", regionId);
+          if (pageLimit) params.append("pageLimit", pageLimit);
+      
+          return apiConnector(
+            "GET",
+            `${groupTripEndpoints.SEARCH_GROUP_TRIPS}?${params.toString()}`
+          );
+        },
+        300
+      );
+
 
 
     return {
@@ -188,7 +207,8 @@ export const useCommonHooks = () => {
         searchVehicles,
         searchHotels,
         searchPlaces,
-        searchActivities
+        searchActivities,
+        searchGroupTrips
 
     }
 }

@@ -8,6 +8,10 @@ import {
 import RegionDetails from './Add Group Trip/RegionDetails';
 import TripDetails from './Add Group Trip/TripDetails';
 import ItineraryBuilder from './Add Group Trip/ItineraryBuilder';
+import { useGroupTripHooks } from '../../hooks/useGroupTripHooks';
+import { useNavigate } from 'react-router-dom';
+
+import {ArrowLeft} from 'lucide-react'
 
 const PINK = '#ED5F8D';
 const BLUE = '#18305C';
@@ -15,20 +19,20 @@ const BLUE = '#18305C';
 // ─── blank day template ───────────────────────────────────────────────────────
 const blankDay = () => ({
     dayOverview: '',
-    subRegion1: '',
-    subRegion2: '',
-    subRegion3: '',
+    subRegion1:null,
+    subRegion2:null,
+    subRegion3:null,
     hotelDetails: {
         hotelType: 'inventory',
-        hotelId: '',
+        hotelId: null,
         hotelName: '',
-        roomTypeId: '',
-        roomType:'',
+        roomTypeId: null,
+        roomType: '',
         meals: '',
     },
     placeDetails: [],
     activities: [
-        { activityType: 'inventory', activityId: '', activityName: '', isComplimentary: false, price: 0 }
+        { activityType: 'inventory', activityId: null, activityName: '', isComplimentary: false, price: 0 }
     ],
 });
 
@@ -38,14 +42,18 @@ function sortIdsConsistently(arr) {
 
 function AddGroupTrip() {
 
+    const navigate = useNavigate()
+
     const [activeTab, setActiveTab] = useState(1);
     const [activeDay, setActiveDay] = useState(1);
 
+    const {addGroupTrip} = useGroupTripHooks()
+
     const [formData, setFormData] = useState({
         regionDetails: {
-            region1: '',
-            region2: '',
-            region3: '',
+            region1: null,
+            region2: null,
+            region3: null,
             fromDate: '',
             toDate: '',
             noOfDays: '',
@@ -103,6 +111,7 @@ function AddGroupTrip() {
     // ─── selectors ───────────────────────────────────────────────────────────
 
     const { regions, loading: regionLoading } = useRegionsData();
+    const isProduction = useSelector((state)=>state.user.isProduction)
     const allSubRegions = useSelector(s => s.subRegion.subRegionByRegionKey?.[sortedRegionId.join(',')]);
     const allVehicles = useSelector(s => s.vehicle.vehiclesByRegionKey?.[sortedRegionId.join(',')]);
     const hotelsForActiveDay = useSelector(s => s.hotel.hotelsBysubRegionKey?.[sortedSubRegionId.join(',')]);
@@ -146,9 +155,9 @@ function AddGroupTrip() {
     };
 
     const handleTripChange = (field, value) => {
-        if(field === 'minSeats' && Number(formData?.tripDetails?.totalSeats) < Number(value)){
-           toast.warn("Min seat can not be greater than total Seat")
-           return ;
+        if (field === 'minSeats' && Number(formData?.tripDetails?.totalSeats) < Number(value)) {
+            toast.warn("Min seat can not be greater than total Seat")
+            return;
         }
         setFormData(prev => ({
             ...prev,
@@ -157,6 +166,7 @@ function AddGroupTrip() {
     };
 
     const handleItineraryChange = (dayIndex, fieldOrUpdates, value) => {
+        // console.log("value : ",value)
         setFormData(prev => {
             const iti = prev.itineraryBuilder;
 
@@ -179,20 +189,20 @@ function AddGroupTrip() {
 
     const handleSaveRegion = () => {
         if (!region1 || !fromDate || !toDate) {
-          toast.error('Please fill all Basic Details');
-          return;
+            toast.error('Please fill all Basic Details');
+            return;
         }
-      
+
         const from = new Date(fromDate);
         const to = new Date(toDate);
-      
+
         if (to < from) {
-          toast.error('To date cannot be earlier than From date');
-          return;
+            toast.error('To date cannot be earlier than From date');
+            return;
         }
-      
+
         setActiveTab(2);
-      };
+    };
 
     const handleSaveVehicle = () => {
         const { assignedTo, totalSeats, minSeats, selectedVehicleId } = formData.tripDetails;
@@ -202,115 +212,144 @@ function AddGroupTrip() {
         }
         setActiveTab(3);
     };
-    const handleSaveItinerary = () => {
-        const day1 = formData.itineraryBuilder?.daysDetails?.[0];
-    
-        if (!day1) {
-            toast.error('Day 1 data is missing.');
-            return;
-        }
-    
-        // At least one sub-region
-        const hasSubRegion = [day1.subRegion1, day1.subRegion2, day1.subRegion3].some(Boolean);
-        if (!hasSubRegion) {
-            toast.error('Day 1: Please select at least one Sub-Region.');
-            return;
-        }
-    
-        // Hotel — hotelId (inventory) or hotelName (manual)
-        const hotel = day1?.hotelDetails;
-        const hasHotel = hotel?.hotelType === 'manual'
-            ? !!hotel?.hotelName?.trim()
-            : !!hotel?.hotelId;
-        if (!hasHotel) {
-            toast.error('Day 1: Please select or enter a Hotel.');
-            return;
-        }
-    
-        // Room type — id (inventory) or typed string (manual)
-        const hasRoomType = hotel?.hotelType === 'manual'
-            ? !!hotel?.roomType?.trim()
-            : !!hotel?.roomType;
-        if (!hasRoomType) {
-            toast.error('Day 1: Please select or enter a Room Type.');
-            return;
-        }
-    
-        // At least one meal
-        const hasMeals = !!hotel?.meals?.trim();
-        if (!hasMeals) {
-            toast.error('Day 1: Please select at least one Meal (Breakfast, Lunch, or Dinner).');
-            return;
-        }
-    
-        // At least one place selected
-        const hasPlace = day1.placeDetails?.length > 0;
-        if (!hasPlace) {
-            toast.error('Day 1: Please select at least one Place.');
-            return;
-        }
-    
-        const updatedDays = formData.itineraryBuilder.daysDetails.map(day => {
-            const places = day.placeDetails ?? [];
-            if (places.length === 0) return day;
-    
-            const hasFavourite = places.some(p => p.isFavourite);
-            if (hasFavourite) return day; // already has a favourite, don't touch
-    
-            // No favourite set — mark the first place as favourite
-            return {
-                ...day,
-                placeDetails: places.map((p, i) => ({
-                    ...p,
-                    isFavourite: i === 0,
-                })),
+
+    const handleSaveItinerary = async() => {
+        try {
+            const day1 = formData.itineraryBuilder?.daysDetails?.[0];
+
+            if (!day1) {
+                toast.error('Day 1 data is missing.');
+                return;
+            }
+
+            // At least one sub-region
+            const hasSubRegion = [day1.subRegion1, day1.subRegion2, day1.subRegion3].some(Boolean);
+            if (!hasSubRegion) {
+                toast.error('Day 1: Please select at least one Sub-Region.');
+                return;
+            }
+
+            // Hotel — hotelId (inventory) or hotelName (manual)
+            const hotel = day1?.hotelDetails;
+            const hasHotel = hotel?.hotelType === 'manual'
+                ? !!hotel?.hotelName?.trim()
+                : !!hotel?.hotelId;
+            if (!hasHotel) {
+                toast.error('Day 1: Please select or enter a Hotel.');
+                return;
+            }
+
+            // Room type — id (inventory) or typed string (manual)
+            const hasRoomType = hotel?.hotelType === 'manual'
+                ? !!hotel?.roomType?.trim()
+                : !!hotel?.roomType;
+            if (!hasRoomType) {
+                toast.error('Day 1: Please select or enter a Room Type.');
+                return;
+            }
+
+            // At least one meal
+            const hasMeals = !!hotel?.meals?.trim();
+            if (!hasMeals) {
+                toast.error('Day 1: Please select at least one Meal (Breakfast, Lunch, or Dinner).');
+                return;
+            }
+
+            // At least one place selected
+            const hasPlace = day1.placeDetails?.length > 0;
+            if (!hasPlace) {
+                toast.error('Day 1: Please select at least one Place.');
+                return;
+            }
+
+            const updatedDays = formData.itineraryBuilder.daysDetails.map(day => {
+                const places = day.placeDetails ?? [];
+                if (places.length === 0) return day;
+
+                const hasFavourite = places.some(p => p.isFavourite);
+                if (hasFavourite) return day; // already has a favourite, don't touch
+
+                // No favourite set — mark the first place as favourite
+                return {
+                    ...day,
+                    placeDetails: places.map((p, i) => ({
+                        ...p,
+                        isFavourite: i === 0,
+                    })),
+                };
+            });
+
+            // Sync the auto-favourited days back into formData before saving
+            setFormData(prev => ({
+                ...prev,
+                itineraryBuilder: {
+                    ...prev.itineraryBuilder,
+                    daysDetails: updatedDays,
+                },
+            }));
+
+            const payload = {
+                ...formData,
+                itineraryBuilder: {
+                    ...formData.itineraryBuilder,
+                    daysDetails: updatedDays
+                }
             };
-        });
-    
-        // Sync the auto-favourited days back into formData before saving
-        setFormData(prev => ({
-            ...prev,
-            itineraryBuilder: {
-                ...prev.itineraryBuilder,
-                daysDetails: updatedDays,
-            },
-        }));
-    
-        console.log('Final formData:', { ...formData, itineraryBuilder: { ...formData.itineraryBuilder, daysDetails: updatedDays } });
-        toast.success('Itinerary saved!');
+
+
+            const response = await addGroupTrip (payload)
+            toast.success(response?.data?.message ||'Itinerary saved!');
+            navigate(-1)
+        }
+        catch (error) {
+            if (!isProduction) {
+                console.log("========= ERROR DEBUG START =========");
+                console.log("Error:", error);
+                console.log("Response:", error?.response);
+                console.log("========= ERROR DEBUG END =========");
+            }
+            toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin")
+        }
+
     };
-    // console.log("placesForActiveDay : ",placesForActiveDay)
 
     // ─── render ───────────────────────────────────────────────────────────────
 
     const tabs = ['Basic Details', 'Trip Details', 'Itinerary Builder'];
 
-    const tabClick = (i)=>{
-        if(i === 1){
+    const tabClick = (i) => {
+        if (i === 1) {
             handleSaveRegion()
         }
-        else if(i === 2){
+        else if (i === 2) {
             handleSaveVehicle()
         }
-        else{
-            setActiveTab(i+1)
+        else {
+            setActiveTab(i + 1)
         }
     }
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '24px', background: '#f5f6fa', minHeight: '100vh' }}>
             <h1 style={{ fontSize: '22px', fontWeight: '700', color: BLUE, margin: 0 }}>Create New Group Trip</h1>
+            <button
+                    onClick={() => navigate(-1)}
+                    className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-[#18305C] -mt-1 transition-colors cursor-pointer"
+                >
+                    <ArrowLeft size={15} />
+                    Back to List
+                </button>
             <p style={{ fontSize: '13px', color: '#666', margin: 0 }}>Step {activeTab} of 3: {tabs[activeTab - 1]}</p>
 
-            <button
+            {/* <button
                 style={{ background: PINK, border: 'none', borderRadius: '6px', color: 'white', width: '30px', height: '30px', fontSize: '16px', cursor: 'pointer', marginTop: '8px', opacity: activeTab === 1 ? 0.4 : 1 }}
                 onClick={() => activeTab > 1 && setActiveTab(p => p - 1)}
             >
                 &#8592;
-            </button>
+            </button> */}
 
             {/* Tab Bar */}
-            <div style={{ display: 'flex', background: '#EEF0F5', borderRadius: '10px', padding: '4px', marginBottom: '8px' }}>
+            <div style={{ display: 'flex', background: '#EEF0F5', borderRadius: '10px', padding: '4px',marginTop:'1rem', marginBottom: '8px' }}>
                 {tabs.map((label, i) => (
                     <button
                         key={i}
