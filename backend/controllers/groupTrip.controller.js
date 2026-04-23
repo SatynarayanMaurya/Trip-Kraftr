@@ -86,46 +86,6 @@ export const getGroupTrips = async (req, res) => {
     }
 }
 
-// export const getGroupTripById = async(req,res)=>{
-//     try{
-//         const {groupTripId} = req.params;
-//         if(!groupTripId){
-//             return res.status(400).json({
-//                 success:false,
-//                 message:"Group Trip Id not found"
-//             })
-//         }
-
-//         if (!mongoose.Types.ObjectId.isValid(groupTripId)) {
-//             return res.status(400).json({
-//                 success: false,
-//                 message: "Invalid Group Trip Id format"
-//             });
-//         }
-
-//         const findGroupTrip = await GroupTrip.findOne({org_id:req.user.org_id, _id:groupTripId})
-//         const findGroupTripSummary = await GroupTripSummary?.findOne({org_id:req.user.org_id,groupTripId:groupTripId})
-//         if(!findGroupTrip){
-//             return res.status(404).json({
-//                 success:false,
-//                 message:"Group Trip not found"
-//             })
-//         }
-
-
-//         return res.status(200).json({
-//             success:true,
-//             message:"Group trip found",
-//             findGroupTrip
-//         })
-//     }
-//     catch(error){
-//         return res.status(500).json({
-//             success:false,
-//             message:error?.message || "Internal Server Error"
-//         })
-//     }
-// }
 
 export const getGroupTripById = async (req, res) => {
     try {
@@ -149,7 +109,11 @@ export const getGroupTripById = async (req, res) => {
             GroupTrip.findOne({
                 org_id: req.user.org_id,
                 _id: groupTripId,
-            }),
+            })
+            .populate({path:'itineraryBuilder.daysDetails.placeDetails.placeId',select:"_id placeName"})
+            .populate({path:'itineraryBuilder.daysDetails.subRegion1',select:"_id name"})
+            .populate({path:'itineraryBuilder.daysDetails.subRegion2',select:"_id name"})
+            .populate({path:'itineraryBuilder.daysDetails.subRegion3',select:"_id name"}),
             GroupTripSummary?.findOne({
                 org_id: req.user.org_id,
                 groupTripId,
@@ -177,6 +141,69 @@ export const getGroupTripById = async (req, res) => {
         });
     }
 };
+
+export const updateGroupTripById = async(req,res)=>{
+    try{
+        const {groupTripId} = req.params;
+        if(!groupTripId){
+            return res.status(400).json({
+                success:false,
+                message:"Group Trip id not found"
+            })
+        }
+        const {itineraryBuilder, regionDetails, tripDetails} = req.body;
+
+        const [updatedGroupTrip, updateGroupTripSummary] = await Promise.all([
+            GroupTrip.findOneAndUpdate(
+              {
+                org_id: req.user.org_id,
+                _id: groupTripId
+              },
+              {
+                $set: { itineraryBuilder, regionDetails, tripDetails }
+              },
+              { new: true }
+            )
+              .populate({ path: 'itineraryBuilder.daysDetails.placeDetails.placeId', select: "_id placeName" })
+              .populate({ path: 'itineraryBuilder.daysDetails.subRegion1', select: "_id name" })
+              .populate({ path: 'itineraryBuilder.daysDetails.subRegion2', select: "_id name" })
+              .populate({ path: 'itineraryBuilder.daysDetails.subRegion3', select: "_id name" }),
+          
+            GroupTripSummary.findOneAndUpdate(
+              {
+                org_id: req.user.org_id,
+                groupTripId: groupTripId
+              },
+              {
+                $set: {
+                  bookingSummary: { totalSeats: tripDetails?.totalSeats }
+                }
+              },
+              { new: true }
+            )
+          ]);
+
+        if(!updatedGroupTrip){
+            return res.status(404).json({
+                success:false,
+                message:"Group Trip Not found"
+            })
+        }
+
+        return res.status(200).json({
+            success:true,
+            message:"Group Trip Updated Successfully",
+            updatedGroupTrip,
+            updateGroupTripSummary
+        })
+    }
+    catch(error){
+        return res.status(500).json({
+            success:false,
+            message:error?.message || "Internal Server Error"
+        })
+    }
+}
 
 // Search Hotels for org
 export const searchGroupTrip = async (req, res) => {

@@ -735,7 +735,6 @@ function ItineraryBuilder({
                                     <div style={{
                                         fontSize: '11px',
                                         color: isActive ? BLUE : 'white',
-                                        // marginTop: '1px',
                                     }}>
                                         {dow}
                                     </div>

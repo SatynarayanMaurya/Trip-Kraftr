@@ -8,6 +8,6 @@ export const groupTripEndpoints  = {
     GET_GROUP_TRIP_BY_ID : BASE_URL + '/get-group-trip-by-id',
     SEARCH_GROUP_TRIPS : BASE_URL + '/search-group-Trips',
     // DELETE_ACTIVITY : BASE_URL + '/delete-activity',
-    // UPDATE_ACTIVITY_BY_ID : BASE_URL + '/update-activity-by-id',
+    UPDATE_GROUP_TRIP_BY_ID : BASE_URL + '/update-group-trip-by-id',
 }
 

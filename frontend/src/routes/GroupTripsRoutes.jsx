@@ -5,6 +5,7 @@ import RoleRoute from "../utils/RoleRoutes"
 import GroupTrips from '../pages/GroupTrips'
 import AddGroupTrip from '../components/Group Trips/AddGroupTrip'
 import ViewGroupTrip from '../components/Group Trips/View Group Trip/ViewGroupTrip'
+import EditGroupTrip from '../components/Group Trips/Edit Group Trip/EditGroupTrip'
 
 export const GroupTripsRoutes = (
     <>
@@ -35,14 +36,14 @@ export const GroupTripsRoutes = (
             }
         />
 
-        {/* <Route
-            path="places/view-place/:placeId"
+        <Route
+            path="group-trips/edit/:groupTripId"
             element={
                 <RoleRoute allowedRoles={["org_admin"]}>
-                    <ViewPlace />
+                    <EditGroupTrip />
                 </RoleRoute>
             }
-        /> */}
+        />
 
 
     </>

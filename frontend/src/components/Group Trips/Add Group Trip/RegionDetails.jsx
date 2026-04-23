@@ -57,7 +57,7 @@ function RegionDetails({
           <label style={labelStyle}>Region 2</label>
           <select
             style={{...inputStyle,backgroundColor: !formData?.region1 ? "#f0f0f0" : undefined,}}
-            value={formData.region2}
+            value={formData.region2 || ''}
             disabled={!formData?.region1}
             onChange={(e) => handleChange("region2", e.target.value)}
           >
@@ -75,7 +75,7 @@ function RegionDetails({
           <label style={labelStyle}>Region 3</label>
           <select
             style={{...inputStyle,backgroundColor: !formData?.region2 ? "#f0f0f0" : undefined}}
-            value={formData.region3}
+            value={formData.region3||''}
             disabled={!formData?.region2}
             onChange={(e) => handleChange("region3", e.target.value)}
           >

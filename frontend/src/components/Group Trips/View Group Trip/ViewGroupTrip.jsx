@@ -9,6 +9,7 @@ import ViewGroupTripOverview from './ViewGroupTripOverview';
 import { BackIcon, DownloadIcon, CopyIcon, EditIcon, ShareIcon, ChevronDown } from '../../Icons/Icons';
 import SkeletonOverview from './SkeletonOverview';
 import Participants from './Participants';
+import ViewItineraryBuilder from './ViewItineraryBuilder';
 
 const PINK = '#ED5F8D';
 const BLUE = '#18305C';
@@ -174,7 +175,7 @@ function ViewGroupTrip() {
 
                     {/* Edit Trip */}
                     <button
-                        onClick={() => navigate(`/manage-group-trips/${groupTripId}/edit`)}
+                        onClick={() => navigate(`/group-trips/edit/${groupTripId}`)}
                         style={{
                             display: 'flex', alignItems: 'center', gap: '8px',
                             background: GREEN, color: 'white', border: 'none',
@@ -221,15 +222,11 @@ function ViewGroupTrip() {
                     />
             )}
             {activeTab === 1 && (
-                <div style={{ color: '#aaa', fontSize: '14px', textAlign: 'center', padding: '60px 0' }}>
-                    Itinerary Details — coming soon
-                </div>
+                <ViewItineraryBuilder
+                    groupTripDetails={groupTripDetails}
+                    groupTripSummary={groupTripSummary}
+                />
             )}
-            {/* {activeTab === 2 && (
-                <div style={{ color: '#aaa', fontSize: '14px', textAlign: 'center', padding: '60px 0' }}>
-                    Participants — coming soon
-                </div>
-            )} */}
 
             {activeTab === 2 && (
                 <Participants />
