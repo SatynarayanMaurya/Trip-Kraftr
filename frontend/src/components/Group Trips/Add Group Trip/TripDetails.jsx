@@ -1,5 +1,6 @@
 import React from 'react';
 import { inputStyle, labelStyle, cardStyle } from '../../Common/CommonCss';
+import { Save } from 'lucide-react';
 const PINK = '#ED5F8D';
 const BLUE = '#18305C';
 
@@ -209,7 +210,7 @@ function TripDetails({
                                 height: '40px',
                             }}
                         >
-                            &#128190; Save
+                            <Save size={16}/> Save
                         </button>
                     </div>
 

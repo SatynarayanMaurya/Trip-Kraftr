@@ -12,6 +12,7 @@ import ItineraryBuilder from '../Add Group Trip/ItineraryBuilder';
 import RegionDetails from '../Add Group Trip/RegionDetails';
 import TripDetails from '../Add Group Trip/TripDetails';
 import { useGroupTripHooks } from '../../../hooks/useGroupTripHooks';
+import { ensureFavouritePlaces, validateItinerary } from '../Add Group Trip/ValidateItinerary';
 
 
 
@@ -48,12 +49,13 @@ function EditGroupTrip() {
     const {groupTripId} = useParams();
 
     const groupTripDetails = useSelector((state)=>state.groupTrip.groupTripById?.[groupTripId])
-    console.log("Group trip details : ",groupTripDetails)
+
 
     const [activeTab, setActiveTab] = useState(1);
     const [activeDay, setActiveDay] = useState(1);
+    const [submitLoading, setSubmitLoading] = useState(false)
 
-    const {addGroupTrip} = useGroupTripHooks()
+    const {updateGroupTripById, getGroupTripById} = useGroupTripHooks()
 
     const [formData, setFormData] = useState({
         regionDetails: {
@@ -92,7 +94,28 @@ function EditGroupTrip() {
         }).format(date);
       
         return istDate; // format: YYYY-MM-DD
-      };
+    };
+
+    const fetchGroupDetails = async()=>{
+        try{
+            await getGroupTripById(groupTripId)
+        }
+        catch(error){
+          if (!isProduction) {
+            console.log("========= ERROR DEBUG START =========");
+            console.log("Error:", error);
+            console.log("Response:", error?.response);
+            console.log("========= ERROR DEBUG END =========");
+          }
+          toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin")
+        }
+    }
+
+    useEffect(()=>{
+        if(!groupTripDetails){
+            fetchGroupDetails()
+        }
+    },[groupTripId])
 
     useEffect(() => {
         if (!groupTripDetails) return;
@@ -100,8 +123,8 @@ function EditGroupTrip() {
         setFormData({
           regionDetails: {
             region1: groupTripDetails?.regionDetails?.region1?._id || groupTripDetails?.regionDetails?.region1 || null,
-            region2: groupTripDetails?.regionDetails?.region2?._id || null,
-            region3: groupTripDetails?.regionDetails?.region3?._id || null,
+            region2: groupTripDetails?.regionDetails?.region2?._id || groupTripDetails?.regionDetails?.region2 || null,
+            region3: groupTripDetails?.regionDetails?.region3?._id || groupTripDetails?.regionDetails?.region3 || null,
             fromDate: convertUTCToISTDate(groupTripDetails?.regionDetails?.fromDate) || '',
             toDate: convertUTCToISTDate(groupTripDetails?.regionDetails?.toDate) || '',
             noOfDays: groupTripDetails?.regionDetails?.noOfDays || '',
@@ -282,110 +305,161 @@ function EditGroupTrip() {
         setActiveTab(3);
     };
 
-    const handleSaveItinerary = async() => {
+    // const handleSaveItinerary = async() => {
+    //     try {
+    //         const day1 = formData.itineraryBuilder?.daysDetails?.[0];
+
+    //         if (!day1) {
+    //             toast.error('Day 1 data is missing.');
+    //             return;
+    //         }
+
+    //         // At least one sub-region
+    //         const hasSubRegion = [day1.subRegion1, day1.subRegion2, day1.subRegion3].some(Boolean);
+    //         if (!hasSubRegion) {
+    //             toast.error('Day 1: Please select at least one Sub-Region.');
+    //             return;
+    //         }
+
+    //         // Hotel — hotelId (inventory) or hotelName (manual)
+    //         const hotel = day1?.hotelDetails;
+    //         const hasHotel = hotel?.hotelType === 'manual'
+    //             ? !!hotel?.hotelName?.trim()
+    //             : !!hotel?.hotelId;
+    //         if (!hasHotel) {
+    //             toast.error('Day 1: Please select or enter a Hotel.');
+    //             return;
+    //         }
+
+    //         // Room type — id (inventory) or typed string (manual)
+    //         const hasRoomType = hotel?.hotelType === 'manual'
+    //             ? !!hotel?.roomType?.trim()
+    //             : !!hotel?.roomType;
+    //         if (!hasRoomType) {
+    //             toast.error('Day 1: Please select or enter a Room Type.');
+    //             return;
+    //         }
+
+    //         // At least one meal
+    //         const hasMeals = !!hotel?.meals?.trim();
+    //         if (!hasMeals) {
+    //             toast.error('Day 1: Please select at least one Meal (Breakfast, Lunch, or Dinner).');
+    //             return;
+    //         }
+
+    //         // At least one place selected
+    //         const hasPlace = day1.placeDetails?.length > 0;
+    //         if (!hasPlace) {
+    //             toast.error('Day 1: Please select at least one Place.');
+    //             return;
+    //         }
+
+    //         const updatedDays = formData.itineraryBuilder.daysDetails.map(day => {
+    //             const places = day.placeDetails ?? [];
+    //             if (places.length === 0) return day;
+
+    //             const hasFavourite = places.some(p => p.isFavourite);
+    //             if (hasFavourite) return day; // already has a favourite, don't touch
+
+    //             // No favourite set — mark the first place as favourite
+    //             return {
+    //                 ...day,
+    //                 placeDetails: places.map((p, i) => ({
+    //                     ...p,
+    //                     isFavourite: i === 0,
+    //                 })),
+    //             };
+    //         });
+
+    //         // Sync the auto-favourited days back into formData before saving
+    //         setFormData(prev => ({
+    //             ...prev,
+    //             itineraryBuilder: {
+    //                 ...prev.itineraryBuilder,
+    //                 daysDetails: updatedDays,
+    //             },
+    //         }));
+
+    //         const payload = {
+    //             ...formData,
+    //             itineraryBuilder: {
+    //                 ...formData.itineraryBuilder,
+    //                 daysDetails: updatedDays
+    //             },
+    //             _id:groupTripDetails?._id
+    //         };
+
+
+    //         // console.log("payload : ",payload)
+    //         const response = await updateGroupTripById (payload)
+    //         toast.success(response?.data?.message ||'Itinerary saved!');
+    //         navigate("/group-trips")
+    //     }
+    //     catch (error) {
+    //         if (!isProduction) {
+    //             console.log("========= ERROR DEBUG START =========");
+    //             console.log("Error:", error);
+    //             console.log("Response:", error?.response);
+    //             console.log("========= ERROR DEBUG END =========");
+    //         }
+    //         toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin")
+    //     }
+
+    // };
+
+    // ─── render ───────────────────────────────────────────────────────────────
+
+
+    const handleSaveItinerary = async () => {
         try {
-            const day1 = formData.itineraryBuilder?.daysDetails?.[0];
-
-            if (!day1) {
-                toast.error('Day 1 data is missing.');
+            setSubmitLoading(true);
+    
+            // ✅ Validation
+            const { isValid, message } = validateItinerary(formData);
+            if (!isValid) {
+                toast.error(message);
                 return;
             }
-
-            // At least one sub-region
-            const hasSubRegion = [day1.subRegion1, day1.subRegion2, day1.subRegion3].some(Boolean);
-            if (!hasSubRegion) {
-                toast.error('Day 1: Please select at least one Sub-Region.');
-                return;
-            }
-
-            // Hotel — hotelId (inventory) or hotelName (manual)
-            const hotel = day1?.hotelDetails;
-            const hasHotel = hotel?.hotelType === 'manual'
-                ? !!hotel?.hotelName?.trim()
-                : !!hotel?.hotelId;
-            if (!hasHotel) {
-                toast.error('Day 1: Please select or enter a Hotel.');
-                return;
-            }
-
-            // Room type — id (inventory) or typed string (manual)
-            const hasRoomType = hotel?.hotelType === 'manual'
-                ? !!hotel?.roomType?.trim()
-                : !!hotel?.roomType;
-            if (!hasRoomType) {
-                toast.error('Day 1: Please select or enter a Room Type.');
-                return;
-            }
-
-            // At least one meal
-            const hasMeals = !!hotel?.meals?.trim();
-            if (!hasMeals) {
-                toast.error('Day 1: Please select at least one Meal (Breakfast, Lunch, or Dinner).');
-                return;
-            }
-
-            // At least one place selected
-            const hasPlace = day1.placeDetails?.length > 0;
-            if (!hasPlace) {
-                toast.error('Day 1: Please select at least one Place.');
-                return;
-            }
-
-            const updatedDays = formData.itineraryBuilder.daysDetails.map(day => {
-                const places = day.placeDetails ?? [];
-                if (places.length === 0) return day;
-
-                const hasFavourite = places.some(p => p.isFavourite);
-                if (hasFavourite) return day; // already has a favourite, don't touch
-
-                // No favourite set — mark the first place as favourite
-                return {
-                    ...day,
-                    placeDetails: places.map((p, i) => ({
-                        ...p,
-                        isFavourite: i === 0,
-                    })),
-                };
-            });
-
-            // Sync the auto-favourited days back into formData before saving
-            setFormData(prev => ({
-                ...prev,
-                itineraryBuilder: {
-                    ...prev.itineraryBuilder,
-                    daysDetails: updatedDays,
-                },
-            }));
-
-            const payload = {
+    
+            // ✅ Ensure favourite places
+            const updatedDays = ensureFavouritePlaces(
+                formData.itineraryBuilder.daysDetails
+            );
+    
+            const updatedFormData = {
                 ...formData,
                 itineraryBuilder: {
                     ...formData.itineraryBuilder,
-                    daysDetails: updatedDays
-                }
+                    daysDetails: updatedDays,
+                },
+                _id:groupTripDetails?._id
             };
-
-
-            console.log("payload : ",payload)
-            // const response = await addGroupTrip (payload)
-            // toast.success(response?.data?.message ||'Itinerary saved!');
-            toast.success('Itinerary Updated!');
-            // navigate(-1)
-        }
-        catch (error) {
+    
+            setFormData(updatedFormData);
+    
+            // ✅ API call
+            const response = await updateGroupTripById(updatedFormData);
+    
+            toast.success(response?.data?.message || 'Itinerary saved!');
+            navigate(-1);
+    
+        } catch (error) {
             if (!isProduction) {
                 console.log("========= ERROR DEBUG START =========");
                 console.log("Error:", error);
                 console.log("Response:", error?.response);
                 console.log("========= ERROR DEBUG END =========");
             }
-            toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin")
+    
+            toast.error(
+                error?.response?.data?.message ||
+                error?.message ||
+                "Error in adding the admin"
+            );
+        } finally {
+            setSubmitLoading(false);
         }
-
     };
-
-    // ─── render ───────────────────────────────────────────────────────────────
-
     const tabs = ['Basic Details', 'Trip Details', 'Itinerary Builder'];
 
     const tabClick = (i) => {
@@ -475,6 +549,7 @@ function EditGroupTrip() {
                     roomTypeLoading={roomTypeLoading}
                     handleItineraryChange={handleItineraryChange}
                     handleSave={handleSaveItinerary}
+                    submitLoading={submitLoading}
                 />
             )}
         </div>

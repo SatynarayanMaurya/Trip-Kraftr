@@ -2,28 +2,28 @@ import GroupTrip from "../models/groupTrip.model.js"
 import GroupTripSummary from "../models/groupTripSummary.model.js"
 import mongoose from "mongoose";
 
-export const addGroupTrip = async(req ,res)=>{
-    try{
-        const {itineraryBuilder, regionDetails, tripDetails} = req.body;
+export const addGroupTrip = async (req, res) => {
+    try {
+        const { itineraryBuilder, regionDetails, tripDetails } = req.body;
 
-        const totalGroupTrip = await GroupTrip.countDocuments({org_id:req.user.org_id})
-        const tripId=`GRP-${totalGroupTrip+1}`;
-        const newGroupTrip = await GroupTrip.create({org_id:req.user.org_id,tripId:tripId,itineraryBuilder,regionDetails,tripDetails})
-        const newGroupTripSummary = await GroupTripSummary.create({org_id:req.user.org_id,groupTripId:newGroupTrip?._id,bookingSummary:{confirmedBookings:0,availableSeats:tripDetails?.totalSeats,totalSeats:tripDetails?.totalSeats}})
+        const totalGroupTrip = await GroupTrip.countDocuments({ org_id: req.user.org_id })
+        const tripId = `GRP-${totalGroupTrip + 1}`;
+        const newGroupTrip = await GroupTrip.create({ org_id: req.user.org_id, tripId: tripId, itineraryBuilder, regionDetails, tripDetails })
+        const newGroupTripSummary = await GroupTripSummary.create({ org_id: req.user.org_id, groupTripId: newGroupTrip?._id, bookingSummary: { confirmedBookings: 0, availableSeats: tripDetails?.totalSeats, totalSeats: tripDetails?.totalSeats } })
         await newGroupTrip.populate([
             { path: "regionDetails.region1", select: "_id name" },
         ]);
         return res.status(201).json({
-            success:true,
-            message:"Group Trip Created successfully",
+            success: true,
+            message: "Group Trip Created successfully",
             newGroupTrip,
             newGroupTripSummary
         })
     }
-    catch(error){
+    catch (error) {
         return res.status(500).json({
-            success:false,
-            message:error?.message || "Internal Server Error"
+            success: false,
+            message: error?.message || "Internal Server Error"
         })
     }
 }
@@ -46,15 +46,15 @@ export const getGroupTrips = async (req, res) => {
             .lean()
             .select({
                 _id: 1,
-                tripId:1,
+                tripId: 1,
                 "regionDetails.region1": 1,
                 "regionDetails.fromDate": 1,
                 "regionDetails.toDate": 1,
-                status:1,
-                'tripDetails.totalSeats':1
+                status: 1,
+                'tripDetails.totalSeats': 1
             })
-            .populate({path:'regionDetails.region1',select:"_id name"})
-            
+            .populate({ path: 'regionDetails.region1', select: "_id name" })
+
 
         // Counts
         const totalGroupTrips = await GroupTrip.countDocuments({ org_id: req.user.org_id })
@@ -110,10 +110,10 @@ export const getGroupTripById = async (req, res) => {
                 org_id: req.user.org_id,
                 _id: groupTripId,
             })
-            .populate({path:'itineraryBuilder.daysDetails.placeDetails.placeId',select:"_id placeName"})
-            .populate({path:'itineraryBuilder.daysDetails.subRegion1',select:"_id name"})
-            .populate({path:'itineraryBuilder.daysDetails.subRegion2',select:"_id name"})
-            .populate({path:'itineraryBuilder.daysDetails.subRegion3',select:"_id name"}),
+                .populate({ path: 'itineraryBuilder.daysDetails.placeDetails.placeId', select: "_id placeName" })
+                .populate({ path: 'itineraryBuilder.daysDetails.subRegion1', select: "_id name" })
+                .populate({ path: 'itineraryBuilder.daysDetails.subRegion2', select: "_id name" })
+                .populate({ path: 'itineraryBuilder.daysDetails.subRegion3', select: "_id name" }),
             GroupTripSummary?.findOne({
                 org_id: req.user.org_id,
                 groupTripId,
@@ -142,65 +142,68 @@ export const getGroupTripById = async (req, res) => {
     }
 };
 
-export const updateGroupTripById = async(req,res)=>{
-    try{
-        const {groupTripId} = req.params;
-        if(!groupTripId){
+export const updateGroupTripById = async (req, res) => {
+    try {
+        const { groupTripId } = req.params;
+        if (!groupTripId) {
             return res.status(400).json({
-                success:false,
-                message:"Group Trip id not found"
+                success: false,
+                message: "Group Trip id not found"
             })
         }
-        const {itineraryBuilder, regionDetails, tripDetails} = req.body;
+        const { itineraryBuilder, regionDetails, tripDetails } = req.body;
 
         const [updatedGroupTrip, updateGroupTripSummary] = await Promise.all([
             GroupTrip.findOneAndUpdate(
-              {
-                org_id: req.user.org_id,
-                _id: groupTripId
-              },
-              {
-                $set: { itineraryBuilder, regionDetails, tripDetails }
-              },
-              { new: true }
+                {
+                    org_id: req.user.org_id,
+                    _id: groupTripId
+                },
+                {
+                    $set: { itineraryBuilder, regionDetails, tripDetails }
+                },
+                { new: true }
             )
-              .populate({ path: 'itineraryBuilder.daysDetails.placeDetails.placeId', select: "_id placeName" })
-              .populate({ path: 'itineraryBuilder.daysDetails.subRegion1', select: "_id name" })
-              .populate({ path: 'itineraryBuilder.daysDetails.subRegion2', select: "_id name" })
-              .populate({ path: 'itineraryBuilder.daysDetails.subRegion3', select: "_id name" }),
-          
-            GroupTripSummary.findOneAndUpdate(
-              {
-                org_id: req.user.org_id,
-                groupTripId: groupTripId
-              },
-              {
-                $set: {
-                  bookingSummary: { totalSeats: tripDetails?.totalSeats }
-                }
-              },
-              { new: true }
-            )
-          ]);
+                .populate({ path: 'regionDetails.region1', select: "_id name" })
+                .populate({ path: 'regionDetails.region2', select: "_id name" })
+                .populate({ path: 'regionDetails.region3', select: "_id name" })
+                .populate({ path: 'itineraryBuilder.daysDetails.placeDetails.placeId', select: "_id placeName" })
+                .populate({ path: 'itineraryBuilder.daysDetails.subRegion1', select: "_id name" })
+                .populate({ path: 'itineraryBuilder.daysDetails.subRegion2', select: "_id name" })
+                .populate({ path: 'itineraryBuilder.daysDetails.subRegion3', select: "_id name" }),
 
-        if(!updatedGroupTrip){
+            GroupTripSummary.findOneAndUpdate(
+                {
+                    org_id: req.user.org_id,
+                    groupTripId: groupTripId
+                },
+                {
+                    $set: {
+                        bookingSummary: { totalSeats: tripDetails?.totalSeats }
+                    }
+                },
+                { new: true }
+            )
+        ]);
+
+        if (!updatedGroupTrip) {
             return res.status(404).json({
-                success:false,
-                message:"Group Trip Not found"
+                success: false,
+                message: "Group Trip Not found"
             })
         }
 
         return res.status(200).json({
-            success:true,
-            message:"Group Trip Updated Successfully",
+            success: true,
+            message: "Group Trip Updated Successfully",
             updatedGroupTrip,
             updateGroupTripSummary
         })
     }
-    catch(error){
+    catch (error) {
         return res.status(500).json({
-            success:false,
-            message:error?.message || "Internal Server Error"
+            success: false,
+            message: error?.message || "Internal Server Error"
         })
     }
 }

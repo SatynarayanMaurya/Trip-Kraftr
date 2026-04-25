@@ -28,50 +28,87 @@ export const groupTripSlice = createSlice({
     initialState,
     reducers: {
 
+        // addNewGroupTrip: (state, action) => {
+        //     const newGroupTrip = action.payload;
+        //     const limit = state.HotelPageLimit || 5;
+
+        //     // ✅ Step 1: Ensure page 1 exists
+        //     if (!state.groupTripsPages[1]) {
+        //         state.groupTripsPages[1] = [newGroupTrip];
+        //     } else {
+        //         // add new hotel at top
+        //         state.groupTripsPages[1].unshift(newGroupTrip);
+
+        //         let currentPage = 1;
+
+        //         // ✅ Step 2: Handle overflow ONLY if next page exists
+        //         while (state.groupTripsPages[currentPage]?.length > limit) {
+        //             const nextPage = currentPage + 1;
+
+        //             // ❌ Stop if next page not fetched
+        //             if (!state.groupTripsPages[nextPage]) {
+        //                 state.groupTripsPages[currentPage] =
+        //                     state.groupTripsPages[currentPage].slice(0, limit);
+        //                 break;
+        //             }
+
+        //             // move last item to next page
+        //             const overflowItem = state.groupTripsPages[currentPage].pop();
+
+        //             state.groupTripsPages[nextPage].unshift(overflowItem);
+
+        //             currentPage = nextPage;
+        //         }
+        //     }
+
+        //     // ✅ Step 3: Update stats
+        //     state.statsGroupTrips.totalGroupTrips += 1;
+
+
+        //     // ✅ Step 4: Update pagination
+        //     if (state.paginationGroupTrips) {
+        //         state.paginationGroupTrips.totalRecords += 1;
+
+        //         state.paginationGroupTrips.totalPages = Math.ceil(
+        //             state.paginationGroupTrips.totalRecords / limit
+        //         );
+        //     }
+        // },
+
+        
         addNewGroupTrip: (state, action) => {
-            const newGroupTrip = action.payload;
-            const limit = state.HotelPageLimit || 5;
+            const newGroupTrip = action.payload
+            const limit = state.groupTripPageLimit || 4
 
-            // ✅ Step 1: Ensure page 1 exists
+            // 1️⃣ Add to first page
             if (!state.groupTripsPages[1]) {
-                state.groupTripsPages[1] = [newGroupTrip];
+                state.groupTripsPages[1] = [newGroupTrip]
             } else {
-                // add new hotel at top
-                state.groupTripsPages[1].unshift(newGroupTrip);
+                state.groupTripsPages[1].unshift(newGroupTrip)
 
-                let currentPage = 1;
+                // Handle overflow
+                let overflow = state.groupTripsPages[1].slice(limit)
+                state.groupTripsPages[1] = state.groupTripsPages[1].slice(0, limit)
 
-                // ✅ Step 2: Handle overflow ONLY if next page exists
-                while (state.groupTripsPages[currentPage]?.length > limit) {
-                    const nextPage = currentPage + 1;
+                let page = 2
+                while (overflow.length > 0) {
+                    if (!state.groupTripsPages[page]) break
 
-                    // ❌ Stop if next page not fetched
-                    if (!state.groupTripsPages[nextPage]) {
-                        state.groupTripsPages[currentPage] =
-                            state.groupTripsPages[currentPage].slice(0, limit);
-                        break;
-                    }
+                    state.groupTripsPages[page] = [...overflow, ...state.groupTripsPages[page]]
 
-                    // move last item to next page
-                    const overflowItem = state.groupTripsPages[currentPage].pop();
-
-                    state.groupTripsPages[nextPage].unshift(overflowItem);
-
-                    currentPage = nextPage;
+                    // Slice again if this page exceeds limit
+                    overflow = state.groupTripsPages[page].slice(limit)
+                    state.groupTripsPages[page] = state.groupTripsPages[page].slice(0, limit)
+                    page++
                 }
             }
 
-            // ✅ Step 3: Update stats
-            state.statsGroupTrips.totalGroupTrips += 1;
-
-
-            // ✅ Step 4: Update pagination
+            // 3️⃣ Update totalRecords and totalPages in pagination
             if (state.paginationGroupTrips) {
-                state.paginationGroupTrips.totalRecords += 1;
-
+                state.paginationGroupTrips.totalRecords += 1
                 state.paginationGroupTrips.totalPages = Math.ceil(
                     state.paginationGroupTrips.totalRecords / limit
-                );
+                )
             }
         },
 
@@ -84,61 +121,27 @@ export const groupTripSlice = createSlice({
             if (stats) state.statsGroupTrips = stats
         },
 
-        updateHotel: (state, action) => {
-            const updatedHotel = action.payload;
+        updateGroupTrip: (state, action) => {
+            const updatedGroupTrip = action.payload;
             let found = false;
 
-            for (const page in state.hotelsPages) {
-                const pageData = state.hotelsPages[page];
+            for (const page in state.groupTripsPages) {
+                const pageData = state.groupTripsPages[page];
 
                 const index = pageData.findIndex(
-                    hotel => hotel._id === updatedHotel._id
+                    groupTrip => groupTrip._id === updatedGroupTrip._id
                 );
 
                 if (index !== -1) {
-                    const previousHotel = pageData[index];
-
-                    // ✅ Update stats ONLY if is_active changed
-                    if (previousHotel.is_active !== updatedHotel.is_active) {
-                        if (updatedHotel.is_active) {
-                            state.statsHotels.activeHotel += 1;
-                            state.statsHotels.inactiveHotel -= 1;
-                        } else {
-                            state.statsHotels.activeHotel -= 1;
-                            state.statsHotels.inactiveHotel += 1;
-                        }
-                    }
-
                     // ✅ Replace hotel
-                    pageData[index] = updatedHotel;
+                    pageData[index] = updatedGroupTrip;
 
                     found = true;
                     break;
                 }
             }
 
-            // ✅ If not found → add to first page
-            if (!found) {
-                const firstPage = 1;
-                const limit = state.HotelPageLimit || 4;
-
-                if (!state.hotelsPages[firstPage]) {
-                    state.hotelsPages[firstPage] = [updatedHotel];
-                } else {
-                    state.hotelsPages[firstPage].unshift(updatedHotel);
-
-                    // ✅ Maintain pagination consistency
-                    if (state.hotelsPages[firstPage].length > limit) {
-                        if (state.hotelsPages[2]) {
-                            const overflowItem = state.hotelsPages[firstPage].pop();
-                            state.hotelsPages[2].unshift(overflowItem);
-                        } else {
-                            state.hotelsPages[firstPage] =
-                                state.hotelsPages[firstPage].slice(0, limit);
-                        }
-                    }
-                }
-            }
+            state.groupTripById[updatedGroupTrip?._id] = updatedGroupTrip
         },
 
         clearGroupTrips: (state, action) => {
@@ -246,6 +249,7 @@ export const {
     setGroupTripPageLimit,
     clearGroupTrips,
     setGroupTripById,
+    updateGroupTrip,
     setGroupTripSummaryById
 } = groupTripSlice.actions
 

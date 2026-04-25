@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { inputStyle, labelStyle, cardStyle } from '../../Common/CommonCss';
+import { Save } from 'lucide-react';
 
 const PINK = '#ED5F8D';
 const BLUE = '#18305C';
@@ -305,134 +306,6 @@ function PlacesSection({ dayData, placesForActiveDay, onDayChange }) {
     );
 }
 
-// function ActivitiesSection({ dayData, activitiesForActiveDay, onDayChange }) {
-//     const activities = dayData?.activities ?? [{ activityType: 'inventory', activityId: '', activityName: '', isComplimentary: false, price: 0 }];
-
-//     const updateActivity = (index, updates) => {
-//         // updates is now an object of multiple fields at once
-//         const updated = activities.map((a, i) =>
-//             i === index ? { ...a, ...updates } : a
-//         );
-//         onDayChange('activities', updated);
-//     };
-
-//     const addActivity = () => {
-//         onDayChange('activities', [...activities, { activityType: 'inventory', activityId: '', activityName: '', isComplimentary: false, price: 0 }]);
-//     };
-
-//     const removeActivity = (index) => {
-//         if (activities.length === 1) return;
-//         onDayChange('activities', activities.filter((_, i) => i !== index));
-//     };
-
-
-//     const handleActivitySelect = (index, activityId) => {
-//         const found = activitiesForActiveDay?.find(a => a._id === activityId);
-//         // Single call — all fields patched at once, no stale reads
-//         updateActivity(index, {
-//             activityId: activityId,
-//             activityName: found?.activityName ?? '',
-//             activityType: 'inventory',
-//             ...(activities[index].isComplimentary ? {} : { price: found?.price ?? 0 }),
-//         });
-//     };
-
-//     return (
-//         <div style={{ marginBottom: '8px' }}>
-//             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-//                 <label style={{ ...labelStyle, color: BLUE, fontWeight: '700', fontSize: '15px', marginBottom: 0 }}>Activities</label>
-//                 <button
-//                     onClick={addActivity}
-//                     style={{ background: 'none', border: 'none', color: PINK, fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}
-//                 >
-//                     + Add Activity
-//                 </button>
-//             </div>
-//             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-//                 {activities?.map((act, index) => (
-//                     <div key={index} style={{ border: '1px solid #eee', borderRadius: '8px', padding: '14px' }}>
-//                         {/* Row 1: name input + price + delete */}
-//                         <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
-//                             {/* Activity name — search/select from inventory or type manual */}
-//                             <div style={{ flex: 2, minWidth: '140px' }}>
-//                                 <input
-//                                     list={`activity-list-${index}`}
-//                                     style={{ ...inputStyle }}
-//                                     placeholder="Enter activity name"
-//                                     value={act.activityName ?? ''}
-//                                     onChange={e => {
-//                                         const found = activitiesForActiveDay?.find(a => a.activityName === e.target.value);
-//                                         if (found) {
-//                                             handleActivitySelect(index, found._id);
-//                                         } else {
-//                                             updateActivity(index, 'activityName', e.target.value);
-//                                             updateActivity(index, 'activityId', '');
-//                                             updateActivity(index, 'activityType', 'manual');
-//                                         }
-//                                     }}
-//                                 />
-//                                 <datalist id={`activity-list-${index}`}>
-//                                     {(activitiesForActiveDay ?? []).map(a => (
-//                                         <option key={a._id} value={a.activityName} />
-//                                     ))}
-//                                 </datalist>
-//                             </div>
-
-//                             {/* Price — hidden when complimentary */}
-//                             {!act.isComplimentary && (
-//                                 <div style={{ flex: 1, minWidth: '110px', display: 'flex', alignItems: 'center', gap: '6px', border: '1.5px solid #ddd', borderRadius: '6px', padding: '0 10px', height: '38px', background: 'white' }}>
-//                                     <span style={{ fontSize: '14px', color: '#555' }}>₹</span>
-//                                     <input
-//                                         type="number"
-//                                         min={0}
-//                                         style={{ border: 'none', outline: 'none', width: '100%', fontSize: '14px', color: '#333' }}
-//                                         value={act.price ?? 0}
-//                                         onChange={e => updateActivity(index, 'price', Number(e.target.value))}
-//                                     />
-//                                 </div>
-//                             )}
-
-//                             {/* Delete */}
-//                             <button
-//                                 onClick={() => removeActivity(index)}
-//                                 disabled={activities.length === 1}
-//                                 style={{ background: 'none', border: 'none', cursor: activities.length === 1 ? 'not-allowed' : 'pointer', opacity: activities.length === 1 ? 0.35 : 1, fontSize: '16px', color: '#e53935' }}
-//                                 title="Remove activity"
-//                             >
-//                                 🗑
-//                             </button>
-//                         </div>
-
-//                         {/* Row 2: Complimentary checkbox + Paid Activity badge */}
-//                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '10px', flexWrap: 'wrap' }}>
-//                             <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#444', cursor: 'pointer', userSelect: 'none' }}>
-//                                 <input
-//                                     type="checkbox"
-//                                     checked={act.isComplimentary ?? false}
-//                                     onChange={e => {
-//                                         updateActivity(index, 'isComplimentary', e.target.checked);
-//                                         if (e.target.checked) updateActivity(index, 'price', null);
-//                                         else updateActivity(index, 'price', 0);
-//                                     }}
-//                                     style={{ accentColor: PINK, width: '14px', height: '14px', cursor: 'pointer' }}
-//                                 />
-//                                 Complimentary
-//                             </label>
-
-//                             {!act.isComplimentary && (
-//                                 <span style={{ background: '#e3f2fd', color: '#1565c0', fontSize: '12px', fontWeight: '600', padding: '3px 12px', borderRadius: '12px' }}>
-//                                     Paid Activity
-//                                 </span>
-//                             )}
-//                         </div>
-//                     </div>
-//                 ))}
-//             </div>
-//         </div>
-//     );
-// }
-
-// ─── main component ───────────────────────────────────────────────────────────
 
 function ActivitiesSection({ dayData, activitiesForActiveDay, onDayChange }) {
     const activities = dayData?.activities ?? [
@@ -594,6 +467,7 @@ function ActivitiesSection({ dayData, activitiesForActiveDay, onDayChange }) {
         </div>
     );
 }
+
 function ItineraryBuilder({
     formData,
     activeDay,
@@ -610,6 +484,7 @@ function ItineraryBuilder({
     roomTypeLoading,
     handleItineraryChange,
     handleSave,
+    submitLoading
 }) {
     const { itineraryBuilder, regionDetails } = formData;
     const { fromDate } = regionDetails ?? {};
@@ -617,7 +492,7 @@ function ItineraryBuilder({
     const currentDay = itineraryBuilder?.daysDetails?.[activeDay - 1];
 
     const updateDayField = (field, value) => {
-        if(value === ''){
+        if (value === '') {
             value = null
         }
         let updates = { [field]: value };
@@ -626,7 +501,7 @@ function ItineraryBuilder({
         if (field === 'subRegion1' && !value) {
             updates = { subRegion1: null, subRegion2: null, subRegion3: null };
         } else if (field === 'subRegion2' && !value) {
-            updates = { subRegion2:null, subRegion3: null };
+            updates = { subRegion2: null, subRegion3: null };
         }
 
         // Apply all updates at once
@@ -718,20 +593,16 @@ function ItineraryBuilder({
                                     style={{
                                         background: isActive ? '#FEF4F8' : 'transparent',
                                         color: isActive ? BLUE : 'white',
-                                        
+
                                         border: 'none',
-                                        // Active pill: rounded only on left side, bleeds to right edge of sidebar
                                         borderRadius: isActive ? '20px 0 0 20px' : '0',
-                                        // Active: left margin only, no right margin so it touches the content border
                                         margin: isActive ? '0 0 0 8px' : '0',
-                                        // padding: '10px 16px',
                                         padding: '8px 6px',
                                         cursor: 'pointer',
                                         textAlign: 'center',
-                                        // transition: 'background 0.15s ease, border-radius 0.15s ease',
                                     }}
                                 >
-                                    <div style={{ fontSize: '14px', fontWeight: '700', color:isActive ? BLUE : 'white'}}>Day {dayNum}</div>
+                                    <div style={{ fontSize: '14px', fontWeight: '700', color: isActive ? BLUE : 'white' }}>Day {dayNum}</div>
                                     <div style={{
                                         fontSize: '11px',
                                         color: isActive ? BLUE : 'white',
@@ -800,14 +671,21 @@ function ItineraryBuilder({
             {/* Save button */}
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                 <button
+                    type="button"
                     onClick={handleSave}
-                    style={{
-                        background: PINK, color: 'white', border: 'none', borderRadius: '8px',
-                        padding: '10px 28px', fontSize: '14px', fontWeight: '600', cursor: 'pointer',
-                        display: 'flex', alignItems: 'center', gap: '8px',
-                    }}
+                    disabled={submitLoading}
+                    className={`flex items-center gap-2 px-6 py-2.5 bg-[#E91E8C] text-white text-sm font-semibold rounded-lg transition-colors shadow-sm shadow-pink-200
+            ${submitLoading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-pink-600'}`}
                 >
-                    &#128190; Save
+                    {submitLoading ? (
+                        <svg className="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" fill="none" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z" />
+                        </svg>
+                    ) : (
+                        <Save size={16} />
+                    )}
+                    {submitLoading ? 'Saving...' : 'Save'}
                 </button>
             </div>
 

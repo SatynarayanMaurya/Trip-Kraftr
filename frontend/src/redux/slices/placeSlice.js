@@ -23,10 +23,6 @@ export const placeSlice = createSlice({
     initialState,
     reducers: {
 
-        setAllSubRegions: (state, action) => {
-            state.allSubRegions = action.payload
-        },
-
         addNewPlace: (state, action) => {
             const newPlace = action.payload
             const limit = state.paginationPlaces?.limit || 5
