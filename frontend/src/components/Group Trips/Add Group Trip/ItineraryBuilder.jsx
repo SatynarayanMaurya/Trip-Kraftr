@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { inputStyle, labelStyle, cardStyle } from '../../Common/CommonCss';
 import { Save } from 'lucide-react';
 
@@ -295,6 +295,7 @@ function PlacesSection({ dayData, placesForActiveDay, onDayChange }) {
                                 background: 'none', border: 'none', cursor: isSelected(place._id) ? 'pointer' : 'not-allowed',
                                 padding: '0', fontSize: '15px', lineHeight: 1,
                                 opacity: isSelected(place._id) ? 1 : 0.35,
+                                color: isFavourite ? '#FFD700' : '#ddd'
                             }}
                         >
                             {isFavourite(place._id) ? '★' : '☆'}
@@ -497,16 +498,81 @@ function ItineraryBuilder({
         }
         let updates = { [field]: value };
 
+
         // If clearing a subregion, cascade-clear the dependent ones
         if (field === 'subRegion1' && !value) {
             updates = { subRegion1: null, subRegion2: null, subRegion3: null };
+            
         } else if (field === 'subRegion2' && !value) {
             updates = { subRegion2: null, subRegion3: null };
         }
 
+
         // Apply all updates at once
         handleItineraryChange(activeDay - 1, updates);
     };
+
+    useEffect(() => {
+        if (!placesForActiveDay || !currentDay) return;
+    
+        const activePlaceIds = new Set(
+            placesForActiveDay.map(p => p._id)
+        );
+    
+        const filteredPlaceDetails = currentDay.placeDetails?.filter(detail =>
+            activePlaceIds.has(detail.placeId)
+        );
+    
+        handleItineraryChange(activeDay - 1, {
+            placeDetails: filteredPlaceDetails
+        });
+    
+    }, [placesForActiveDay]);
+
+    useEffect(() => {
+        if (!activitiesForActiveDay || !currentDay) return;
+    
+        const activeActivitesIds = new Set(
+            activitiesForActiveDay.map(p => p._id)
+        );
+    
+        const filteredActivitiesDetails = currentDay.activities?.filter(detail =>
+            activeActivitesIds.has(detail.activityId)
+        );
+
+        handleItineraryChange(activeDay - 1, {
+            activities: filteredActivitiesDetails
+        });
+    
+    }, [activitiesForActiveDay]);
+
+    useEffect(() => {
+        if (!hotelsForActiveDay || !currentDay) return;
+    
+        const activeHotelIds = new Set(
+            hotelsForActiveDay.map(h => h._id)
+        );
+    
+        const currentHotel = currentDay?.hotelDetails;
+    
+        let updatedHotelDetails = currentHotel;
+    
+        // If hotel exists but is NOT in active list → remove it
+        if (currentHotel && !activeHotelIds.has(currentHotel.hotelId)) {
+            updatedHotelDetails = {
+                hotelType: 'inventory',
+                hotelId: null,
+                hotelName: '',
+                roomTypeId: null,
+                roomType: '',
+                meals: '',};
+        }
+    
+        handleItineraryChange(activeDay - 1, {
+            hotelDetails: updatedHotelDetails
+        });
+    
+    }, [hotelsForActiveDay]);
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>

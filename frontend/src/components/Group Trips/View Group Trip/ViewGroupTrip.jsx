@@ -10,6 +10,7 @@ import { BackIcon, DownloadIcon, CopyIcon, EditIcon, ShareIcon, ChevronDown } fr
 import SkeletonOverview from './SkeletonOverview';
 import Participants from './Participants';
 import ViewItineraryBuilder from './ViewItineraryBuilder';
+import FinancialCloseup from './FinancialCloseup';
 
 const PINK = '#ED5F8D';
 const BLUE = '#18305C';
@@ -57,6 +58,7 @@ function ViewGroupTrip() {
     const [fetchLoading, setFetchLoading] = useState(false);
     const [activeTab, setActiveTab] = useState(0);
     const [showStatusDrop, setShowStatusDrop] = useState(false);
+    const [isFinancialPopup, setIsFinancialPopup] = useState(false)
 
     const fetchGroupTrip = async () => {
         try {
@@ -219,6 +221,7 @@ function ViewGroupTrip() {
                     : <ViewGroupTripOverview
                         groupTripDetails={groupTripDetails}
                         groupTripSummary={groupTripSummary}
+                        setIsFinancialPopup={()=>setIsFinancialPopup(true)}
                     />
             )}
             {activeTab === 1 && (
@@ -243,6 +246,13 @@ function ViewGroupTrip() {
                     .vgt-header-right { flex-direction: column !important; align-items: flex-start !important; }
                 }
             `}</style>
+
+
+            {/* Add financial  */}
+            {
+                isFinancialPopup &&
+                <FinancialCloseup groupTripSummary={groupTripSummary} isOpen={isFinancialPopup} onClose={()=>setIsFinancialPopup(false)}/>
+            }
         </div>
     );
 }

@@ -50,7 +50,7 @@ function SummaryCard({ icon, title, rows, footer }) {
 }
 
 // ─── main component ───────────────────────────────────────────────────────────
-function ViewGroupTripOverview({ groupTripDetails, groupTripSummary }) {
+function ViewGroupTripOverview({ groupTripDetails, groupTripSummary,setIsFinancialPopup }) {
     const tripOverview = groupTripDetails?.itineraryBuilder?.tripOverview ?? '';
     const assignedTo   = groupTripDetails?.tripDetails?.assignedTo ?? '—';
     const totalSeats   = groupTripDetails?.tripDetails?.totalSeats ?? 0;
@@ -184,7 +184,7 @@ function ViewGroupTripOverview({ groupTripDetails, groupTripSummary }) {
                             background: 'none', border: 'none', color: PINK,
                             fontSize: '13px', fontWeight: '600', cursor: 'pointer',
                             padding: 0, float: 'right',
-                        }}>
+                        }} onClick={()=>setIsFinancialPopup()}>
                             + Add Details
                         </button>
                     }

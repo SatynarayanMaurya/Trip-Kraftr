@@ -51,7 +51,7 @@ function EditGroupTrip() {
     const groupTripDetails = useSelector((state)=>state.groupTrip.groupTripById?.[groupTripId])
 
 
-    const [activeTab, setActiveTab] = useState(1);
+    const [activeTab, setActiveTab] = useState(3);
     const [activeDay, setActiveDay] = useState(1);
     const [submitLoading, setSubmitLoading] = useState(false)
 
@@ -191,7 +191,7 @@ function EditGroupTrip() {
                 };
             });
         }
-    }, [numDays]);
+    }, [numDays,region1, region2, region3]);
 
     // ─── active day sub-regions for fetching ─────────────────────────────────
 
@@ -243,7 +243,9 @@ function EditGroupTrip() {
         setFormData(prev => ({
             ...prev,
             regionDetails: { ...prev.regionDetails, [field]: value },
+            itineraryBuilder:{  daysDetails: []}
         }));
+
     };
 
     const handleTripChange = (field, value) => {
@@ -256,6 +258,7 @@ function EditGroupTrip() {
             tripDetails: { ...prev.tripDetails, [field]: value },
         }));
     };
+
 
     const handleItineraryChange = (dayIndex, fieldOrUpdates, value) => {
         // console.log("value : ",value)
@@ -275,6 +278,7 @@ function EditGroupTrip() {
             const updatedDays = iti.daysDetails.map((day, i) =>
                 i === dayIndex ? { ...day, ...patch } : day
             );
+
             return { ...prev, itineraryBuilder: { ...iti, daysDetails: updatedDays } };
         });
     };
@@ -304,110 +308,6 @@ function EditGroupTrip() {
         }
         setActiveTab(3);
     };
-
-    // const handleSaveItinerary = async() => {
-    //     try {
-    //         const day1 = formData.itineraryBuilder?.daysDetails?.[0];
-
-    //         if (!day1) {
-    //             toast.error('Day 1 data is missing.');
-    //             return;
-    //         }
-
-    //         // At least one sub-region
-    //         const hasSubRegion = [day1.subRegion1, day1.subRegion2, day1.subRegion3].some(Boolean);
-    //         if (!hasSubRegion) {
-    //             toast.error('Day 1: Please select at least one Sub-Region.');
-    //             return;
-    //         }
-
-    //         // Hotel — hotelId (inventory) or hotelName (manual)
-    //         const hotel = day1?.hotelDetails;
-    //         const hasHotel = hotel?.hotelType === 'manual'
-    //             ? !!hotel?.hotelName?.trim()
-    //             : !!hotel?.hotelId;
-    //         if (!hasHotel) {
-    //             toast.error('Day 1: Please select or enter a Hotel.');
-    //             return;
-    //         }
-
-    //         // Room type — id (inventory) or typed string (manual)
-    //         const hasRoomType = hotel?.hotelType === 'manual'
-    //             ? !!hotel?.roomType?.trim()
-    //             : !!hotel?.roomType;
-    //         if (!hasRoomType) {
-    //             toast.error('Day 1: Please select or enter a Room Type.');
-    //             return;
-    //         }
-
-    //         // At least one meal
-    //         const hasMeals = !!hotel?.meals?.trim();
-    //         if (!hasMeals) {
-    //             toast.error('Day 1: Please select at least one Meal (Breakfast, Lunch, or Dinner).');
-    //             return;
-    //         }
-
-    //         // At least one place selected
-    //         const hasPlace = day1.placeDetails?.length > 0;
-    //         if (!hasPlace) {
-    //             toast.error('Day 1: Please select at least one Place.');
-    //             return;
-    //         }
-
-    //         const updatedDays = formData.itineraryBuilder.daysDetails.map(day => {
-    //             const places = day.placeDetails ?? [];
-    //             if (places.length === 0) return day;
-
-    //             const hasFavourite = places.some(p => p.isFavourite);
-    //             if (hasFavourite) return day; // already has a favourite, don't touch
-
-    //             // No favourite set — mark the first place as favourite
-    //             return {
-    //                 ...day,
-    //                 placeDetails: places.map((p, i) => ({
-    //                     ...p,
-    //                     isFavourite: i === 0,
-    //                 })),
-    //             };
-    //         });
-
-    //         // Sync the auto-favourited days back into formData before saving
-    //         setFormData(prev => ({
-    //             ...prev,
-    //             itineraryBuilder: {
-    //                 ...prev.itineraryBuilder,
-    //                 daysDetails: updatedDays,
-    //             },
-    //         }));
-
-    //         const payload = {
-    //             ...formData,
-    //             itineraryBuilder: {
-    //                 ...formData.itineraryBuilder,
-    //                 daysDetails: updatedDays
-    //             },
-    //             _id:groupTripDetails?._id
-    //         };
-
-
-    //         // console.log("payload : ",payload)
-    //         const response = await updateGroupTripById (payload)
-    //         toast.success(response?.data?.message ||'Itinerary saved!');
-    //         navigate("/group-trips")
-    //     }
-    //     catch (error) {
-    //         if (!isProduction) {
-    //             console.log("========= ERROR DEBUG START =========");
-    //             console.log("Error:", error);
-    //             console.log("Response:", error?.response);
-    //             console.log("========= ERROR DEBUG END =========");
-    //         }
-    //         toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin")
-    //     }
-
-    // };
-
-    // ─── render ───────────────────────────────────────────────────────────────
 
 
     const handleSaveItinerary = async () => {
@@ -460,6 +360,7 @@ function EditGroupTrip() {
             setSubmitLoading(false);
         }
     };
+
     const tabs = ['Basic Details', 'Trip Details', 'Itinerary Builder'];
 
     const tabClick = (i) => {

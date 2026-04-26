@@ -31,6 +31,12 @@ const groupTripSummarySchema = new mongoose.Schema({
         totalBalance:{type:Number,default:0},
         potentialRevenue:{type:Number,default:0},
     },
+    financialCloseup :{
+        totalHotelCost:{type:Number,default:0},
+        totalVehicleCost:{type:Number,default:0},
+        totalOtherCost:{type:Number,default:0},
+        netProfit:{type:Number,default:0},
+    }
 
 
 }, { timestamps: true })

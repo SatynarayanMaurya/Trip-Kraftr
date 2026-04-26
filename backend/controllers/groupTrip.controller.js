@@ -117,7 +117,7 @@ export const getGroupTripById = async (req, res) => {
             GroupTripSummary?.findOne({
                 org_id: req.user.org_id,
                 groupTripId,
-            }).select("_id bookingSummary financialOverview paymentSummary")
+            }).select("_id bookingSummary financialOverview paymentSummary financialCloseup")
         ]);
 
         if (!findGroupTrip) {
@@ -138,6 +138,78 @@ export const getGroupTripById = async (req, res) => {
         return res.status(500).json({
             success: false,
             message: error?.message || "Internal Server Error"
+        });
+    }
+};
+
+
+export const updateGroupTripSummaryById = async (req, res) => {
+    try {
+        const { _id, netProfit, totalHotelCost, totalOtherCost, totalVehicleCost } = req.body;
+        const { groupTripId } = req.params;
+
+        // ✅ Validate IDs
+        if (!groupTripId || !mongoose.Types.ObjectId.isValid(groupTripId)) {
+            return res.status(400).json({
+                success: false,
+                message: "Valid groupTripId is required",
+            });
+        }
+
+        if (!_id || !mongoose.Types.ObjectId.isValid(_id)) {
+            return res.status(400).json({
+                success: false,
+                message: "Valid _id is required",
+            });
+        }
+
+        // ✅ Build dynamic update object (prevents overwriting)
+        const updateFields = {};
+
+        if (netProfit !== undefined) updateFields["financialCloseup.netProfit"] = netProfit;
+        if (totalHotelCost !== undefined) updateFields["financialCloseup.totalHotelCost"] = totalHotelCost;
+        if (totalOtherCost !== undefined) updateFields["financialCloseup.totalOtherCost"] = totalOtherCost;
+        if (totalVehicleCost !== undefined) updateFields["financialCloseup.totalVehicleCost"] = totalVehicleCost;
+
+        if (Object.keys(updateFields).length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "No valid fields provided to update",
+            });
+        }
+
+        console.log("groupTripId,_id : ",groupTripId, _id)
+        // ✅ Update
+        const updatedSummary = await GroupTripSummary.findOneAndUpdate(
+            {
+                org_id: req.user.org_id,
+                groupTripId,
+                _id
+            },
+            { $set: updateFields },
+            {
+                new: true,            // return updated doc
+            }
+        );
+
+        if (!updatedSummary) {
+            return res.status(404).json({
+                success: false,
+                message: "Group Trip Summary not found",
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Group Trip Summary updated successfully",
+            updatedSummary
+        });
+
+    } catch (error) {
+
+        return res.status(500).json({
+            success: false,
+            message: error?.message || "Internal Server Error",
         });
     }
 };

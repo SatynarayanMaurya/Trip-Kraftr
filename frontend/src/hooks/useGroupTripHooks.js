@@ -122,12 +122,42 @@ export const useGroupTripHooks = () => {
     }
   }
 
+  // For getting Hotels with paginated
+  const updateGroupTripSummaryById = async (groupTripId, groupTripSummaryDetails) => {
+    try {
+
+      dispatch(setLoading(true))
+
+      const response = await apiConnector(
+        "PUT",
+        `${groupTripEndpoints.UPDATE_GROUP_TRIP_SUMMARY_BY_ID}/${groupTripId}`, groupTripSummaryDetails
+      )
+
+      if (response?.data?.success) {
+        dispatch(
+          setGroupTripSummaryById({
+            id: groupTripId,
+            data: response?.data?.updatedSummary
+          })
+        )
+      }
+
+      return response
+
+    } catch (error) {
+      throw error
+    } finally {
+      dispatch(setLoading(false))
+    }
+  }
+
 
 
   return {
     addGroupTrip,
     getGroupTrips,
     getGroupTripById,
-    updateGroupTripById
+    updateGroupTripById,
+    updateGroupTripSummaryById
   };
 };

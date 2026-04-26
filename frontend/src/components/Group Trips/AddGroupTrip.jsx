@@ -101,7 +101,7 @@ function AddGroupTrip() {
                 };
             });
         }
-    }, [numDays]);
+    }, [numDays,region1, region2, region3]);
 
     // ─── active day sub-regions for fetching ─────────────────────────────────
 
