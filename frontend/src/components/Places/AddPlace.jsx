@@ -23,7 +23,7 @@ function AddPlace() {
     region: "",
     subRegion: "",
     placeName: "",
-    category: "",
+    category: "Leisure",
     notes: "",
     description: "",
     mapLink: "",

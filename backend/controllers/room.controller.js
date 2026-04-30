@@ -5,7 +5,7 @@ import RoomRate from "../models/roomRate.model.js"
 
 export const addRoom = async (req, res) => {
     try {
-        const { hotelId, roomName, capacity, adult, children } = req.body;
+        const { hotelId, roomName, capacity, adult, children,quantity } = req.body;
 
         // ✅ Validate hotelId existence
         if (!hotelId) {
@@ -35,6 +35,7 @@ export const addRoom = async (req, res) => {
         const cap = Number(capacity);
         const ad = Number(adult);
         const child = Number(children);
+        const qty = Number(quantity);
 
         // ✅ Validate numeric fields
         if ([cap, ad, child].some(val => isNaN(val))) {
@@ -78,7 +79,8 @@ export const addRoom = async (req, res) => {
             roomName_lower: roomName.trim().toLowerCase(),
             capacity: cap,
             adult: ad,
-            children: child
+            children: child,
+            quantity:qty
         });
 
         const newRoom = {
@@ -144,7 +146,7 @@ export const getRoomsOfHotels = async (req, res) => {
             })
         }
 
-        const allRooms = await Room.find({ org_id: req.user.org_id, hotelId: hotelId }).select("_id roomName capacity adult children is_active hotelId")
+        const allRooms = await Room.find({ org_id: req.user.org_id, hotelId: hotelId }).select("_id roomName quantity capacity adult children is_active hotelId")
         return res.status(200).json({
             success: true,
             message: "All Rooms are fetched",
@@ -171,7 +173,7 @@ export const getRoomsTypeForHotelId = async (req, res) => {
         })
         .sort({ createdAt: -1 })
         .lean()
-        .select("_id roomName")
+        .select("_id roomName quantity")
   
       return res.status(200).json({
         success: true,
@@ -191,7 +193,7 @@ export const getRoomsTypeForHotelId = async (req, res) => {
 
 export const updateRoomById = async (req, res) => {
     try {
-        const { hotelId, roomId, roomName, capacity, adult, children } = req.body
+        const { hotelId, roomId, roomName, capacity, adult, children,quantity } = req.body
         if (!hotelId) {
             return res.status(400).json({
                 success: false,
@@ -226,6 +228,7 @@ export const updateRoomById = async (req, res) => {
         const cap = Number(capacity);
         const ad = Number(adult);
         const child = Number(children);
+        const qty = Number(quantity);
 
         // ✅ Validate numeric fields
         if ([cap, ad, child].some(val => isNaN(val))) {
@@ -251,7 +254,7 @@ export const updateRoomById = async (req, res) => {
             });
         }
 
-        const updatedRoom = await Room.findOneAndUpdate({ org_id: req.user.org_id, hotelId: hotelId, _id: roomId }, { $set: { roomName: roomName?.trim(), roomName_lower: roomName?.trim()?.toLowerCase(), capacity: cap, adult: ad, children: child } }, { new: true }).select("_id roomName capacity adult children hotelId")
+        const updatedRoom = await Room.findOneAndUpdate({ org_id: req.user.org_id, hotelId: hotelId, _id: roomId }, { $set: { roomName: roomName?.trim(), roomName_lower: roomName?.trim()?.toLowerCase(),quantity:qty, capacity: cap, adult: ad, children: child } }, { new: true }).select("_id roomName quantity capacity adult children hotelId")
 
         if (updatedRoom) {
             return res.status(200).json({

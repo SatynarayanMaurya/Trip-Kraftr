@@ -14,6 +14,7 @@ function AddRoom({ onClose, hotelId }) {
         capacity: "",
         adult: "",
         children: "",
+        quantity:''
     });
 
     const [errors, setErrors] = useState({});
@@ -23,7 +24,7 @@ function AddRoom({ onClose, hotelId }) {
         const { name, value } = e.target;
 
         // Only allow numbers for numeric fields
-        if (["capacity", "adult", "children"].includes(name)) {
+        if (["capacity", "adult", "children",'quantity'].includes(name)) {
             if (value !== "" && !/^\d+$/.test(value)) return;
         }
 
@@ -47,12 +48,14 @@ function AddRoom({ onClose, hotelId }) {
         const capacity = Number(formData.capacity);
         const adult = Number(formData.adult);
         const children = Number(formData.children);
+        const quantity = Number(formData.quantity);
 
         // Required validations
         if (!roomName) newErrors.roomName = "Room name is required.";
         if (formData.capacity === "") newErrors.capacity = "Capacity is required.";
         if (formData.adult === "") newErrors.adult = "Adult count is required.";
         if (formData.children === "") newErrors.children = "Children count is required.";
+        if (formData.quantity === "") newErrors.quantity = "Room Quantity is required.";
 
         // Positive / valid number validations
         if (formData.capacity !== "" && capacity <= 0) {
@@ -65,6 +68,10 @@ function AddRoom({ onClose, hotelId }) {
 
         if (formData.children !== "" && children < 0) {
             newErrors.children = "Children count cannot be negative.";
+        }
+
+        if (formData.quantity !== "" && quantity < 1) {
+            newErrors.quantity = "Room Quantity Can not be less than 1";
         }
 
         // Capacity match validation only when all numeric values exist
@@ -99,6 +106,7 @@ function AddRoom({ onClose, hotelId }) {
             const capacity = Number(formData.capacity);
             const adult = Number(formData.adult);
             const children = Number(formData.children);
+            const quantity = Number(formData.quantity);
 
             if (!isValid) return;
 
@@ -111,6 +119,7 @@ function AddRoom({ onClose, hotelId }) {
                 capacity,
                 adult,
                 children,
+                quantity,
                 hotelId
             };
 
@@ -278,6 +287,33 @@ function AddRoom({ onClose, hotelId }) {
                             )}
                         </div>
 
+                        {/* Quantity */}
+                        <div>
+                            <label className="mb-2 block text-sm font-semibold text-slate-700">
+                                Room Quantity
+                            </label>
+                            <div className="relative">
+                                <Baby
+                                    size={18}
+                                    className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                                />
+                                <input
+                                    type="text"
+                                    name="quantity"
+                                    value={formData.quantity}
+                                    onChange={handleChange}
+                                    placeholder="Enter Room Quantity"
+                                    className={`w-full rounded-2xl border bg-white py-3 pl-11 pr-4 text-sm outline-none transition ${errors.quantity
+                                        ? "border-red-400 focus:border-red-500"
+                                        : "border-slate-300 focus:border-pink-500"
+                                        }`}
+                                />
+                            </div>
+                            {errors.quantity && (
+                                <p className="mt-2 text-sm text-red-500">{errors.quantity}</p>
+                            )}
+                        </div>
+
 
                         {/* Capacity Error */}
                         {submitError && (
@@ -287,23 +323,6 @@ function AddRoom({ onClose, hotelId }) {
                         )}
                     </div>
 
-                    {/* Footer
-                    <div className="mt-8 flex items-center justify-end gap-3">
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="rounded-2xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
-                        >
-                            Cancel
-                        </button>
-
-                        <button
-                            type="submit"
-                            className="rounded-2xl bg-pink-500 px-6 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-pink-600"
-                        >
-                            Add Room
-                        </button>
-                    </div> */}
                     <div className="mt-8 flex items-center justify-end gap-3">
                         <button
                             type="button"
@@ -324,7 +343,7 @@ function AddRoom({ onClose, hotelId }) {
                             className={`flex items-center justify-center gap-2 rounded-2xl px-6 py-3 text-sm font-semibold text-white shadow-md transition
       ${loading
                                     ? "bg-pink-300 cursor-not-allowed"
-                                    : "bg-pink-500 hover:bg-pink-600"
+                                    : "bg-[#ED5F8D] cursor-pointer"
                                 }`}
                         >
                             {loading ? (

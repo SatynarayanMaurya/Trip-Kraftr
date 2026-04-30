@@ -8,6 +8,7 @@ const initialState = {
 
     groupTripById: {}, 
     groupTripSummaryById: {},  
+    suggestionGroupTripsSlice:{},
 
     groupTripPageLimit: 4,
 
@@ -28,52 +29,6 @@ export const groupTripSlice = createSlice({
     initialState,
     reducers: {
 
-        // addNewGroupTrip: (state, action) => {
-        //     const newGroupTrip = action.payload;
-        //     const limit = state.HotelPageLimit || 5;
-
-        //     // ✅ Step 1: Ensure page 1 exists
-        //     if (!state.groupTripsPages[1]) {
-        //         state.groupTripsPages[1] = [newGroupTrip];
-        //     } else {
-        //         // add new hotel at top
-        //         state.groupTripsPages[1].unshift(newGroupTrip);
-
-        //         let currentPage = 1;
-
-        //         // ✅ Step 2: Handle overflow ONLY if next page exists
-        //         while (state.groupTripsPages[currentPage]?.length > limit) {
-        //             const nextPage = currentPage + 1;
-
-        //             // ❌ Stop if next page not fetched
-        //             if (!state.groupTripsPages[nextPage]) {
-        //                 state.groupTripsPages[currentPage] =
-        //                     state.groupTripsPages[currentPage].slice(0, limit);
-        //                 break;
-        //             }
-
-        //             // move last item to next page
-        //             const overflowItem = state.groupTripsPages[currentPage].pop();
-
-        //             state.groupTripsPages[nextPage].unshift(overflowItem);
-
-        //             currentPage = nextPage;
-        //         }
-        //     }
-
-        //     // ✅ Step 3: Update stats
-        //     state.statsGroupTrips.totalGroupTrips += 1;
-
-
-        //     // ✅ Step 4: Update pagination
-        //     if (state.paginationGroupTrips) {
-        //         state.paginationGroupTrips.totalRecords += 1;
-
-        //         state.paginationGroupTrips.totalPages = Math.ceil(
-        //             state.paginationGroupTrips.totalRecords / limit
-        //         );
-        //     }
-        // },
 
         
         addNewGroupTrip: (state, action) => {
@@ -229,14 +184,64 @@ export const groupTripSlice = createSlice({
 
 
 
-        setHotelsBySubRegionKey: (state, action) => {
+        setSuggestionGroupTripByRegionId: (state, action) => {
             const { key, data } = action.payload;
 
-            if (!state.hotelsBysubRegionKey) {
-                state.hotelsBysubRegionKey = {};
+            if (!state.suggestionGroupTripsSlice) {
+                state.suggestionGroupTripsSlice = {};
             }
 
-            state.hotelsBysubRegionKey[key] = data;
+            state.suggestionGroupTripsSlice[key] = data;
+        },
+
+
+        setUpdateGroupTripStatus:(state,action)=>{
+            const {status,groupTripId} = action.payload;
+            let data = state.groupTripById?.[groupTripId]
+            if(data){
+                data.status = status
+            }
+        },
+
+        setUpdateGroupTripStatusForPages: (state, action) => {
+            const { status, groupTripId } = action.payload;
+        
+            for (const page in state.groupTripsPages) {
+                const pageData = state.groupTripsPages[page];
+        
+                const trip = pageData.find(
+                    (groupTrip) => groupTrip._id === groupTripId
+                );
+        
+                if (trip) {
+                    trip.status = status;
+                    break;
+                }
+            }
+        },
+
+        setUpdateGroupTripStatusEverywhere: (state, action) => {
+            const { status, groupTripId } = action.payload;
+        
+            // Update normalized state
+            const trip = state.groupTripById?.[groupTripId];
+            if (trip) {
+                trip.status = status;
+            }
+        
+            // Update paginated state
+            for (const page in state.groupTripsPages) {
+                const pageData = state.groupTripsPages[page];
+        
+                const item = pageData.find(
+                    (groupTrip) => groupTrip._id === groupTripId
+                );
+        
+                if (item) {
+                    item.status = status;
+                    break;
+                }
+            }
         }
 
 
@@ -250,7 +255,11 @@ export const {
     clearGroupTrips,
     setGroupTripById,
     updateGroupTrip,
-    setGroupTripSummaryById
+    setGroupTripSummaryById,
+    setSuggestionGroupTripByRegionId,
+    setUpdateGroupTripStatusForPages,
+    setUpdateGroupTripStatus,
+    setUpdateGroupTripStatusEverywhere
 } = groupTripSlice.actions
 
 export default groupTripSlice.reducer

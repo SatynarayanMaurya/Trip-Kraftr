@@ -21,9 +21,22 @@ export const labelStyle = {
   display: "block",
 };
 
+
 export const cardStyle = {
-    background: 'white',
-    borderRadius: '10px',
-    padding: '24px',
-    border: '1px solid #eee',
+  background: 'linear-gradient(135deg, #FFFFFF 0%, #F7FAFFB2 50%, #FFF0F5 100%)',
+  borderRadius: '10px',
+  padding: '24px',
+  border: '1px solid rgba(59, 130, 246, 0.15)',
+};
+export const cardStyleHotel = {
+  background: 'linear-gradient(135deg,#FFF1F6 0%, #FFFFFF 100% )',
+  borderRadius: '10px',
+  padding: '24px',
+  border: '1px solid rgba(59, 130, 246, 0.15)',
+};
+export const cardStylePlaces = {
+  background: 'linear-gradient(135deg, #F0FFFF 0%, #F7FAFFB2 50%, #FFF0F5 100% )',
+  borderRadius: '10px',
+  padding: '24px',
+  border: '1px solid rgba(59, 130, 246, 0.15)',
 };

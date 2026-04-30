@@ -856,6 +856,7 @@ export default function UpdateHotel() {
         <button
           type="button"
           onClick={() => navigate(-1)}
+          disabled={submitLoading}
           className="flex items-center gap-2 px-6 py-2.5 border border-gray-300 text-[#18305C] text-sm font-semibold rounded-lg hover:bg-gray-50 transition-colors"
         >
           <XCircle size={16} />

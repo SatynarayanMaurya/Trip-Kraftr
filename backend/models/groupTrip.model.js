@@ -71,7 +71,7 @@ const groupTripSchema = new mongoose.Schema({
         ]
     },
 
-    status:{type:String,default:"created"},
+    status:{type:String,default:"new"},
 
 
 }, { timestamps: true })

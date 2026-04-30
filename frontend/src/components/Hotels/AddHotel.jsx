@@ -14,6 +14,7 @@ import { useRegionHooks } from '../../hooks/useRegionHooks'
 import { useHotelHooks } from '../../hooks/useHotelHooks'
 
 const CATEGORIES = ['Budget', 'Premium', 'Luxury']
+const PINK = '#ED5F8D';
 const MAX_IMAGES = 3
 
 // ── Amenities master list ─────────────────────────────────────────────────
@@ -62,7 +63,7 @@ function AmenityChip({ amenity, selected, onToggle }) {
       style={{
         border: selected ? '1.5px solid #E91E8C' : '1.5px solid #E5E7EB',
         background: selected ? '#FFF0F7' : '#FAFAFA',
-        color: selected ? '#E91E8C' : '#6B7280',
+        color: selected ? PINK : '#6B7280',
         boxShadow: selected
           ? '0 2px 8px rgba(233,30,140,0.13)'
           : '0 1px 4px rgba(0,0,0,0.06)',
@@ -72,7 +73,7 @@ function AmenityChip({ amenity, selected, onToggle }) {
       onMouseEnter={e => {
         if (!selected) {
           e.currentTarget.style.borderColor = '#F9A8D4'
-          e.currentTarget.style.color = '#E91E8C'
+          e.currentTarget.style.color = PINK
           e.currentTarget.style.background = '#FFF7FB'
         }
       }}
@@ -89,7 +90,7 @@ function AmenityChip({ amenity, selected, onToggle }) {
       {selected && (
         <span
           className="ml-0.5 w-4 h-4 rounded-full flex items-center justify-center"
-          style={{ background: '#E91E8C' }}
+          style={{ background: '#ED5F8D' }}
         >
           <svg width="8" height="8" viewBox="0 0 10 10" fill="none">
             <path d="M2 5l2.5 2.5L8 2.5" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
@@ -256,6 +257,7 @@ export default function AddHotel() {
     if (!form.hotelName.trim()) e.hotelName = 'Hotel name is required.'
     if (!form.category) e.category = 'Please select a category.'
     if (!form.regionId) e.regionId = 'Please select a region.'
+    if (!form.subRegionId) e.subRegionId = 'Please select a Sub Region.'
     if (!form.contact.trim()) e.contact = 'Contact is required.'
     else if (!/^\+?[\d\s\-()]{7,15}$/.test(form.contact.trim())) e.contact = 'Enter a valid contact number.'
     if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) e.email = 'Enter a valid email.'
@@ -379,7 +381,7 @@ export default function AddHotel() {
                     key={c}
                     onClick={() => { setForm((f) => ({ ...f, category: c })); setCategoryOpen(false); clearError('category') }}
                     className={`w-full text-left px-4 py-2.5 text-sm transition-colors
-                      ${form.category === c ? 'bg-[#E91E8C] text-white font-semibold' : 'text-[#18305C] hover:bg-pink-50'}`}
+                      ${form.category === c ? 'bg-[#ED5F8D] text-white font-semibold' : 'text-[#18305C] hover:bg-pink-50'}`}
                   >
                     {c}
                   </button>
@@ -430,7 +432,7 @@ export default function AddHotel() {
                       key={r._id}
                       onClick={() => handleRegionSelect(r)}
                       className={`w-full text-left px-4 py-2.5 text-sm transition-colors flex items-center justify-between
-                        ${form.regionId === r._id ? 'bg-[#E91E8C] text-white font-semibold' : 'text-[#18305C] hover:bg-pink-50'}`}
+                        ${form.regionId === r._id ? 'bg-[#ED5F8D] text-white font-semibold' : 'text-[#18305C] hover:bg-pink-50'}`}
                     >
                       <span>{r.name}</span>
                       <span className={`text-xs ${form.regionId === r._id ? 'text-pink-100' : 'text-gray-400'}`}>{r.country}</span>
@@ -492,14 +494,16 @@ export default function AddHotel() {
                       key={sr?._id}
                       onClick={() => handleSubRegionSelect(sr)}
                       className={`w-full text-left px-4 py-2.5 text-sm transition-colors
-                        ${form.subRegionId === sr?._id ? 'bg-[#E91E8C] text-white font-semibold' : 'text-[#18305C] hover:bg-pink-50'}`}
+                        ${form.subRegionId === sr?._id ? 'bg-[#ED5F8D] text-white font-semibold' : 'text-[#18305C] hover:bg-pink-50'}`}
                     >
                       {sr?.name}
                     </button>
+                    
                   ))}
                 </div>
               </div>
             )}
+            {errors.subRegionId && <p className="text-red-500 text-xs mt-1">{errors.subRegionId}</p>}
           </div>
 
           {/* Contact */}
@@ -701,8 +705,8 @@ export default function AddHotel() {
           type="button"
           onClick={handleSubmit}
           disabled={submitLoading}
-          className={`flex items-center gap-2 px-6 py-2.5 bg-[#E91E8C] text-white text-sm font-semibold rounded-lg transition-colors shadow-sm shadow-pink-200
-            ${submitLoading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-pink-600'}`}
+          className={`flex items-center gap-2 px-6 py-2.5 bg-[${PINK}] text-white text-sm font-semibold rounded-lg transition-colors shadow-sm shadow-pink-200
+            ${submitLoading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-pink-500'}`}
         >
           {submitLoading ? (
             <svg className="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24">

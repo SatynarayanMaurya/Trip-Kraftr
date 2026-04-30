@@ -5,10 +5,43 @@ const PINK = '#ED5F8D';
 const BLUE = '#18305C';
 // ─── status config ────────────────────────────────────────────────────────────
 const STATUS_CONFIG = {
-    confirmed: { bg: '#E8F5E9', color: '#448B47', label: 'Confirmed' },
-    planning: { bg: '#FFF3E0', color: '#FF9800', label: 'Planning' },
-    created: { bg: '#FFDDE6', color: '#ED5F8D', label: 'Created' },
-  };
+  created: {
+      label: 'Created',
+      color: '#9C27B0',        // Purple (initial state)
+      bg: '#F3E5F5',
+      border: '#CE93D8'
+  },
+  planning: {
+      label: 'Planning',
+      color: '#FF9800',        // Orange (preparation)
+      bg: '#FFF3E0',
+      border: '#FFCC80'
+  },
+  confirmed: {
+      label: 'Confirmed',
+      color: '#4CAF50',        // Green (approved)
+      bg: '#E8F5E9',
+      border: '#A5D6A7'
+  },
+  inProgress: {
+      label: 'In Progress',
+      color: '#2196F3',        // Blue (active/live)
+      bg: '#E3F2FD',
+      border: '#90CAF9'
+  },
+  completed: {
+      label: 'Completed',
+      color: '#2E7D32',        // Dark green (finished)
+      bg: '#E8F5E9',
+      border: '#81C784'
+  },
+  cancelled: {
+      label: 'Cancelled',
+      color: '#F44336',        // Red (terminated)
+      bg: '#FFEBEE',
+      border: '#EF9A9A'
+  },
+};
   
   // ─── helpers ──────────────────────────────────────────────────────────────────
   const formatDate = (iso) => {
@@ -24,7 +57,7 @@ const STATUS_CONFIG = {
   };
 
 function TripCard({ trip, onDelete, onCopy, onView }) {
-    const status = trip?.status?.toLowerCase() ?? 'created';
+    const status = trip?.status ?? 'created';
     const statusCfg = STATUS_CONFIG[status] ?? STATUS_CONFIG.created;
   
     const from = formatDate(trip?.regionDetails?.fromDate);

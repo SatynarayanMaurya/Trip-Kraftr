@@ -3,12 +3,13 @@ import { apiConnector } from '../services/apiConnector'
 import { useDispatch, useSelector } from 'react-redux'
 import { setLoading } from '../redux/slices/userSlice'
 import { groupTripEndpoints } from '../services/Apis/groupTripApis';
-import { addNewGroupTrip, setGroupTripById, setGroupTripByPage, setGroupTripSummaryById, updateGroupTrip } from '../redux/slices/groupTripSlice';
+import { addNewGroupTrip, setGroupTripById, setGroupTripByPage, setGroupTripSummaryById, setSuggestionGroupTripByRegionId, setUpdateGroupTripStatus, setUpdateGroupTripStatusEverywhere, setUpdateGroupTripStatusForPages, updateGroupTrip } from '../redux/slices/groupTripSlice';
 
 export const useGroupTripHooks = () => {
   const dispatch = useDispatch();
   const groupTripsPages = useSelector((state) => state.groupTrip.groupTripsPages)
   const groupTripById = useSelector(s => s.groupTrip.groupTripById)
+  const suggestionGroupTripsSlice = useSelector((state)=>state.groupTrip.suggestionGroupTripsSlice)
 
   const addGroupTrip = async (groupTripDetails) => {  // For Normal Org_admin
     try {
@@ -92,6 +93,41 @@ export const useGroupTripHooks = () => {
   }
 
   // For getting Hotels with paginated
+  const suggestionGroupTrips = async (region1,region2,region3,noOfDays) => {
+    try {
+      const cachedPage = suggestionGroupTripsSlice?.[`${region1},${region2},${region3},${noOfDays}`]
+
+      if (cachedPage) return cachedPage 
+      
+      dispatch(setLoading(true))
+      const params = new URLSearchParams({
+        region1,
+        region2,
+        region3,
+        noOfDays,
+      });
+      
+      const response = await apiConnector(
+        "GET",
+        `${groupTripEndpoints.SUGGESTION_GROUP_TRIPS}?${params.toString()}`
+      );
+
+
+      if(response?.data?.success){
+        dispatch(setSuggestionGroupTripByRegionId({key:`${region1},${region2},${region3},${noOfDays}`,data:response?.data?.trips}))
+      }
+
+      // console.log("Response : ",response?.data?.trips)
+      return response
+
+    } catch (error) {
+      throw error
+    } finally {
+      dispatch(setLoading(false))
+    }
+  }
+
+  // For getting Hotels with paginated
   const updateGroupTripById = async (groupTripDetails) => {
     try {
 
@@ -112,6 +148,36 @@ export const useGroupTripHooks = () => {
           })
         )
       }
+
+      return response
+
+    } catch (error) {
+      throw error
+    } finally {
+      dispatch(setLoading(false))
+    }
+  }
+
+  // For getting Hotels with paginated
+  const updateGroupTripStatusById = async (status,groupTripId) => {
+    try {
+
+      dispatch(setLoading(true))
+
+      const response = await apiConnector(
+        "PATCH",
+        `${groupTripEndpoints.UPDATE_GROUP_TRIP_STATUS_BY_ID}/${groupTripId}`, {status}
+      )
+
+
+      if (response?.data?.success) {
+        dispatch(
+            setUpdateGroupTripStatusEverywhere({
+                status,
+                groupTripId
+            })
+        );
+    }
 
       return response
 
@@ -158,6 +224,8 @@ export const useGroupTripHooks = () => {
     getGroupTrips,
     getGroupTripById,
     updateGroupTripById,
-    updateGroupTripSummaryById
+    updateGroupTripSummaryById,
+    suggestionGroupTrips,
+    updateGroupTripStatusById
   };
 };

@@ -7,7 +7,7 @@ import {
 } from '../../../hooks/Resuable Hooks/useResuableData';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import {ArrowLeft} from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import ItineraryBuilder from '../Add Group Trip/ItineraryBuilder';
 import RegionDetails from '../Add Group Trip/RegionDetails';
 import TripDetails from '../Add Group Trip/TripDetails';
@@ -22,9 +22,9 @@ const BLUE = '#18305C';
 // ─── blank day template ───────────────────────────────────────────────────────
 const blankDay = () => ({
     dayOverview: '',
-    subRegion1:null,
-    subRegion2:null,
-    subRegion3:null,
+    subRegion1: null,
+    subRegion2: null,
+    subRegion3: null,
     hotelDetails: {
         hotelType: 'inventory',
         hotelId: null,
@@ -46,16 +46,16 @@ function sortIdsConsistently(arr) {
 function EditGroupTrip() {
 
     const navigate = useNavigate()
-    const {groupTripId} = useParams();
+    const { groupTripId } = useParams();
 
-    const groupTripDetails = useSelector((state)=>state.groupTrip.groupTripById?.[groupTripId])
+    const groupTripDetails = useSelector((state) => state.groupTrip.groupTripById?.[groupTripId])
 
 
     const [activeTab, setActiveTab] = useState(3);
     const [activeDay, setActiveDay] = useState(1);
     const [submitLoading, setSubmitLoading] = useState(false)
 
-    const {updateGroupTripById, getGroupTripById} = useGroupTripHooks()
+    const { updateGroupTripById, getGroupTripById } = useGroupTripHooks()
 
     const [formData, setFormData] = useState({
         regionDetails: {
@@ -82,87 +82,95 @@ function EditGroupTrip() {
 
     const convertUTCToISTDate = (utcDateString) => {
         if (!utcDateString) return '';
-      
+
         const date = new Date(utcDateString);
-      
+
         // Convert to IST using Intl API
         const istDate = new Intl.DateTimeFormat('en-CA', {
-          timeZone: 'Asia/Kolkata',
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
+            timeZone: 'Asia/Kolkata',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
         }).format(date);
-      
+
         return istDate; // format: YYYY-MM-DD
     };
 
-    const fetchGroupDetails = async()=>{
-        try{
+    const fetchGroupDetails = async () => {
+        try {
             await getGroupTripById(groupTripId)
         }
-        catch(error){
-          if (!isProduction) {
-            console.log("========= ERROR DEBUG START =========");
-            console.log("Error:", error);
-            console.log("Response:", error?.response);
-            console.log("========= ERROR DEBUG END =========");
-          }
-          toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin")
+        catch (error) {
+            if (!isProduction) {
+                console.log("========= ERROR DEBUG START =========");
+                console.log("Error:", error);
+                console.log("Response:", error?.response);
+                console.log("========= ERROR DEBUG END =========");
+            }
+            toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin")
         }
     }
 
-    useEffect(()=>{
-        if(!groupTripDetails){
+    useEffect(() => {
+        if (!groupTripDetails) {
             fetchGroupDetails()
         }
-    },[groupTripId])
+    }, [groupTripId])
 
     useEffect(() => {
         if (!groupTripDetails) return;
-      
+
         setFormData({
-          regionDetails: {
-            region1: groupTripDetails?.regionDetails?.region1?._id || groupTripDetails?.regionDetails?.region1 || null,
-            region2: groupTripDetails?.regionDetails?.region2?._id || groupTripDetails?.regionDetails?.region2 || null,
-            region3: groupTripDetails?.regionDetails?.region3?._id || groupTripDetails?.regionDetails?.region3 || null,
-            fromDate: convertUTCToISTDate(groupTripDetails?.regionDetails?.fromDate) || '',
-            toDate: convertUTCToISTDate(groupTripDetails?.regionDetails?.toDate) || '',
-            noOfDays: groupTripDetails?.regionDetails?.noOfDays || '',
-          },
-      
-          tripDetails: {
-            assignedTo: groupTripDetails?.tripDetails?.assignedTo || '',
-            totalSeats: groupTripDetails?.tripDetails?.totalSeats || '',
-            minSeats: groupTripDetails?.tripDetails?.minSeats || '',
-            occupancy: {
-              single: groupTripDetails?.tripDetails?.occupancy?.single || '',
-              double: groupTripDetails?.tripDetails?.occupancy?.double || '',
-              triple: groupTripDetails?.tripDetails?.occupancy?.triple || '',
+            regionDetails: {
+                region1: groupTripDetails?.regionDetails?.region1?._id || groupTripDetails?.regionDetails?.region1 || null,
+                region2: groupTripDetails?.regionDetails?.region2?._id || groupTripDetails?.regionDetails?.region2 || null,
+                region3: groupTripDetails?.regionDetails?.region3?._id || groupTripDetails?.regionDetails?.region3 || null,
+                fromDate: convertUTCToISTDate(groupTripDetails?.regionDetails?.fromDate) || '',
+                toDate: convertUTCToISTDate(groupTripDetails?.regionDetails?.toDate) || '',
+                noOfDays: groupTripDetails?.regionDetails?.noOfDays || '',
             },
-            selectedVehicleId: groupTripDetails?.tripDetails?.selectedVehicleId || '',
-            quantity: groupTripDetails?.tripDetails?.quantity || 1,
-          },
-      
-          itineraryBuilder: {
-            tripOverview: groupTripDetails?.itineraryBuilder?.tripOverview || '',
-      
-            daysDetails: (groupTripDetails?.itineraryBuilder?.daysDetails || []).map(day => ({
-              ...day,
-      
-              // ✅ normalize subRegions
-              subRegion1: day?.subRegion1?._id || day?.subRegion1 || null,
-              subRegion2: day?.subRegion2?._id || null,
-              subRegion3: day?.subRegion3?._id || null,
-      
-              // ✅ normalize places
-              placeDetails: (day?.placeDetails || []).map(place => ({
-                ...place,
-                placeId: place?.placeId?._id || place?.placeId || null,
-              })),
-            })),
-          },
+
+            tripDetails: {
+                assignedTo: groupTripDetails?.tripDetails?.assignedTo || '',
+                totalSeats: groupTripDetails?.tripDetails?.totalSeats || '',
+                minSeats: groupTripDetails?.tripDetails?.minSeats || '',
+                occupancy: {
+                    single: groupTripDetails?.tripDetails?.occupancy?.single || '',
+                    double: groupTripDetails?.tripDetails?.occupancy?.double || '',
+                    triple: groupTripDetails?.tripDetails?.occupancy?.triple || '',
+                },
+                selectedVehicleId: groupTripDetails?.tripDetails?.selectedVehicleId || '',
+                quantity: groupTripDetails?.tripDetails?.quantity || 1,
+            },
+
+            itineraryBuilder: {
+                tripOverview: groupTripDetails?.itineraryBuilder?.tripOverview || '',
+
+                daysDetails: (groupTripDetails?.itineraryBuilder?.daysDetails || []).map(day => ({
+                    ...day,
+
+                    // ✅ normalize subRegions
+                    subRegion1: day?.subRegion1?._id || day?.subRegion1 || null,
+                    subRegion2: day?.subRegion2?._id || null,
+                    subRegion3: day?.subRegion3?._id || null,
+                    hotelDetails: {
+                        hotelId: day?.hotelDetails?.hotelId?._id || day?.hotelDetails?.hotelId||null,
+                        hotelType: day?.hotelDetails?.hotelType || 'inventory',
+                        hotelName: day?.hotelDetails?.hotelName ||'',
+                        roomTypeId: day?.hotelDetails?.roomTypeId?._id || day?.hotelDetails?.roomTypeId||null,
+                        roomType: day?.hotelDetails?.roomType||'',
+                        meals: day?.hotelDetails?.meals||'',
+                    },
+
+                    // ✅ normalize places
+                    placeDetails: (day?.placeDetails || []).map(place => ({
+                        ...place,
+                        placeId: place?.placeId?._id || place?.placeId || null,
+                    })),
+                })),
+            },
         });
-      }, [groupTripDetails]);
+    }, [groupTripDetails]);
 
     // ─── computed ────────────────────────────────────────────────────────────
 
@@ -173,10 +181,12 @@ function EditGroupTrip() {
     const numDays = (() => {
         if (fromDate && toDate) {
             const diff = (new Date(toDate) - new Date(fromDate)) / (1000 * 60 * 60 * 24);
-            return diff > 0 ? Math.round(diff)+1 : 0;
+            return diff > 0 ? Math.round(diff) + 1 : 0;
         }
         return 0;
     })();
+
+
 
     // When numDays changes, rebuild daysDetails array (preserve existing data)
     useEffect(() => {
@@ -191,7 +201,7 @@ function EditGroupTrip() {
                 };
             });
         }
-    }, [numDays,region1, region2, region3]);
+    }, [numDays, region1, region2, region3]);
 
     // ─── active day sub-regions for fetching ─────────────────────────────────
 
@@ -203,7 +213,7 @@ function EditGroupTrip() {
     // ─── selectors ───────────────────────────────────────────────────────────
 
     const { regions, loading: regionLoading } = useRegionsData();
-    const isProduction = useSelector((state)=>state.user.isProduction)
+    const isProduction = useSelector((state) => state.user.isProduction)
     const allSubRegions = useSelector(s => s.subRegion.subRegionByRegionKey?.[sortedRegionId.join(',')]);
     const allVehicles = useSelector(s => s.vehicle.vehiclesByRegionKey?.[sortedRegionId.join(',')]);
     const hotelsForActiveDay = useSelector(s => s.hotel.hotelsBysubRegionKey?.[sortedSubRegionId.join(',')]);
@@ -231,8 +241,8 @@ function EditGroupTrip() {
         enabled: activeTab === 3 && !!activeHotelId,
     });
 
-    // ─── handlers ────────────────────────────────────────────────────────────
 
+    // ─── handlers ────────────────────────────────────────────────────────────
     const getFilteredRegions = (excludeKeys) => {
         if (!regions) return [];
         const excluded = excludeKeys.map(k => formData.regionDetails[k]).filter(Boolean);
@@ -243,7 +253,7 @@ function EditGroupTrip() {
         setFormData(prev => ({
             ...prev,
             regionDetails: { ...prev.regionDetails, [field]: value },
-            itineraryBuilder:{  daysDetails: []}
+            itineraryBuilder: { daysDetails: [] }
         }));
 
     };
@@ -313,36 +323,36 @@ function EditGroupTrip() {
     const handleSaveItinerary = async () => {
         try {
             setSubmitLoading(true);
-    
+
             // ✅ Validation
             const { isValid, message } = validateItinerary(formData);
             if (!isValid) {
                 toast.error(message);
                 return;
             }
-    
+
             // ✅ Ensure favourite places
             const updatedDays = ensureFavouritePlaces(
                 formData.itineraryBuilder.daysDetails
             );
-    
+
             const updatedFormData = {
                 ...formData,
                 itineraryBuilder: {
                     ...formData.itineraryBuilder,
                     daysDetails: updatedDays,
                 },
-                _id:groupTripDetails?._id
+                _id: groupTripDetails?._id
             };
-    
+
             setFormData(updatedFormData);
-    
+
             // ✅ API call
             const response = await updateGroupTripById(updatedFormData);
-    
+
             toast.success(response?.data?.message || 'Itinerary saved!');
             navigate(-1);
-    
+
         } catch (error) {
             if (!isProduction) {
                 console.log("========= ERROR DEBUG START =========");
@@ -350,7 +360,7 @@ function EditGroupTrip() {
                 console.log("Response:", error?.response);
                 console.log("========= ERROR DEBUG END =========");
             }
-    
+
             toast.error(
                 error?.response?.data?.message ||
                 error?.message ||
@@ -379,17 +389,17 @@ function EditGroupTrip() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '24px', background: '#f5f6fa', minHeight: '100vh' }}>
             <h1 style={{ fontSize: '22px', fontWeight: '700', color: BLUE, margin: 0 }}>Update Group Trip</h1>
             <button
-                    onClick={() => navigate(-1)}
-                    className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-[#18305C] -mt-1 transition-colors cursor-pointer"
-                >
-                    <ArrowLeft size={15} />
-                    Back to List
-                </button>
+                onClick={() => navigate(-1)}
+                className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-[#18305C] -mt-1 transition-colors cursor-pointer"
+            >
+                <ArrowLeft size={15} />
+                Back to List
+            </button>
             <p style={{ fontSize: '13px', color: '#666', margin: 0 }}>Step {activeTab} of 3: {tabs[activeTab - 1]}</p>
 
 
             {/* Tab Bar */}
-            <div style={{ display: 'flex', background: '#EEF0F5', borderRadius: '10px', padding: '4px',marginTop:'1rem', marginBottom: '8px' }}>
+            <div style={{ display: 'flex', background: '#EEF0F5', borderRadius: '10px', padding: '4px', marginTop: '1rem', marginBottom: '8px' }}>
                 {tabs.map((label, i) => (
                     <button
                         key={i}

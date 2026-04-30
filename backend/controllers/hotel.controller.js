@@ -239,9 +239,7 @@ export const getHotelsBySubRegionIds = async (req, res) => {
         })
         .sort({ createdAt: -1 })
         .lean()
-        .select("_id regionId subRegionId hotelName category")
-        // .populate({ path: "regionId", select: "_id name country" })
-        // .populate({ path: "subRegionId", select: "_id name" })
+        .select("_id regionId subRegionId hotelName category images amenities googleRating")
   
       return res.status(200).json({
         success: true,

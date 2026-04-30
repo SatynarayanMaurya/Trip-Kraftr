@@ -533,7 +533,7 @@ function AddRoomRate({ onClose, hotelId, allRooms }) {
                             className={`inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-md transition
       ${loading
                                     ? "bg-pink-300 cursor-not-allowed"
-                                    : "bg-pink-500 hover:bg-pink-600"
+                                    : "bg-[#ED5F8D]"
                                 }`}
                         >
                             {loading ? (

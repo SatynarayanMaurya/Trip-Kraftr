@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import {
     useActivitiesData, useHotelsData, usePlacesData,
-    useRegionsData, useRoomTypesData, useSubRegionsData, useVehiclesData
+    useRegionsData, useRoomTypesData, useSubRegionsData, useSuggestionGroupTripsData, useVehiclesData
 } from '../../hooks/Resuable Hooks/useResuableData';
 import RegionDetails from './Add Group Trip/RegionDetails';
 import TripDetails from './Add Group Trip/TripDetails';
@@ -13,6 +13,7 @@ import { useNavigate } from 'react-router-dom';
 import {validateItinerary,ensureFavouritePlaces} from "./Add Group Trip/ValidateItinerary"
 
 import {ArrowLeft} from 'lucide-react'
+import SuggestionCardGroupCard from './Add Group Trip/SuggestionCardGroupCard';
 
 const PINK = '#ED5F8D';
 const BLUE = '#18305C';
@@ -48,6 +49,8 @@ function AddGroupTrip() {
     const [activeTab, setActiveTab] = useState(1);
     const [activeDay, setActiveDay] = useState(1);
     const [submitLoading, setSubmitLoading] = useState(false)
+    const [selectedGroupTripDetails, setSelectedGroupTripDetails] = useState(null)
+    const [suggestionPage, setSuggestionPage] = useState(true)
 
     const {addGroupTrip} = useGroupTripHooks()
 
@@ -74,9 +77,19 @@ function AddGroupTrip() {
         },
     });
 
+    useEffect(() => {
+        if(selectedGroupTripDetails){
+
+            setFormData((prev) => ({
+                ...prev,
+                itineraryBuilder: selectedGroupTripDetails?.itineraryBuilder,
+            }));
+        }
+      }, [selectedGroupTripDetails]);
+
     // ─── computed ────────────────────────────────────────────────────────────
 
-    const { region1, region2, region3, fromDate, toDate } = formData.regionDetails;
+    const { region1, region2, region3, fromDate, toDate, noOfDays } = formData.regionDetails;
     const selectedRegionIds = [region1, region2, region3].filter(Boolean);
     const sortedRegionId = sortIdsConsistently(selectedRegionIds);
 
@@ -121,6 +134,7 @@ function AddGroupTrip() {
     const activitiesForActiveDay = useSelector(s => s.activity.activitiesBySubRegionKey?.[sortedSubRegionId.join(',')]);
     const activeHotelId = activeDayData?.hotelDetails?.hotelId;
     const roomTypesForActiveDay = useSelector(s => s.room.roomTypesForHotelId?.[activeHotelId]);
+    const suggestionGroupTrips = useSelector(s=>s.groupTrip.suggestionGroupTripsSlice?.[`${region1},${region2},${region3},${noOfDays}`])
 
     // ─── conditional fetches ─────────────────────────────────────────────────
 
@@ -140,6 +154,10 @@ function AddGroupTrip() {
         hotelId: activeHotelId,
         enabled: activeTab === 3 && !!activeHotelId,
     });
+    const { loading: suggestionGroupTripLoading } = useSuggestionGroupTripsData({
+        region1,region2,region3,noOfDays,
+        enabled: activeTab === 3 && !!region1 && suggestionPage,
+    });
 
     // ─── handlers ────────────────────────────────────────────────────────────
 
@@ -150,6 +168,9 @@ function AddGroupTrip() {
     };
 
     const handleRegionChange = (field, value) => {
+        if(!value){
+            value = null
+        }
         setFormData(prev => ({
             ...prev,
             regionDetails: { ...prev.regionDetails, [field]: value },
@@ -337,7 +358,14 @@ function AddGroupTrip() {
                 />
             )}
 
+            {
+                activeTab === 3&&
+                <p onClick={()=>setSuggestionPage(true)} className='flex justify-end'>Show Suggestiton</p>
+            }
+
             {activeTab === 3 && (
+                suggestionPage ? 
+                <SuggestionCardGroupCard data={suggestionGroupTrips} closeSuggestion={()=>setSuggestionPage(false)} setSelectedGroupTripDetails={(val)=>setSelectedGroupTripDetails(val)}/>:
                 <ItineraryBuilder
                     formData={formData}
                     activeDay={activeDay}

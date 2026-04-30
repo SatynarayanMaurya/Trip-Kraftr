@@ -26,10 +26,10 @@ function AddPlace() {
     region: "",
     subRegion: "",
     activityName: "",
-    category: "",
+    category: "Others",
     notes: "",
     description: "",
-    price: "",
+    price: 0,
     image: null,
     preview: null,
   });
@@ -151,6 +151,7 @@ function AddPlace() {
     if (!formData.region) newErrors.region = "Region is required";
     if (!formData.activityName) newErrors.placeName = "Activity name is required";
     if (!formData.category) newErrors.category = "Category is required";
+    if (!formData.price) newErrors.price = "Price is required";
     return newErrors;
   };
 
@@ -404,10 +405,13 @@ function AddPlace() {
                 type="number"
                 name="price"
                 placeholder="$300"
-                value={formData.price}
+                value={formData.price||''}
                 onChange={handleChange}
                 className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-transparent transition-all"
               />
+            {errors.price && (
+              <p className="mt-1 text-xs text-red-500">{errors.price}</p>
+            )}
             </div>
 
             <div>

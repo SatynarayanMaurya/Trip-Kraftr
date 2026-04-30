@@ -7,12 +7,12 @@ const initialState = {
 
     individualActivity:{}, // This contain a single place but details about that it is used when we update the place
 
-    activitiesPerPages: 10,
+    activitiesPerPages: 5,
 
     paginationActivities: {
         currentPage: 1,
         totalPages: 1,
-        limit: 10,
+        limit: 5,
         totalRecords: 0
     },
 

@@ -7,12 +7,12 @@ const initialState = {
 
     individualPlaces:{}, // This contain a single place but details about that it is used when we update the place
 
-    placesPageLimit: 10,
+    placesPageLimit: 5,
 
     paginationPlaces: {
         currentPage: 1,
         totalPages: 1,
-        limit: 10,
+        limit: 5,
         totalRecords: 0
     },
 

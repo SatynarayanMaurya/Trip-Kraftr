@@ -16,11 +16,38 @@ const PINK = '#ED5F8D';
 const BLUE = '#18305C';
 const GREEN = '#4CAF50';
 
-// ─── status config ────────────────────────────────────────────────────────────
+
 const STATUS_CONFIG = {
-    confirmed: { label: 'Trip Confirmed', color: GREEN, bg: '#E8F5E9', border: '#A5D6A7' },
-    planning: { label: 'Planning', color: '#FF9800', bg: '#FFF3E0', border: '#FFCC80' },
-    created: { label: 'Created', color: PINK, bg: '#FFDDE6', border: '#F48FB1' },
+    new: {
+        label: 'New',
+        color: '#9C27B0',        // Purple (initial state)
+        bg: '#F3E5F5',
+        border: '#CE93D8'
+    },
+    planning: {
+        label: 'Planning',
+        color: '#FF9800',        // Orange (preparation)
+        bg: '#FFF3E0',
+        border: '#FFCC80'
+    },
+    confirmed: {
+        label: 'Confirmed',
+        color: '#4CAF50',        // Green (approved)
+        bg: '#E8F5E9',
+        border: '#A5D6A7'
+    },
+    completed: {
+        label: 'Completed',
+        color: '#2E7D32',        // Dark green (finished)
+        bg: '#E8F5E9',
+        border: '#81C784'
+    },
+    cancelled: {
+        label: 'Cancelled',
+        color: '#F44336',        // Red (terminated)
+        bg: '#FFEBEE',
+        border: '#EF9A9A'
+    },
 };
 
 const formatDate = (iso) => {
@@ -45,9 +72,10 @@ function Skeleton({ w = '100%', h = '16px', radius = '6px' }) {
     );
 }
 
+
 // ─── Main component ───────────────────────────────────────────────────────────
 function ViewGroupTrip() {
-    const { getGroupTripById } = useGroupTripHooks();
+    const { getGroupTripById, updateGroupTripStatusById } = useGroupTripHooks();
     const { groupTripId } = useParams();
     const navigate = useNavigate();
 
@@ -59,6 +87,7 @@ function ViewGroupTrip() {
     const [activeTab, setActiveTab] = useState(0);
     const [showStatusDrop, setShowStatusDrop] = useState(false);
     const [isFinancialPopup, setIsFinancialPopup] = useState(false)
+
 
     const fetchGroupTrip = async () => {
         try {
@@ -80,7 +109,7 @@ function ViewGroupTrip() {
     useEffect(() => { fetchGroupTrip(); }, []);
 
     // ── derived ───────────────────────────────────────────────────────────────
-    const status = groupTripDetails?.status?.toLowerCase() ?? 'created';
+    const status = groupTripDetails?.status ?? 'new';
     const statusCfg = STATUS_CONFIG[status] ?? STATUS_CONFIG.created;
 
     const fromDate = formatDate(groupTripDetails?.regionDetails?.fromDate);
@@ -93,6 +122,28 @@ function ViewGroupTrip() {
         background: GREEN, color: 'white', border: 'none', cursor: 'pointer',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
     };
+
+    const updateStatus = async(key)=>{
+        try{
+            setFetchLoading(true)
+            const response = await updateGroupTripStatusById(key,groupTripId)
+            toast.success(response?.data?.message)
+            setShowStatusDrop(false)
+        }
+        catch(error){
+          if (!isProduction) {
+            console.log("========= ERROR DEBUG START =========");
+            console.log("Error:", error);
+            console.log("Response:", error?.response);
+            console.log("========= ERROR DEBUG END =========");
+          }
+          toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin")
+        }
+        finally{
+            setFetchLoading(false)
+        }
+    }
+
 
     return (
         <div style={{ padding: '24px 28px', background: '#f5f6fa', minHeight: '100vh' }}>
@@ -147,7 +198,8 @@ function ViewGroupTrip() {
                                 {Object.entries(STATUS_CONFIG).map(([key, cfg]) => (
                                     <button
                                         key={key}
-                                        onClick={() => { setShowStatusDrop(false); /* call update status */ }}
+                                        value={groupTripDetails?.status}
+                                        onClick={() => updateStatus(key)}
                                         style={{
                                             display: 'block', width: '100%', textAlign: 'left',
                                             padding: '10px 16px', border: 'none',

@@ -794,7 +794,7 @@ function RoomRates() {
 
         <button
           onClick={() => setIsAddRoomRate(true)}
-          className="inline-flex items-center gap-2 self-start rounded-xl bg-[#ED5F8D] px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-pink-600"
+          className="inline-flex items-center gap-2 self-start rounded-xl bg-[#ED5F8D] px-5 py-3 text-sm font-semibold text-white shadow-md transition"
         >
           <Plus size={18} />
           Add
@@ -824,7 +824,7 @@ function RoomRates() {
 
             <button
               onClick={() => setIsAddRoomRate(true)}
-              className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#ED5F8D] px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-pink-600"
+              className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#ED5F8D] px-5 py-3 text-sm font-semibold text-white shadow-md transition "
             >
               <Plus size={18} />
               Add Room Rate

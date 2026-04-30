@@ -142,7 +142,6 @@ export const getGroupTripById = async (req, res) => {
     }
 };
 
-
 export const updateGroupTripSummaryById = async (req, res) => {
     try {
         const { _id, netProfit, totalHotelCost, totalOtherCost, totalVehicleCost } = req.body;

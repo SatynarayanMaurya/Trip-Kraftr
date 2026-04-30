@@ -209,7 +209,8 @@ export const getPlacesBySubRegionIds = async (req, res) => {
         })
         .sort({ createdAt: -1 })
         .lean()
-        .select("_id regionId subRegionId placeName")
+        .select("_id regionId subRegionId placeName notes imageUrl")
+        .populate({path:"subRegionId",select:"_id name"})
   
       return res.status(200).json({
         success: true,

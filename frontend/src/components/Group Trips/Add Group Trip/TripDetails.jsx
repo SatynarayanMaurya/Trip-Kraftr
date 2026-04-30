@@ -1,6 +1,7 @@
 import React from 'react';
 import { inputStyle, labelStyle, cardStyle } from '../../Common/CommonCss';
 import { Save } from 'lucide-react';
+import { BlueButton } from '../Buttons';
 const PINK = '#ED5F8D';
 const BLUE = '#18305C';
 
@@ -219,6 +220,9 @@ function TripDetails({
 
             {/* ── Vehicle Selection Card ── */}
             <div style={cardStyle}>
+                <div className='flex justify-center'>
+                <BlueButton text={"Vehicle"}/>
+                </div>
                 <div style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',

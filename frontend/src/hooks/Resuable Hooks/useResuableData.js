@@ -8,6 +8,7 @@ import { useHotelHooks } from "../useHotelHooks";
 import { useRoomHooks } from "../useRoomHooks";
 import { usePlaceHooks } from "../usePlaceHooks";
 import { useActivityHooks } from "../useActivityHooks";
+import { useGroupTripHooks } from "../useGroupTripHooks";
 
 export const useRegionsData = () => {
   const { getRegionsForOrg } = useRegionHooks();
@@ -256,6 +257,54 @@ export const useRoomTypesData = ({ hotelId,enabled, skip = false,
       fetchData();
     }
   }, [enabled,  JSON.stringify(hotelId), skip]);
+
+  return {
+    loading,
+    refetch: fetchData, // optional but useful
+  };
+};
+
+export const useSuggestionGroupTripsData = ({region1,region2,region3, noOfDays,enabled, skip = false,
+}) => {
+
+  const {suggestionGroupTrips} = useGroupTripHooks()
+
+  const isProduction = useSelector((state) => state.user.isProduction);
+  const alreadySuggestionGroupTrip = useSelector(s=>s.groupTrip.suggestionGroupTripsSlice?.[`${region1},${region2},${region3},${noOfDays}`])
+  const [loading, setLoading] = useState(false);
+
+  const fetchData = async () => {
+    try {
+      if (!region1 || !noOfDays ) return;
+      if(alreadySuggestionGroupTrip) return ;
+      setLoading(true);
+
+      await suggestionGroupTrips(region1,region2,region3, noOfDays);
+
+    } catch (error) {
+      if (!isProduction) {
+        console.log("========= ERROR DEBUG START =========");
+        console.log("Error:", error);
+        console.log("Response:", error?.response);
+        console.log("========= ERROR DEBUG END =========");
+      }
+
+      toast.error(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Error fetching Suggestion group trip"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!enabled) return;
+    if (!skip) {
+      fetchData();
+    }
+  }, [enabled, region1,region2,region3, noOfDays, skip]);
 
   return {
     loading,

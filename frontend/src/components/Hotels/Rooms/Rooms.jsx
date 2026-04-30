@@ -42,6 +42,7 @@ function Rooms() {
     const [editingRoomId, setEditingRoomId] = useState(null)
     const [editingRoomData, setEditingRoomData] = useState({
         roomName: "",
+        quantity: "",
         capacity: "",
         adult: "",
         children: "",
@@ -111,6 +112,7 @@ function Rooms() {
         setEditingRoomId(room._id)
         setEditingRoomData({
             roomName: room.roomName || "",
+            quantity: room.quantity?.toString() || "",
             capacity: room.capacity?.toString() || "",
             adult: room.adult?.toString() || "",
             children: room.children?.toString() || "",
@@ -121,6 +123,7 @@ function Rooms() {
         setEditingRoomId(null)
         setEditingRoomData({
             roomName: "",
+            quantity: "",
             capacity: "",
             adult: "",
             children: "",
@@ -128,7 +131,7 @@ function Rooms() {
     }
 
     const handleEditChange = (field, value) => {
-        if (["capacity", "adult", "children"].includes(field)) {
+        if (["capacity", "adult", "children",'quantity'].includes(field)) {
             if (value !== "" && !/^\d+$/.test(value)) return
         }
 
@@ -144,9 +147,11 @@ function Rooms() {
             const capacity = Number(editingRoomData.capacity)
             const adult = Number(editingRoomData.adult)
             const children = Number(editingRoomData.children)
+            const quantity = Number(editingRoomData.quantity)
 
             if (
                 !roomName ||
+                editingRoomData.quantity === "" ||
                 editingRoomData.capacity === "" ||
                 editingRoomData.adult === "" ||
                 editingRoomData.children === ""
@@ -170,6 +175,7 @@ function Rooms() {
                 roomId,
                 roomName,
                 capacity,
+                quantity,
                 adult,
                 children,
             }
@@ -249,7 +255,7 @@ function Rooms() {
 
                 <button
                     onClick={() => setIsAddRoom(true)}
-                    className="inline-flex items-center gap-2 self-start rounded-xl bg-pink-500 px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-pink-600"
+                    className="inline-flex items-center gap-2 self-start rounded-xl bg-[#ED5F8D] px-5 py-3 text-sm font-semibold text-white shadow-md transition"
                 >
                     <Plus size={18} />
                     Add Rooms
@@ -274,6 +280,7 @@ function Rooms() {
                                 <div className="h-4 rounded bg-gray-200"></div>
                                 <div className="h-4 rounded bg-gray-200"></div>
                                 <div className="h-4 rounded bg-gray-200"></div>
+                                <div className="h-4 rounded bg-gray-200"></div>
                             </div>
 
                             {/* rows skeleton */}
@@ -282,6 +289,7 @@ function Rooms() {
                                     key={item}
                                     className="mb-3 grid grid-cols-5 gap-4 rounded-xl border border-gray-100 p-4"
                                 >
+                                    <div className="h-4 rounded bg-gray-200"></div>
                                     <div className="h-4 rounded bg-gray-200"></div>
                                     <div className="h-4 rounded bg-gray-200"></div>
                                     <div className="h-4 rounded bg-gray-200"></div>
@@ -307,7 +315,7 @@ function Rooms() {
 
                         <button
                             onClick={() => setIsAddRoom(true)}
-                            className="mt-5 inline-flex items-center gap-2 rounded-xl bg-pink-500 px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-pink-600"
+                            className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#ED5F8D] px-5 py-3 text-sm font-semibold text-white shadow-md transition "
                         >
                             <Plus size={18} />
                             Add First Room
@@ -320,6 +328,7 @@ function Rooms() {
                             <thead className="bg-[#f2f2f5]">
                                 <tr className="text-left text-sm font-bold text-[#1d3561]">
                                     <th className="px-5 py-4">Room Name</th>
+                                    <th className="px-5 py-4">Quantity</th>
                                     <th className="px-5 py-4">Capacity</th>
                                     <th className="px-5 py-4">Adult</th>
                                     <th className="px-5 py-4">Child</th>
@@ -353,6 +362,23 @@ function Rooms() {
                                                     />
                                                 ) : (
                                                     room.roomName
+                                                )}
+                                            </td>
+
+                                            {/* Capacity */}
+                                            <td className="px-5 py-4">
+                                                {isEditing ? (
+                                                    <input
+                                                        type="text"
+                                                        value={editingRoomData.quantity}
+                                                        onChange={(e) =>
+                                                            handleEditChange("quantity", e.target.value)
+                                                        }
+                                                        className={inputClass}
+                                                        placeholder="Quantity"
+                                                    />
+                                                ) : (
+                                                    room.quantity || 1
                                                 )}
                                             </td>
 
@@ -420,7 +446,7 @@ function Rooms() {
                                                         <>
                                                             <button
                                                                 onClick={() => handleSaveEdit(room._id)}
-                                                                className="inline-flex items-center gap-1 rounded-lg bg-pink-500 px-3 py-2 text-xs font-semibold text-white transition hover:bg-pink-600"
+                                                                className="inline-flex items-center gap-1 rounded-lg bg-[#ED5F8D] px-3 py-2 text-xs font-semibold text-white transition "
                                                                 title="Save Room"
                                                             >
                                                                 <Save size={14} />
@@ -473,11 +499,11 @@ function Rooms() {
             {!fetchLoading && allRooms?.length > 0 && (
                 <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
                     <button
-                        onClick={() => navigate(`manage-rates`, { state: { rooms: allRooms, hotel: hotelDetails } })} className="rounded-xl bg-pink-500 px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-pink-600">
+                        onClick={() => navigate(`manage-rates`, { state: { rooms: allRooms, hotel: hotelDetails } })} className="rounded-xl bg-[#ED5F8D] px-5 py-3 text-sm font-semibold text-white shadow-md transition ">
                         Manage Rates
                     </button>
 
-                    <button className="rounded-xl bg-pink-500 px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-pink-600">
+                    <button className="rounded-xl bg-[#ED5F8D] px-5 py-3 text-sm font-semibold text-white shadow-md transition ">
                         Save
                     </button>
                 </div>

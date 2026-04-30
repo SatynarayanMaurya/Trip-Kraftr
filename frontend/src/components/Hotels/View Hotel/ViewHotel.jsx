@@ -8,6 +8,7 @@ import {
   Wifi, Wind, Tv, Clock, UtensilsCrossed,
   BedDouble, CheckSquare, Image as ImageIcon,
 } from 'lucide-react'
+const PINK = '#ED5F8D';
 
 
 
@@ -198,8 +199,6 @@ export default function ViewHotel() {
 
       {/* ── Details card ──────────────────────────────────────────────── */}
       <div
-        // className="bg-white rounded-2xl p-5 md:p-6 mb-8"
-        // style={{ boxShadow: '0 2px 16px rgba(0,0,0,0.09)' }}
         className="bg-white rounded-2xl p-5 md:p-6 mb-8"
         style={{ 
           boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)' 
@@ -282,7 +281,7 @@ export default function ViewHotel() {
       <div className="flex justify-end">
         <button
           onClick={() => navigate("manage-rooms", { state: { hotel:hotelDetails } })}
-          className="flex items-center gap-2 px-6 py-3 bg-[#E91E8C] hover:bg-pink-600 text-white text-sm font-bold rounded-xl transition-colors"
+          className="flex items-center gap-2 px-6 py-3 bg-[#ED5F8D]  text-white text-sm font-bold rounded-xl transition-colors"
           style={{ boxShadow: '0 4px 14px rgba(233,30,140,0.35)' }}
         >
           <BedDouble size={17} />

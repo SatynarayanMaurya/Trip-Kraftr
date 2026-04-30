@@ -119,7 +119,10 @@ export const useHotelHooks = () => {
         `${hotelEndpoinsts.UPDATE_HOTEL_BY_ID}/${hotelId}`, hotelDetails, { "Content-Type": "multipart/form-data" }
       )
 
-      dispatch(updateHotel(response?.data?.updatedHotel))
+      if(response?.data?.success){
+        dispatch(updateHotel(response?.data?.updatedHotel))
+        dispatch(setHotelDetails({hotelId: hotelId, hotel: response?.data?.updatedHotel }))
+      }
       return response
 
     } catch (error) {
