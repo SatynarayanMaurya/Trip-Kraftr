@@ -6,7 +6,7 @@ export const addGroupTrip = async (req, res) => {
         const { itineraryBuilder, regionDetails, tripDetails } = req.body;
 
         const totalGroupTrip = await GroupTrip.countDocuments({ org_id: req.user.org_id })
-        const tripId = `GRP-${totalGroupTrip + 1}`;
+        const tripId = `GRPTRIP-${totalGroupTrip + 1}`;
         const newGroupTrip = await GroupTrip.create({ org_id: req.user.org_id, tripId: tripId, itineraryBuilder, regionDetails, tripDetails })
         const newGroupTripSummary = await GroupTripSummary.create({ org_id: req.user.org_id, groupTripId: newGroupTrip?._id, bookingSummary: { confirmedBookings: 0, availableSeats: tripDetails?.totalSeats, totalSeats: tripDetails?.totalSeats } })
         await newGroupTrip.populate([

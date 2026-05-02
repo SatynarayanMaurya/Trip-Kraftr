@@ -1,4 +1,21 @@
+import { toast } from "react-toastify";
+
+const handleSaveVehicle = (formData) => {
+    const { assignedTo, totalSeats, minSeats, selectedVehicleId } = formData.tripDetails;
+    if (!assignedTo || !totalSeats || !minSeats || !selectedVehicleId) {
+        return false;
+    }
+    return true
+};
+
+
+
 export const validateItinerary = (formData) => {
+    // const tripDetails = formData?.tripDetails;
+    const isTripDetailsValid = handleSaveVehicle(formData)
+    console.log(" isTripDetailsValid",isTripDetailsValid)
+    if(!isTripDetailsValid) return { isValid: false, message: 'Trip Details Missing' };
+    
     const day1 = formData.itineraryBuilder?.daysDetails?.[0];
 
     if (!day1) {

@@ -11,6 +11,7 @@ import SkeletonOverview from './SkeletonOverview';
 import Participants from './Participants';
 import ViewItineraryBuilder from './ViewItineraryBuilder';
 import FinancialCloseup from './FinancialCloseup';
+import GroupTripPolicies from '../Add Group Trip/GroupTripPolicies';
 
 const PINK = '#ED5F8D';
 const BLUE = '#18305C';
@@ -58,7 +59,7 @@ const formatDate = (iso) => {
 
 
 // ─── Tab definitions ──────────────────────────────────────────────────────────
-const TABS = ['Overview', 'Itinerary Details', 'Participants'];
+const TABS = ['Overview', 'Itinerary Details', 'Participants', 'Policies'];
 
 // ─── Skeleton loader ──────────────────────────────────────────────────────────
 function Skeleton({ w = '100%', h = '16px', radius = '6px' }) {
@@ -72,6 +73,9 @@ function Skeleton({ w = '100%', h = '16px', radius = '6px' }) {
     );
 }
 
+const NON_EDITABLE_STATUS = ['completed', 'confirmed']
+
+
 
 // ─── Main component ───────────────────────────────────────────────────────────
 function ViewGroupTrip() {
@@ -82,7 +86,7 @@ function ViewGroupTrip() {
     const isProduction = useSelector(s => s.user.isProduction);
     const groupTripDetails = useSelector(s => s.groupTrip.groupTripById?.[groupTripId]);
     const groupTripSummary = useSelector(s => s.groupTrip.groupTripSummaryById?.[groupTripId]);
-
+    const isEditable = !NON_EDITABLE_STATUS?.includes(groupTripDetails?.status)
     const [fetchLoading, setFetchLoading] = useState(false);
     const [activeTab, setActiveTab] = useState(0);
     const [showStatusDrop, setShowStatusDrop] = useState(false);
@@ -110,7 +114,7 @@ function ViewGroupTrip() {
 
     // ── derived ───────────────────────────────────────────────────────────────
     const status = groupTripDetails?.status ?? 'new';
-    const statusCfg = STATUS_CONFIG[status] ?? STATUS_CONFIG.created;
+    const statusCfg = STATUS_CONFIG[status] ?? STATUS_CONFIG.new;
 
     const fromDate = formatDate(groupTripDetails?.regionDetails?.fromDate);
     const toDate = formatDate(groupTripDetails?.regionDetails?.toDate);
@@ -123,23 +127,23 @@ function ViewGroupTrip() {
         display: 'flex', alignItems: 'center', justifyContent: 'center',
     };
 
-    const updateStatus = async(key)=>{
-        try{
+    const updateStatus = async (key) => {
+        try {
             setFetchLoading(true)
-            const response = await updateGroupTripStatusById(key,groupTripId)
+            const response = await updateGroupTripStatusById(key, groupTripId)
             toast.success(response?.data?.message)
             setShowStatusDrop(false)
         }
-        catch(error){
-          if (!isProduction) {
-            console.log("========= ERROR DEBUG START =========");
-            console.log("Error:", error);
-            console.log("Response:", error?.response);
-            console.log("========= ERROR DEBUG END =========");
-          }
-          toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin")
+        catch (error) {
+            if (!isProduction) {
+                console.log("========= ERROR DEBUG START =========");
+                console.log("Error:", error);
+                console.log("Response:", error?.response);
+                console.log("========= ERROR DEBUG END =========");
+            }
+            toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin")
         }
-        finally{
+        finally {
             setFetchLoading(false)
         }
     }
@@ -180,9 +184,9 @@ function ViewGroupTrip() {
                             onClick={() => setShowStatusDrop(p => !p)}
                             style={{
                                 display: 'flex', alignItems: 'center', gap: '8px',
-                                background: 'white', border: `1.5px solid ${statusCfg.border}`,
+                                background: 'white', border: `1.5px solid ${statusCfg?.border||'red'}`,
                                 borderRadius: '8px', padding: '8px 16px',
-                                fontSize: '13px', fontWeight: '600', color: statusCfg.color,
+                                fontSize: '13px', fontWeight: '600', color: (statusCfg.color||'red'),
                                 cursor: 'pointer',
                             }}
                         >
@@ -228,13 +232,43 @@ function ViewGroupTrip() {
                     </button>
 
                     {/* Edit Trip */}
+                    {/* {
+                        isEditable &&
+                        <button
+                            onClick={() => navigate(`/group-trips/edit/${groupTripId}`)}
+                            style={{
+                                display: 'flex', alignItems: 'center', gap: '8px',
+                                background: GREEN, color: 'white', border: 'none',
+                                borderRadius: '8px', padding: '9px 18px',
+                                fontSize: '13px', fontWeight: '600', cursor: 'pointer',
+                            }}
+                        >
+                            <EditIcon /> Edit Trip
+                        </button>
+                    } */}
                     <button
-                        onClick={() => navigate(`/group-trips/edit/${groupTripId}`)}
+                        onClick={() => {
+                            if (isEditable) {
+                                navigate(`/group-trips/edit/${groupTripId}`);
+                            } else {
+                                alert("This trip cannot be edited in its current status.");
+                            }
+                        }}
+                        // disabled={!isEditable}
+                        title={!isEditable ? "This trip cannot be edited in its current status." : ""}
                         style={{
-                            display: 'flex', alignItems: 'center', gap: '8px',
-                            background: GREEN, color: 'white', border: 'none',
-                            borderRadius: '8px', padding: '9px 18px',
-                            fontSize: '13px', fontWeight: '600', cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            background: isEditable ? GREEN : '#ccc',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '8px',
+                            padding: '9px 18px',
+                            fontSize: '13px',
+                            fontWeight: '600',
+                            cursor: isEditable ? 'pointer' : 'not-allowed',
+                            opacity: isEditable ? 1 : 0.7,
                         }}
                     >
                         <EditIcon /> Edit Trip
@@ -273,7 +307,7 @@ function ViewGroupTrip() {
                     : <ViewGroupTripOverview
                         groupTripDetails={groupTripDetails}
                         groupTripSummary={groupTripSummary}
-                        setIsFinancialPopup={()=>setIsFinancialPopup(true)}
+                        setIsFinancialPopup={() => setIsFinancialPopup(true)}
                     />
             )}
             {activeTab === 1 && (
@@ -286,6 +320,11 @@ function ViewGroupTrip() {
             {activeTab === 2 && (
                 <Participants />
             )}
+
+            {activeTab === 3 && (
+                <GroupTripPolicies regionId={groupTripDetails?.regionDetails?.region1?._id} regionName={groupTripDetails?.regionDetails?.region1?.name} />
+            )}
+
 
             {/* Click outside status dropdown */}
             {showStatusDrop && (
@@ -303,7 +342,7 @@ function ViewGroupTrip() {
             {/* Add financial  */}
             {
                 isFinancialPopup &&
-                <FinancialCloseup groupTripSummary={groupTripSummary} isOpen={isFinancialPopup} onClose={()=>setIsFinancialPopup(false)}/>
+                <FinancialCloseup groupTripSummary={groupTripSummary} isOpen={isFinancialPopup} onClose={() => setIsFinancialPopup(false)} />
             }
         </div>
     );

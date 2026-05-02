@@ -13,6 +13,8 @@ import RegionDetails from '../Add Group Trip/RegionDetails';
 import TripDetails from '../Add Group Trip/TripDetails';
 import { useGroupTripHooks } from '../../../hooks/useGroupTripHooks';
 import { ensureFavouritePlaces, validateItinerary } from '../Add Group Trip/ValidateItinerary';
+import GroupTripPolicies from '../Add Group Trip/GroupTripPolicies';
+import StepperTab from './StepperTab';
 
 
 
@@ -154,12 +156,12 @@ function EditGroupTrip() {
                     subRegion2: day?.subRegion2?._id || null,
                     subRegion3: day?.subRegion3?._id || null,
                     hotelDetails: {
-                        hotelId: day?.hotelDetails?.hotelId?._id || day?.hotelDetails?.hotelId||null,
+                        hotelId: day?.hotelDetails?.hotelId?._id || day?.hotelDetails?.hotelId || null,
                         hotelType: day?.hotelDetails?.hotelType || 'inventory',
-                        hotelName: day?.hotelDetails?.hotelName ||'',
-                        roomTypeId: day?.hotelDetails?.roomTypeId?._id || day?.hotelDetails?.roomTypeId||null,
-                        roomType: day?.hotelDetails?.roomType||'',
-                        meals: day?.hotelDetails?.meals||'',
+                        hotelName: day?.hotelDetails?.hotelName || '',
+                        roomTypeId: day?.hotelDetails?.roomTypeId?._id || day?.hotelDetails?.roomTypeId || null,
+                        roomType: day?.hotelDetails?.roomType || '',
+                        meals: day?.hotelDetails?.meals || '',
                     },
 
                     // ✅ normalize places
@@ -293,10 +295,10 @@ function EditGroupTrip() {
         });
     };
 
-    const handleSaveRegion = () => {
+    const handleSaveRegion = (isSave=true) => {
         if (!region1 || !fromDate || !toDate) {
             toast.error('Please fill all Basic Details');
-            return;
+            return false;
         }
 
         const from = new Date(fromDate);
@@ -304,10 +306,28 @@ function EditGroupTrip() {
 
         if (to < from) {
             toast.error('To date cannot be earlier than From date');
-            return;
+            return false;
         }
+        if(isSave){
+            setActiveTab(2);
+        }
+        else{
+            return true;
+        } 
+        // if (!region1 || !fromDate || !toDate) {
+        //     toast.error('Please fill all Basic Details');
+        //     return;
+        // }
 
-        setActiveTab(2);
+        // const from = new Date(fromDate);
+        // const to = new Date(toDate);
+
+        // if (to < from) {
+        //     toast.error('To date cannot be earlier than From date');
+        //     return;
+        // }
+
+        // setActiveTab(2);
     };
 
     const handleSaveVehicle = () => {
@@ -371,17 +391,28 @@ function EditGroupTrip() {
         }
     };
 
-    const tabs = ['Basic Details', 'Trip Details', 'Itinerary Builder'];
+    const tabs = ['Basic Details', 'Trip Details', 'Itinerary Builder', "Policies"];
 
     const tabClick = (i) => {
-        if (i === 1) {
-            handleSaveRegion()
+        // if (i === 1) {
+        //     handleSaveRegion()
+        // }
+        // else if (i === 2) {
+        //     handleSaveVehicle()
+        // }
+        // else {
+        //     setActiveTab(i + 1)
+        // }
+        if(i===1){
+            setActiveTab(i)
+            return;
         }
-        else if (i === 2) {
-            handleSaveVehicle()
+        const isValidJump = handleSaveRegion(false)
+        if(isValidJump && i!==1){
+            setActiveTab(i)
         }
-        else {
-            setActiveTab(i + 1)
+        else{
+            setActiveTab(1)
         }
     }
 
@@ -395,29 +426,13 @@ function EditGroupTrip() {
                 <ArrowLeft size={15} />
                 Back to List
             </button>
-            <p style={{ fontSize: '13px', color: '#666', margin: 0 }}>Step {activeTab} of 3: {tabs[activeTab - 1]}</p>
+            <p style={{ fontSize: '13px', color: '#666', margin: 0 }}>Step {activeTab} of 4: {tabs[activeTab - 1]}</p>
 
-
-            {/* Tab Bar */}
-            <div style={{ display: 'flex', background: '#EEF0F5', borderRadius: '10px', padding: '4px', marginTop: '1rem', marginBottom: '8px' }}>
-                {tabs.map((label, i) => (
-                    <button
-                        key={i}
-                        onClick={() => tabClick(i)}
-                        style={{
-                            flex: 1, padding: '10px 16px', textAlign: 'center',
-                            fontSize: '14px', fontWeight: activeTab === i + 1 ? '600' : '400',
-                            cursor: 'pointer',
-                            background: activeTab === i + 1 ? PINK : 'transparent',
-                            border: 'none',
-                            color: activeTab === i + 1 ? 'white' : '#666',
-                            borderRadius: '8px', transition: 'all 0.2s ease',
-                        }}
-                    >
-                        {label}
-                    </button>
-                ))}
-            </div>
+            <StepperTab
+                steps={tabs}
+                activeStep={activeTab}
+                onStepClick={tabClick}
+            />
 
             {activeTab === 1 && (
                 <RegionDetails
@@ -462,6 +477,10 @@ function EditGroupTrip() {
                     handleSave={handleSaveItinerary}
                     submitLoading={submitLoading}
                 />
+            )}
+
+            {activeTab === 4 && (
+                <GroupTripPolicies regionId={region1} regionName={regions?.find(r => r?._id === region1)?.name} />
             )}
         </div>
     );

@@ -92,6 +92,7 @@ export const getGroupTripById = async (req, res) => {
             select: "_id name" // choose fields you need
           }
         })
+        .populate({ path: 'regionDetails.region1', select: "_id name" })
         .populate({ path: 'itineraryBuilder.daysDetails.hotelDetails.hotelId', select: "_id images amenities googleRating category" })
         .populate({ path: 'itineraryBuilder.daysDetails.hotelDetails.roomTypeId', select: "_id roomName quantity" })
         .populate({ path: 'itineraryBuilder.daysDetails.subRegion1', select: "_id name" })
@@ -150,7 +151,7 @@ export const suggestionGroupTrip = async (req, res) => {
 
       "regionDetails.region3": isValidObjectId(region3) ? new mongoose.Types.ObjectId(region3) : null,
       "regionDetails.noOfDays": Number(noOfDays),
-
+      status: { $in: ["completed", "confirmed"] },
     };
 
 
@@ -174,10 +175,8 @@ export const suggestionGroupTrip = async (req, res) => {
               branches: [
                 { case: { $eq: ["$status", "completed"] }, then: 1 },
                 { case: { $eq: ["$status", "confirmed"] }, then: 2 },
-                { case: { $eq: ["$status", "inProgress"] }, then: 3 },
-                { case: { $eq: ["$status", "created"] }, then: 4 },
               ],
-              default: 5,
+              default: 3,
             },
           },
         },

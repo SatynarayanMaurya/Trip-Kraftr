@@ -18,63 +18,6 @@ const policyModelMap = {
 };
 
 
-// export const addPolicy = async (req, res) => {
-//     try {
-//         const { regionId, policies, policyCategory } = req.body;
-
-//         // ✅ Validate required fields
-//         if (!regionId || !policies || !policyCategory) {
-//             return res.status(400).json({
-//                 success: false,
-//                 message: "Required fields are missing",
-//             });
-//         }
-
-//         // ✅ Get model dynamically
-//         const Model = policyModelMap[policyCategory];
-
-//         if (!Model) {
-//             return res.status(400).json({
-//                 success: false,
-//                 message: "Invalid policy category",
-//             });
-//         }
-
-//         // ✅ Check existing policy
-//         const existingPolicy = await Model.findOne({
-//             org_id: req.user.org_id,
-//             regionId,
-//         });
-
-//         if (existingPolicy) {
-//             return res.status(409).json({
-//                 success: false,
-//                 message: `${policyCategory} policy already exists for this region`,
-//             });
-//         }
-
-//         // ✅ Create policy
-//         const newPolicy = await Model.create({
-//             org_id: req.user.org_id,
-//             regionId,
-//             policies,
-//             policyCategory, // optional if already implied in model
-//         });
-
-//         return res.status(201).json({
-//             success: true,
-//             message: `${policyCategory} policy created successfully`,
-//             data: newPolicy,
-//         });
-
-//     } catch (error) {
-//         return res.status(500).json({
-//             success: false,
-//             message: error?.message || "Internal Server Error",
-//         });
-//     }
-// };
-
 export const addPolicy = async (req, res) => {
     try {
         const { regionId, policies, policyCategory } = req.body;
@@ -135,6 +78,7 @@ export const addPolicy = async (req, res) => {
         });
     }
 };
+
 export const getPolicy = async (req, res) => {
     try {
         const { regionId, policyCategory } = req.query;
