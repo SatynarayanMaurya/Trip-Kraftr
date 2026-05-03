@@ -46,6 +46,8 @@ function Rooms() {
         capacity: "",
         adult: "",
         children: "",
+        extraMattress: "",
+        imageLink: "",
     })
 
     const fetchHotelDetails = async () => {
@@ -116,6 +118,8 @@ function Rooms() {
             capacity: room.capacity?.toString() || "",
             adult: room.adult?.toString() || "",
             children: room.children?.toString() || "",
+            extraMattress: room.extraMattress || "",
+            imageLink: room.imageLink || "",
         })
     }
 
@@ -127,11 +131,13 @@ function Rooms() {
             capacity: "",
             adult: "",
             children: "",
+            extraMattress: "",
+            imageLink: "",
         })
     }
 
     const handleEditChange = (field, value) => {
-        if (["capacity", "adult", "children",'quantity'].includes(field)) {
+        if (["capacity", "adult", "children", 'quantity','extraMattress'].includes(field)) {
             if (value !== "" && !/^\d+$/.test(value)) return
         }
 
@@ -144,17 +150,20 @@ function Rooms() {
     const handleSaveEdit = async (roomId) => {
         try {
             const roomName = editingRoomData.roomName.trim()
+            const imageLink = editingRoomData.imageLink.trim()
             const capacity = Number(editingRoomData.capacity)
             const adult = Number(editingRoomData.adult)
             const children = Number(editingRoomData.children)
             const quantity = Number(editingRoomData.quantity)
+            const extraMattress = Number(editingRoomData.extraMattress)
 
             if (
                 !roomName ||
                 editingRoomData.quantity === "" ||
                 editingRoomData.capacity === "" ||
                 editingRoomData.adult === "" ||
-                editingRoomData.children === ""
+                editingRoomData.children === "" ||
+                editingRoomData.extraMattress === "" 
             ) {
                 toast.error("All fields are required")
                 return
@@ -178,6 +187,8 @@ function Rooms() {
                 quantity,
                 adult,
                 children,
+                extraMattress,
+                imageLink
             }
 
             // console.log("Updated Room Data:", updatedRoom)
@@ -191,6 +202,8 @@ function Rooms() {
                 capacity: "",
                 adult: "",
                 children: "",
+                extraMattress: "",
+                imageLink: "",
             })
         }
         catch (error) {
@@ -281,6 +294,8 @@ function Rooms() {
                                 <div className="h-4 rounded bg-gray-200"></div>
                                 <div className="h-4 rounded bg-gray-200"></div>
                                 <div className="h-4 rounded bg-gray-200"></div>
+                                <div className="h-4 rounded bg-gray-200"></div>
+                                <div className="h-4 rounded bg-gray-200"></div>
                             </div>
 
                             {/* rows skeleton */}
@@ -332,6 +347,8 @@ function Rooms() {
                                     <th className="px-5 py-4">Capacity</th>
                                     <th className="px-5 py-4">Adult</th>
                                     <th className="px-5 py-4">Child</th>
+                                    <th className="px-5 py-4">Mattress</th>
+                                    <th className="px-5 py-4">Link</th>
                                     <th className="px-5 py-4 text-center">Action</th>
                                 </tr>
                             </thead>
@@ -439,6 +456,40 @@ function Rooms() {
                                                 )}
                                             </td>
 
+                                            {/* Extra Mattress */}
+                                            <td className="px-5 py-4">
+                                                {isEditing ? (
+                                                    <input
+                                                        type="text"
+                                                        value={editingRoomData.extraMattress}
+                                                        onChange={(e) =>
+                                                            handleEditChange("extraMattress", e.target.value)
+                                                        }
+                                                        className={inputClass}
+                                                        placeholder="Extra Mattress"
+                                                    />
+                                                ) : (
+                                                    room.extraMattress||1
+                                                )}
+                                            </td>
+
+                                            {/* Image Link */}
+                                            <td className="px-5 py-4 italic">
+                                                {isEditing ? (
+                                                    <input
+                                                        type="text"
+                                                        value={editingRoomData.imageLink||''}
+                                                        onChange={(e) =>
+                                                            handleEditChange("imageLink", e.target.value)
+                                                        }
+                                                        className={inputClass}
+                                                        placeholder="Image Link"
+                                                    />
+                                                ) : (
+                                                    <a href={room.imageLink} target="_blank">{`${room.imageLink?.slice(0,10)}...`||''}</a>
+                                                )}
+                                            </td>
+
                                             {/* Actions */}
                                             <td className="px-5 py-4">
                                                 <div className="flex items-center justify-center gap-3">
@@ -520,7 +571,7 @@ function Rooms() {
             {/* Delete Room Popup */}
             {isDeletingModal && (
                 <DeleteModal
-                    onClose={()=>setIsDeletingModal(false)} onDelete={()=>deleteRoom()}  itemName = {deletingRoomDetails?.roomName} confirmText = {deletingRoomDetails?.roomName}
+                    onClose={() => setIsDeletingModal(false)} onDelete={() => deleteRoom()} itemName={deletingRoomDetails?.roomName} confirmText={deletingRoomDetails?.roomName}
                 />
             )}
         </div>

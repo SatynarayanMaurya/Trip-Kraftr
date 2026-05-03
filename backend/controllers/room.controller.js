@@ -5,7 +5,7 @@ import RoomRate from "../models/roomRate.model.js"
 
 export const addRoom = async (req, res) => {
     try {
-        const { hotelId, roomName, capacity, adult, children,quantity } = req.body;
+        const { hotelId, roomName, capacity, adult, children,quantity,extraMattress,imageLink } = req.body;
 
         // ✅ Validate hotelId existence
         if (!hotelId) {
@@ -36,6 +36,7 @@ export const addRoom = async (req, res) => {
         const ad = Number(adult);
         const child = Number(children);
         const qty = Number(quantity);
+        const extraMat = Number(extraMattress);
 
         // ✅ Validate numeric fields
         if ([cap, ad, child].some(val => isNaN(val))) {
@@ -61,17 +62,6 @@ export const addRoom = async (req, res) => {
             });
         }
 
-        // ✅ Create room
-        // const newRoom = await Room.create({
-        //     org_id: req.user.org_id,
-        //     hotelId,
-        //     roomName: roomName.trim(),
-        //     roomName_lower: roomName.trim().toLowerCase(),
-        //     capacity: cap,
-        //     adult: ad,
-        //     children: child
-        // })
-
         const result = await Room.create({
             org_id: req.user.org_id,
             hotelId,
@@ -80,7 +70,9 @@ export const addRoom = async (req, res) => {
             capacity: cap,
             adult: ad,
             children: child,
-            quantity:qty
+            quantity:qty,
+            extraMattress:extraMat,
+            imageLink:imageLink||null
         });
 
         const newRoom = {
@@ -89,6 +81,8 @@ export const addRoom = async (req, res) => {
             adult: result.adult,
             children: result.children,
             capacity: result.capacity,
+            extraMattress: result.extraMattress,
+            imageLink: result.imageLink,
             hotelId: result.hotelId
         };
 
@@ -146,7 +140,7 @@ export const getRoomsOfHotels = async (req, res) => {
             })
         }
 
-        const allRooms = await Room.find({ org_id: req.user.org_id, hotelId: hotelId }).select("_id roomName quantity capacity adult children is_active hotelId")
+        const allRooms = await Room.find({ org_id: req.user.org_id, hotelId: hotelId }).select("_id roomName quantity capacity adult children is_active hotelId extraMattress imageLink")
         return res.status(200).json({
             success: true,
             message: "All Rooms are fetched",
@@ -193,7 +187,7 @@ export const getRoomsTypeForHotelId = async (req, res) => {
 
 export const updateRoomById = async (req, res) => {
     try {
-        const { hotelId, roomId, roomName, capacity, adult, children,quantity } = req.body
+        const { hotelId, roomId, roomName, capacity, adult, children,quantity ,extraMattress,imageLink} = req.body
         if (!hotelId) {
             return res.status(400).json({
                 success: false,
@@ -229,6 +223,7 @@ export const updateRoomById = async (req, res) => {
         const ad = Number(adult);
         const child = Number(children);
         const qty = Number(quantity);
+        const extraMat = Number(extraMattress);
 
         // ✅ Validate numeric fields
         if ([cap, ad, child].some(val => isNaN(val))) {
@@ -254,7 +249,7 @@ export const updateRoomById = async (req, res) => {
             });
         }
 
-        const updatedRoom = await Room.findOneAndUpdate({ org_id: req.user.org_id, hotelId: hotelId, _id: roomId }, { $set: { roomName: roomName?.trim(), roomName_lower: roomName?.trim()?.toLowerCase(),quantity:qty, capacity: cap, adult: ad, children: child } }, { new: true }).select("_id roomName quantity capacity adult children hotelId")
+        const updatedRoom = await Room.findOneAndUpdate({ org_id: req.user.org_id, hotelId: hotelId, _id: roomId }, { $set: { roomName: roomName?.trim(), roomName_lower: roomName?.trim()?.toLowerCase(),quantity:qty, capacity: cap,extraMattress:extraMat,imageLink, adult: ad, children: child } }, { new: true }).select("_id roomName quantity capacity adult children hotelId extraMattress imageLink")
 
         if (updatedRoom) {
             return res.status(200).json({

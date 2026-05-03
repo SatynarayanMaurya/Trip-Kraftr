@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { X, BedDouble, Users, User, Baby } from "lucide-react";
+import { X, BedDouble, Users, User, Baby, Bed, Image } from "lucide-react";
 import { useSelector } from "react-redux";
 import { useRoomHooks } from "../../../hooks/useRoomHooks";
 import { toast } from "react-toastify";
@@ -14,7 +14,9 @@ function AddRoom({ onClose, hotelId }) {
         capacity: "",
         adult: "",
         children: "",
-        quantity:''
+        quantity:'',
+        extraMattress: 0,
+        imageLink:''
     });
 
     const [errors, setErrors] = useState({});
@@ -49,6 +51,7 @@ function AddRoom({ onClose, hotelId }) {
         const adult = Number(formData.adult);
         const children = Number(formData.children);
         const quantity = Number(formData.quantity);
+        const extraMattress = Number(formData.extraMattress);
 
         // Required validations
         if (!roomName) newErrors.roomName = "Room name is required.";
@@ -56,6 +59,7 @@ function AddRoom({ onClose, hotelId }) {
         if (formData.adult === "") newErrors.adult = "Adult count is required.";
         if (formData.children === "") newErrors.children = "Children count is required.";
         if (formData.quantity === "") newErrors.quantity = "Room Quantity is required.";
+        if (formData.extraMattress === "" ) newErrors.extraMattress = "Extraa Mattress Required";
 
         // Positive / valid number validations
         if (formData.capacity !== "" && capacity <= 0) {
@@ -72,6 +76,10 @@ function AddRoom({ onClose, hotelId }) {
 
         if (formData.quantity !== "" && quantity < 1) {
             newErrors.quantity = "Room Quantity Can not be less than 1";
+        }
+
+        if (formData.extraMattress !== "" && extraMattress < 0) {
+            newErrors.extraMattress = "Extra Mattress Can not be less than 0";
         }
 
         // Capacity match validation only when all numeric values exist
@@ -107,6 +115,7 @@ function AddRoom({ onClose, hotelId }) {
             const adult = Number(formData.adult);
             const children = Number(formData.children);
             const quantity = Number(formData.quantity);
+            const extraMattress = Number(formData.extraMattress);
 
             if (!isValid) return;
 
@@ -120,10 +129,11 @@ function AddRoom({ onClose, hotelId }) {
                 adult,
                 children,
                 quantity,
+                extraMattress,
+                imageLink:formData?.imageLink,
                 hotelId
             };
 
-            // console.log("Room Added:", payload);
             setLoading(true)
             const response = await addRoom(payload)
             toast.success(response?.data?.message)
@@ -135,6 +145,8 @@ function AddRoom({ onClose, hotelId }) {
                 capacity: "",
                 adult: "",
                 children: "",
+                extraMattress:0,
+                imageLink:''
             });
             setErrors({});
             setSubmitError("");
@@ -312,6 +324,55 @@ function AddRoom({ onClose, hotelId }) {
                             {errors.quantity && (
                                 <p className="mt-2 text-sm text-red-500">{errors.quantity}</p>
                             )}
+                        </div>
+
+                        {/* Extra Mattress */}
+                        <div>
+                            <label className="mb-2 block text-sm font-semibold text-slate-700">
+                                Extra Mattress
+                            </label>
+                            <div className="relative">
+                                <Bed
+                                    size={18}
+                                    className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                                />
+                                <input
+                                    type="number"
+                                    name="extraMattress"
+                                    value={formData.extraMattress||''}
+                                    onChange={handleChange}
+                                    placeholder="0"
+                                    className={`w-full rounded-2xl border bg-white py-3 pl-11 pr-4 text-sm outline-none transition ${errors.extraMattress
+                                        ? "border-red-400 focus:border-red-500"
+                                        : "border-slate-300 focus:border-pink-500"
+                                        }`}
+                                />
+                            </div>
+                            {errors.extraMattress && (
+                                <p className="mt-2 text-sm text-red-500">{errors.extraMattress}</p>
+                            )}
+                        </div>
+
+                        {/* Google Photos link */}
+                        <div>
+                            <label className="mb-2 block text-sm font-semibold text-slate-700">
+                                Image Link
+                            </label>
+                            <div className="relative">
+                                <Image
+                                    size={18}
+                                    className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                                />
+                                <input
+                                    type="text"
+                                    name="imageLink"
+                                    value={formData.imageLink}
+                                    onChange={handleChange}
+                                    placeholder="Enter image link"
+                                    className={`w-full rounded-2xl border bg-white py-3 pl-11 pr-4 text-sm outline-none transition border-slate-300 focus:border-pink-500
+                                        }`}
+                                />
+                            </div>
                         </div>
 
 

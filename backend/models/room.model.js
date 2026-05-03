@@ -42,6 +42,14 @@ const roomSchema = new mongoose.Schema({
         type:Number,
         default:0
     },
+    extraMattress:{
+        type:Number,
+        default:0
+    },
+    imageLink:{
+        type:String,
+        default:null
+    },
 
 },{ timestamps: true })
 
