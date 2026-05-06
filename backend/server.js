@@ -24,6 +24,7 @@ import placeRouter from "./routes/place.routes.js";
 import activityRouter from "./routes/activity.routes.js";
 import policyRouter from "./routes/policy.routes.js";
 import groupTripRouter from "./routes/groupTrip.routes.js";
+import accountsRouter from "./routes/accounts.routes.js";
 
 // Step 1: Initialize critical services (DB + Cloudinary)
 const initializeServices = async () => {
@@ -46,6 +47,7 @@ initializeServices().then(() => {
   app.use(fileUpload());
   app.use(cors({
     origin: process.env.FRONTEND_URL,
+    // origin: process.env.FRONTEND_URL_PREVIEW,
     credentials: true
   }));
 
@@ -64,6 +66,7 @@ initializeServices().then(() => {
   app.use("/api/v1", activityRouter);
   app.use("/api/v1", policyRouter);
   app.use("/api/v1", groupTripRouter);
+  app.use("/api/v1", accountsRouter);
 
   app.get("/", (req, res) => {
     res.send("<h1>TripKraftr Backend is running successfully</h1>");
