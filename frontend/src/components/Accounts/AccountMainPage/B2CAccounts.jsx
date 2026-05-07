@@ -54,6 +54,7 @@ function B2CAccounts() {
   const {searchB2CAccounts} = useCommonHooks()
   const { getb2cAccounts } = useAccountHooks()
   const [currentPage, setCurrentPage] = useState(1)
+  const [searchedCurrentPage, setSearchedCurrentPage] = useState(1)
   const [isSearching, setIsSearching] = useState(false)
   const [search, setSearch] = useState('');
   const [searchedAccounts, setSearchedAccounts] = useState([])
@@ -63,7 +64,8 @@ function B2CAccounts() {
   const pageLimit = useSelector(s => s.account.b2cAccountPerPages)
   const currentPageData = useSelector(s => s.account.b2cAccountsByPage?.[currentPage])
   const pagination = useSelector(s => s.account.paginationB2C)
-
+  const [showSearchedAccount, setShowSearchedAccount] = useState(searchedAccounts?.slice(0,pageLimit))
+  const [totalPages,setTotalPages] = useState(1)
   const fetchB2CAccounts = async () => {
     try {
       setFetchLoading(true)
@@ -78,6 +80,12 @@ function B2CAccounts() {
       setFetchLoading(false)
     }
   }
+
+  useEffect(()=>{
+    const skip = (searchedCurrentPage-1) * pageLimit
+    setShowSearchedAccount(searchedAccounts?.slice(skip, skip + pageLimit))
+    setTotalPages(Math.ceil(searchedAccounts?.length/pageLimit))
+  },[searchedAccounts,searchedCurrentPage])
 
   useEffect(() => {
     if (!currentPageData) fetchB2CAccounts()
@@ -94,7 +102,7 @@ function B2CAccounts() {
     try{  
       setFetchLoading(true)
       setIsSearching(true)
-      const response = await searchB2CAccounts(search,sourceFilter)
+      const response = await searchB2CAccounts(search,sourceFilter,pageLimit)
       setSearchedAccounts(response?.data?.searchedAccounts)
     }
     catch(error){
@@ -121,7 +129,7 @@ function B2CAccounts() {
   },[search,sourceFilter,pageLimit])
 
 
-  const filtered = isSearching ? searchedAccounts : currentPageData;
+  const filtered = isSearching ? showSearchedAccount : currentPageData;
 
   return (
     <div>
@@ -184,10 +192,12 @@ function B2CAccounts() {
 
             {/* Prev */}
             <button
-              disabled={currentPage === 1 || isSearching}
-              onClick={() => setCurrentPage(currentPage - 1)}
+              disabled={isSearching ? searchedCurrentPage ===1 :currentPage === 1}
+              onClick={() => {
+                isSearching ? setSearchedCurrentPage(searchedCurrentPage-1) : setCurrentPage(Number(currentPage - 1))
+              }}
               className={`px-4 py-2 rounded-lg text-sm font-semibold border transition-all duration-200 w-full sm:w-auto
-        ${currentPage === 1 || isSearching
+        ${(isSearching ? searchedCurrentPage ===1 :currentPage === 1)
                   ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
                   : 'bg-[#ED5F8D] border-[#E91E8C] text-white hover:bg-[#C81878] cursor-pointer'
                 }`}
@@ -197,16 +207,17 @@ function B2CAccounts() {
 
             {/* Page Info */}
             <p className="text-sm text-gray-400 whitespace-nowrap">
-              Page <span className="text-[#18305C] font-semibold">{currentPage || 1}</span> of{" "}
-              <span className="text-[#18305C] font-semibold">{pagination?.totalPages || 0}</span>
+              Page <span className="text-[#18305C] font-semibold">{isSearching ? searchedCurrentPage:currentPage || 1}</span> of{" "}
+              <span className="text-[#18305C] font-semibold">{isSearching ? totalPages : pagination?.totalPages || 0}</span>
             </p>
 
             {/* Next */}
             <button
-              disabled={currentPage === pagination?.totalPages || isSearching}
-              onClick={() => setCurrentPage(Number(currentPage + 1))}
+              disabled={isSearching ? totalPages===searchedCurrentPage :currentPage === pagination?.totalPages}
+              onClick={() => {
+                isSearching ? setSearchedCurrentPage(searchedCurrentPage+1) : setCurrentPage(Number(currentPage + 1))}}
               className={`px-4 py-2 rounded-lg text-sm font-semibold border transition-all duration-200 w-full sm:w-auto
-        ${currentPage === pagination?.totalPages || isSearching
+        ${(isSearching ? totalPages===searchedCurrentPage :currentPage === pagination?.totalPages)
                   ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
                   : 'bg-[#ED5F8D] border-[#E91E8C] text-white hover:bg-[#C81878] cursor-pointer'
                 }`}
@@ -227,6 +238,7 @@ function B2CAccounts() {
 
             <select
               value={pageLimit}
+              disabled
               onChange={(e) => changePageLimit(Number(e.target.value))}
               className="w-[100px] bg-white border border-gray-200 text-[#18305C] text-sm px-3 py-2 rounded-lg outline-none focus:border-[#E91E8C] cursor-pointer"
               style={{

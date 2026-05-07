@@ -44,11 +44,12 @@ const b2bAccountSchema = new mongoose.Schema(
 
     phone: {
       type: Number,
-      required: true
+      required: true,
     },
-
+    
     phone_str: {
-      type: String
+      type: String,
+      unique:true
     },
 
     secondaryPhone: {

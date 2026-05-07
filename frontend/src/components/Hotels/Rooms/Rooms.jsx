@@ -346,9 +346,9 @@ function Rooms() {
                                     <th className="px-5 py-4">Quantity</th>
                                     <th className="px-5 py-4">Capacity</th>
                                     <th className="px-5 py-4">Adult</th>
-                                    <th className="px-5 py-4">Child</th>
-                                    <th className="px-5 py-4">Mattress</th>
-                                    <th className="px-5 py-4">Link</th>
+                                    {/* <th className="px-5 py-4">Child</th> */}
+                                    <th className="px-5 py-4">Extra Mattress</th>
+                                    <th className="px-5 py-4">Room Photos</th>
                                     <th className="px-5 py-4 text-center">Action</th>
                                 </tr>
                             </thead>
@@ -437,7 +437,7 @@ function Rooms() {
                                             </td>
 
                                             {/* Children */}
-                                            <td className="px-5 py-4">
+                                            {/* <td className="px-5 py-4">
                                                 {isEditing ? (
                                                     <input
                                                         type="text"
@@ -454,7 +454,7 @@ function Rooms() {
                                                         <span>{room.children}</span>
                                                     </div>
                                                 )}
-                                            </td>
+                                            </td> */}
 
                                             {/* Extra Mattress */}
                                             <td className="px-5 py-4">
@@ -486,7 +486,7 @@ function Rooms() {
                                                         placeholder="Image Link"
                                                     />
                                                 ) : (
-                                                    <a href={room.imageLink} target="_blank">{`${room.imageLink?.slice(0,10)}...`||''}</a>
+                                                    <a href={room.imageLink?.split(":")?.[0] === 'https' ?room.imageLink:`https://${room.imageLink}` } target="_blank">{`${room.imageLink?.slice(0,10)}...`||''}</a>
                                                 )}
                                             </td>
 

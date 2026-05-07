@@ -49,7 +49,8 @@ const b2cAccountSchema = new mongoose.Schema(
 
     phone: {
       type: Number,
-      required: true
+      required: true,
+      unique:true
     },
 
     phone_str: {
@@ -89,7 +90,7 @@ const b2cAccountSchema = new mongoose.Schema(
 );
 
 
-b2cAccountSchema.index({ org_id: 1, fullName_lower: 1,phone_str:1 });
+b2cAccountSchema.index({ org_id: 1, fullName_lower: 1,phone_str:1 },{unique:true});
 
 
 b2cAccountSchema.pre("save", function () {

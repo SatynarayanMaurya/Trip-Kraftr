@@ -13,6 +13,13 @@ export const addB2BAccount = async (req, res) => {
                 message: "Required field are missing"
             })
         }
+        const existingAccount = await B2BAccount.findOne({org_id:req.user.org_id,phone})
+        if(existingAccount){
+            return res.status(409).json({
+                success:false,
+                message:"Account Already exist"
+            })
+        }
 
         const counts = await B2BAccount.countDocuments({ org_id: req.user.org_id })
         const accountId = `ACC-${counts + 1}`
@@ -61,6 +68,14 @@ export const addB2CAccount = async (req, res) => {
             return res.status(400).json({
                 success: false,
                 message: "Required field are missing"
+            })
+        }
+
+        const existingAccount = await B2CAccount.findOne({org_id:req.user.org_id,phone})
+        if(existingAccount){
+            return res.status(409).json({
+                success:false,
+                message:"Account Already exist"
             })
         }
 
