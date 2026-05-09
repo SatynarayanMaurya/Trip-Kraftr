@@ -12,6 +12,9 @@ export const accountsEndpoints  = {
     SEARCH_B2B_ACCOUNTS : BASE_URL + '/search-b2b-accounts',
     SEARCH_B2C_ACCOUNTS : BASE_URL + '/search-b2c-accounts',
     // DELETE_ACTIVITY : BASE_URL + '/delete-activity',
-    // UPDATE_ACTIVITY_BY_ID : BASE_URL + '/update-activity-by-id',
+    UPDATE_B2B_ACCOUNT_BY_ID : BASE_URL + '/update-b2b-account-by-id',
+    UPDATE_B2C_ACCOUNT_BY_ID : BASE_URL + '/update-b2c-account-by-id',
+    UPDATE_B2B_ACCOUNT_STATUS_BY_ID : BASE_URL + '/update-b2b-account-status-by-id',
+    UPDATE_B2C_ACCOUNT_STATUS_BY_ID : BASE_URL + '/update-b2c-account-status-by-id',
 }
 

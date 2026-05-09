@@ -3,7 +3,7 @@ import { apiConnector } from '../services/apiConnector'
 import { useDispatch, useSelector } from 'react-redux'
 import { setLoading } from '../redux/slices/userSlice'
 import { accountsEndpoints } from '../services/Apis/accountsApis';
-import { addNewB2BAccount, addNewB2CAccount, setB2BAccountById, setB2BAccountsByPage, setB2CAccountById, setB2CAccountsByPage } from '../redux/slices/accountSlice';
+import { addNewB2BAccount, addNewB2CAccount, clearB2BAccounts, clearB2CAccounts, setB2BAccountById, setB2BAccountsByPage, setB2CAccountById, setB2CAccountsByPage } from '../redux/slices/accountSlice';
 
 export const useAccountHooks = () => {
     const dispatch = useDispatch();
@@ -159,7 +159,110 @@ export const useAccountHooks = () => {
         } finally {
           dispatch(setLoading(false))
         }
-      }
+    }
+    // For getting accounts with paginated
+    const updateB2BAccountById = async (accountDetails) => {
+        try {
+          dispatch(setLoading(true))
+    
+          const response = await apiConnector(
+            "PUT",
+            `${accountsEndpoints.UPDATE_B2B_ACCOUNT_BY_ID}/${accountDetails?._id}`,accountDetails
+          )
+
+
+        if(response?.data?.success){
+            dispatch(clearB2BAccounts())
+            dispatch(setB2BAccountById({_id:accountDetails?._id,data:response?.data?.updatedAccount}))
+        }
+    
+    
+          return response
+    
+        } catch (error) {
+          throw error
+        } finally {
+          dispatch(setLoading(false))
+        }
+    }
+
+    // For getting accounts with paginated
+    const updateB2CAccountById = async (accountDetails) => {
+        try {
+          dispatch(setLoading(true))
+    
+          const response = await apiConnector(
+            "PUT",
+            `${accountsEndpoints.UPDATE_B2C_ACCOUNT_BY_ID}/${accountDetails?._id}`,accountDetails
+          )
+
+
+        if(response?.data?.success){
+            dispatch(clearB2CAccounts())
+            dispatch(setB2CAccountById({_id:accountDetails?._id,data:response?.data?.updatedAccount}))
+        }
+    
+    
+          return response
+    
+        } catch (error) {
+          throw error
+        } finally {
+          dispatch(setLoading(false))
+        }
+    }
+
+    // For getting accounts with paginated
+    const updateB2BAccountStatusById = async (id,val) => {
+        try {
+          dispatch(setLoading(true))
+    
+          const response = await apiConnector(
+            "PATCH",
+            `${accountsEndpoints.UPDATE_B2B_ACCOUNT_STATUS_BY_ID}/${id}`,{val}
+          )
+
+
+        if(response?.data?.success){
+            dispatch(clearB2BAccounts())
+            dispatch(setB2BAccountById({_id:id,data:response?.data?.updatedAccountStatus}))
+        }
+    
+    
+          return response
+    
+        } catch (error) {
+          throw error
+        } finally {
+          dispatch(setLoading(false))
+        }
+    }
+
+    // For getting accounts with paginated
+    const updateB2CAccountStatusById = async (id,val) => {
+        try {
+          dispatch(setLoading(true))
+    
+          const response = await apiConnector(
+            "PATCH",
+            `${accountsEndpoints.UPDATE_B2C_ACCOUNT_STATUS_BY_ID}/${id}`,{val}
+          )
+
+
+        if(response?.data?.success){
+            dispatch(clearB2CAccounts())
+            dispatch(setB2CAccountById({_id:id,data:response?.data?.updatedAccountStatus}))
+        }
+    
+    
+          return response
+    
+        } catch (error) {
+          throw error
+        } finally {
+          dispatch(setLoading(false))
+        }
+    }
 
 
 
@@ -169,6 +272,10 @@ export const useAccountHooks = () => {
         getb2bAccounts,
         getb2cAccounts,
         getB2BAccountById,
-        getB2CAccountById
+        getB2CAccountById,
+        updateB2BAccountById,
+        updateB2CAccountById,
+        updateB2BAccountStatusById,
+        updateB2CAccountStatusById
     };
 };

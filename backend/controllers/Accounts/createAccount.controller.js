@@ -63,7 +63,7 @@ export const addB2BAccount = async (req, res) => {
 
 export const addB2CAccount = async (req, res) => {
     try {
-        const { fullName, email, source, referralBy, phone, state, month, dietaryPreference, noOfMembers, destinations, tripType, assignedTo } = req.body;
+        const { fullName, email, source, referralby, phone, state, month, dietaryPreference, noOfMembers, destinations, tripType, assignedTo } = req.body;
         if (!fullName || !email || !phone) {
             return res.status(400).json({
                 success: false,
@@ -88,7 +88,7 @@ export const addB2CAccount = async (req, res) => {
             email,
             accountId,
             source,
-            referralBy,
+            referralBy:referralby,
             phone,
             state,
             month,
@@ -107,7 +107,12 @@ export const addB2CAccount = async (req, res) => {
         })
     }
     catch (error) {
-
+        if (error.code === 11000) {
+            return res.status(409).json({
+                success: false,
+                message: `Account with this name already exists in your organization.`
+            });
+        }
         return res.status(500).json({
             success: false,
             message: error?.message || "Internal Server Error"

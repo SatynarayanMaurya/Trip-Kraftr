@@ -3,6 +3,7 @@ import { authMiddleware } from "../middlewares/auth.middleware.js";
 import { roleMiddleware } from "../middlewares/role.middleware.js";
 import { addB2BAccount, addB2CAccount } from "../controllers/Accounts/createAccount.controller.js";
 import { getB2BAccountById, getB2BAccounts, getB2CAccountById, getB2CAccounts, searchB2BAccounts, searchB2CAccounts } from "../controllers/Accounts/getAccounts.controller.js";
+import { updateB2BAccount, updateB2BStatus, updateB2CAccount, updateB2CStatus } from "../controllers/Accounts/updateAccount.controller.js";
 const accountsRouter = express.Router()
 
 
@@ -16,6 +17,9 @@ accountsRouter.get("/search-b2c-accounts",authMiddleware,roleMiddleware(["org_ad
 accountsRouter.get("/get-b2b-account-by-id/:accountId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),getB2BAccountById)
 accountsRouter.get("/get-b2c-account-by-id/:accountId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),getB2CAccountById)
 // accountsRouter.delete("/delete-activity/:activityId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),deleteActivityById)
-// accountsRouter.put("/update-activity-by-id/:activityId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),updateActivityById)
+accountsRouter.put("/update-b2b-account-by-id/:accountId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),updateB2BAccount)
+accountsRouter.put("/update-b2c-account-by-id/:accountId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),updateB2CAccount)
+accountsRouter.patch("/update-b2b-account-status-by-id/:accountId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),updateB2BStatus)
+accountsRouter.patch("/update-b2c-account-status-by-id/:accountId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),updateB2CStatus)
 
 export default accountsRouter

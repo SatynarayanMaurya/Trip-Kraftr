@@ -52,8 +52,9 @@ function B2CAccounts() {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const {searchB2CAccounts} = useCommonHooks()
-  const { getb2cAccounts } = useAccountHooks()
+  const { getb2cAccounts,updateB2CAccountStatusById } = useAccountHooks()
   const [currentPage, setCurrentPage] = useState(1)
+  const [isUpdated, setIsUpdated] = useState(false)
   const [searchedCurrentPage, setSearchedCurrentPage] = useState(1)
   const [isSearching, setIsSearching] = useState(false)
   const [search, setSearch] = useState('');
@@ -89,7 +90,7 @@ function B2CAccounts() {
 
   useEffect(() => {
     if (!currentPageData) fetchB2CAccounts()
-  }, [currentPage, pageLimit])
+  }, [currentPage, pageLimit,isUpdated])
 
   const changePageLimit = (val) => {
     dispatch(clearB2CAccounts())
@@ -130,6 +131,27 @@ function B2CAccounts() {
 
 
   const filtered = isSearching ? showSearchedAccount : currentPageData;
+
+  const updateStatus =async(id,val)=>{
+    try{
+      setFetchLoading(true)
+      const response = await updateB2CAccountStatusById(id,val)
+      toast.success(response?.data?.message)
+      setIsUpdated(!isUpdated)
+    }
+    catch(error){
+      if (!isProduction) {
+        console.log("========= ERROR DEBUG START =========");
+        console.log("Error:", error);
+        console.log("Response:", error?.response);
+        console.log("========= ERROR DEBUG END =========");
+      }
+      toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin")
+    }
+    finally{
+      setFetchLoading(false)
+    }
+  }
 
   return (
     <div>
@@ -173,7 +195,7 @@ function B2CAccounts() {
         columns={COLUMNS}
         fetchLoading={fetchLoading}
         onView={(row) => navigate(`view-b2c/${row?._id}`)}
-        onToggleActive={(id, val) => console.log('Toggle B2C:', id, val)}
+        onToggleActive={(id, val) => updateStatus(id, val)}
       />
       {/* Pagination */}
       <div

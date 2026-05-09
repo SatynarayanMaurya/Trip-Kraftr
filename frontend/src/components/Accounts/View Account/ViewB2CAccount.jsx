@@ -1,80 +1,4 @@
 
-// import React, { useEffect, useState } from 'react'
-// import { useAccountHooks } from '../../../hooks/useAccountHooks'
-// import { useParams } from 'react-router-dom'
-// import { useSelector } from 'react-redux'
-// import { toast } from 'react-toastify'
-
-// function ViewB2CAccount() {
-//     const {getB2CAccountById} = useAccountHooks()
-//     const isProduction = useSelector(s=>s.user.isProduction)
-//     const [fetchLoading, setFetchLoading] = useState(false)
-
-//     const {accountId} = useParams();
-//     const accountDetails = useSelector(s=>s.account.b2cAccountsByIds?.[accountId])
-//     console.log("Account Details : ",accountDetails)
-
-//     const fetchAccountDetails = async()=>{
-//         try{
-//             setFetchLoading(true)
-//             await getB2CAccountById(accountId)
-//         }
-//         catch(error){
-//           if (!isProduction) {
-//             console.log("========= ERROR DEBUG START =========");
-//             console.log("Error:", error);
-//             console.log("Response:", error?.response);
-//             console.log("========= ERROR DEBUG END =========");
-//           }
-//           toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin")
-//         }
-//         finally{
-//             setFetchLoading(false)
-//         }
-//     }
-
-
-//     useEffect(()=>{
-//         if(accountId){
-//             fetchAccountDetails()
-//         }
-//     },[accountId])
-
-
-//   return (
-//     <div>ViewB2CAccount</div>
-//   )
-// }
-
-
-// export default ViewB2CAccount
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import React, { useEffect, useState } from 'react'
 import { useAccountHooks } from '../../../hooks/useAccountHooks'
 import { useParams, useNavigate } from 'react-router-dom'
@@ -215,7 +139,7 @@ function ViewB2CAccount() {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           <Toggle value={d?.isActive} />
-          <button style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+          <button onClick={()=>navigate(`/accounts/update-b2c/${accountId}`)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
             <Pencil size={18} color={PINK} />
           </button>
           <button style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>

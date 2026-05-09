@@ -184,7 +184,7 @@ export const {
     clearB2BAccounts,
     clearB2CAccounts,
     setB2BAccountById,
-    setB2CAccountById
+    setB2CAccountById,
 
 
 } = accountSlice.actions
