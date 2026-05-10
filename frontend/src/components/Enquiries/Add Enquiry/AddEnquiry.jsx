@@ -1,16 +1,14 @@
 import React, { useState } from 'react'
-import AddB2BAccounts from './AddB2BAccounts';
-import AddB2CAccounts from './AddB2CAccounts';
 import { useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import AddEnquiryB2B from './AddEnquiryB2B';
+import AddEnquiryB2C from './AddEnquiryB2C';
 
 const PINK = '#ED5F8D';
 const BLUE = '#18305C';
 
-function AddAccount() {
+function AddEnquiry() {
   const navigate = useNavigate()
-  const actualOpenTab = useSelector(s=>s.account.openTab)
-  const [account, setAccount] = useState(actualOpenTab)
+  const [account, setAccount] = useState('b2c');
 
   return (
     <div style={{  padding: '24px', maxWidth: '1100px', margin: '0 auto' }}>
@@ -27,8 +25,8 @@ function AddAccount() {
           </svg>
         </button>
         <div>
-          <h2 style={{ margin: 0, fontSize: '22px', fontWeight: '700', color: BLUE }}>Add New Account</h2>
-          <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#6b7280' }}>Create a new customer profile</p>
+          <h2 style={{ margin: 0, fontSize: '22px', fontWeight: '700', color: BLUE }}>Add New Enquiry</h2>
+          <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#6b7280' }}>Create a new trip request</p>
         </div>
       </div>
 
@@ -60,10 +58,10 @@ function AddAccount() {
         </div>
 
         {/* Form */}
-        {account === 'b2b' ? <AddB2BAccounts /> : <AddB2CAccounts />}
+        {account === 'b2b' ? <AddEnquiryB2B /> : <AddEnquiryB2C />}
       </div>
     </div>
   );
 }
 
-export default AddAccount;
+export default AddEnquiry

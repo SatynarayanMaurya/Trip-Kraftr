@@ -25,6 +25,7 @@ import activityRouter from "./routes/activity.routes.js";
 import policyRouter from "./routes/policy.routes.js";
 import groupTripRouter from "./routes/groupTrip.routes.js";
 import accountsRouter from "./routes/accounts.routes.js";
+import enquiryRouter from "./routes/enquiry.routes.js";
 
 // Step 1: Initialize critical services (DB + Cloudinary)
 const initializeServices = async () => {
@@ -67,6 +68,7 @@ initializeServices().then(() => {
   app.use("/api/v1", policyRouter);
   app.use("/api/v1", groupTripRouter);
   app.use("/api/v1", accountsRouter);
+  app.use("/api/v1", enquiryRouter);
 
   app.get("/", (req, res) => {
     res.send("<h1>TripKraftr Backend is running successfully</h1>");

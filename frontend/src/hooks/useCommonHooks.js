@@ -10,6 +10,7 @@ import { placeEndpoints } from "../services/Apis/placeApis"
 import { activityEndpoints } from "../services/Apis/activityApis"
 import { groupTripEndpoints } from "../services/Apis/groupTripApis"
 import { accountsEndpoints } from "../services/Apis/accountsApis"
+import { enquiriessEndpoints } from "../services/Apis/enquiriesApis"
 
 export const useCommonHooks = () => {
     const dispatch = useDispatch()
@@ -233,6 +234,42 @@ export const useCommonHooks = () => {
         300
       );
 
+          // ---------- Subregion Search for org ( ) ----------
+    const searchB2BAccountsForEnquiry = debounceSearch(
+        "searchB2BAccountsForEnquiry",
+        (searchTerm, pageLimit=10) => {
+          const params = new URLSearchParams();
+      
+          if (searchTerm) params.append("search", searchTerm);
+          if (pageLimit) params.append("pageLimit", pageLimit);
+      
+          return apiConnector(
+            "GET",
+            `${enquiriessEndpoints.GET_SEARCHED_B2B_ACCOUNT_FOR_ENQUIRY}?${params.toString()}`
+          );
+
+        },
+        300
+      );
+
+          // ---------- Subregion Search for org ( ) ----------
+    const searchB2CAccountsForEnquiry = debounceSearch(
+        "searchB2CAccountsForEnquiry",
+        (searchTerm, pageLimit=10) => {
+          const params = new URLSearchParams();
+      
+          if (searchTerm) params.append("search", searchTerm);
+          if (pageLimit) params.append("pageLimit", pageLimit);
+      
+          return apiConnector(
+            "GET",
+            `${enquiriessEndpoints.GET_SEARCHED_B2C_ACCOUNT_FOR_ENQUIRY}?${params.toString()}`
+          );
+
+        },
+        300
+      );
+
 
 
     return {
@@ -247,7 +284,9 @@ export const useCommonHooks = () => {
         searchActivities,
         searchGroupTrips,
         searchB2BAccounts,
-        searchB2CAccounts
+        searchB2CAccounts,
+        searchB2BAccountsForEnquiry,
+        searchB2CAccountsForEnquiry
 
     }
 }

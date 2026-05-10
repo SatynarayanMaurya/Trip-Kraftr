@@ -10,7 +10,7 @@ const initialState = {
 
     individualActivity: {}, // This contain a single place but details about that it is used when we update the place
 
-    b2bAccountPerPages: 10,
+    b2bAccountPerPages: 5,
     b2cAccountPerPages: 10,
 
     paginationB2B: {

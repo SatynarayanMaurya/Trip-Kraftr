@@ -26,6 +26,7 @@ import { ActivityRoutes } from "./ActivityRoutes";
 import { PolicyRoutes } from "./PolicyRoutes";
 import { GroupTripsRoutes } from "./GroupTripsRoutes";
 import { AccountRoutes } from "./AccountRoutes";
+import { EnquiriesRoutes } from "./EnquiriesRoutes";
 
 function AppRoutes() {
   return (
@@ -61,6 +62,7 @@ function AppRoutes() {
           {PolicyRoutes}
           {GroupTripsRoutes}
           {AccountRoutes}
+          {EnquiriesRoutes}
 
           {/* fallback */}
           <Route path="unauthorized" element={<Unauthorized />} />

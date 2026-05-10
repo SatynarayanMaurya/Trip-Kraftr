@@ -225,7 +225,7 @@ export const searchB2CAccounts = async (req, res) => {
       const trimmed = search?.trim()
       if(trimmed){
           query.$or = [
-              { fullName_lower: { $regex: trimmed, $options: "i" } },
+              { fullName_lower: { $regex: `^${trimmed}`, $options: "i" } },
               { phone_str: { $regex: `^${trimmed}` } }
             ];
         }
