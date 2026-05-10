@@ -7,6 +7,18 @@ import { enquiriessEndpoints } from '../services/Apis/enquiriesApis';
 export const useEnquiryHooks = () => {
     const dispatch = useDispatch();
 
+    const addEnquiryB2B = async (details) => {  // For Normal Org_admin
+        try {
+            dispatch(setLoading(true));
+            const response = await apiConnector("POST", enquiriessEndpoints.ADD_B2B_ENQUIRY, details)
+            return response;
+        } catch (error) {
+            throw error;
+        } finally {
+            dispatch(setLoading(false));
+        }
+    }
+
     const addEnquiryB2C = async (details) => {  // For Normal Org_admin
         try {
             dispatch(setLoading(true));
@@ -22,6 +34,7 @@ export const useEnquiryHooks = () => {
 
 
     return {
+        addEnquiryB2B,
         addEnquiryB2C,
     };
 };

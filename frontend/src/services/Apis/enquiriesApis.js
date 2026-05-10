@@ -2,6 +2,7 @@
 const BASE_URL = import.meta.env.VITE_BACKEND_URL+"/api/v1"
 
 export const enquiriessEndpoints  = {
+    ADD_B2B_ENQUIRY : BASE_URL + '/add-b2b-enquiry',
     ADD_B2C_ENQUIRY : BASE_URL + '/add-b2c-enquiry',
     // ADD_B2C_ACCOUNT : BASE_URL + '/add-b2c-account',
     // GET_B2B_ACCOUNTS : BASE_URL + '/get-b2b-accounts',
