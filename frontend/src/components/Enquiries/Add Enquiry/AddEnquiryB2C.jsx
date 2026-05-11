@@ -12,6 +12,7 @@ import {
 import { MdOutlineTravelExplore } from 'react-icons/md';
 
 import { gridTwo,cardLabelStyle,cardValueStyle,saveBtn,cancelBtn,destTag,suggestionItem,suggestionBox,spinnerStyle,searchIcon, chevronIcon } from './CommonCssForEnquiry';
+import { useNavigate } from 'react-router-dom';
 
 // ── Constants ──────────────────────────────────────────────────────────────
 const PINK = '#ED5F8D';
@@ -63,8 +64,8 @@ const fieldWrap = { display: 'flex', flexDirection: 'column', gap: 0 };
 function AddEnquiryB2C({ onCancel }) {
     const isProduction = useSelector(s => s.user.isProduction);
     const { searchB2CAccountsForEnquiry } = useCommonHooks?.() ?? {};
-    const { addEnquiry } = useEnquiryHooks?.() ?? {};
     const { addEnquiryB2C } = useEnquiryHooks()
+    const navigate = useNavigate()
 
     // ── search state ──
     const [searchInput, setSearchInput] = useState('');
@@ -209,6 +210,7 @@ function AddEnquiryB2C({ onCancel }) {
             setSubmitLoading(true);
             const response = await addEnquiryB2C(payload)
             toast.success(response?.data?.message || 'Enquiry added successfully!');
+            navigate(-1)
         } catch (err) {
             if (!isProduction) console.error(err);
             toast.error(err?.response?.data?.message || err?.message || 'Failed to add enquiry');

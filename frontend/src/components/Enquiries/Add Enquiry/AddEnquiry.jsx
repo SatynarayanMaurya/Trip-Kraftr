@@ -2,13 +2,14 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 import AddEnquiryB2B from './AddEnquiryB2B';
 import AddEnquiryB2C from './AddEnquiryB2C';
+import { useSelector } from 'react-redux';
 
 const PINK = '#ED5F8D';
 const BLUE = '#18305C';
 
 function AddEnquiry() {
   const navigate = useNavigate()
-  const [account, setAccount] = useState('b2c');
+  const [account, setAccount] =useState(useSelector(s=>s.enquiry.openTab));
 
   return (
     <div style={{  padding: '24px', maxWidth: '1100px', margin: '0 auto' }}>

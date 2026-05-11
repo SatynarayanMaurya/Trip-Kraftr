@@ -40,6 +40,8 @@ export const addB2BEnquiry = async(req ,res)=>{
 
             })
 
+        await newEnquiry.populate({path:'accountId',select: "_id businessName phone source"})
+
         return res.status(201).json({
             success:true,
             message:"Enquiry Created",
@@ -89,6 +91,8 @@ export const addB2CEnquiry = async(req ,res)=>{
                 tripType
 
             })
+
+            await newEnquiry.populate({path:'accountId',select: "_id fullName phone source"})
 
         return res.status(201).json({
             success:true,

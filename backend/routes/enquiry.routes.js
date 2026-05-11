@@ -1,7 +1,7 @@
 import express from "express";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
 import { roleMiddleware } from "../middlewares/role.middleware.js";
-import { searchB2BAccountsForEnquiry, searchB2CAccountsForEnquiry } from "../controllers/Enquiry/getEnquiry.controller.js";
+import { getB2BEnquiry, getB2CEnquiry, searchB2BAccountsForEnquiry, searchB2BEnquiry, searchB2CAccountsForEnquiry, searchB2CEnquiry } from "../controllers/Enquiry/getEnquiry.controller.js";
 import { addB2BEnquiry, addB2CEnquiry } from "../controllers/Enquiry/createEnquiry.controller.js";
 const enquiryRouter = express.Router()
 
@@ -9,9 +9,11 @@ const enquiryRouter = express.Router()
 enquiryRouter.post("/add-b2b-enquiry",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),addB2BEnquiry)
 enquiryRouter.post("/add-b2c-enquiry",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),addB2CEnquiry)
 // enquiryRouter.post("/add-b2c-account",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),addB2CAccount)
-// enquiryRouter.get("/get-b2b-accounts",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),getB2BAccounts)
+enquiryRouter.get("/get-b2b-enquiry",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),getB2BEnquiry)
+enquiryRouter.get("/get-b2c-enquiry",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),getB2CEnquiry)
 // enquiryRouter.get("/get-b2c-accounts",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),getB2CAccounts)
-// enquiryRouter.get("/search-b2b-accounts",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),searchB2BAccounts)
+enquiryRouter.get("/search-b2b-enquiry",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),searchB2BEnquiry)
+enquiryRouter.get("/search-b2c-enquiry",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),searchB2CEnquiry)
 // enquiryRouter.get("/search-b2c-accounts",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),searchB2CAccounts)
 enquiryRouter.get("/get-searched-B2B-Accounts-For-Enquiry",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),searchB2BAccountsForEnquiry)
 enquiryRouter.get("/get-searched-B2C-Accounts-For-Enquiry",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),searchB2CAccountsForEnquiry)

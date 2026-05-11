@@ -217,6 +217,42 @@ export const useCommonHooks = () => {
       );
 
           // ---------- Subregion Search for org ( ) ----------
+    const searchB2BEnquiry = debounceSearch(
+        "searchB2BEnquiry",
+        (searchTerm,filter,pageLimit=10) => {
+          const params = new URLSearchParams();
+      
+          if (searchTerm) params.append("search", searchTerm);
+          if (filter) params.append("filter", filter);
+          if (pageLimit) params.append("pageLimit", pageLimit);
+      
+          return apiConnector(
+            "GET",
+            `${enquiriessEndpoints.SEARCH_B2B_ENQUIRY}?${params.toString()}`
+          );
+        },
+        300
+      );
+
+          // ---------- Subregion Search for org ( ) ----------
+    const searchB2CEnquiry = debounceSearch(
+        "searchB2CEnquiry",
+        (searchTerm,filter,pageLimit=10) => {
+          const params = new URLSearchParams();
+      
+          if (searchTerm) params.append("search", searchTerm);
+          if (filter) params.append("filter", filter);
+          if (pageLimit) params.append("pageLimit", pageLimit);
+      
+          return apiConnector(
+            "GET",
+            `${enquiriessEndpoints.SEARCH_B2C_ENQUIRY}?${params.toString()}`
+          );
+        },
+        300
+      );
+
+          // ---------- Subregion Search for org ( ) ----------
     const searchB2CAccounts = debounceSearch(
         "searchB2CAccounts",
         (searchTerm,filter,pageLimit=10) => {
@@ -284,6 +320,8 @@ export const useCommonHooks = () => {
         searchActivities,
         searchGroupTrips,
         searchB2BAccounts,
+        searchB2BEnquiry,
+        searchB2CEnquiry,
         searchB2CAccounts,
         searchB2BAccountsForEnquiry,
         searchB2CAccountsForEnquiry

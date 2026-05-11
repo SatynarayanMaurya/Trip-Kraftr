@@ -13,7 +13,7 @@ const B2BEnquirySchema = new mongoose.Schema({
 
     accountId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "B2CAccount",
+        ref: "B2BAccount",
         required: true
     },
 

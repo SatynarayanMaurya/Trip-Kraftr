@@ -13,6 +13,7 @@ import {
 import { MdOutlineTravelExplore } from 'react-icons/md';
 
 import { gridTwo,cardLabelStyle,cardValueStyle,saveBtn,cancelBtn,destTag,suggestionItem,suggestionBox,spinnerStyle,searchIcon, chevronIcon } from './CommonCssForEnquiry';
+import { useNavigate } from 'react-router-dom';
 
 // ── Constants ──────────────────────────────────────────────────────────────
 const PINK = '#ED5F8D';
@@ -62,9 +63,10 @@ const fieldWrap = { display: 'flex', flexDirection: 'column', gap: 0 };
 
 // ── Component ───────────────────────────────────────────────────────────────
 function AddEnquiryB2B({ onCancel }) {
+
+    const navigate = useNavigate()
     const isProduction = useSelector(s => s.user.isProduction);
     const { searchB2BAccountsForEnquiry } = useCommonHooks?.() ?? {};
-    const { addEnquiry } = useEnquiryHooks?.() ?? {};
     const { addEnquiryB2B } = useEnquiryHooks()
 
     // ── search state ──
@@ -207,9 +209,9 @@ function AddEnquiryB2B({ onCancel }) {
 
         try {
             setSubmitLoading(true);
-            console.log("form : ",payload)
             const response = await addEnquiryB2B(payload)
             toast.success(response?.data?.message || 'Enquiry added successfully!');
+            navigate(-1)
         } catch (err) {
             if (!isProduction) console.error(err);
             toast.error(err?.response?.data?.message || err?.message || 'Failed to add enquiry');
@@ -599,52 +601,3 @@ function AddEnquiryB2B({ onCancel }) {
 }
 
 export default AddEnquiryB2B;
-
-
-
-// import React, { useEffect, useState } from 'react'
-// import { useSelector } from 'react-redux';
-// import { toast } from 'react-toastify';
-// import { useEnquiryHooks } from '../../../hooks/useEnquiryHooks';
-// import { useCommonHooks } from '../../../hooks/useCommonHooks';
-
-// function AddEnquiryB2B() {
-
-
-//   const isProduction = useSelector(s=>s.user.isProduction)
-//   const [fetchLoading, setFetchLoading] = useState(false)
-//   const {searchB2BAccountsForEnquiry} = useCommonHooks()
-//   const [searchInput, setSearchInput] = useState('a')
-//   const [searchedAccounts, setSearchedAccounts] = useState([])
-
-
-//   const suggestionAccounts = async()=>{
-//     try{
-//       setFetchLoading(true)
-//       const response = await searchB2BAccountsForEnquiry (searchInput)
-//       setSearchedAccounts(response?.data?.searchedAccounts||[])
-//     }
-//     catch(error){
-//       if (!isProduction) {
-//         console.log("========= ERROR DEBUG START =========");
-//         console.log("Error:", error);
-//         console.log("Response:", error?.response);
-//         console.log("========= ERROR DEBUG END =========");
-//       }
-//       toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin")
-//     }
-//     finally{
-//       setFetchLoading(false)
-//     }
-//   }
-
-//   useEffect(()=>{
-//     if(searchInput)  suggestionAccounts()
-//   },[searchInput])
-
-//   return (
-//     <div>AddEnquiryB2B</div>
-//   )
-// }
-
-// export default AddEnquiryB2B
