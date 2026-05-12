@@ -5,12 +5,12 @@
 import React, { lazy } from "react";
 import { Route } from "react-router-dom";
 import RoleRoute from "../utils/RoleRoutes";
-import ViewB2BAccount from "../components/Accounts/View Account/ViewB2BAccount";
-import ViewB2CAccount from "../components/Accounts/View Account/ViewB2CAccount";
-import EditB2BAccount from "../components/Accounts/Edit Account/EditB2BAccount";
-import EditB2CAccount from "../components/Accounts/Edit Account/EditB2CAccount";
 import Enquiries from "../pages/Enquiries";
 import AddEnquiry from "../components/Enquiries/Add Enquiry/AddEnquiry";
+import ViewB2BEnquiry from "../components/Enquiries/View Enquiry/ViewB2BEnquiry";
+import ViewB2CEnquiry from "../components/Enquiries/View Enquiry/ViewB2CEnquiry";
+import EditB2BEnquiry from "../components/Enquiries/Edit Enquiry/EditB2BEnquiry";
+import EditB2CEnquiry from "../components/Enquiries/Edit Enquiry/EditB2CEnquiry";
 
 // 🔥 Lazy imports
 const Accounts = lazy(() => import("../pages/Accounts"));
@@ -36,41 +36,41 @@ export const EnquiriesRoutes = (
       }
     />
 
-    {/* <Route
-      path="accounts/view-b2b/:accountId"
+    <Route
+      path="enquiries/view-b2b/:enquiryId"
       element={
         <RoleRoute allowedRoles={["org_admin"]}>
-          <ViewB2BAccount />
+          <ViewB2BEnquiry />
         </RoleRoute>
       }
     />
 
     <Route
-      path="accounts/view-b2c/:accountId"
+      path="enquiries/view-b2c/:enquiryId"
       element={
         <RoleRoute allowedRoles={["org_admin"]}>
-          <ViewB2CAccount />
+          <ViewB2CEnquiry />
         </RoleRoute>
       }
     />
 
     <Route
-      path="accounts/update-b2b/:accountId"
+      path="enquiries/edit-b2b/:enquiryId"
       element={
         <RoleRoute allowedRoles={["org_admin"]}>
-          <EditB2BAccount />
+          <EditB2BEnquiry />
         </RoleRoute>
       }
     />
 
     <Route
-      path="accounts/update-b2c/:accountId"
+      path="enquiries/edit-b2c/:enquiryId"
       element={
         <RoleRoute allowedRoles={["org_admin"]}>
-          <EditB2CAccount />
+          <EditB2CEnquiry />
         </RoleRoute>
       }
-    /> */}
+    />
 
   </>
 );

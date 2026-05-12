@@ -12,7 +12,7 @@ import { useNavigate } from 'react-router-dom'
 import { useEnquiryHooks } from '../../../hooks/useEnquiryHooks';
 import EnquiryTable from './EnquiryTable';
 
-const SOURCE_OPTIONS = ['Instagram', 'Referral', 'Direct'];
+const STATUS_OPTIONS = ['New', 'In Progress', 'Warm' ,'Won', 'Lost'];
 
 
 function B2CEnquries() {
@@ -133,16 +133,16 @@ function B2CEnquries() {
                         cursor: 'pointer', outline: 'none', minWidth: '140px',
                     }}
                 >
-                    <option value="">All Sources</option>
-                    {SOURCE_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+                    <option value="">All Status</option>
+                    {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
             </div>
 
             <EnquiryTable
                 data={filtered || []}
                 fetchLoading={fetchLoading}
-                onView={(row) => navigate(`view-b2b/${row?._id}`)}
-                onEdit={(row) => navigate(`edit-b2b/${row?._id}`)}
+                onView={(row) => navigate(`view-b2c/${row?._id}`)}
+                onEdit={(row) => navigate(`edit-b2c/${row?._id}`)}
                 onDelete={(row) => {
                     // wire your delete handler here
                     console.log('delete', row._id);

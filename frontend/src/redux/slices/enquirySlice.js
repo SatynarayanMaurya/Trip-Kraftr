@@ -135,37 +135,14 @@ export const enquirySlice = createSlice({
             state.b2cAccountPerPages = action.payload;
         },
 
-        clearB2BAccounts: (state, action) => {
-            state.b2bAccountsByPage = {}
+        clearB2BEnquiries: (state, action) => {
+            state.b2bEnquiriesByPage = {}
         },
 
-        clearB2CAccounts: (state, action) => {
-            state.b2cAccountsByPage = {}
+        clearB2CEnquiries: (state, action) => {
+            state.b2cEnquiriesByPage = {}
         },
 
-        setB2BAccountById: (state, action) => {
-            const { _id, data } = action.payload;
-
-            if (!_id) return;
-
-            if (!state.b2bAccountsByIds) {
-                state.b2bAccountsByIds = {};
-            }
-
-            state.b2bAccountsByIds[_id] = data;
-        },
-
-        setB2CAccountById: (state, action) => {
-            const { _id, data } = action.payload;
-
-            if (!_id) return;
-
-            if (!state.b2cAccountsByIds) {
-                state.b2cAccountsByIds = {};
-            }
-
-            state.b2cAccountsByIds[_id] = data;
-        },
 
 
 
@@ -180,7 +157,9 @@ export const {
     addNewB2BEnquiry,
     addNewB2CEnquiry,
     setB2BEnquiriesByPage,
-    setB2CEnquiriesByPage
+    setB2CEnquiriesByPage,
+    clearB2BEnquiries,
+    clearB2CEnquiries
 
 
 } = enquirySlice.actions

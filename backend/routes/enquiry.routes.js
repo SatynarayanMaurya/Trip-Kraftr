@@ -1,8 +1,9 @@
 import express from "express";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
 import { roleMiddleware } from "../middlewares/role.middleware.js";
-import { getB2BEnquiry, getB2CEnquiry, searchB2BAccountsForEnquiry, searchB2BEnquiry, searchB2CAccountsForEnquiry, searchB2CEnquiry } from "../controllers/Enquiry/getEnquiry.controller.js";
+import { getB2BEnquiry, getB2BEnquiryById, getB2CEnquiry, getB2CEnquiryById, searchB2BAccountsForEnquiry, searchB2BEnquiry, searchB2CAccountsForEnquiry, searchB2CEnquiry } from "../controllers/Enquiry/getEnquiry.controller.js";
 import { addB2BEnquiry, addB2CEnquiry } from "../controllers/Enquiry/createEnquiry.controller.js";
+import { updateB2BEnquiryById, updateB2CEnquiryById } from "../controllers/Enquiry/updateEnquiry.controller.js";
 const enquiryRouter = express.Router()
 
 
@@ -17,8 +18,10 @@ enquiryRouter.get("/search-b2c-enquiry",authMiddleware,roleMiddleware(["org_admi
 // enquiryRouter.get("/search-b2c-accounts",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),searchB2CAccounts)
 enquiryRouter.get("/get-searched-B2B-Accounts-For-Enquiry",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),searchB2BAccountsForEnquiry)
 enquiryRouter.get("/get-searched-B2C-Accounts-For-Enquiry",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),searchB2CAccountsForEnquiry)
-// enquiryRouter.get("/get-b2c-account-by-id/:accountId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),getB2CAccountById)
-// enquiryRouter.put("/update-b2b-account-by-id/:accountId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),updateB2BAccount)
+enquiryRouter.get("/get-b2b-enquiry-by-id/:enquiryId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),getB2BEnquiryById)
+enquiryRouter.get("/get-b2c-enquiry-by-id/:enquiryId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),getB2CEnquiryById)
+enquiryRouter.put("/update-b2b-enquiry-by-id/:enquiryId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),updateB2BEnquiryById)
+enquiryRouter.put("/update-b2c-enquiry-by-id/:enquiryId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),updateB2CEnquiryById)
 // enquiryRouter.put("/update-b2c-account-by-id/:accountId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),updateB2CAccount)
 // enquiryRouter.patch("/update-b2b-account-status-by-id/:accountId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),updateB2BStatus)
 // enquiryRouter.patch("/update-b2c-account-status-by-id/:accountId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),updateB2CStatus)

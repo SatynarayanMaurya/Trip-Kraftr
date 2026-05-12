@@ -8,7 +8,7 @@ const BLUE = '#18305C';
 // Status badge colors
 const STATUS_STYLE = {
   'New':         { bg: '#EFF6FF', color: '#3B82F6' },
-  'In Progress': { bg: '#F3F4F6', color: '#374151' },
+  'In Progress': { bg: '#FEF3C7', color: '#B45309' },
   'Warm':        { bg: '#FFF7ED', color: '#EA580C' },
   'Won':         { bg: '#F0FDF4', color: '#16A34A' },
   'Lost':        { bg: '#FFF1F2', color: '#E11D48' },

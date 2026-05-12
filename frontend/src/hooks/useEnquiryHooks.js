@@ -3,7 +3,7 @@ import { apiConnector } from '../services/apiConnector'
 import { useDispatch, useSelector } from 'react-redux'
 import { setLoading } from '../redux/slices/userSlice'
 import { enquiriessEndpoints } from '../services/Apis/enquiriesApis';
-import { addNewB2BEnquiry, addNewB2CEnquiry, setB2BEnquiriesByPage, setB2CEnquiriesByPage } from '../redux/slices/enquirySlice';
+import { addNewB2BEnquiry, addNewB2CEnquiry, clearB2BEnquiries, clearB2CEnquiries, setB2BEnquiriesByPage, setB2CEnquiriesByPage } from '../redux/slices/enquirySlice';
 
 export const useEnquiryHooks = () => {
     const dispatch = useDispatch();
@@ -75,6 +75,25 @@ export const useEnquiryHooks = () => {
     }
     
     // For getting accounts with paginated
+    const getb2bEnquiryById = async (enquiryId) => {
+        try {
+
+            dispatch(setLoading(true))
+
+            const response = await apiConnector(
+                "GET",
+                `${enquiriessEndpoints.GET_B2B_ENQUIRY_BY_ID}/${enquiryId}`
+            )
+            return response
+
+        } catch (error) {
+            throw error
+        } finally {
+            dispatch(setLoading(false))
+        }
+    }
+    
+    // For getting accounts with paginated
     const getb2cEnquiries = async (page = 1, limit = 5) => {
         try {
             const cachedPage = b2cEnquiriesByPage?.[page]
@@ -107,11 +126,82 @@ export const useEnquiryHooks = () => {
     }
 
 
+        
+    // For getting accounts with paginated
+    const getb2cEnquiryById = async (enquiryId) => {
+        try {
+
+            dispatch(setLoading(true))
+
+            const response = await apiConnector(
+                "GET",
+                `${enquiriessEndpoints.GET_B2C_ENQUIRY_BY_ID}/${enquiryId}`
+            )
+            return response
+
+        } catch (error) {
+            throw error
+        } finally {
+            dispatch(setLoading(false))
+        }
+    }
+
+        
+    // For getting accounts with paginated
+    const updateB2BEnquiryById = async (enquiryDetails) => {
+        try {
+
+            dispatch(setLoading(true))
+
+            const response = await apiConnector(
+                "PUT",
+                `${enquiriessEndpoints.UPDATE_B2B_ENQUIRY_BY_ID}/${enquiryDetails?._id}`,enquiryDetails
+            )
+
+            if(response?.data?.success){
+                dispatch(clearB2BEnquiries())
+            }
+            return response
+
+        } catch (error) {
+            throw error
+        } finally {
+            dispatch(setLoading(false))
+        }
+    }
+        
+    // For getting accounts with paginated
+    const updateB2CEnquiryById = async (enquiryDetails) => {
+        try {
+
+            dispatch(setLoading(true))
+
+            const response = await apiConnector(
+                "PUT",
+                `${enquiriessEndpoints.UPDATE_B2C_ENQUIRY_BY_ID}/${enquiryDetails?._id}`,enquiryDetails
+            )
+
+            if(response?.data?.success){
+                dispatch(clearB2CEnquiries())
+            }
+            return response
+
+        } catch (error) {
+            throw error
+        } finally {
+            dispatch(setLoading(false))
+        }
+    }
+
 
     return {
         addEnquiryB2B,
         addEnquiryB2C,
         getb2bEnquiries,
-        getb2cEnquiries
+        getb2cEnquiries,
+        getb2bEnquiryById,
+        getb2cEnquiryById,
+        updateB2BEnquiryById,
+        updateB2CEnquiryById
     };
 };

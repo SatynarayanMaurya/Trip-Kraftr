@@ -12,7 +12,8 @@ import { useNavigate } from 'react-router-dom'
 import { useEnquiryHooks } from '../../../hooks/useEnquiryHooks';
 import EnquiryTable from './EnquiryTable';
 
-const SOURCE_OPTIONS = ['Instagram', 'Referral', 'Direct'];
+// const SOURCE_OPTIONS = ['Instagram', 'Referral', 'Direct'];
+const STATUS_OPTIONS = ['New', 'In Progress', 'Warm' ,'Won', 'Lost'];
 
 
 function B2BEnquiries() {
@@ -67,6 +68,7 @@ function B2BEnquiries() {
         dispatch(setB2BAccountPageLimit(Number(val)))
     }
 
+    // The source is working as statsu filter
     const searchEnquiry = async () => {
         try {
             setFetchLoading(true)
@@ -133,8 +135,8 @@ function B2BEnquiries() {
                         cursor: 'pointer', outline: 'none', minWidth: '140px',
                     }}
                 >
-                    <option value="">All Sources</option>
-                    {SOURCE_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+                    <option value="">All Status</option>
+                    {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
             </div>
 

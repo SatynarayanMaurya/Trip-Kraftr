@@ -57,7 +57,7 @@ function Enquiries() {
               color: account === type ? 'white' : '#6b7280',
             }}
           >
-            {type === 'b2b' ? 'B2B Accounts' : 'B2C Accounts'}
+            {type === 'b2b' ? 'B2B Enquiries' : 'B2C Enquiries'}
           </button>
         ))}
       </div>
