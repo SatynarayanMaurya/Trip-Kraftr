@@ -192,6 +192,52 @@ export const useEnquiryHooks = () => {
             dispatch(setLoading(false))
         }
     }
+        
+    // For getting accounts with paginated
+    const deleteB2BEnquiryById = async (enquiryId) => {
+        try {
+
+            dispatch(setLoading(true))
+
+            const response = await apiConnector(
+                "DELETE",
+                `${enquiriessEndpoints.DELETE_B2B_ENQUIRY_BY_ID}/${enquiryId}`
+            )
+
+            if(response?.data?.success){
+                dispatch(clearB2BEnquiries())
+            }
+            return response
+
+        } catch (error) {
+            throw error
+        } finally {
+            dispatch(setLoading(false))
+        }
+    }
+        
+    // For getting accounts with paginated
+    const deleteB2CEnquiryById = async (enquiryId) => {
+        try {
+
+            dispatch(setLoading(true))
+
+            const response = await apiConnector(
+                "DELETE",
+                `${enquiriessEndpoints.DELETE_B2C_ENQUIRY_BY_ID}/${enquiryId}`
+            )
+
+            if(response?.data?.success){
+                dispatch(clearB2CEnquiries())
+            }
+            return response
+
+        } catch (error) {
+            throw error
+        } finally {
+            dispatch(setLoading(false))
+        }
+    }
 
 
     return {
@@ -202,6 +248,8 @@ export const useEnquiryHooks = () => {
         getb2bEnquiryById,
         getb2cEnquiryById,
         updateB2BEnquiryById,
-        updateB2CEnquiryById
+        updateB2CEnquiryById,
+        deleteB2BEnquiryById,
+        deleteB2CEnquiryById
     };
 };

@@ -4,6 +4,7 @@ import { roleMiddleware } from "../middlewares/role.middleware.js";
 import { getB2BEnquiry, getB2BEnquiryById, getB2CEnquiry, getB2CEnquiryById, searchB2BAccountsForEnquiry, searchB2BEnquiry, searchB2CAccountsForEnquiry, searchB2CEnquiry } from "../controllers/Enquiry/getEnquiry.controller.js";
 import { addB2BEnquiry, addB2CEnquiry } from "../controllers/Enquiry/createEnquiry.controller.js";
 import { updateB2BEnquiryById, updateB2CEnquiryById } from "../controllers/Enquiry/updateEnquiry.controller.js";
+import { deleteB2BEnquiryById, deleteB2CEnquiryById } from "../controllers/Enquiry/deleteEnquiry.controller.js";
 const enquiryRouter = express.Router()
 
 
@@ -22,8 +23,7 @@ enquiryRouter.get("/get-b2b-enquiry-by-id/:enquiryId",authMiddleware,roleMiddlew
 enquiryRouter.get("/get-b2c-enquiry-by-id/:enquiryId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),getB2CEnquiryById)
 enquiryRouter.put("/update-b2b-enquiry-by-id/:enquiryId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),updateB2BEnquiryById)
 enquiryRouter.put("/update-b2c-enquiry-by-id/:enquiryId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),updateB2CEnquiryById)
-// enquiryRouter.put("/update-b2c-account-by-id/:accountId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),updateB2CAccount)
-// enquiryRouter.patch("/update-b2b-account-status-by-id/:accountId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),updateB2BStatus)
-// enquiryRouter.patch("/update-b2c-account-status-by-id/:accountId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),updateB2CStatus)
+enquiryRouter.delete("/delete-b2b-enquiry-by-id/:enquiryId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),deleteB2BEnquiryById)
+enquiryRouter.delete("/delete-b2c-enquiry-by-id/:enquiryId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),deleteB2CEnquiryById)
 
 export default enquiryRouter

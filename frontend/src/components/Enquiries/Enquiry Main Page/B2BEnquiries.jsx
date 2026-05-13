@@ -11,6 +11,7 @@ import { useCommonHooks } from '../../../hooks/useCommonHooks'
 import { useNavigate } from 'react-router-dom'
 import { useEnquiryHooks } from '../../../hooks/useEnquiryHooks';
 import EnquiryTable from './EnquiryTable';
+import DeleteModal from '../../DeleteModals/DeleteModal';
 
 // const SOURCE_OPTIONS = ['Instagram', 'Referral', 'Direct'];
 const STATUS_OPTIONS = ['New', 'In Progress', 'Warm' ,'Won', 'Lost'];
@@ -21,7 +22,7 @@ function B2BEnquiries() {
     const navigate = useNavigate()
     const { searchB2BEnquiry } = useCommonHooks()
     const [isUpdated, setIsUpdated] = useState(false)
-    const { getb2bEnquiries } = useEnquiryHooks()
+    const { getb2bEnquiries ,deleteB2BEnquiryById} = useEnquiryHooks()
     const [currentPage, setCurrentPage] = useState(1)
     const [searchedCurrentPage, setSearchedCurrentPage] = useState(1)
     const [isSearching, setIsSearching] = useState(false)
@@ -103,6 +104,35 @@ function B2BEnquiries() {
     const filtered = isSearching ? showSearchedEnquiry : currentPageData;
 
 
+    const [deleteEnquiryDetails, setDeleteEnquiryDetails] = useState(null)
+    const [isDeleteModal, setIsDeleteModal] = useState(false)
+    const handleDelete = (row)=>{
+        setDeleteEnquiryDetails(row)
+        setIsDeleteModal(true)
+    }
+
+
+    const deleteEnquiry = async()=>{
+        try{
+            setFetchLoading(true)
+            const response = await deleteB2BEnquiryById(deleteEnquiryDetails?._id)
+            toast.success(response?.data?.message)
+            setIsUpdated(!isUpdated)
+        }
+        catch(error){
+          if (!isProduction) {
+            console.log("========= ERROR DEBUG START =========");
+            console.log("Error:", error);
+            console.log("Response:", error?.response);
+            console.log("========= ERROR DEBUG END =========");
+          }
+          toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin")
+        }
+        finally{
+            setFetchLoading(false)
+        }
+    }
+
     return (
         <div>
 
@@ -147,7 +177,7 @@ function B2BEnquiries() {
                 onEdit={(row) => navigate(`edit-b2b/${row?._id}`)}
                 onDelete={(row) => {
                     // wire your delete handler here
-                    console.log('delete', row._id);
+                    handleDelete(row);
                 }}
             />
 
@@ -252,6 +282,14 @@ function B2BEnquiries() {
                 </div>
 
             </div>
+
+            {/* Delete Modal  */}
+            <>
+                {
+                    isDeleteModal && 
+                    <DeleteModal onClose={()=>setIsDeleteModal(false)} onDelete={deleteEnquiry} itemName = {deleteEnquiryDetails?.enquiryId} confirmText = {deleteEnquiryDetails?.enquiryId} />
+                }
+            </>
         </div>
     )
 }

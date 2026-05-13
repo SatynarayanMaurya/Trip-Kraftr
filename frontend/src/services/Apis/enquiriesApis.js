@@ -17,6 +17,8 @@ export const enquiriessEndpoints  = {
     // SEARCH_B2C_ACCOUNTS : BASE_URL + '/search-b2c-accounts',
     UPDATE_B2B_ENQUIRY_BY_ID : BASE_URL + '/update-b2b-enquiry-by-id',
     UPDATE_B2C_ENQUIRY_BY_ID : BASE_URL + '/update-b2c-enquiry-by-id',
+    DELETE_B2B_ENQUIRY_BY_ID : BASE_URL + '/delete-b2b-enquiry-by-id',
+    DELETE_B2C_ENQUIRY_BY_ID : BASE_URL + '/delete-b2c-enquiry-by-id',
     // UPDATE_B2C_ACCOUNT_BY_ID : BASE_URL + '/update-b2c-account-by-id',
     // UPDATE_B2B_ACCOUNT_STATUS_BY_ID : BASE_URL + '/update-b2b-account-status-by-id',
     // UPDATE_B2C_ACCOUNT_STATUS_BY_ID : BASE_URL + '/update-b2c-account-status-by-id',

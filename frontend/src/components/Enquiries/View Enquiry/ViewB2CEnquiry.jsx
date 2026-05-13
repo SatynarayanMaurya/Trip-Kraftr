@@ -140,9 +140,6 @@ function ViewB2CEnquiry() {
           <button onClick={()=>navigate(`/enquiries/edit-b2c/${enquiryId}`)} className="p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-500">
             <Pencil size={16} />
           </button>
-          <button className="p-2 rounded-lg hover:bg-red-50 transition-colors text-red-400">
-            <Trash2 size={16} />
-          </button>
         </div>
       </div>
 
