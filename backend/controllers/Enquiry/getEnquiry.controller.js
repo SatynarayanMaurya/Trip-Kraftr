@@ -170,7 +170,7 @@ export const getB2CEnquiryById = async (req, res) => {
 
 export const searchB2BEnquiry = async (req, res) => {
   try {
-    const { search, filter, pageLimit } = req.query;
+    const { search, filter, forParticipant } = req.query;
 
     // Account query
     const accountQuery = {
@@ -225,6 +225,10 @@ export const searchB2BEnquiry = async (req, res) => {
     if (filter) {
       query.status = filter;
     }
+
+    if(forParticipant ==='true'){
+      query.status = 'New'
+    }
     
     const searchedEnquiries = await B2BEnquiry.find(query)
       .sort({ createdAt: -1 })
@@ -249,7 +253,7 @@ export const searchB2BEnquiry = async (req, res) => {
 
 export const searchB2CEnquiry = async (req, res) => {
   try {
-    const { search, filter, pageLimit } = req.query;
+    const { search, filter, forParticipant } = req.query;
 
     // Account query
     const accountQuery = {
@@ -303,6 +307,10 @@ export const searchB2CEnquiry = async (req, res) => {
     // add status filter only if provided
     if (filter) {
       query.status = filter;
+    }
+
+    if(forParticipant ==='true'){
+      query.status = 'New'
     }
     
     const searchedEnquiries = await B2CEnquiry.find(query)

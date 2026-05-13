@@ -14,6 +14,7 @@ import { MdOutlineTravelExplore } from 'react-icons/md';
 
 import { gridTwo, cardLabelStyle, cardValueStyle, saveBtn, cancelBtn, destTag, suggestionItem, suggestionBox, spinnerStyle, searchIcon, chevronIcon } from '../Add Enquiry/CommonCssForEnquiry';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useRegionsData } from '../../../hooks/Resuable Hooks/useResuableData';
 
 // ── Constants ──────────────────────────────────────────────────────────────
 const PINK = '#ED5F8D';
@@ -69,6 +70,12 @@ function EditB2CEnquiry({ onCancel }) {
   const isProduction = useSelector(s => s.user.isProduction);
   const { searchB2CAccountsForEnquiry } = useCommonHooks?.() ?? {};
   const { updateB2CEnquiryById,getb2cEnquiryById } = useEnquiryHooks()
+  const { regions, loading: regionLoading } = useRegionsData();
+  const [suggestedDestinations, setSuggestedDestinations] = useState([])
+  useEffect(()=>{
+      if(!regions)return ;
+      setSuggestedDestinations(regions?.map(val=>val?.name))
+  },[regions])
 
   // ── search state ──
   const [searchInput, setSearchInput] = useState('');
@@ -141,7 +148,7 @@ function EditB2CEnquiry({ onCancel }) {
   const [submitLoading, setSubmitLoading] = useState(false);
 
   // ── destination filtered list ──
-  const filteredStates = INDIAN_STATES.filter(
+  const filteredStates = suggestedDestinations?.filter(
     s => !form.destinations.includes(s) &&
       s.toLowerCase().includes(destInput.toLowerCase())
   );
@@ -612,6 +619,7 @@ function EditB2CEnquiry({ onCancel }) {
               <div style={{ ...suggestionBox, maxHeight: '200px' }}>
                 {filteredStates.map(state => (
                   <div
+                    className='flex gap-2 items-center'
                     key={state}
                     onMouseDown={() => addDestination(state)}
                     style={suggestionItem}

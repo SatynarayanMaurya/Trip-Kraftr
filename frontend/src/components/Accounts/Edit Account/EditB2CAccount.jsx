@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { useNavigate, useParams } from 'react-router-dom';
 import {Save} from 'lucide-react'
+import { useRegionsData } from '../../../hooks/Resuable Hooks/useResuableData';
 const PINK = '#ED5F8D';
 const BLUE = '#18305C';
 
@@ -32,8 +33,14 @@ function DestinationSelect({ selected, onChange }) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const ref = useRef();
+  const { regions, loading: regionLoading } = useRegionsData();
+  const [suggestedDestinations, setSuggestedDestinations] = useState([])
+  useEffect(()=>{
+      if(!regions)return ;
+      setSuggestedDestinations(regions?.map(val=>val?.name))
+  },[regions])
 
-  const available = INDIAN_STATES?.filter(s =>
+  const available = suggestedDestinations?.filter(s =>
     !selected?.includes(s) && s.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -180,7 +187,6 @@ function EditB2CAccount() {
     }
     try{
         setSubmitLoading(true)
-        console.log("form : ",form)
         const payload = {
           ...form,
           _id:accountDetails?._id

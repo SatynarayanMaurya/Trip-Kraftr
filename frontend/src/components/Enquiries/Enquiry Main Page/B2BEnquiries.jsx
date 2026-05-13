@@ -73,7 +73,7 @@ function B2BEnquiries() {
         try {
             setFetchLoading(true)
             setIsSearching(true)
-            const response = await searchB2BEnquiry(search, sourceFilter, pageLimit);
+            const response = await searchB2BEnquiry(search, sourceFilter);
             setSearchedEnquiries(response?.data?.searchedEnquiries)
         }
         catch (error) {
@@ -97,7 +97,7 @@ function B2BEnquiries() {
         else {
             setIsSearching(false)
         }
-    }, [search, sourceFilter, pageLimit])
+    }, [search, sourceFilter])
 
 
     const filtered = isSearching ? showSearchedEnquiry : currentPageData;

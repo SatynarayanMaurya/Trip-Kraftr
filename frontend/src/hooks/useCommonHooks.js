@@ -219,12 +219,12 @@ export const useCommonHooks = () => {
           // ---------- Subregion Search for org ( ) ----------
     const searchB2BEnquiry = debounceSearch(
         "searchB2BEnquiry",
-        (searchTerm,filter,pageLimit=10) => {
+        (searchTerm,filter,forParticipant =false) => {
           const params = new URLSearchParams();
       
           if (searchTerm) params.append("search", searchTerm);
           if (filter) params.append("filter", filter);
-          if (pageLimit) params.append("pageLimit", pageLimit);
+          params.append("forParticipant", forParticipant);
       
           return apiConnector(
             "GET",
@@ -237,12 +237,12 @@ export const useCommonHooks = () => {
           // ---------- Subregion Search for org ( ) ----------
     const searchB2CEnquiry = debounceSearch(
         "searchB2CEnquiry",
-        (searchTerm,filter,pageLimit=10) => {
+        (searchTerm,filter,forParticipant=false) => {
           const params = new URLSearchParams();
       
           if (searchTerm) params.append("search", searchTerm);
           if (filter) params.append("filter", filter);
-          if (pageLimit) params.append("pageLimit", pageLimit);
+          params.append("forParticipant", forParticipant);
       
           return apiConnector(
             "GET",

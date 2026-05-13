@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import {Save} from 'lucide-react'
+import { useRegionsData } from '../../hooks/Resuable Hooks/useResuableData';
 const PINK = '#ED5F8D';
 
 const INDIAN_STATES = [
@@ -31,8 +32,14 @@ function DestinationSelect({ selected, onChange }) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const ref = useRef();
+  const { regions, loading: regionLoading } = useRegionsData();
+  const [suggestedDestinations, setSuggestedDestinations] = useState([])
+  useEffect(()=>{
+      if(!regions)return ;
+      setSuggestedDestinations(regions?.map(val=>val?.name))
+  },[regions])
 
-  const available = INDIAN_STATES.filter(s =>
+  const available = suggestedDestinations?.filter(s =>
     !selected.includes(s) && s.toLowerCase().includes(search.toLowerCase())
   );
 

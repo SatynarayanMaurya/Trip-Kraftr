@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { EditIcon, PlusIcon, EyeIcon, WhatsAppIcon,PencilIcon } from '../../Icons/Icons';
+import AddParticipant from './AddParticipant';
 
 const PINK = '#ED5F8D';
 const BLUE = '#18305C';
@@ -136,6 +137,7 @@ const actionBtnStyle = {
 // ─── Main component ───────────────────────────────────────────────────────────
 function Participants({ participants = DUMMY_PARTICIPANTS }) {
     const [isMobile, setIsMobile] = useState(false);
+    const [isAddParticipant, setIsAddParticipant] = useState(false)
 
     React.useEffect(() => {
         const check = () => setIsMobile(window.innerWidth < 768);
@@ -147,7 +149,8 @@ function Participants({ participants = DUMMY_PARTICIPANTS }) {
     const handleEdit     = (p) => console.log('Edit',      p);
     const handleView     = (p) => console.log('View',      p);
     const handleWhatsApp = (p) => window.open(`https://wa.me/${p.contact}`, '_blank');
-    const handleAdd      = ()  => console.log('Add participant');
+    // const handleAdd      = ()  => setIsAddParticipant(true);
+    const handleAdd      = ()  => console.log("Add");
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -281,6 +284,14 @@ function Participants({ participants = DUMMY_PARTICIPANTS }) {
                     ))}
                 </div>
             )}
+
+            {/* Add Participant */}
+            <>
+                {
+                    isAddParticipant && 
+                    <AddParticipant closeModal = {()=>setIsAddParticipant(false)}/>
+                }
+            </>
         </div>
     );
 }
