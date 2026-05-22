@@ -1,7 +1,7 @@
 import GroupTrip from "../../models/groupTrip.model.js"
 import GroupTripSummary from "../../models/groupTripSummary.model.js"
 import mongoose from "mongoose";
-
+import GroupTripParticipant from '../../models/Group Trip/groupTripParticipants.model.js'
 
 export const updateGroupTripSummaryById = async (req, res) => {
     try {
@@ -28,6 +28,7 @@ export const updateGroupTripSummaryById = async (req, res) => {
 
         if (netProfit !== undefined) updateFields["financialCloseup.netProfit"] = netProfit;
         if (totalHotelCost !== undefined) updateFields["financialCloseup.totalHotelCost"] = totalHotelCost;
+        if (totalHotelCost !== undefined) updateFields["financialOverview.totalCost"] = totalHotelCost + totalOtherCost + totalVehicleCost;
         if (totalOtherCost !== undefined) updateFields["financialCloseup.totalOtherCost"] = totalOtherCost;
         if (totalVehicleCost !== undefined) updateFields["financialCloseup.totalVehicleCost"] = totalVehicleCost;
 
@@ -38,7 +39,6 @@ export const updateGroupTripSummaryById = async (req, res) => {
             });
         }
 
-        console.log("groupTripId,_id : ",groupTripId, _id)
         // ✅ Update
         const updatedSummary = await GroupTripSummary.findOneAndUpdate(
             {
@@ -109,10 +109,10 @@ export const updateGroupTripById = async (req, res) => {
                     path: 'itineraryBuilder.daysDetails.placeDetails.placeId',
                     select: "_id placeName imageUrl notes subRegionId",
                     populate: {
-                      path: 'subRegionId',
-                      select: "_id name" 
+                        path: 'subRegionId',
+                        select: "_id name"
                     }
-                  }),
+                }),
 
             GroupTripSummary.findOneAndUpdate(
                 {
@@ -150,35 +150,233 @@ export const updateGroupTripById = async (req, res) => {
     }
 }
 
-export const updateGroupTripStatus = async(req,res)=>{
-    try{
-        const {status} = req.body;
-        const {groupTripId} = req.params;
-        if(!status || !groupTripId){
+export const updateGroupTripStatus = async (req, res) => {
+    try {
+        const { status } = req.body;
+        const { groupTripId } = req.params;
+        if (!status || !groupTripId) {
             return res.status(400).json({
-                success:false,
-                message:"Required field are missing"
+                success: false,
+                message: "Required field are missing"
             })
         }
 
-        const updatedGroupTrip = await GroupTrip.findOneAndUpdate({org_id:req.user.org_id,_id:groupTripId},{$set:{status}},{new:true})
-        if(!updatedGroupTrip){
+        const updatedGroupTrip = await GroupTrip.findOneAndUpdate({ org_id: req.user.org_id, _id: groupTripId }, { $set: { status } }, { new: true })
+        if (!updatedGroupTrip) {
             return res.status(404).json({
-                success:false,
-                message:"Group Trip not found",
+                success: false,
+                message: "Group Trip not found",
             })
         }
 
         return res.status(200).json({
-            success:true,
-            message:"Group Trip Status Updated",
+            success: true,
+            message: "Group Trip Status Updated",
             updatedGroupTrip
         })
     }
-    catch(error){
+    catch (error) {
         return res.status(500).json({
+            success: false,
+            message: error?.message || "Internal Server Errror"
+        })
+    }
+}
+
+
+export const updateGroupTripParticipantById = async (req, res) => {
+    try {
+        const { groupTripId } = req.params;
+        if (!groupTripId) {
+            return res.status(400).json({
+                success: false,
+                message: "Group Trip id not found"
+            })
+        }
+        const { _id, contact, dietaryPreference, status, enquiryType, enquiryId, occupancy, paidAmount, saleAmount, totalMembers, travellerName, visaStatus } = req.body;
+
+
+        if (!enquiryId || !groupTripId || !travellerName || !saleAmount || !contact) {
+            return res.status(400).json({
+                success: false,
+                message: "Required field are missing"
+            })
+        }
+
+        const findParticipant = await GroupTripParticipant.findOne({ org_id: req.user.org_id, groupTripId, _id })
+        if (!findParticipant) {
+            return res.status(4004).json({
+                success: false,
+                message: "Participant not found"
+            })
+        }
+
+
+            if (status !== 'enquiry' && findParticipant?.status !== 'enquiry') {
+
+                // 1. Get current document
+                const summary = await GroupTripSummary.findOne({
+                    org_id: req.user.org_id,
+                    groupTripId
+                });
+
+                if (!summary) return;
+                // return
+
+                // 2. Calculate new values safely
+
+                const updatedPotentialRevenue = (summary.paymentSummary?.potentialRevenue || 0) + Number(saleAmount) - findParticipant?.saleAmount;
+
+                const updatedTotalPaid = (summary.paymentSummary?.totalPaid || 0) + Number(paidAmount) - findParticipant?.paidAmount;
+
+                const updatedTotalRevenue = (summary.financialOverview?.totalRevenue || 0) + Number(saleAmount) - findParticipant?.saleAmount;
+
+                const updatedTotalBalance = updatedPotentialRevenue - updatedTotalPaid;
+
+                const updatedProfitLoss = updatedTotalRevenue - (summary.financialOverview?.totalCost || 0);
+
+                // 3. Save back
+                await GroupTripSummary.updateOne(
+                    {
+                        org_id: req.user.org_id,
+                        groupTripId
+                    },
+                    {
+                        $set: {
+                            "paymentSummary.potentialRevenue": updatedPotentialRevenue,
+                            "paymentSummary.totalPaid": updatedTotalPaid,
+                            "paymentSummary.totalBalance": updatedTotalBalance,
+
+                            "financialOverview.totalRevenue": updatedTotalRevenue,
+                            "financialOverview.totalProfitLoss": updatedProfitLoss
+                        }
+                    }
+                );
+            }
+            else if (status !== 'enquiry' && findParticipant?.status === 'enquiry') {
+                // 1. Get current document
+                const summary = await GroupTripSummary.findOne({
+                    org_id: req.user.org_id,
+                    groupTripId
+                });
+
+                if (!summary) return;
+                // return
+
+                // 2. Calculate new values safely
+                const updatedConfirmedBookings = (summary.bookingSummary?.confirmedBookings || 0) + 1;
+
+                const updatedAvailableSeats = (summary.bookingSummary?.availableSeats || 0) - 1;
+
+                const updatedPotentialRevenue = (summary.paymentSummary?.potentialRevenue || 0) + Number(saleAmount);
+
+                const updatedTotalPaid = (summary.paymentSummary?.totalPaid || 0) + Number(paidAmount);
+
+                const updatedTotalRevenue = (summary.financialOverview?.totalRevenue || 0) + Number(saleAmount);
+
+                const updatedTotalBalance = updatedPotentialRevenue - updatedTotalPaid;
+
+                const updatedProfitLoss = updatedTotalRevenue - (summary.financialOverview?.totalCost || 0);
+
+                // 3. Save back
+                await GroupTripSummary.updateOne(
+                    {
+                        org_id: req.user.org_id,
+                        groupTripId
+                    },
+                    {
+                        $set: {
+                            "bookingSummary.confirmedBookings": updatedConfirmedBookings,
+                            "bookingSummary.availableSeats": updatedAvailableSeats,
+
+                            "paymentSummary.potentialRevenue": updatedPotentialRevenue,
+                            "paymentSummary.totalPaid": updatedTotalPaid,
+                            "paymentSummary.totalBalance": updatedTotalBalance,
+
+                            "financialOverview.totalRevenue": updatedTotalRevenue,
+                            "financialOverview.totalProfitLoss": updatedProfitLoss
+                        }
+                    }
+                );
+            }
+            else if (status === 'enquiry' && findParticipant?.status !== 'enquiry') {
+                // 1. Get current document
+                const summary = await GroupTripSummary.findOne({
+                    org_id: req.user.org_id,
+                    groupTripId
+                });
+
+                if (!summary) return;
+                // return
+
+                // 2. Calculate new values safely
+                const updatedConfirmedBookings = (summary.bookingSummary?.confirmedBookings || 0) - 1;
+
+                const updatedAvailableSeats = (summary.bookingSummary?.availableSeats || 0)+ 1;
+
+                const updatedPotentialRevenue = (summary.paymentSummary?.potentialRevenue || 0) - Number(findParticipant?.saleAmount);
+
+                const updatedTotalPaid = (summary.paymentSummary?.totalPaid || 0) - Number(findParticipant?.paidAmount);
+
+                const updatedTotalRevenue = (summary.financialOverview?.totalRevenue || 0) - Number(findParticipant?.saleAmount);
+
+                const updatedTotalBalance = updatedPotentialRevenue - updatedTotalPaid;
+
+                const updatedProfitLoss = updatedTotalRevenue - (summary.financialOverview?.totalCost || 0);
+
+                // 3. Save back
+                await GroupTripSummary.updateOne(
+                    {
+                        org_id: req.user.org_id,
+                        groupTripId
+                    },
+                    {
+                        $set: {
+                            "bookingSummary.confirmedBookings": updatedConfirmedBookings,
+                            "bookingSummary.availableSeats": updatedAvailableSeats,
+
+                            "paymentSummary.potentialRevenue": updatedPotentialRevenue,
+                            "paymentSummary.totalPaid": updatedTotalPaid,
+                            "paymentSummary.totalBalance": updatedTotalBalance,
+
+                            "financialOverview.totalRevenue": updatedTotalRevenue,
+                            "financialOverview.totalProfitLoss": updatedProfitLoss
+                        }
+                    }
+                );
+            }
+
+        const updatedParticipant = await GroupTripParticipant.findOneAndUpdate(
+            {
+                org_id:req.user.org_id,
+                groupTripId,
+                _id
+            },
+            {
+                $set:{
+                    contact, 
+                    dietaryPreference, 
+                    status, 
+                    occupancy, 
+                    paidAmount, 
+                    saleAmount, 
+                    totalMembers, 
+                    travellerName, 
+                    visaStatus
+                }
+            },{new:true}
+        )
+
+        return res.status(200).json({
             success:false,
-            message:error?.message||"Internal Server Errror"
+            message:"Participant updated ",
+            updatedParticipant
+        })
+    }
+    catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error?.message || "Internal Server Error"
         })
     }
 }

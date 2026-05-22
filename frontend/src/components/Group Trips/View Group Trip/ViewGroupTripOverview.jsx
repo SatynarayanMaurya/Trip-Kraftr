@@ -59,7 +59,7 @@ function ViewGroupTripOverview({ groupTripDetails, groupTripSummary,setIsFinanci
     // Viability = confirmed bookings / min seats * 100
     const confirmedBookings = groupTripSummary?.bookingSummary?.confirmedBookings ?? 0;
     // const viabilityPct = minSeats > 0 ? Math.min(Math.round((confirmedBookings / minSeats) * 100), 100) : 0;
-    const viabilityPct = minSeats > 0 ? Math.min(Math.round((minSeats / totalSeats) * 100), 100) : 0;
+    const viabilityPct = minSeats > 0 ? Math.min(Math.round((confirmedBookings / minSeats) * 100), 100) : 0;
 
     const viabilityStatus = viabilityPct >= 100 ? 'Confirmed' : viabilityPct >= 60 ? 'Pending Minimum seats' : 'Pending Minimum seats';
     const viabilityStatusColor = viabilityPct >= 100 ? '#448B47' : '#FF9800';

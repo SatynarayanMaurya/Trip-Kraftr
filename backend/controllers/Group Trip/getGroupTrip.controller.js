@@ -1,7 +1,7 @@
 import GroupTrip from "../../models/groupTrip.model.js"
 import GroupTripSummary from "../../models/groupTripSummary.model.js"
 import mongoose from "mongoose";
-
+import GroupTripParticipant from '../../models/Group Trip/groupTripParticipants.model.js'
 
 export const getGroupTrips = async (req, res) => {
   try {
@@ -267,6 +267,43 @@ export const searchGroupTrip = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: error?.message || "Internal Server Error"
+    });
+  }
+};
+
+
+export const getAllGroupTripParticipant = async (req, res) => {
+  try {
+    const { groupTripId } = req.params;
+
+    if (!groupTripId) {
+      return res.status(400).json({
+        success: false,
+        message: "Group Trip id not found",
+      });
+    }
+
+    const allParticipants = await GroupTripParticipant.find({
+      org_id: req.user.org_id,
+      groupTripId,
+    }).populate({
+      path: "enquiryId",
+      select: "_id accountId",
+      populate: {
+        path: "accountId",
+        select:"_id fullName businessName "
+      },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "All Participant found",
+      allParticipants,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error?.message || "Internal Server Error",
     });
   }
 };

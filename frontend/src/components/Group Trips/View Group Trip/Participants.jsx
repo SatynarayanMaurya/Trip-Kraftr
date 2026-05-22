@@ -1,65 +1,16 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EditIcon, PlusIcon, EyeIcon, WhatsAppIcon,PencilIcon } from '../../Icons/Icons';
 import AddParticipant from './AddParticipant';
+import { Avatar, ParticipantCard, StatusBadge } from './ParticipantsHelper';
+import { useGroupTripHooks } from '../../../hooks/useGroupTripHooks';
+import { useParams } from 'react-router-dom';
+import EditParticipant from '../Edit Group Trip/EditParticipant';
 
 const PINK = '#ED5F8D';
 const BLUE = '#18305C';
 
 
 
-// ─── Status badge ─────────────────────────────────────────────────────────────
-const STATUS_MAP = {
-    paid:    { label: 'Paid',    bg: '#E8F5E9', color: '#388E3C', border: '#A5D6A7' },
-    pending: { label: 'Pending', bg: '#FFF9C4', color: '#F9A825', border: '#FFE082' },
-    partial: { label: 'Partial', bg: '#FFF3E0', color: '#E65100', border: '#FFCC80' },
-    unpaid:  { label: 'Unpaid',  bg: '#FFDDE6', color: PINK,      border: '#F48FB1' },
-};
-
-function StatusBadge({ status = 'paid' }) {
-    const cfg = STATUS_MAP[status] ?? STATUS_MAP.paid;
-    return (
-        <span style={{
-            background: cfg.bg, color: cfg.color,
-            border: `1px solid ${cfg.border}`,
-            fontSize: '12px', fontWeight: '700',
-            padding: '4px 14px', borderRadius: '20px',
-            whiteSpace: 'nowrap',
-        }}>
-            {cfg.label}
-        </span>
-    );
-}
-
-// ─── Avatar ───────────────────────────────────────────────────────────────────
-function Avatar({ name, src }) {
-    const initials = name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) ?? 'U';
-    // const colors = ['#ED5F8D', '#4C78CA', '#2E7D32', '#FF9800', '#7B1FA2'];
-    const colors = ['#ED5F8D', '#4C78CA', '#4CAF50', '#FF9800', '#7B1FA2'];
-    const colorIdx = (name?.charCodeAt(0) ?? 0) % colors.length;
-
-    if (src) return (
-        <img src={src} alt={name} style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
-    );
-    return (
-        <div style={{
-            width: '36px', height: '36px', borderRadius: '50%', flexShrink: 0,
-            background: colors[colorIdx], display: 'flex', alignItems: 'center',
-            justifyContent: 'center', fontSize: '13px', fontWeight: '700', color: 'white',
-        }}>
-            {initials}
-        </div>
-    );
-}
-
-// ─── Dummy data ───────────────────────────────────────────────────────────────
-const DUMMY_PARTICIPANTS = [
-    { id: 1, name: 'John Smith',   members: 2, contact: '9821014091', dietary: 'Vegetarian', occupancy: 'Single room', saleAmount: 5000, paidAmount: 5000, status: 'paid'    },
-    { id: 2, name: 'Priya Sharma', members: 2, contact: '9821014091', dietary: 'None',       occupancy: 'Single room', saleAmount: 5000, paidAmount: 5000, status: 'paid'    },
-    { id: 3, name: 'Rahul Verma',  members: 2, contact: '9821014091', dietary: 'Vegetarian', occupancy: 'Single room', saleAmount: 5000, paidAmount: 5000, status: 'paid'    },
-    { id: 4, name: 'Anita Roy',    members: 2, contact: '9821014091', dietary: 'None',       occupancy: 'Single room', saleAmount: 5000, paidAmount: 2500, status: 'partial'  },
-    { id: 5, name: 'Karan Mehta',  members: 2, contact: '9821014091', dietary: 'Vegetarian', occupancy: 'Single room', saleAmount: 5000, paidAmount: 5000, status: 'paid'    },
-    { id: 6, name: 'Sneha Patel',  members: 2, contact: '9821014091', dietary: 'None',       occupancy: 'Single room', saleAmount: 5000, paidAmount: 0,    status: 'pending'  },
-];
 
 // ─── Table header cell ────────────────────────────────────────────────────────
 const TH = ({ children, align = 'left', minW }) => (
@@ -84,50 +35,7 @@ const TD = ({ children, align = 'left' }) => (
 );
 
 // ─── Mobile card view ─────────────────────────────────────────────────────────
-function ParticipantCard({ p, onEdit, onView, onWhatsApp }) {
-    return (
-        <div style={{
-            background: 'white', borderRadius: '12px', border: '1px solid #f0f0f0',
-            padding: '16px', boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
-            display: 'flex', flexDirection: 'column', gap: '12px',
-        }}>
-            {/* Top row: avatar + name + status */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <Avatar name={p.name} />
-                    <div>
-                        <div style={{ fontSize: '14px', fontWeight: '700', color: BLUE }}>{p.name}</div>
-                        <div style={{ fontSize: '12px', color: '#999', marginTop: '2px' }}>Member : {p.members}</div>
-                    </div>
-                </div>
-                <StatusBadge status={p.status} />
-            </div>
 
-            {/* Info grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                {[
-                    { label: 'Contact',   value: p.contact },
-                    { label: 'Dietary',   value: p.dietary },
-                    { label: 'Occupancy', value: p.occupancy },
-                    { label: 'Sale Amt',  value: `₹ ${p.saleAmount.toLocaleString()}` },
-                    { label: 'Paid Amt',  value: `₹ ${p.paidAmount.toLocaleString()}` },
-                ].map(({ label, value }) => (
-                    <div key={label}>
-                        <div style={{ fontSize: '11px', color: '#aaa', marginBottom: '2px' }}>{label}</div>
-                        <div style={{ fontSize: '13px', fontWeight: '500', color: '#333' }}>{value}</div>
-                    </div>
-                ))}
-            </div>
-
-            {/* Actions */}
-            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', borderTop: '1px solid #f5f5f5', paddingTop: '10px' }}>
-                <button onClick={() => onEdit(p)} style={actionBtnStyle}><PencilIcon /></button>
-                <button onClick={() => onView(p)} style={actionBtnStyle}><EyeIcon /></button>
-                <button onClick={() => onWhatsApp(p)} style={actionBtnStyle}><WhatsAppIcon /></button>
-            </div>
-        </div>
-    );
-}
 
 const actionBtnStyle = {
     background: 'none', border: 'none', cursor: 'pointer',
@@ -135,9 +43,16 @@ const actionBtnStyle = {
 };
 
 // ─── Main component ───────────────────────────────────────────────────────────
-function Participants({ participants = DUMMY_PARTICIPANTS }) {
+function Participants() {
+    const {getGroupTripParticipantsById} = useGroupTripHooks()
     const [isMobile, setIsMobile] = useState(false);
     const [isAddParticipant, setIsAddParticipant] = useState(false)
+    const [isEditParticipant, setIsEditParticipant] = useState(false)
+    const [participants, setParticipants] = useState([])
+    const [fetchLoading, setFetchLoading] = useState(false)
+    const [selectedParticipant, setSelectedParticipant] = useState(null)
+    const {groupTripId} = useParams()
+    const [isUpdated,setIsUpdated] = useState(false)
 
     React.useEffect(() => {
         const check = () => setIsMobile(window.innerWidth < 768);
@@ -146,11 +61,41 @@ function Participants({ participants = DUMMY_PARTICIPANTS }) {
         return () => window.removeEventListener('resize', check);
     }, []);
 
-    const handleEdit     = (p) => console.log('Edit',      p);
+    const handleEdit     = (p) => {
+        setSelectedParticipant(p)
+        setIsEditParticipant(true)
+    };
     const handleView     = (p) => console.log('View',      p);
     const handleWhatsApp = (p) => window.open(`https://wa.me/${p.contact}`, '_blank');
-    // const handleAdd      = ()  => setIsAddParticipant(true);
-    const handleAdd      = ()  => console.log("Add");
+    const handleAdd      = ()  => setIsAddParticipant(true);
+    // const handleAdd      = ()  => console.log("Add");
+
+
+    const fetchParticipants = async()=>{
+        try{
+            setFetchLoading(true)
+            const response = await getGroupTripParticipantsById(groupTripId)
+            setParticipants(response?.data?.allParticipants)
+        }
+        catch(error){
+          if (!isProduction) {
+            console.log("========= ERROR DEBUG START =========");
+            console.log("Error:", error);
+            console.log("Response:", error?.response);
+            console.log("========= ERROR DEBUG END =========");
+          }
+          toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin")
+        }
+        finally{
+            setFetchLoading(false)
+        }
+    }
+
+    useEffect(()=>{
+        if(groupTripId){
+            fetchParticipants()
+        }
+    },[groupTripId,isUpdated])
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -193,33 +138,33 @@ function Participants({ participants = DUMMY_PARTICIPANTS }) {
                             </tr>
                         </thead>
                         <tbody>
-                            {participants.map((p) => (
-                                <tr key={p.id} style={{ transition: 'background 0.1s' }}
+                            {participants?.map((p) => (
+                                <tr key={p?._id} style={{ transition: 'background 0.1s' }}
                                     onMouseEnter={e => e.currentTarget.style.background = '#fafafa'}
                                     onMouseLeave={e => e.currentTarget.style.background = 'white'}
                                 >
                                     {/* Name cell */}
                                     <TD>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                            <Avatar name={p.name} />
+                                            <Avatar name={p?.travellerName || p?.enquiryId?.accountId?.fullName||p?.enquiryId?.accountId?.businessName} />
                                             <div>
-                                                <div style={{ fontSize: '14px', fontWeight: '700', color: BLUE }}>{p.name}</div>
-                                                <div style={{ fontSize: '12px', color: '#aaa', marginTop: '2px' }}>Member : {p.members}</div>
+                                                <div style={{ fontSize: '14px', fontWeight: '700', color: BLUE }}>{p?.travellerName || p?.enquiryId?.accountId?.fullName||p?.enquiryId?.accountId?.businessName}</div>
+                                                <div style={{ fontSize: '12px', color: '#aaa', marginTop: '2px' }}>Member : {p?.totalMembers}</div>
                                             </div>
                                         </div>
                                     </TD>
 
                                     <TD><span style={{ color: '#555' }}>{p.contact}</span></TD>
 
-                                    <TD><span style={{ color: p.dietary === 'None' ? '#aaa' : '#444' }}>{p.dietary}</span></TD>
+                                    <TD><span style={{ color: p.dietary === 'None' ? '#aaa' : '#444' }}>{p?.dietaryPreference}</span></TD>
 
-                                    <TD>{p.occupancy}</TD>
+                                    <TD>{p?.occupancy}</TD>
 
                                     {/* Sale Amount */}
                                     <TD align="right">
                                         <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
                                             <span style={{ fontSize: '13px', color: '#555' }}>₹</span>
-                                            <span style={{ fontWeight: '600', color: BLUE }}>{p.saleAmount.toLocaleString()}</span>
+                                            <span style={{ fontWeight: '600', color: BLUE }}>{p.saleAmount?.toLocaleString()}</span>
                                         </span>
                                     </TD>
 
@@ -227,13 +172,13 @@ function Participants({ participants = DUMMY_PARTICIPANTS }) {
                                     <TD align="right">
                                         <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
                                             <span style={{ fontSize: '13px', color: '#555' }}>₹</span>
-                                            <span style={{ fontWeight: '600', color: BLUE }}>{p.paidAmount.toLocaleString()}</span>
+                                            <span style={{ fontWeight: '600', color: BLUE }}>{p.paidAmount?.toLocaleString()}</span>
                                         </span>
                                     </TD>
 
                                     {/* Status */}
                                     <TD align="center">
-                                        <StatusBadge status={p.status} />
+                                        <StatusBadge status={p?.status} />
                                     </TD>
 
                                     {/* Actions */}
@@ -242,9 +187,9 @@ function Participants({ participants = DUMMY_PARTICIPANTS }) {
                                             <button onClick={() => handleEdit(p)} style={actionBtnStyle} title="Edit">
                                                 <PencilIcon />
                                             </button>
-                                            <button onClick={() => handleView(p)} style={actionBtnStyle} title="View">
+                                            {/* <button onClick={() => handleView(p)} style={actionBtnStyle} title="View">
                                                 <EyeIcon />
-                                            </button>
+                                            </button> */}
                                             <button onClick={() => handleWhatsApp(p)} style={actionBtnStyle} title="WhatsApp">
                                                 <WhatsAppIcon />
                                             </button>
@@ -289,7 +234,15 @@ function Participants({ participants = DUMMY_PARTICIPANTS }) {
             <>
                 {
                     isAddParticipant && 
-                    <AddParticipant closeModal = {()=>setIsAddParticipant(false)}/>
+                    <AddParticipant closeModal = {()=>setIsAddParticipant(false)} setIsUpdated={()=>{setIsUpdated(!isUpdated)}}/>
+                }
+            </>
+
+            {/* Edit Participant */}
+            <>
+                {
+                    isEditParticipant && 
+                    <EditParticipant closeModal = {()=>setIsEditParticipant(false)} selectedParticipant={selectedParticipant}  setIsUpdated={()=>{setIsUpdated(!isUpdated)}}/>
                 }
             </>
         </div>

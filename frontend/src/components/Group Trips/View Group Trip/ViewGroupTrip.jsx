@@ -110,7 +110,7 @@ function ViewGroupTrip() {
         }
     };
 
-    useEffect(() => { fetchGroupTrip(); }, []);
+    useEffect(() => { fetchGroupTrip(); }, [groupTripDetails]);
 
     // ── derived ───────────────────────────────────────────────────────────────
     const status = groupTripDetails?.status ?? 'new';

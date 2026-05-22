@@ -3,20 +3,20 @@ import { useCommonHooks } from '../../../hooks/useCommonHooks'
 import { useSelector } from 'react-redux'
 import { toast } from 'react-toastify'
 import { X, Search, Save, ChevronDown } from 'lucide-react'
-import { useParams } from 'react-router-dom'
+import {useParams} from 'react-router-dom'
 import { useGroupTripHooks } from '../../../hooks/useGroupTripHooks'
 
 const OCCUPANCY_OPTIONS = ['single', 'double', 'triple']
 const VISA_OPTIONS = ['N/A', 'Applied', 'Approved', 'Rejected', 'On Arrival']
 const DIETARY_OPTIONS = ['Vegetarian', 'Non-Vegetarian', 'Both (Veg & Non-Veg)', 'Vegan', 'Jain'];
 
-function AddParticipant({ closeModal, setIsUpdated }) {
+function EditParticipant({ closeModal,selectedParticipant,setIsUpdated }) {
   const { searchB2BEnquiry, searchB2CEnquiry } = useCommonHooks()
   const isProduction = useSelector(s => s.user.isProduction)
   const { groupTripId } = useParams();
-  const { addGroupTripParticipant } = useGroupTripHooks()
+  const {updateGroupTripParticipantById} = useGroupTripHooks()
   const groupTripDetails = useSelector(s => s.groupTrip.groupTripById?.[groupTripId]);
-  //   console.log("group trip details : ",groupTripDetails)
+//   console.log("group trip details : ",groupTripDetails)
 
 
 
@@ -30,24 +30,24 @@ function AddParticipant({ closeModal, setIsUpdated }) {
   const searchRef = useRef(null)
 
   const [form, setForm] = useState({
-    travellerName: '',
-    totalMembers: '',
-    contact: '',
-    dietaryPreference: '',
-    occupancy: '',
-    saleAmount: '',
-    paidAmount: '',
-    visaStatus: 'N/A',
-    status: 'enquiry'
+    travellerName: selectedParticipant?.travellerName || '',
+    totalMembers:  selectedParticipant?.totalMembers || '',
+    contact:  selectedParticipant?.contact || '',
+    dietaryPreference:  selectedParticipant?.dietaryPreference || '',
+    occupancy:  selectedParticipant?.occupancy || '',
+    saleAmount:  selectedParticipant?.saleAmount || '',
+    paidAmount:  selectedParticipant?.paidAmount || '',
+    visaStatus: selectedParticipant?.visaStatus ||  'N/A',
+    status: selectedParticipant?.status || 'enquiry'
   })
 
   useEffect(() => {
-    if (!groupTripDetails) return
+    if(!groupTripDetails) return 
     setForm(prev => ({
       ...prev,
       saleAmount:
         (groupTripDetails?.tripDetails?.occupancy?.[prev.occupancy] || 0) *
-        (form.totalMembers || 1),
+        (form.totalMembers||1),
     }));
   }, [form.occupancy, form.totalMembers, groupTripDetails]);
 
@@ -97,7 +97,7 @@ function AddParticipant({ closeModal, setIsUpdated }) {
     setSearch('')
     setSearchedEnquiries(null)
     setShowSuggestions(false)
-    setForm({ travellerName: '', status: 'enquiry', totalMembers: '', contact: '', dietaryPreference: '', occupancy: '', saleAmount: '', paidAmount: '', visaStatus: 'N/A' })
+    setForm({ travellerName: '', totalMembers: '', contact: '', dietaryPreference: '', occupancy: '', saleAmount: '', paidAmount: '', visaStatus: 'N/A' })
     setErrors({})
   }
 
@@ -105,9 +105,9 @@ function AddParticipant({ closeModal, setIsUpdated }) {
     setSelectedEnquiry(enq)
     setSearch(enq.accountId?.fullName || enq.accountId?.businessName || '')
     setShowSuggestions(false)
-    setForm(prev => ({
-      ...prev,
-      travellerName: enq.accountId?.fullName || enq.accountId?.businessName || '',
+    setForm(prev=>({
+        ...prev,
+      travellerName: enq.accountId?.fullName || enq.accountId?.businessName||'',
       totalMembers: enq.totalMembers ?? '',
       contact: enq.accountId?.phone ?? '',
       dietaryPreference: enq.dietaryPreference || '',
@@ -132,59 +132,31 @@ function AddParticipant({ closeModal, setIsUpdated }) {
     return e
   }
 
-  useEffect(() => {
+  const handleSubmit =async (e) => {
 
-    if (Number(form.paidAmount) === 0) {
-      setForm(prev => ({
-        ...prev,
-        status: 'enquiry',
-      }))
-    }
-    else {
-      setForm(prev => ({
-        ...prev,
-        status: 'partial',
-      }))
-
-    }
-
-  }, [form.paidAmount])
-
-  useEffect(() => {
-    if (form.status === 'enquiry') {
-      setForm(prev => ({
-        ...prev,
-        paidAmount: 0,
-      }))
+    try{
+        e.preventDefault()
+        const errs = validate()
+        if (Object.keys(errs).length) { setErrors(errs); return }
+        // submit logic here
+        const payload = {
+            ...form,
+            _id:selectedParticipant?._id,
+            groupTripId: groupTripId,
+            enquiryId: selectedParticipant?.enquiryId?._id,
+            saleAmount: Number(form.saleAmount),
+            paidAmount: Number(form.paidAmount)||0,
+            totalMembers: Number(form.totalMembers),
+            enquiryType:account
+        }
+        setSubmitLoading(true)
+        const response = await updateGroupTripParticipantById(groupTripId,payload)
+        toast.success(response?.data?.message||'Participant updated!')
+        setIsUpdated()
+        closeModal()
 
     }
-
-  }, [form.status])
-
-
-  const handleSubmit = async (e) => {
-
-    try {
-      e.preventDefault()
-      const errs = validate()
-      if (Object.keys(errs).length) { setErrors(errs); return }
-      const payload = {
-        ...form,
-        groupTripId: groupTripId,
-        enquiryId: selectedEnquiry?._id,
-        saleAmount: Number(form.saleAmount),
-        paidAmount: Number(form.paidAmount) || 0,
-        totalMembers: Number(form.totalMembers),
-        enquiryType: account
-      }
-      setSubmitLoading(true)
-      const response = await addGroupTripParticipant(payload)
-      toast.success(response?.data?.message || 'Participant added!')
-      setIsUpdated()
-      closeModal()
-
-    }
-    catch (error) {
+    catch(error){
       if (!isProduction) {
         console.log("========= ERROR DEBUG START =========");
         console.log("Error:", error);
@@ -193,8 +165,8 @@ function AddParticipant({ closeModal, setIsUpdated }) {
       }
       toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin")
     }
-    finally {
-      setSubmitLoading(false)
+    finally{
+        setSubmitLoading(false)
     }
   }
 
@@ -209,7 +181,7 @@ function AddParticipant({ closeModal, setIsUpdated }) {
       >
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 sticky top-0 bg-white rounded-t-2xl z-10">
-          <h2 className="text-lg font-semibold text-gray-800">Add Participant</h2>
+          <h2 className="text-lg font-semibold text-gray-800">Update Participant</h2>
           <button
             onClick={closeModal}
             className="p-1.5 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition"
@@ -225,10 +197,11 @@ function AddParticipant({ closeModal, setIsUpdated }) {
             <div className="relative">
               <select
                 value={account}
-                onChange={e => {
-                  setAccount(e.target.value)
-                  clearEnquiry()
-                }}
+                disabled
+                // onChange={e => {
+                //     setAccount(e.target.value) 
+                //     clearEnquiry()
+                // }}
                 className="h-full pl-3 pr-8 py-2.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-pink-400 cursor-pointer"
               >
                 <option value="b2c">B2C</option>
@@ -243,14 +216,13 @@ function AddParticipant({ closeModal, setIsUpdated }) {
               <input
                 type="text"
                 placeholder="Search enquiry by name..."
-                value={search}
-                onChange={e => !selectedEnquiry && setSearch(e.target.value)}
-                onFocus={() => !selectedEnquiry && searchedEnquiries?.length && setShowSuggestions(true)}
-                readOnly={!!selectedEnquiry}
+                value={selectedParticipant?.travellerName||''}
+                readOnly
                 className={`w-full pl-9 pr-8 py-2.5 border rounded-lg text-sm focus:outline-none transition placeholder:text-gray-400
                   ${selectedEnquiry
                     ? 'border-pink-300 bg-pink-50 text-gray-700 cursor-default focus:ring-0'
-                    : 'border-gray-200 focus:ring-2 focus:ring-pink-400 bg-white'
+                    : 'border-pink-300 bg-pink-50 text-gray-700 cursor-default focus:ring-0'
+                    // : 'border-gray-200 focus:ring-2 focus:ring-pink-400 bg-white'
                   }`}
               />
 
@@ -282,16 +254,9 @@ function AddParticipant({ closeModal, setIsUpdated }) {
                     >
                       <div className="font-medium text-sm text-gray-800">{enq.accountId?.fullName || enq?.accountId?.businessName}</div>
                       <div className="text-xs text-gray-500 mt-0.5 flex gap-3">
-                        <p  className='flex gap-2 items-center'>
-                          {
-                            enq?.destinations?.map((val,index)=>{
-                              return <span key={index}>{val}</span>
-                            })
-                          }
-                          
-                        </p>
-                        <span>• {enq.accountId?.phone}</span>
-                        {/* <span className="bg-gray-100 px-1.5 rounded text-gray-600">{enq.status}</span> */}
+                        <span>{enq.enquiryId}</span>
+                        <span>{enq.accountId?.phone}</span>
+                        <span className="bg-gray-100 px-1.5 rounded text-gray-600">{enq.status}</span>
                       </div>
                     </button>
                   ))}
@@ -309,8 +274,7 @@ function AddParticipant({ closeModal, setIsUpdated }) {
               <select
                 value={form?.status}
                 onChange={e => {
-                  handleChange('status', e.target.value)
-                }}
+                    handleChange('status', e.target.value)}}
                 className="h-full pl-3 pr-8 py-2.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-pink-400 cursor-pointer"
               >
                 {/* <option value="">Status</option> */}
@@ -373,6 +337,15 @@ function AddParticipant({ closeModal, setIsUpdated }) {
 
           {/* Row: Dietary + Occupancy */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* <Field label="Dietary Preference">
+              <input
+                type="text"
+                value={form.dietaryPreference}
+                onChange={e => handleChange('dietaryPreference', e.target.value)}
+                placeholder="e.g. Vegetarian"
+                className={input()}
+              />
+            </Field> */}
             <Field label="Dietary Preference" required error={errors.dietaryPreference}>
               <div className="relative">
                 <select
@@ -421,7 +394,7 @@ function AddParticipant({ closeModal, setIsUpdated }) {
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">₹</span>
                 <input
                   type="number"
-                  value={form.paidAmount || ''}
+                  value={form.paidAmount}
                   onChange={e => handleChange('paidAmount', e.target.value)}
                   placeholder="0"
                   min={0}
@@ -467,7 +440,4 @@ function Field({ label, required, error, children }) {
   )
 }
 
-export default AddParticipant
-
-
-
+export default EditParticipant

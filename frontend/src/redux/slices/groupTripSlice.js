@@ -110,9 +110,16 @@ export const groupTripSlice = createSlice({
         setGroupTripById: (state, action) => {
             const { id, data } = action.payload || {};
 
-            if (!id || !data) return;
+            if (!id ) return;
 
             state.groupTripById[id] = data;
+        },
+        removeGroupTripById: (state, action) => {
+            const { id } = action.payload || {};
+        
+            if (!id) return;
+        
+            delete state.groupTripById[id];
         },
 
         setGroupTripSummaryById: (state, action) => {
@@ -256,6 +263,7 @@ export const {
     setGroupTripById,
     updateGroupTrip,
     setGroupTripSummaryById,
+    removeGroupTripById,
     setSuggestionGroupTripByRegionId,
     setUpdateGroupTripStatusForPages,
     setUpdateGroupTripStatus,

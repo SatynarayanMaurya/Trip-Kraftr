@@ -24,7 +24,7 @@ const groupTripSummarySchema = new mongoose.Schema({
     financialOverview:{
         totalRevenue:{type:Number,default:0},
         totalCost:{type:Number,default:0},
-        totalPaid:{type:Number,default:0},
+        totalProfitLoss:{type:Number,default:0},
     },
     paymentSummary:{
         totalPaid:{type:Number,default:0},

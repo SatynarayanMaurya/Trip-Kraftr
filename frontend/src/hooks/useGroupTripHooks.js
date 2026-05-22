@@ -3,7 +3,7 @@ import { apiConnector } from '../services/apiConnector'
 import { useDispatch, useSelector } from 'react-redux'
 import { setLoading } from '../redux/slices/userSlice'
 import { groupTripEndpoints } from '../services/Apis/groupTripApis';
-import { addNewGroupTrip, setGroupTripById, setGroupTripByPage, setGroupTripSummaryById, setSuggestionGroupTripByRegionId, setUpdateGroupTripStatus, setUpdateGroupTripStatusEverywhere, setUpdateGroupTripStatusForPages, updateGroupTrip } from '../redux/slices/groupTripSlice';
+import { addNewGroupTrip, removeGroupTripById, setGroupTripById, setGroupTripByPage, setGroupTripSummaryById, setSuggestionGroupTripByRegionId, setUpdateGroupTripStatus, setUpdateGroupTripStatusEverywhere, setUpdateGroupTripStatusForPages, updateGroupTrip } from '../redux/slices/groupTripSlice';
 
 export const useGroupTripHooks = () => {
   const dispatch = useDispatch();
@@ -16,6 +16,20 @@ export const useGroupTripHooks = () => {
       dispatch(setLoading(true));
       const response = await apiConnector("POST", groupTripEndpoints.ADD_GROUP_TRIP, groupTripDetails)
       dispatch(addNewGroupTrip(response?.data?.newGroupTrip))
+      return response;
+    } catch (error) {
+      throw error;
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }
+
+  const addGroupTripParticipant = async (participantDetails) => {  // For Normal Org_admin
+    try {
+      dispatch(setLoading(true));
+      const response = await apiConnector("POST", groupTripEndpoints.ADD_GROUP_TRIP_PARTICIPANT, participantDetails)
+      const {groupTripId} = participantDetails;
+      dispatch(removeGroupTripById({id:groupTripId}))
       return response;
     } catch (error) {
       throw error;
@@ -63,7 +77,6 @@ export const useGroupTripHooks = () => {
       if (cachedPage) return cachedPage   // 🚀 return cached data
 
       dispatch(setLoading(true))
-
       const response = await apiConnector(
         "GET",
         `${groupTripEndpoints.GET_GROUP_TRIP_BY_ID}/${groupTripId}`
@@ -82,6 +95,26 @@ export const useGroupTripHooks = () => {
           })
         )
       }
+
+      return response
+
+    } catch (error) {
+      throw error
+    } finally {
+      dispatch(setLoading(false))
+    }
+  }
+
+  // For getting Hotels with paginated
+  const getGroupTripParticipantsById = async (groupTripId) => {
+    try {
+
+      dispatch(setLoading(true))
+
+      const response = await apiConnector(
+        "GET",
+        `${groupTripEndpoints.GET_GROUP_TRIP_PARTICIPANT}/${groupTripId}`
+      )
 
       return response
 
@@ -217,15 +250,63 @@ export const useGroupTripHooks = () => {
     }
   }
 
+  // For getting Hotels with paginated
+  const updateGroupTripParticipantById = async (groupTripId, participantDetails) => {
+    try {
+
+      dispatch(setLoading(true))
+
+      const response = await apiConnector(
+        "PUT",
+        `${groupTripEndpoints.UPDATE_GROUP_TRIP_PARTICIPANT_BY_ID}/${groupTripId}`, participantDetails
+      )
+
+      dispatch(removeGroupTripById({id:groupTripId}))
+
+      return response
+
+    } catch (error) {
+      throw error
+    } finally {
+      dispatch(setLoading(false))
+    }
+  }
+
+  // For getting Hotels with paginated
+  const deleteGroupTripParticipantById = async (groupTripId, _id) => {
+    try {
+
+      dispatch(setLoading(true))
+
+      const response = await apiConnector(
+        "PUT",
+        `${groupTripEndpoints.DELETE_GROUP_TRIP_STATUS_BY_ID}/${groupTripId}`, {_id}
+      )
+
+      dispatch(removeGroupTripById({id:groupTripId}))
+
+      return response
+
+    } catch (error) {
+      throw error
+    } finally {
+      dispatch(setLoading(false))
+    }
+  }
+
 
 
   return {
     addGroupTrip,
+    addGroupTripParticipant,
     getGroupTrips,
     getGroupTripById,
     updateGroupTripById,
     updateGroupTripSummaryById,
     suggestionGroupTrips,
-    updateGroupTripStatusById
+    updateGroupTripStatusById,
+    getGroupTripParticipantsById,
+    updateGroupTripParticipantById,
+    deleteGroupTripParticipantById
   };
 };
