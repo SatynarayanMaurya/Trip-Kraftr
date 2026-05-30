@@ -11,6 +11,7 @@ import { activityEndpoints } from "../services/Apis/activityApis"
 import { groupTripEndpoints } from "../services/Apis/groupTripApis"
 import { accountsEndpoints } from "../services/Apis/accountsApis"
 import { enquiriessEndpoints } from "../services/Apis/enquiriesApis"
+import { roomRateEndpoints } from "../services/Apis/roomRateApis"
 
 export const useCommonHooks = () => {
     const dispatch = useDispatch()
@@ -308,6 +309,7 @@ export const useCommonHooks = () => {
 
 
 
+
     return {
         searchMasterRegion,
         searchMasterCountry,
@@ -324,7 +326,7 @@ export const useCommonHooks = () => {
         searchB2CEnquiry,
         searchB2CAccounts,
         searchB2BAccountsForEnquiry,
-        searchB2CAccountsForEnquiry
+        searchB2CAccountsForEnquiry,
 
     }
 }

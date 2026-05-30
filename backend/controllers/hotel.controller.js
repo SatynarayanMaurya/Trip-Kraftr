@@ -227,34 +227,78 @@ export const getHotelById = async (req, res) => {
 };
 
 
+// export const getHotelsBySubRegionIds = async (req, res) => {
+//     try {
+//       const subRegionIds = req.query.subRegionIds.split(",");
+//       const {category} = req.query;
+//       console.log("categroy : ",category)
+  
+//       const allHotels = await Hotel
+//         .find({
+//           org_id: req.user.org_id,
+//           subRegionId: { $in: subRegionIds.map(id => new mongoose.Types.ObjectId(id)) },
+//           category,
+//           is_active:true
+//         })
+//         .sort({ createdAt: -1 })
+//         .lean()
+//         .select("_id regionId subRegionId hotelName category images amenities googleRating")
+  
+//       return res.status(200).json({
+//         success: true,
+//         message: "Hotels fetched successfully",
+//         allHotels
+//       });
+  
+//     } catch (error) {
+//       return res.status(500).json({
+//         success: false,
+//         message: error?.message || "Internal Server Error"
+//       });
+//     }
+// };
+
 export const getHotelsBySubRegionIds = async (req, res) => {
     try {
       const subRegionIds = req.query.subRegionIds.split(",");
+      const { category } = req.query;
   
-      const allHotels = await Hotel
-        .find({
-          org_id: req.user.org_id,
-          subRegionId: { $in: subRegionIds.map(id => new mongoose.Types.ObjectId(id)) },
-          is_active:true
-        })
+      console.log("category :", category);
+  
+      const query = {
+        org_id: req.user.org_id,
+        subRegionId: {
+          $in: subRegionIds.map(
+            (id) => new mongoose.Types.ObjectId(id)
+          ),
+        },
+        is_active: true,
+      };
+  
+      // add category only if it exists
+      if (category) {
+        query.category = category;
+      }
+  
+      const allHotels = await Hotel.find(query)
         .sort({ createdAt: -1 })
         .lean()
-        .select("_id regionId subRegionId hotelName category images amenities googleRating")
+        .select(
+          "_id regionId subRegionId hotelName category images amenities googleRating"
+        );
   
       return res.status(200).json({
         success: true,
         message: "Hotels fetched successfully",
-        allHotels
+        allHotels,
       });
-  
     } catch (error) {
       return res.status(500).json({
         success: false,
-        message: error?.message || "Internal Server Error"
+        message: error?.message || "Internal Server Error",
       });
     }
-};
-
+  };
 
 
 export const updateHotelById = async (req, res) => {

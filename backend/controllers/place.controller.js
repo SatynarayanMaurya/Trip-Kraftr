@@ -204,7 +204,7 @@ export const getPlacesBySubRegionIds = async (req, res) => {
   
       const allPlaces = await Place
         .find({
-          org_id: req.user.org_id,
+        //   org_id: req.user.org_id,
           subRegionId: { $in: subRegionIds.map(id => new mongoose.Types.ObjectId(id)) }
         })
         .sort({ createdAt: -1 })

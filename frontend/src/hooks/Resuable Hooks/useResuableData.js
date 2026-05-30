@@ -9,6 +9,8 @@ import { useRoomHooks } from "../useRoomHooks";
 import { usePlaceHooks } from "../usePlaceHooks";
 import { useActivityHooks } from "../useActivityHooks";
 import { useGroupTripHooks } from "../useGroupTripHooks";
+import { useCommonHooks } from "../useCommonHooks";
+import { useRoomRateHooks } from "../useRoomRateHooks";
 
 export const useRegionsData = () => {
   const { getRegionsForOrg } = useRegionHooks();
@@ -162,14 +164,15 @@ export const useVehiclesData = ({ regionIds,enabled, skip = false,
   };
 };
 
-export const useHotelsData = ({ subRegionIds,enabled, skip = false,
+export const useHotelsData = ({ subRegionIds, category,enabled, skip = false,
 }) => {
   const {getHotelsBySubRegionIds} = useHotelHooks()
-
+  
+  // if(!category) return ;
   const isProduction = useSelector((state) => state.user.isProduction);
-  const allHotels = useSelector((state)=>state.hotel.hotelsBysubRegionKey?.[subRegionIds?.join(",")])
+  const allHotels = useSelector((state)=>state.hotel.hotelsBysubRegionKey?.[subRegionIds?.join(",")+category])
   const [loading, setLoading] = useState(false);
-
+  
   const fetchData = async () => {
     try {
       if (!subRegionIds || subRegionIds?.length === 0) return;
@@ -181,7 +184,7 @@ export const useHotelsData = ({ subRegionIds,enabled, skip = false,
 
       setLoading(true);
 
-      await getHotelsBySubRegionIds(validSubRegionIds);
+      await getHotelsBySubRegionIds(validSubRegionIds,category);
 
     } catch (error) {
       if (!isProduction) {
@@ -206,7 +209,7 @@ export const useHotelsData = ({ subRegionIds,enabled, skip = false,
     if (!skip) {
       fetchData();
     }
-  }, [enabled, JSON.stringify(subRegionIds), skip]);
+  }, [enabled, JSON.stringify(subRegionIds,category), skip]);
 
   return {
     loading,
@@ -370,7 +373,6 @@ export const usePlacesData = ({ subRegionIds,enabled, skip = false,
 export const useActivitiesData = ({ subRegionIds,enabled, skip = false,
 }) => {
   const {getActivitiesBySubRegionIds} = useActivityHooks()
-
   const isProduction = useSelector((state) => state.user.isProduction);
   const allActivity = useSelector((state)=>state.hotel.activitiesBySubRegionKey?.[subRegionIds?.join(",")])
   const [loading, setLoading] = useState(false);
@@ -412,6 +414,54 @@ export const useActivitiesData = ({ subRegionIds,enabled, skip = false,
       fetchData();
     }
   }, [enabled, JSON.stringify(subRegionIds), skip]);
+
+  return {
+    loading,
+    refetch: fetchData, // optional but useful
+  };
+};
+
+export const useRoomRatesData = ({ hotelId, startDate,enabled, skip = false,
+}) => {
+  const {getRoomRateByHotelIdRoomIdDate} = useRoomRateHooks()
+  // console.log("Incoming data : ",hotelId, roomId,startDate)
+  const isProduction = useSelector((state) => state.user.isProduction);
+  // const allActivity = useSelector((state)=>state.hotel.activitiesBySubRegionKey?.[subRegionIds?.join(",")])
+  const [loading, setLoading] = useState(false);
+
+  const fetchData = async () => {
+    try {
+      if (!hotelId  || !startDate) return;
+
+
+      setLoading(true);
+
+      const res = await getRoomRateByHotelIdRoomIdDate(hotelId, startDate);
+
+    } catch (error) {
+      if (!isProduction) {
+        console.log("========= ERROR DEBUG START =========");
+        console.log("Error:", error);
+        console.log("Response:", error?.response);
+        console.log("========= ERROR DEBUG END =========");
+      }
+
+      toast.error(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Error fetching Activities"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!enabled) return;
+    if (!skip) {
+      fetchData();
+    }
+  }, [enabled, JSON.stringify(hotelId, startDate), skip]);
 
   return {
     loading,

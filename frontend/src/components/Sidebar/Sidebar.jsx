@@ -49,7 +49,7 @@ function Sidebar() {
     { name: "Accounts", icon:  <Building2 size={18}/>, path: "/accounts", roles:['org_admin'] },
     { name: "Manage Group Trips", icon:  <Building2 size={18}/>, path: "/group-trips", roles:['org_admin'] },
     // { name: "Manage B2B Trips", icon: <Building2 size={18}/>, path: "/", roles:['org_admin'] },
-    { name: "My Sample Trips", icon: <Building2 size={18}/>, path: "/" , roles:['org_admin'] },
+    { name: "Sample Package", icon: <Building2 size={18}/>, path: "/sample-packages" , roles:['org_admin'] },
     { name: "Policies", icon: <Siren  size={18}/>, path: "/policies" , roles:['org_admin'] },
   ];
   const filteredStaticTabs = staticMenuTabs.filter(tab =>

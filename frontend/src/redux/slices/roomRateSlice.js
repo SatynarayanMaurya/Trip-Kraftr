@@ -2,7 +2,8 @@ import { createSlice } from '@reduxjs/toolkit'
 
 const initialState = {
 
-    allRoomRates: {}
+    allRoomRates: {},
+    roomRatesForHotelId: {}
 
 }
 
@@ -64,7 +65,42 @@ export const roomRateSlice = createSlice({
             if (!hotelId || !state.allRoomRates) return;
 
             delete state.allRoomRates[hotelId];
+        },
+
+
+
+        // setRoomRatesForHotelId: (state, action) => {
+        //     const { key, data } = action.payload;
+
+        //     if (!state.roomRatesForHotelId) {
+        //         state.roomRatesForHotelId = {};
+        //     }
+
+        //     state.roomRatesForHotelId[key] = data;
+        // }
+        setRoomRatesForHotelId: (state, action) => {
+            const { key, data } = action.payload;
+        
+            if (!state.roomRatesForHotelId) {
+                state.roomRatesForHotelId = {};
+            }
+        
+            if (!state.roomRatesForHotelId[key]) {
+                state.roomRatesForHotelId[key] = [];
+            }
+        
+            // avoid duplicates (important)
+            const exists = state.roomRatesForHotelId[key].some(
+                item =>
+                    item.fromDate === data.fromDate &&
+                    item.toDate === data.toDate
+            );
+        
+            if (!exists) {
+                state.roomRatesForHotelId[key].push(data);
+            }
         }
+
     }
 })
 
@@ -74,6 +110,7 @@ export const {
     updateRoomRateReducer,
     deleteSingleRoomRate,
     deleteRoomRateForHotel,
+    setRoomRatesForHotelId
 
 } = roomRateSlice.actions
 

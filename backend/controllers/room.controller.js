@@ -5,7 +5,7 @@ import RoomRate from "../models/roomRate.model.js"
 
 export const addRoom = async (req, res) => {
     try {
-        const { hotelId, roomName, capacity, adult, children,quantity,extraMattress,imageLink } = req.body;
+        const { hotelId, roomName, capacity, adult, quantity,extraMattress,imageLink } = req.body;
 
         // ✅ Validate hotelId existence
         if (!hotelId) {
@@ -34,12 +34,11 @@ export const addRoom = async (req, res) => {
         // Convert to numbers
         const cap = Number(capacity);
         const ad = Number(adult);
-        const child = Number(children);
         const qty = Number(quantity);
         const extraMat = Number(extraMattress);
 
         // ✅ Validate numeric fields
-        if ([cap, ad, child].some(val => isNaN(val))) {
+        if ([cap, ad,extraMat].some(val => isNaN(val))) {
             return res.status(400).json({
                 success: false,
                 message: "Capacity, adult and children must be valid numbers"
@@ -47,18 +46,18 @@ export const addRoom = async (req, res) => {
         }
 
         // ✅ Validate non-negative values
-        if (cap <= 0 || ad < 0 || child < 0) {
+        if (cap <= 0 || ad < 0 || extraMat < 0 ) {
             return res.status(400).json({
                 success: false,
-                message: "Invalid capacity, adult or children values"
+                message: "Invalid capacity, adult or extra Mattress values"
             });
         }
 
         // ✅ Business logic validation
-        if (cap !== ad + child) {
+        if (cap !== ad + extraMat) {
             return res.status(400).json({
                 success: false,
-                message: "Capacity must be equal to adult + children"
+                message: "Capacity must be equal to adult + Extra Mattress"
             });
         }
 
@@ -69,7 +68,6 @@ export const addRoom = async (req, res) => {
             roomName_lower: roomName.trim().toLowerCase(),
             capacity: cap,
             adult: ad,
-            children: child,
             quantity:qty,
             extraMattress:extraMat,
             imageLink:imageLink||null
@@ -79,7 +77,6 @@ export const addRoom = async (req, res) => {
             _id: result._id,
             roomName: result.roomName,
             adult: result.adult,
-            children: result.children,
             capacity: result.capacity,
             extraMattress: result.extraMattress,
             imageLink: result.imageLink,
@@ -140,7 +137,7 @@ export const getRoomsOfHotels = async (req, res) => {
             })
         }
 
-        const allRooms = await Room.find({ org_id: req.user.org_id, hotelId: hotelId }).select("_id roomName quantity capacity adult children is_active hotelId extraMattress imageLink")
+        const allRooms = await Room.find({ org_id: req.user.org_id, hotelId: hotelId }).select("_id roomName quantity capacity adult is_active hotelId extraMattress imageLink")
         return res.status(200).json({
             success: true,
             message: "All Rooms are fetched",
@@ -167,7 +164,7 @@ export const getRoomsTypeForHotelId = async (req, res) => {
         })
         .sort({ createdAt: -1 })
         .lean()
-        .select("_id roomName quantity")
+        .select("_id roomName quantity adult capacity extraMattress")
   
       return res.status(200).json({
         success: true,
@@ -221,12 +218,11 @@ export const updateRoomById = async (req, res) => {
         // Convert to numbers
         const cap = Number(capacity);
         const ad = Number(adult);
-        const child = Number(children);
         const qty = Number(quantity);
         const extraMat = Number(extraMattress);
 
         // ✅ Validate numeric fields
-        if ([cap, ad, child].some(val => isNaN(val))) {
+        if ([cap, ad, extraMat].some(val => isNaN(val))) {
             return res.status(400).json({
                 success: false,
                 message: "Capacity, adult and children must be valid numbers"
@@ -234,22 +230,41 @@ export const updateRoomById = async (req, res) => {
         }
 
         // ✅ Validate non-negative values
-        if (cap <= 0 || ad < 0 || child < 0) {
+        if (cap <= 0 || ad < 0 || extraMat < 0) {
             return res.status(400).json({
                 success: false,
-                message: "Invalid capacity, adult or children values"
+                message: "Invalid capacity, adult or Extra Mattress values"
             });
         }
 
         // ✅ Business logic validation
-        if (cap !== ad + child) {
+        if (cap !== ad + extraMat) {
             return res.status(400).json({
                 success: false,
-                message: "Capacity must be equal to adult + children"
+                message: "Capacity must be equal to adult + Extra Mattress"
             });
         }
 
-        const updatedRoom = await Room.findOneAndUpdate({ org_id: req.user.org_id, hotelId: hotelId, _id: roomId }, { $set: { roomName: roomName?.trim(), roomName_lower: roomName?.trim()?.toLowerCase(),quantity:qty, capacity: cap,extraMattress:extraMat,imageLink, adult: ad, children: child } }, { new: true }).select("_id roomName quantity capacity adult children hotelId extraMattress imageLink")
+        const updatedRoom = await Room.findOneAndUpdate(
+            { 
+                org_id: req.user.org_id, 
+                hotelId: hotelId, 
+                _id: roomId 
+            }, 
+            { 
+                $set: 
+                    { 
+                        roomName: roomName?.trim(), 
+                        roomName_lower: roomName?.trim()?.toLowerCase(),
+                        quantity:qty, 
+                        capacity: cap,
+                        extraMattress:extraMat,
+                        imageLink, 
+                        adult: ad, 
+                    } 
+            }, 
+            { new: true })
+            .select("_id roomName quantity capacity adult hotelId extraMattress imageLink")
 
         if (updatedRoom) {
             return res.status(200).json({

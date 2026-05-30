@@ -82,9 +82,10 @@ export const useHotelHooks = () => {
   }
 
 
-  const getHotelsBySubRegionIds = async (subRegionIds) => {  
+  const getHotelsBySubRegionIds = async (subRegionIds,category) => {  
     try {
-      const subRegionKey = subRegionIds?.join(",")
+      const subRegionKey = subRegionIds?.join(",")+category;
+      // console.log("Sub region key : ",subRegionKey)
       const cachedPage = hotelsBysubRegionKey?.[subRegionKey]
       if (cachedPage) return cachedPage
 
@@ -92,7 +93,7 @@ export const useHotelHooks = () => {
 
       const response = await apiConnector(
         "GET",
-        `${hotelEndpoinsts.GET_HOTEL_BY_SUB_REGION_ID}?subRegionIds=${subRegionIds.join(",")}`
+        `${hotelEndpoinsts.GET_HOTEL_BY_SUB_REGION_ID}?subRegionIds=${subRegionIds.join(",")}&category=${category}`
       );
 
       if(response?.data?.success){

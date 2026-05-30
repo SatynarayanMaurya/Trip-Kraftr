@@ -45,7 +45,6 @@ function Rooms() {
         quantity: "",
         capacity: "",
         adult: "",
-        children: "",
         extraMattress: "",
         imageLink: "",
     })
@@ -114,10 +113,9 @@ function Rooms() {
         setEditingRoomId(room._id)
         setEditingRoomData({
             roomName: room.roomName || "",
-            quantity: room.quantity?.toString() || "",
-            capacity: room.capacity?.toString() || "",
+            quantity: room.quantity||1,
+            capacity: room.capacity || "",
             adult: room.adult?.toString() || "",
-            children: room.children?.toString() || "",
             extraMattress: room.extraMattress || "",
             imageLink: room.imageLink || "",
         })
@@ -137,7 +135,7 @@ function Rooms() {
     }
 
     const handleEditChange = (field, value) => {
-        if (["capacity", "adult", "children", 'quantity','extraMattress'].includes(field)) {
+        if (["capacity", "adult",  'quantity','extraMattress'].includes(field)) {
             if (value !== "" && !/^\d+$/.test(value)) return
         }
 
@@ -153,7 +151,6 @@ function Rooms() {
             const imageLink = editingRoomData.imageLink.trim()
             const capacity = Number(editingRoomData.capacity)
             const adult = Number(editingRoomData.adult)
-            const children = Number(editingRoomData.children)
             const quantity = Number(editingRoomData.quantity)
             const extraMattress = Number(editingRoomData.extraMattress)
 
@@ -162,7 +159,6 @@ function Rooms() {
                 editingRoomData.quantity === "" ||
                 editingRoomData.capacity === "" ||
                 editingRoomData.adult === "" ||
-                editingRoomData.children === "" ||
                 editingRoomData.extraMattress === "" 
             ) {
                 toast.error("All fields are required")
@@ -174,8 +170,8 @@ function Rooms() {
                 return
             }
 
-            if (adult + children !== capacity) {
-                toast.error("Adult + Children must be equal to Capacity")
+            if (adult + extraMattress !== capacity) {
+                toast.error("Adult + Extra Mattress must be equal to Capacity")
                 return
             }
 
@@ -186,7 +182,6 @@ function Rooms() {
                 capacity,
                 quantity,
                 adult,
-                children,
                 extraMattress,
                 imageLink
             }
@@ -200,9 +195,9 @@ function Rooms() {
             setEditingRoomData({
                 roomName: "",
                 capacity: "",
+                quantity:1,
                 adult: "",
-                children: "",
-                extraMattress: "",
+                extraMattress: 0,
                 imageLink: "",
             })
         }

@@ -44,14 +44,9 @@ export const addRoomRate = async (req, res) => {
     // 🔴 CHECK OVERLAPPING DATE RANGE
     const existingRate = await RoomRate.findOne({
       org_id: req.user.org_id,
-      hotelId: hotelId,
-      isActive: true,
-      $or: [
-        {
-          fromDate: { $lte: newToDate },
-          toDate: { $gte: newFromDate },
-        },
-      ],
+      hotelId,
+      fromDate: { $lte: newToDate },
+      toDate: { $gte: newFromDate },
     });
 
     if (existingRate) {
@@ -190,12 +185,14 @@ export const updateRoomRate = async (req, res) => {
       org_id: req.user.org_id,
       hotelId: hotelId,
       _id: { $ne: _id },
-      $or: [
-        {
-          fromDate: { $lte: newToDate },
-          toDate: { $gte: newFromDate },
-        },
-      ],
+      // $or: [
+      //   {
+      //     fromDate: { $lte: newToDate },
+      //     toDate: { $gte: newFromDate },
+      //   },
+      // ],
+      fromDate: { $lte: newToDate },
+      toDate: { $gte: newFromDate },
     });
 
     if (existingRate) {
@@ -281,6 +278,78 @@ export const deleteRoomRate = async (req, res) => {
       success: true,
       message: "Room Rate Deleted",
       deletedRoomRate,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error?.message || "Internal Server Error",
+    });
+  }
+};
+
+
+// export const getRoomRateBy_HotelId_RoomId_date = async(req,res)=>{
+//   try{
+//     const {hotelId, roomId, date} = req.query;
+//     if(!hotelId || !roomId || !date){
+//       return res.status(400).json({
+//         success:false,
+//         message:"Required field not found"
+//       })
+//     }
+
+//     const foundRate = await RoomRate.find(
+//       {
+//         org_id:req.user.org_id,
+//         hotelId,
+//       }
+//     )
+//     return res.status(200).json({
+//       success:true,
+//       message:"Room Rate found"
+//     })
+//   } 
+//   catch(error){
+//     return res.status(500).json({
+//       success:false,
+//       message:error?.message || "Internal Server Error"
+//     })
+//   }
+// }
+
+export const getRoomRateBy_HotelId_RoomId_date = async (req, res) => {
+  try {
+    const { hotelId, date } = req.query;
+    console.log("date : ",date)
+
+    if (!hotelId || !date) {
+      return res.status(400).json({
+        success: false,
+        message: "Required field not found",
+      });
+    }
+
+    const selectedDate = new Date(date);
+
+    const foundRate = await RoomRate.findOne({
+      org_id: req.user.org_id,
+      hotelId,
+      fromDate: { $lte: selectedDate },
+      toDate: { $gte: selectedDate },
+    });
+
+    if (!foundRate) {
+      return res.status(200).json({
+        success: false,
+        message: "Room Rate not found for selected date",
+        foundRate:{}
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Room Rate found",
+      foundRate,
     });
   } catch (error) {
     return res.status(500).json({

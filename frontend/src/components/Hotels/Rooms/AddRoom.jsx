@@ -13,8 +13,7 @@ function AddRoom({ onClose, hotelId }) {
         roomName: "",
         capacity: "",
         adult: "",
-        children: "",
-        quantity:'',
+        quantity:1,
         extraMattress: 0,
         imageLink:''
     });
@@ -26,7 +25,7 @@ function AddRoom({ onClose, hotelId }) {
         const { name, value } = e.target;
 
         // Only allow numbers for numeric fields
-        if (["capacity", "adult", "children",'quantity'].includes(name)) {
+        if (["capacity", "adult",'quantity'].includes(name)) {
             if (value !== "" && !/^\d+$/.test(value)) return;
         }
 
@@ -49,7 +48,6 @@ function AddRoom({ onClose, hotelId }) {
         const roomName = formData.roomName.trim();
         const capacity = Number(formData.capacity);
         const adult = Number(formData.adult);
-        const children = Number(formData.children);
         const quantity = Number(formData.quantity);
         const extraMattress = Number(formData.extraMattress);
 
@@ -70,10 +68,6 @@ function AddRoom({ onClose, hotelId }) {
             newErrors.adult = "Adult count cannot be negative.";
         }
 
-        if (formData.children !== "" && children < 0) {
-            newErrors.children = "Children count cannot be negative.";
-        }
-
         if (formData.quantity !== "" && quantity < 1) {
             newErrors.quantity = "Room Quantity Can not be less than 1";
         }
@@ -86,14 +80,13 @@ function AddRoom({ onClose, hotelId }) {
         if (
             formData.capacity !== "" &&
             formData.adult !== "" &&
-            formData.children !== "" &&
             capacity > 0
         ) {
-            const total = adult + children;
+            const total = adult + extraMattress;
 
             if (total !== capacity) {
                 setSubmitError(
-                    `Adult + Children must be exactly equal to Capacity. Current total is ${total}, but capacity is ${capacity}.`
+                    `Adult + Extra Mattress must be exactly equal to Capacity. Current total is ${total}, but capacity is ${capacity}.`
                 );
             }
         }
@@ -113,13 +106,12 @@ function AddRoom({ onClose, hotelId }) {
 
             const capacity = Number(formData.capacity);
             const adult = Number(formData.adult);
-            const children = Number(formData.children);
             const quantity = Number(formData.quantity);
             const extraMattress = Number(formData.extraMattress);
 
             if (!isValid) return;
 
-            if (adult + children !== capacity) {
+            if (adult + extraMattress !== capacity) {
                 return;
             }
 
@@ -127,13 +119,13 @@ function AddRoom({ onClose, hotelId }) {
                 roomName: formData.roomName.trim(),
                 capacity,
                 adult,
-                children,
                 quantity,
                 extraMattress,
                 imageLink:formData?.imageLink,
                 hotelId
             };
 
+            // console.log("Payload : ",payload)
             setLoading(true)
             const response = await addRoom(payload)
             toast.success(response?.data?.message)
@@ -144,8 +136,8 @@ function AddRoom({ onClose, hotelId }) {
                 roomName: "",
                 capacity: "",
                 adult: "",
-                children: "",
-                extraMattress:0,
+                quantity:1,
+                extraMattress: 0,
                 imageLink:''
             });
             setErrors({});
@@ -232,6 +224,7 @@ function AddRoom({ onClose, hotelId }) {
                                     type="text"
                                     name="capacity"
                                     value={formData.capacity}
+                                    min={1}
                                     onChange={handleChange}
                                     placeholder="Enter capacity"
                                     className={`w-full rounded-2xl border bg-white py-3 pl-11 pr-4 text-sm outline-none transition ${errors.capacity
@@ -258,6 +251,7 @@ function AddRoom({ onClose, hotelId }) {
                                 <input
                                     type="text"
                                     name="adult"
+                                    min={0}
                                     value={formData.adult}
                                     onChange={handleChange}
                                     placeholder="Enter adult count"
@@ -269,33 +263,6 @@ function AddRoom({ onClose, hotelId }) {
                             </div>
                             {errors.adult && (
                                 <p className="mt-2 text-sm text-red-500">{errors.adult}</p>
-                            )}
-                        </div>
-
-                        {/* Children */}
-                        <div>
-                            <label className="mb-2 block text-sm font-semibold text-slate-700">
-                                Children
-                            </label>
-                            <div className="relative">
-                                <Baby
-                                    size={18}
-                                    className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-                                />
-                                <input
-                                    type="text"
-                                    name="children"
-                                    value={formData.children}
-                                    onChange={handleChange}
-                                    placeholder="Enter children count"
-                                    className={`w-full rounded-2xl border bg-white py-3 pl-11 pr-4 text-sm outline-none transition ${errors.children
-                                        ? "border-red-400 focus:border-red-500"
-                                        : "border-slate-300 focus:border-pink-500"
-                                        }`}
-                                />
-                            </div>
-                            {errors.children && (
-                                <p className="mt-2 text-sm text-red-500">{errors.children}</p>
                             )}
                         </div>
 
@@ -312,6 +279,7 @@ function AddRoom({ onClose, hotelId }) {
                                 <input
                                     type="text"
                                     name="quantity"
+                                    min={1}
                                     value={formData.quantity}
                                     onChange={handleChange}
                                     placeholder="Enter Room Quantity"
@@ -339,6 +307,7 @@ function AddRoom({ onClose, hotelId }) {
                                 <input
                                     type="number"
                                     name="extraMattress"
+                                    min={0}
                                     value={formData.extraMattress||''}
                                     onChange={handleChange}
                                     placeholder="0"
