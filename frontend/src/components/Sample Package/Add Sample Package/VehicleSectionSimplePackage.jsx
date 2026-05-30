@@ -29,7 +29,7 @@ export const blankVehicle = () => ({
   vehicleModel:    '',
   vehicleType:     '',
   quantity:        1,
-  _id:             '',
+  // _id:             '',
 });
 
 // ─── shared tiny helpers ──────────────────────────────────────────────────────
@@ -70,7 +70,7 @@ function VehicleEntry({ entry, index, total, allVehicles, disabled, onEntryChang
       vehicleModel:    v?.vehicleModel   || '',
       vehicleType:     v?.vehicleType    || '',
       quantity:        entry.quantity    || 1,
-      _id:             v?._id            || '',
+      // _id:             v?._id            || '',
     });
   };
 
@@ -198,8 +198,6 @@ function VehicleSectionSimplePackage({ dayData, allVehicles, onDayChange }) {
     ? dayData.vehicleDetails
     : [blankVehicle()];
 
-  // disabled when subRegion1 not selected
-  const isDisabled = !dayData?.subRegion1;
 
   // last entry must have a vehicleId before adding another
   const lastEntry   = vehicles[vehicles.length - 1];
@@ -232,17 +230,16 @@ function VehicleSectionSimplePackage({ dayData, allVehicles, onDayChange }) {
         <button
           type="button"
           onClick={handleAddVehicle}
-          disabled={!canAddMore || isDisabled}
+          disabled={!canAddMore}
           title={
-            isDisabled   ? 'Select Sub-Region first' :
             !canAddMore  ? 'Select a vehicle first' :
             'Add another vehicle'
           }
           className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] font-semibold transition-all
-            ${canAddMore && !isDisabled
+            ${canAddMore 
               ? 'text-white cursor-pointer'
               : 'text-gray-300 bg-gray-100 border border-gray-200 cursor-not-allowed'}`}
-          style={canAddMore && !isDisabled ? { background: PINK, border: `1px solid ${PINK}` } : {}}
+          style={canAddMore  ? { background: PINK, border: `1px solid ${PINK}` } : {}}
         >
           <Plus size={13} />
           Add Vehicle
@@ -257,7 +254,7 @@ function VehicleSectionSimplePackage({ dayData, allVehicles, onDayChange }) {
           index={idx}
           total={vehicles.length}
           allVehicles={allVehicles}
-          disabled={isDisabled}
+          // disabled={isDisabled}
           onEntryChange={handleEntryChange}
           onDelete={handleDeleteVehicle}
         />

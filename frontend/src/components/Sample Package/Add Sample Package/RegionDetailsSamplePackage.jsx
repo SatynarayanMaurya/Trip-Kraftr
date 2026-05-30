@@ -96,6 +96,7 @@ function RegionDetailsSamplePackage({
                         style={{
                             ...inputStyle,
                         }}
+                        onWheel={(e) => e.currentTarget.blur()}
                         value={formData.noOfDays || ''}
                         onChange={(e) => handleChange("noOfDays", Number(e.target.value))}
                     />
@@ -122,6 +123,7 @@ function RegionDetailsSamplePackage({
                     <input
                         type="number"
                         min={0}
+                        onWheel={(e) => e.currentTarget.blur()}
                         placeholder="Enter Number of Adults"
                         style={inputStyle}
                         value={formData.adults||''}
@@ -137,6 +139,7 @@ function RegionDetailsSamplePackage({
                     <input
                         type="number"
                         min={0}
+                        onWheel={(e) => e.currentTarget.blur()}
                         placeholder="Enter Number of children"
                         style={inputStyle}
                         value={formData.children || ""}
@@ -192,6 +195,7 @@ function RegionDetailsSamplePackage({
 
                                         handleChange("childAges", updatedAges);
                                     }}
+                                    onWheel={(e) => e.currentTarget.blur()}
                                 />
                             </div>
                         ))}

@@ -5,6 +5,7 @@ export const placeEndpoints  = {
     ADD_PLACE : BASE_URL + '/add-place',
     GET_PLACE : BASE_URL + '/get-places',
     GET_PLACE_BY_SUBREGION_IDS : BASE_URL + '/get-places-by-subRegion-ids',
+    GET_PLACE_BY_SUBREGION_NAMES : BASE_URL + '/get-places-by-subRegion-names',
     GET_PLACE_BY_ID : BASE_URL + '/get-place-by-id',
     SEAECH_PLACE : BASE_URL + '/search-places',
     DELETE_PLACE : BASE_URL + '/delete-place',

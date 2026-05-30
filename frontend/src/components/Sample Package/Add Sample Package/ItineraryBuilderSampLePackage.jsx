@@ -1,11 +1,12 @@
 
 import React, { useEffect } from 'react';
 import { inputStyle, labelStyle, cardStyle, cardStyleHotel, cardStylePlaces } from '../../Common/CommonCss';
-import { Save, Hotel, MapPin, Zap } from 'lucide-react';
+import { Save, Hotel, MapPin, Zap, ChevronLeft, ChevronRight } from 'lucide-react';
 import CalculationCard from './CalculationCard';
 import HotelDetailsSimplePackage from './HotelDetailsSimplePackage';
 import VehicleSectionSimplePackage from './VehicleSectionSimplePackage';
 import ActivitySectionSimplePackage from './ActivitySectionSimplePackage';
+import { useSelector } from 'react-redux';
 const PINK = '#ED5F8D';
 const BLUE = '#18305C';
 
@@ -80,6 +81,7 @@ function SubRegionDropdowns({ dayData, allSubRegions, onDayChange, subRegionLoad
 
 // ─── PlacesSection — UPDATED UI: image card grid matching image ───────────────
 function PlacesSection({ dayData, placesForActiveDay, onDayChange }) {
+    const userDetails = useSelector(s => s.user.userDetails)
     const selectedPlaces = dayData?.placeDetails ?? [];
 
     const togglePlace = (place) => {
@@ -164,10 +166,14 @@ function PlacesSection({ dayData, placesForActiveDay, onDayChange }) {
                                             {place.placeName}
                                         </div>
                                         {place?.subRegionId?.name && (
-                                            <div style={{ fontSize: '11px', color: '#888', marginTop: '1px' }}>{place.subRegionId.name}</div>
+                                            <div style={{ fontSize: '11px', color: '#888', marginTop: '1px' }}>{place?.subRegionId?.name}</div>
                                         )}
                                         {place?.notes && (
-                                            <div style={{ fontSize: '11px', color: '#aaa', marginTop: '1px' }}>{place.notes?.length > 30 ? `${place?.notes?.slice(0, 30)}...` : place?.notes}</div>
+                                            <div style={{ fontSize: '11px', color: '#aaa', marginTop: '1px' }}>
+                                                {place?.notes?.length > 30 ? `${place?.notes?.slice(0, 30)}...` : place?.notes}
+                                                {userDetails?.org_id !== place?.org_id && <span className='text-red-600'>*</span>}
+
+                                            </div>
                                         )}
                                     </div>
 
@@ -198,7 +204,7 @@ function ItineraryBuilderSampLePackage({
     subRegionLoading, hotelLoading, placeLoading,
     activityLoading, roomTypeLoading,
     handleItineraryChange, handleSave, submitLoading,
-    price, handlePrice,vendorDetails, handleVendorDetails
+    price, handlePrice, vendorDetails, handleVendorDetails
 }) {
     const { itineraryBuilder, regionDetails } = formData;
     const { startDate } = regionDetails ?? {};
@@ -368,6 +374,34 @@ function ItineraryBuilderSampLePackage({
                             activitiesForActiveDay={activitiesForActiveDay}
                             onDayChange={updateDayField}
                         />
+
+
+
+                        <div className="flex justify-end">
+                            <div className="flex items-center gap-3">
+                                <button
+                                    disabled={activeDay === 1}
+                                    onClick={() => setActiveDay(activeDay - 1)}
+                                    className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#E91E8C] text-white text-sm font-medium shadow-md transition-all duration-200 hover:bg-[#d81b7f] disabled:bg-pink-300 disabled:cursor-not-allowed"
+                                >
+                                    <ChevronLeft size={16} />
+                                    Prev
+                                </button>
+
+                                <div className="px-4 text-sm font-medium text-gray-600">
+                                    Day {activeDay} / {numDays}
+                                </div>
+
+                                <button
+                                    disabled={activeDay === numDays}
+                                    onClick={() => setActiveDay(activeDay + 1)}
+                                    className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#E91E8C] text-white text-sm font-medium shadow-md transition-all duration-200 hover:bg-[#d81b7f] disabled:bg-pink-300 disabled:cursor-not-allowed"
+                                >
+                                    Next
+                                    <ChevronRight size={16} />
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -384,7 +418,7 @@ function ItineraryBuilderSampLePackage({
             `}</style>
 
             {/* Save button */}
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            {/* <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                 <button
                     type="button"
                     onClick={handleSave}
@@ -395,6 +429,40 @@ function ItineraryBuilderSampLePackage({
                         <svg className="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24">
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" fill="none" />
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z" />
+                        </svg>
+                    ) : (
+                        <Save size={16} />
+                    )}
+                    {submitLoading ? 'Saving...' : 'Save'}
+                </button>
+            </div> */}
+            {/* Save button */}
+            <div className="flex justify-end">
+                <button
+                    type="button"
+                    onClick={handleSave}
+                    disabled={submitLoading}
+                    className={`flex items-center gap-2 px-6 py-2.5 bg-green-600 text-white text-sm font-semibold rounded-lg transition-colors shadow-sm shadow-green-200 ${submitLoading
+                            ? 'opacity-70 cursor-not-allowed'
+                            : 'hover:bg-green-700'
+                        }`}
+                >
+                    {submitLoading ? (
+                        <svg className="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24">
+                            <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="3"
+                                fill="none"
+                            />
+                            <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z"
+                            />
                         </svg>
                     ) : (
                         <Save size={16} />

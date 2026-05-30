@@ -165,6 +165,7 @@ function AddPlace() {
 
       form.append("regionId", formData.regionId);
       form.append("regionName", formData.region);
+      form.append("subRegionName", formData.subRegion);
       form.append("subRegionId", formData.subRegionId);
       form.append("placeName", formData.placeName);
       form.append("category", formData.category);

@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import {
     useActivitiesData, useHotelsData, usePlacesData,
+    usePlacesDataBySubRegionNames,
     useRegionsData, useRoomRatesData, useRoomTypesData, useSubRegionsData, useSuggestionGroupTripsData, useVehiclesData
 } from '../../../hooks/Resuable Hooks/useResuableData';
 import { useNavigate } from 'react-router-dom';
@@ -14,19 +15,22 @@ import GroupTripPolicies from '../../Group Trips/Add Group Trip/GroupTripPolicie
 import StepperTab from '../../Group Trips/Edit Group Trip/StepperTab';
 import { blankDay } from './HotelDetailsSimplePackage';
 import { isDayOneValid, isRegionDetailsValid } from './ValidationSimplePackage';
+import { useSamplePackageHooks } from '../../../hooks/useSamplePackageHooks';
 
 const PINK = '#ED5F8D';
 const BLUE = '#18305C';
 
 
 function sortIdsConsistently(arr) {
-    return [...arr].sort((a, b) => a.localeCompare(b));
+    if(!arr) return 
+    return [...arr]?.sort((a, b) => a.localeCompare(b));
 }
 
 function AddSamplePackage() {
 
     const navigate = useNavigate()
 
+    const {addSamplePackage} = useSamplePackageHooks()
     const [activeTab, setActiveTab] = useState(1);
     const [activeDay, setActiveDay] = useState(1);
     const [submitLoading, setSubmitLoading] = useState(false)
@@ -62,9 +66,9 @@ function AddSamplePackage() {
     })
 
     const [vendorDetails, setVendorDetails] = useState({
-        vendorName:'',
-        vendorPrice:0,
-        commission:0
+        vendorName: '',
+        vendorPrice: 0,
+        commission: 0
     })
 
     // console.log("Vendor details : ",vendorDetails)
@@ -87,7 +91,7 @@ function AddSamplePackage() {
         }));
     };
 
-    
+
 
 
     useEffect(() => {
@@ -109,11 +113,10 @@ function AddSamplePackage() {
     }, [price.additionalPrice, price?.totalPrice, price.isGstChecked, price.gstPercent])
 
 
-    // console.log("form data : ",formData?.itineraryBuilder?.daysDetails)
     // Price Calculation 
     useEffect(() => {
         setPrice(prev => {
-            let total = 0;
+            let total = ((vendorDetails?.vendorPrice||0) + (vendorDetails?.commission||0)) || 0 ;
 
             const daysDetails = formData?.itineraryBuilder?.daysDetails || [];
 
@@ -158,18 +161,16 @@ function AddSamplePackage() {
             }, 0);
 
 
-            total = hotelPrice + totalVehiclePrice + totalActivities
+            total += hotelPrice + totalVehiclePrice + totalActivities
 
             return {
                 ...prev,
                 totalPrice: total
             };
         });
-    }, [formData?.itineraryBuilder]);
+    }, [formData?.itineraryBuilder,vendorDetails?.vendorPrice,vendorDetails?.commission]);
 
-    // console.log("Price : ", price)
 
-    
     function addDays(days) {
         const date = new Date(formData?.regionDetails?.startDate || '2026-05-27');
 
@@ -205,24 +206,34 @@ function AddSamplePackage() {
     const activeDayData = formData.itineraryBuilder.daysDetails?.[activeDay - 1];
     const { subRegion1, subRegion2, subRegion3 } = activeDayData ?? {};
     const selectedSubRegionIds = [subRegion1, subRegion2, subRegion3].filter(Boolean);
-    const sortedSubRegionId = sortIdsConsistently(selectedSubRegionIds);
-
-    console.log("active day data : ", activeDayData)
     // ─── selectors ───────────────────────────────────────────────────────────
 
     const { regions, loading: regionLoading } = useRegionsData();
     const isProduction = useSelector((state) => state.user.isProduction)
     const allSubRegions = useSelector(s => s.subRegion.subRegionByRegionKey?.[sortedRegionId.join(',')]);
     const allVehicles = useSelector(s => s.vehicle.vehiclesByRegionKey?.[sortedRegionId.join(',')]);
+
+
+    const sortedSubRegionId = sortIdsConsistently(selectedSubRegionIds);
+    const selectedSubRegionNames = allSubRegions
+    ?.filter(subregion => selectedSubRegionIds?.includes(subregion?._id))
+    ?.map(subregion => subregion?.name);
+    
+    const sortedSubRegionNames = sortIdsConsistently(selectedSubRegionNames);
+
+    // console.log("active day data : ", activeDayData)
+
+
     const keyForFindHotel = sortedSubRegionId.join(',') + activeDayData?.hotelDetails?.hotelCategory;
     // console.log("Key For find hotel : ",keyForFindHotel)
     const hotelsForActiveDay = useSelector(s => s.hotel.hotelsBysubRegionKey?.[sortedSubRegionId.join(',') + activeDayData?.hotelDetails?.hotelCategory]);
-    const placesForActiveDay = useSelector(s => s.place.placesBySubRegionKey?.[sortedSubRegionId.join(',')]);
+    // const placesForActiveDay = useSelector(s => s.place.placesBySubRegionKey?.[sortedSubRegionId.join(',')]);
+    const placesForActiveDay = useSelector(s => s.place.placesBySubRegionNameKey?.[sortedSubRegionNames?.join(',')]);
     const activitiesForActiveDay = useSelector(s => s.activity.activitiesBySubRegionKey?.[sortedSubRegionId.join(',')]);
     const activeHotelId = activeDayData?.hotelDetails?.hotelId;
     const roomTypesForActiveDay = useSelector(s => s.room.roomTypesForHotelId?.[activeHotelId]);
     // const roomRatesForActiveDayHotel = useSelector(s => s.roomRate.roomRatesForHotelId?.[activeHotelId]);
-    const hotelRates =  useSelector( s => s.roomRate.roomRatesForHotelId?.[activeHotelId] ) || [];
+    const hotelRates = useSelector(s => s.roomRate.roomRatesForHotelId?.[activeHotelId]) || [];
     function addDaysForRate(days) {
         const date = new Date(formData?.regionDetails?.startDate);
 
@@ -232,8 +243,8 @@ function AddSamplePackage() {
     }
 
     const roomRatesForActiveDayHotel = hotelRates?.find(rate => {
-        const date = addDaysForRate(activeDay-1)
-        if(!date) return false
+        const date = addDaysForRate(activeDay - 1)
+        if (!date) return false
         const currentDate = new Date(date);
         const fromDate = new Date(rate.fromDate);
         const toDate = new Date(rate.toDate);
@@ -260,7 +271,7 @@ function AddSamplePackage() {
             refetchHotels()
         }
     }, [activeDayData?.hotelDetails?.hotelCategory])
-    const { loading: placeLoading } = usePlacesData({ subRegionIds: sortedSubRegionId, enabled: shouldFetchMore });
+    const { loading: placeLoading } = usePlacesDataBySubRegionNames({ subRegionNames: sortedSubRegionNames, enabled: shouldFetchMore });
     const { loading: activityLoading } = useActivitiesData({ subRegionIds: sortedSubRegionId, enabled: shouldFetchMore });
     const { loading: roomTypeLoading } = useRoomTypesData({
         hotelId: activeHotelId,
@@ -336,18 +347,33 @@ function AddSamplePackage() {
         try {
             setSubmitLoading(true);
             const isRegionValid = isRegionDetailsValid(formData)
-            if(!isRegionValid?.success){
+            if (!isRegionValid?.success) {
                 toast.warn(isRegionValid.message || "Error")
-                return ;
+                return;
             }
             const isDayValid = isDayOneValid(formData)
             // console.log("is Day valid : ",isDayValid)
-            if(!isDayValid?.success){
+            if (!isDayValid?.success) {
                 toast.warn(isDayValid.message || "Error")
-                return ;
+                return;
             }
 
-            console.log("submitted : ", formData)
+            if(!formData?.itineraryBuilder?.tripName){
+                return toast.warn("Give the trip Name")
+            }
+
+            const payload ={
+                ...formData,
+                vendorDetails,
+                price
+            }
+
+            // console.log("submitted : ", payload?.itineraryBuilder?.daysDetails)
+
+            const response = await addSamplePackage(payload)
+            // console.log("Response : ",response)
+            toast.success(response?.data?.message)
+            navigate(-1)
 
 
         } catch (error) {
@@ -371,20 +397,19 @@ function AddSamplePackage() {
     const tabs = ['Basic Details', 'Itinerary Builder', "Policies"];
 
     const tabClick = (i) => {
-        console.log("i : ",i)
-        if(i===2){
-            if(!isRegionDetailsValid(formData)?.success){
+        if (i === 2) {
+            if (!isRegionDetailsValid(formData)?.success) {
                 toast.warn(isRegionDetailsValid(formData)?.message || "error")
-                setActiveTab(i-1)
+                setActiveTab(i - 1)
             }
-            else{
+            else {
                 setActiveTab(i)
             }
         }
-        else{
+        else {
             setActiveTab(i)
         }
-        
+
     }
 
     // console.log("Fomr Data : ",formData)

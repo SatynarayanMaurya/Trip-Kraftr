@@ -370,6 +370,58 @@ export const usePlacesData = ({ subRegionIds,enabled, skip = false,
   };
 };
 
+export const usePlacesDataBySubRegionNames = ({ subRegionNames,enabled, skip = false,
+}) => {
+  const { getPlacesBySubRegionNames} = usePlaceHooks()
+
+  const isProduction = useSelector((state) => state.user.isProduction);
+  const allPlaces = useSelector((state)=>state.hotel.placesBySubRegionNameKey?.[subRegionNames?.join(",")])
+  const [loading, setLoading] = useState(false);
+
+  const fetchData = async () => {
+    try {
+      if (!subRegionNames || subRegionNames?.length === 0) return;
+
+      const validSubRegionIds = subRegionNames.filter(Boolean).slice(0, 3);
+      if (validSubRegionIds.length === 0) return;
+
+      if (allPlaces?.length > 0) return;
+
+      setLoading(true);
+
+      await getPlacesBySubRegionNames(subRegionNames);
+
+    } catch (error) {
+      if (!isProduction) {
+        console.log("========= ERROR DEBUG START =========");
+        console.log("Error:", error);
+        console.log("Response:", error?.response);
+        console.log("========= ERROR DEBUG END =========");
+      }
+
+      toast.error(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Error fetching Vehicles"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!enabled) return;
+    if (!skip) {
+      fetchData();
+    }
+  }, [enabled, JSON.stringify(subRegionNames), skip]);
+
+  return {
+    loading,
+    refetch: fetchData, // optional but useful
+  };
+};
+
 export const useActivitiesData = ({ subRegionIds,enabled, skip = false,
 }) => {
   const {getActivitiesBySubRegionIds} = useActivityHooks()

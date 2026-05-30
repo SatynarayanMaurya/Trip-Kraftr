@@ -18,6 +18,11 @@ const placeSchema = new mongoose.Schema({
         default: null
     },
 
+    subRegionName: {
+        type: String,
+        default: null
+    },
+
     subRegionId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "SubRegion"

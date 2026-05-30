@@ -4,6 +4,7 @@ const initialState = {
 
     placesPages: {},
     placesBySubRegionKey:{},
+    placesBySubRegionNameKey:{},
 
     individualPlaces:{}, // This contain a single place but details about that it is used when we update the place
 
@@ -201,6 +202,16 @@ export const placeSlice = createSlice({
           }
         
           state.placesBySubRegionKey[key] = data;
+        },
+        
+        setPlacesBySubRegionNameKey: (state, action) => {
+          const { key, data } = action.payload;
+        
+          if (!state.placesBySubRegionNameKey) {
+            state.placesBySubRegionNameKey = {};
+          }
+        
+          state.placesBySubRegionNameKey[key] = data;
         }
 
 
@@ -219,7 +230,8 @@ export const {
     deletePlace,
     setIndividualPlaces,
     updatePlace,
-    setPlacesBySubRegionKey
+    setPlacesBySubRegionKey,
+    setPlacesBySubRegionNameKey
 
 
 } = placeSlice.actions

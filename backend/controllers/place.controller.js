@@ -9,6 +9,7 @@ export const addPlace = async (req, res) => {
             placeName,
             regionId,
             regionName,
+            subRegionName,
             subRegionId,
             category,
             mapLink,
@@ -73,6 +74,7 @@ export const addPlace = async (req, res) => {
         };
 
         if (subRegionId) payload.subRegionId = subRegionId;
+        if (subRegionName) payload.subRegionName = subRegionName;
         if (mapLink) payload.mapLink = mapLink;
         if (description) payload.description = description;
         if (notes) payload.notes = notes;
@@ -226,6 +228,34 @@ export const getPlacesBySubRegionIds = async (req, res) => {
     }
   };
 
+
+  export const getPlacesBySubRegionNames = async (req, res) => {
+    try {
+      const subRegionNames = req.query.subRegionNames.split(",");
+  
+  
+      const allPlaces = await Place
+        .find({
+          subRegionName: { $in: subRegionNames }
+        })
+        .sort({ createdAt: -1 })
+        .lean()
+        .select("_id org_id regionId subRegionId subRegionName placeName notes imageUrl");
+  
+      return res.status(200).json({
+        success: true,
+        message: "Filtered places fetched successfully",
+        allPlaces
+      });
+  
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: error?.message || "Internal Server Error"
+      });
+    }
+  };
+
 export const updatePlaceById = async (req, res) => {
     try {
         const { placeId } = req.params;
@@ -234,6 +264,8 @@ export const updatePlaceById = async (req, res) => {
             placeName,
             regionId,
             subRegionId,
+            regionName,
+            subRegionName,
             category,
             mapLink,
             description,
@@ -310,6 +342,8 @@ export const updatePlaceById = async (req, res) => {
         if (mapLink) updatePayload.mapLink = mapLink;
         if (description) updatePayload.description = description;
         if (notes) updatePayload.notes = notes;
+        if (regionName) updatePayload.regionName = regionName;
+        if (subRegionName) updatePayload.subRegionName = subRegionName;
 
         updatePayload.imageUrl = imageUrl;
         updatePayload.imagePublicId = imagePublicId;

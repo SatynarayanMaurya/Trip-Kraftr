@@ -36,39 +36,36 @@ export const isRegionDetailsValid = (packageDetails) => {
 };
 
 
-export const isDayOneValid = (packageDetails)=>{
+export const isDayOneValid = (packageDetails) => {
 
     const adult = packageDetails?.regionDetails?.adults;
     const childAge = packageDetails?.regionDetails?.childAges
-    const adultChild = childAge?.filter(v=>v>6)?.length;
-    const childMax5Year = childAge?.filter(v=>v<=6)?.length;
-    const totalAdults = adult + adultChild;
+    const adultChildMax12 = childAge?.filter(v => v > 6 && v <= 12)?.length;
+    const adultChildMin12 = childAge?.filter(v => v > 12)?.length;
+    const totalAdults = adult + adultChildMin12;
     const dayDetails = packageDetails?.itineraryBuilder?.daysDetails?.[0];
-    const totalMaxAdults = dayDetails?.hotelDetails?.rooms?.reduce((acc,val)=>acc+((val?.maxAdults+val?.noOfExtraMattress)*val?.noOfRooms),0)
-    const totalTakenCNB = dayDetails?.hotelDetails?.rooms?.reduce((acc,val)=>acc+(val?.noOfCnb),0)
-
-
+    const totalMaxAdults = dayDetails?.hotelDetails?.rooms?.reduce((acc, val) => acc + ((val?.maxAdults + val?.noOfExtraMattress) * val?.noOfRooms), 0)
+    const totalTakenCNB = dayDetails?.hotelDetails?.rooms?.reduce((acc, val) => acc + (val?.noOfCnb||0), 0)
+    const remainingAdultSeats = totalMaxAdults - totalAdults
 
     // Room Validation 
-    if(totalMaxAdults < ( totalAdults + childMax5Year)){
-        if(totalMaxAdults <  totalAdults){
-            return {
-                success:false,
-                message:"You need to add more room"
-            } 
+    if (totalMaxAdults < totalAdults) {
+        return {
+            success: false,
+            message: "You need to add more room in Day-1"
         }
+    }
 
-        if(childMax5Year > totalTakenCNB){
-            return {
-                success:false,
-                message:"You need to add CNB for child"
-            } 
+    if((remainingAdultSeats+totalTakenCNB) < adultChildMax12){
+        return {
+            success: false,
+            message: "You need to add CNB for child in Day-1"
         }
     }
 
 
     return {
-        success:true,
-        message:"All Validation passed"
-    } 
+        success: true,
+        message: "All Validation passed"
+    }
 }

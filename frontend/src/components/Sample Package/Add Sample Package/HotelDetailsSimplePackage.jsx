@@ -74,7 +74,7 @@ export const blankDay = () => ({
         vehicleModel: '',
         vehicleType: '',
         quantity: 1,
-        _id: '',
+        // _id: '',
     }],
     placeDetails: [],
     activities: [
@@ -312,7 +312,7 @@ function RoomEntryInventory({
                     </div>
                     {selectedRoomType && (
                         <p className="text-[11px] text-gray-400 mt-1">
-                            Total available: {selectedRoomType.quantity}
+                            Total available: {selectedRoomType.quantity}, Max Adult: {selectedRoomType.adult}
                         </p>
                     )}
                 </div>
@@ -462,6 +462,7 @@ function RoomEntryManual({ room, roomIndex, rooms, canDelete, onRoomChange, onDe
                         type="number"
                         min={1}
                         placeholder="1"
+                        onWheel={(e) => e.currentTarget.blur()}
                         className={numInputCls}
                         value={room.noOfRooms ?? 1}
                         onChange={e => handleField('noOfRooms', Math.max(1, Number(e.target.value)))}
@@ -477,6 +478,7 @@ function RoomEntryManual({ room, roomIndex, rooms, canDelete, onRoomChange, onDe
                         type="number"
                         min={0}
                         placeholder="0"
+                        onWheel={(e) => e.currentTarget.blur()}
                         className={numInputCls}
                         value={room.noOfExtraMattress ?? 0}
                         onChange={e => handleField('noOfExtraMattress', Math.max(0, Number(e.target.value)))}
@@ -488,6 +490,7 @@ function RoomEntryManual({ room, roomIndex, rooms, canDelete, onRoomChange, onDe
                         type="number"
                         min={0}
                         placeholder="0"
+                        onWheel={(e) => e.currentTarget.blur()}
                         className={numInputCls}
                         value={room.noOfCnb ?? 0}
                         onChange={e => handleField('noOfCnb', Math.max(0, Number(e.target.value)))}
@@ -499,6 +502,7 @@ function RoomEntryManual({ room, roomIndex, rooms, canDelete, onRoomChange, onDe
                         type="number"
                         min={0}
                         placeholder="0"
+                        onWheel={(e) => e.currentTarget.blur()}
                         className={numInputCls}
                         value={room.roomPrice ?? 0}
                         onChange={e => handleField('roomPrice', Math.max(0, Number(e.target.value)))}
@@ -822,48 +826,3 @@ function HotelDetailsSimplePackage({
 
 export default HotelDetailsSimplePackage
 
-
-// ─────────────────────────────────────────────────────────────────────────────
-// INSTRUCTIONS FOR AddSamplePackage.jsx
-// ─────────────────────────────────────────────────────────────────────────────
-//
-// 1. Replace your local `blankDay` with the exported `blankDay` from this file:
-//    import { blankDay } from './HotelDetails';
-//
-// 2. The `handleItineraryChange` function is unchanged — HotelDetails calls
-//    `onDayChange('hotelDetails', { ...fullHotelDetailsObject })` which already
-//    maps to:  handleItineraryChange(activeDay - 1, { hotelDetails: ... })
-//    No changes needed there.
-//
-// 3. In ItineraryBuilderSampLePackage, replace the old <HotelDetails> with:
-//    <HotelDetails
-//      dayData={currentDay}
-//      hotelsForActiveDay={hotelsForActiveDay}
-//      roomTypesForActiveDay={roomTypesForActiveDay}
-//      roomRatesForActiveDayHotel={roomRatesForActiveDayHotel}
-//      hotelLoading={hotelLoading}
-//      roomTypeLoading={roomTypeLoading}
-//      onDayChange={updateDayField}
-//    />
-//
-// 4. The useEffect in ItineraryBuilderSampLePackage that resets hotelDetails
-//    when hotelsForActiveDay changes should reset rooms too. Update it to:
-//
-//    useEffect(() => {
-//      if (!hotelsForActiveDay || !currentDay) return;
-//      const ids = new Set(hotelsForActiveDay.map(h => h._id));
-//      const cur = currentDay?.hotelDetails;
-//      const updated =
-//        cur && !ids.has(cur.hotelId) && cur?.hotelType !== 'manual'
-//          ? {
-//              hotelType:     'inventory',
-//              hotelCategory: cur?.hotelCategory,
-//              hotelId:       null,
-//              hotelName:     '',
-//              rooms:         [blankRoom()],   // ← use blankRoom() here
-//            }
-//          : cur;
-//      handleItineraryChange(activeDay - 1, { hotelDetails: updated });
-//    }, [hotelsForActiveDay]);
-//
-// ─────────────────────────────────────────────────────────────────────────────

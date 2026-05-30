@@ -196,6 +196,7 @@ function UpdatePlace() {
                 _id:placeDetails?._id,
                 regionId: formData.regionId,
                 regionName: formData.region,
+                subRegionName: formData.subRegion,
                 subRegionId: formData.subRegionId,
                 placeName: formData.placeName,
                 category: formData.category,
