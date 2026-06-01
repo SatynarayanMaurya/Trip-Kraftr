@@ -38,7 +38,7 @@ const samplePackageSchema = new mongoose.Schema(
 
         itineraryBuilder: {
             tripName: { type: String, required: true },
-            tripOverview: { type: String, required: true },
+            tripOverview: { type: String },
             daysDetails: [
                 {
                     dayOverview: { type: String },
