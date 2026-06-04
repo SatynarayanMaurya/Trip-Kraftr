@@ -29,9 +29,26 @@ export const isRegionDetailsValid = (packageDetails) => {
             message: "Please enter the number of adults."
         };
     }
+    // console.log("region details : ",regionDetails)
+
+    if (regionDetails?.children > 0) {
+        const childAges = regionDetails?.childAges || [];
+    
+        const isValid =
+            childAges.length === regionDetails.children &&
+            childAges.every(age => Number(age) > 0);
+    
+        if (!isValid) {
+            return {
+                success: false,
+                message: "Please enter a valid age for all children."
+            };
+        }
+    }
 
     return {
-        success: true
+        success: true,
+        message: "All Validation true"
     };
 };
 
@@ -69,3 +86,37 @@ export const isDayOneValid = (packageDetails) => {
         message: "All Validation passed"
     }
 }
+
+
+export const isValidVendorDetails = (vendorDetails) => {
+    const {
+        vendorName = '',
+        vendorPrice = 0,
+    } = vendorDetails || {};
+
+    const hasVendorName = vendorName.trim() !== '';
+    const hasVendorPrice = Number(vendorPrice) > 0;
+
+    // If vendor name is provided, vendor price must be > 0
+    if (hasVendorName && !hasVendorPrice) {
+        return {
+            success: false,
+            message: "Please enter a valid vendor price."
+        };
+    }
+
+    // If vendor price is provided, vendor name must be present
+    if (hasVendorPrice && !hasVendorName) {
+        return {
+            success: false,
+            message: "Please select or enter a vendor name."
+        };
+    }
+
+    // Commission is optional, so no validation needed
+
+    return {
+        success: true,
+        message: "All Validation true"
+    };
+};

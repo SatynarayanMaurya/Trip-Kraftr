@@ -6,36 +6,88 @@ import {
     usePlacesDataBySubRegionNames,
     useRegionsData, useRoomRatesData, useRoomTypesData, useSubRegionsData, useSuggestionGroupTripsData, useVehiclesData
 } from '../../../hooks/Resuable Hooks/useResuableData';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import { ArrowLeft } from 'lucide-react'
-import ItineraryBuilderSampLePackage from './ItineraryBuilderSampLePackage';
-import RegionDetailsSamplePackage from './RegionDetailsSamplePackage';
 import GroupTripPolicies from '../../Group Trips/Add Group Trip/GroupTripPolicies';
 import StepperTab from '../../Group Trips/Edit Group Trip/StepperTab';
-import { blankDay } from './HotelDetailsSimplePackage';
-import { isDayOneValid, isRegionDetailsValid, isValidVendorDetails } from './ValidationSimplePackage';
+import { blankDay } from '../Add Sample Package/HotelDetailsSimplePackage';
+import { isDayOneValid, isRegionDetailsValid, isValidVendorDetails } from '../Add Sample Package/ValidationSimplePackage';
 import { useSamplePackageHooks } from '../../../hooks/useSamplePackageHooks';
+import RegionDetailsSamplePackage from '../Add Sample Package/RegionDetailsSamplePackage';
+import ItineraryBuilderSampLePackage from '../Add Sample Package/ItineraryBuilderSampLePackage';
 
 const PINK = '#ED5F8D';
 const BLUE = '#18305C';
 
 
 function sortIdsConsistently(arr) {
-    if(!arr) return 
+    if (!arr) return
     return [...arr]?.sort((a, b) => a.localeCompare(b));
 }
 
-function AddSamplePackage() {
+function EditSamplePackage() {
 
     const navigate = useNavigate()
 
-    const {addSamplePackage} = useSamplePackageHooks()
+    const { updateSamplePackageById } = useSamplePackageHooks()
+    const { getSamplePackageById } = useSamplePackageHooks()
     const [activeTab, setActiveTab] = useState(1);
     const [activeDay, setActiveDay] = useState(1);
     const [submitLoading, setSubmitLoading] = useState(false)
     const [selectedGroupTripDetails, setSelectedGroupTripDetails] = useState(null)
     const [suggestionPage, setSuggestionPage] = useState(true)
+
+
+
+    const { samplePackageId } = useParams()
+
+    const samplePackageDetails = useSelector(s => s.samplePackage.samplePackageById?.[samplePackageId])
+
+    const [fetchLoading, setFetchLoading] = useState(false)
+    // console.log("samplePackageDetails ", samplePackageDetails)
+
+    const fetchSamplePackage = async () => {
+        try {
+            setFetchLoading(true)
+            await getSamplePackageById(samplePackageId)
+        }
+        catch (error) {
+            if (!isProduction) {
+                console.log("========= ERROR DEBUG START =========");
+                console.log("Error:", error);
+                console.log("Response:", error?.response);
+                console.log("========= ERROR DEBUG END =========");
+            }
+            toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin")
+        }
+        finally {
+            setFetchLoading(false)
+        }
+    }
+
+
+    const convertUTCToISTDate = (utcDateString) => {
+        if (!utcDateString) return '';
+
+        const date = new Date(utcDateString);
+
+        // Convert to IST using Intl API
+        const istDate = new Intl.DateTimeFormat('en-CA', {
+            timeZone: 'Asia/Kolkata',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+        }).format(date);
+
+        return istDate; // format: YYYY-MM-DD
+    };
+
+    useEffect(() => {
+        if (samplePackageId) {
+            fetchSamplePackage()
+        }
+    }, [samplePackageId])
 
 
     const [formData, setFormData] = useState({
@@ -92,6 +144,65 @@ function AddSamplePackage() {
     };
 
 
+    useEffect(() => {
+        if (samplePackageDetails?.price) {
+
+            setFormData(prev => ({
+                ...prev,
+                regionDetails: {
+                    region1: samplePackageDetails?.regionDetails?.region1?._id || samplePackageDetails?.regionDetails?.region1 || null,
+                    region2: samplePackageDetails?.regionDetails?.region2?._id || samplePackageDetails?.regionDetails?.region2 || null,
+                    region3: samplePackageDetails?.regionDetails?.region3?._id || samplePackageDetails?.regionDetails?.region3 || null,
+                    startDate: convertUTCToISTDate(samplePackageDetails?.regionDetails?.startDate) || '',
+                    noOfDays: samplePackageDetails?.regionDetails?.noOfDays || '',
+                    adults: samplePackageDetails?.regionDetails?.adults || 0,
+                    children: samplePackageDetails?.regionDetails?.children || 0,
+                    childAges: samplePackageDetails?.regionDetails?.childAges || [],
+                },
+
+                
+            itineraryBuilder: {
+                tripName: samplePackageDetails?.itineraryBuilder?.tripName || '',
+                tripOverview: samplePackageDetails?.itineraryBuilder?.tripOverview || '',
+
+                daysDetails: (samplePackageDetails?.itineraryBuilder?.daysDetails || []).map(day => ({
+                    ...day,
+
+                    // ✅ normalize subRegions
+                    subRegion1: day?.subRegion1?._id || day?.subRegion1 || null,
+                    subRegion2: day?.subRegion2?._id || null,
+                    subRegion3: day?.subRegion3?._id || null,
+
+                    // ✅ normalize places
+                    placeDetails: (day?.placeDetails || []).map(place => ({
+                        ...place,
+                        placeId: place?.placeId?._id || place?.placeId || null,
+                    })),
+                })),
+            },
+
+            }))
+
+
+            setPrice(prev => ({
+                ...prev,
+                totalPrice: samplePackageDetails?.price?.totalPrice || 0,
+                additionalPrice: samplePackageDetails?.price?.additionalPrice || 0,
+                isGstChecked: samplePackageDetails?.price?.isGstChecked || false,
+                gstPercent: samplePackageDetails?.price?.gstPercent || 0,
+                gstPrice: samplePackageDetails?.price?.gstPrice || 0,
+                finalPrice: samplePackageDetails?.price?.finalPrice || 0
+            }));
+
+            setVendorDetails(prev => ({
+                ...prev,
+                vendorName: samplePackageDetails?.vendorDetails?.vendorName || '',
+                vendorPrice: samplePackageDetails?.vendorDetails?.totalPrice || 0,
+                commission: samplePackageDetails?.vendorDetails?.commission || 0
+            }));
+        }
+    }, [samplePackageDetails]);
+
 
 
     useEffect(() => {
@@ -116,7 +227,7 @@ function AddSamplePackage() {
     // Price Calculation 
     useEffect(() => {
         setPrice(prev => {
-            let total = ((vendorDetails?.vendorPrice||0) + (vendorDetails?.commission||0)) || 0 ;
+            let total = ((vendorDetails?.vendorPrice || 0) + (vendorDetails?.commission || 0)) || 0;
 
             const daysDetails = formData?.itineraryBuilder?.daysDetails || [];
 
@@ -168,7 +279,7 @@ function AddSamplePackage() {
                 totalPrice: total
             };
         });
-    }, [formData?.itineraryBuilder,vendorDetails?.vendorPrice,vendorDetails?.commission]);
+    }, [formData?.itineraryBuilder, vendorDetails?.vendorPrice, vendorDetails?.commission]);
 
 
     function addDays(days) {
@@ -216,9 +327,9 @@ function AddSamplePackage() {
 
     const sortedSubRegionId = sortIdsConsistently(selectedSubRegionIds);
     const selectedSubRegionNames = allSubRegions
-    ?.filter(subregion => selectedSubRegionIds?.includes(subregion?._id))
-    ?.map(subregion => subregion?.name);
-    
+        ?.filter(subregion => selectedSubRegionIds?.includes(subregion?._id))
+        ?.map(subregion => subregion?.name);
+
     const sortedSubRegionNames = sortIdsConsistently(selectedSubRegionNames);
 
     // console.log("active day data : ", activeDayData)
@@ -363,19 +474,19 @@ function AddSamplePackage() {
                 return;
             }
 
-            if(!formData?.itineraryBuilder?.tripName){
+            if (!formData?.itineraryBuilder?.tripName) {
                 return toast.warn("Give the trip Name")
             }
 
-            const payload ={
+            const payload = {
                 ...formData,
                 vendorDetails,
                 price
             }
 
-            // console.log("submitted : ", payload?.itineraryBuilder?.daysDetails)
+            // console.log("submitted : ", payload)
 
-            const response = await addSamplePackage(payload)
+            const response = await updateSamplePackageById(samplePackageId,payload)
             // console.log("Response : ",response)
             toast.success(response?.data?.message)
             navigate(-1)
@@ -420,7 +531,7 @@ function AddSamplePackage() {
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '24px', background: '#f5f6fa', minHeight: '100vh' }}>
-            <h1 style={{ fontSize: '22px', fontWeight: '700', color: BLUE, margin: 0 }}>Create New Sample Package</h1>
+            <h1 style={{ fontSize: '22px', fontWeight: '700', color: BLUE, margin: 0 }}>Update Sample Package</h1>
             <button
                 onClick={() => navigate(-1)}
                 className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-[#18305C] -mt-1 transition-colors cursor-pointer"
@@ -481,4 +592,4 @@ function AddSamplePackage() {
     );
 }
 
-export default AddSamplePackage
+export default EditSamplePackage

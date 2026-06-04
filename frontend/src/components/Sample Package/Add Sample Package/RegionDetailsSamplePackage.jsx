@@ -175,7 +175,7 @@ function RegionDetailsSamplePackage({
                                     Child Age {index + 1}
                                 </label>
 
-                                <input
+                                {/* <input
                                     type="number"
                                     min="0"
                                     max="17"
@@ -196,7 +196,38 @@ function RegionDetailsSamplePackage({
                                         handleChange("childAges", updatedAges);
                                     }}
                                     onWheel={(e) => e.currentTarget.blur()}
-                                />
+                                /> */}
+                                <select name="childAge" id="childAge"
+                                style={{
+                                    ...inputStyle,
+                                    width: "70px",
+                                    minWidth: "100px",
+                                    padding: "8px",
+                                    textAlign: "center",
+                                  }}
+                                value={age}
+                                onChange={(e) => {
+                                    const updatedAges = [...formData.childAges];
+
+                                    updatedAges[index] = Number(e.target.value);
+
+                                    handleChange("childAges", updatedAges);
+                                }}
+                                >
+                                    <option value={""}>Child age</option>
+                                    <option value={1}>1</option>
+                                    <option value={2}>2</option>
+                                    <option value={3}>3</option>
+                                    <option value={4}>4</option>
+                                    <option value={5}>5</option>
+                                    <option value={6}>6</option>
+                                    <option value={7}>7</option>
+                                    <option value={8}>8</option>
+                                    <option value={9}>9</option>
+                                    <option value={10}>10</option>
+                                    <option value={11}>11</option>
+                                    <option value={12}>12</option>
+                                </select>
                             </div>
                         ))}
                     </div>

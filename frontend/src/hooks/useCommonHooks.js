@@ -12,6 +12,7 @@ import { groupTripEndpoints } from "../services/Apis/groupTripApis"
 import { accountsEndpoints } from "../services/Apis/accountsApis"
 import { enquiriessEndpoints } from "../services/Apis/enquiriesApis"
 import { roomRateEndpoints } from "../services/Apis/roomRateApis"
+import { samplePackageEndpoints } from "../services/Apis/samplePackageApis"
 
 export const useCommonHooks = () => {
     const dispatch = useDispatch()
@@ -307,6 +308,26 @@ export const useCommonHooks = () => {
         300
       );
 
+          // ---------- Subregion Search for org ( ) ----------
+    const searchSamplePackage = debounceSearch(
+        "searchSamplePackage",
+        (searchTerm,regionId,days, pageLimit=10) => {
+          const params = new URLSearchParams();
+      
+          if (searchTerm) params.append("search", searchTerm);
+          if (regionId) params.append("regionId", regionId);
+          if (days) params.append("days", days);
+          if (pageLimit) params.append("pageLimit", pageLimit);
+      
+          return apiConnector(
+            "GET",
+            `${samplePackageEndpoints.SEARCH_SAMPLE_PACKAGE}?${params.toString()}`
+          );
+
+        },
+        300
+      );
+
 
 
 
@@ -327,6 +348,7 @@ export const useCommonHooks = () => {
         searchB2CAccounts,
         searchB2BAccountsForEnquiry,
         searchB2CAccountsForEnquiry,
+        searchSamplePackage
 
     }
 }

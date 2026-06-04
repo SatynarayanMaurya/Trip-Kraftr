@@ -5,10 +5,13 @@ const initialState = {
 
     // hotelsPages: {},
     groupTripsPages: {},
+
     samplePackagesByPages: {},
 
     groupTripById: {}, 
+
     groupTripSummaryById: {},  
+    samplePackageById: {}, 
     suggestionGroupTripsSlice:{},
 
     samplePackagePageLimit: 4,
@@ -104,16 +107,12 @@ export const samplePackageSlice = createSlice({
             state.groupTripsPages = {}
         },
 
-        setGroupTripPageLimit: (state, action) => {
-            state.groupTripPageLimit = Number(action.payload)
-        },
 
-        setGroupTripById: (state, action) => {
+        setSamplePackageById: (state, action) => {
             const { id, data } = action.payload || {};
-
             if (!id ) return;
 
-            state.groupTripById[id] = data;
+            state.samplePackageById[id] = data;
         },
         removeGroupTripById: (state, action) => {
             const { id } = action.payload || {};
@@ -259,7 +258,9 @@ export const samplePackageSlice = createSlice({
 export const {
     addNewSamplePackage,
     setCurrentPageSamplePackage,
-    setSamplePackageByPage
+    setSamplePackageByPage,
+    setSamplePackageById,
+    
 } = samplePackageSlice.actions
 
 export default samplePackageSlice.reducer

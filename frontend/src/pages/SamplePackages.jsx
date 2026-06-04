@@ -18,6 +18,7 @@ import {
   CheckCircle,
 } from 'lucide-react';
 import SamplePackageSkeleton from '../components/Sample Package/Sample Package Main page/SamplePackageSkeleton';
+import { useCommonHooks } from '../hooks/useCommonHooks';
 
 // ─── Dummy cover image (replace with real asset later) ───────────────────────
 const DUMMY_IMAGE =
@@ -128,6 +129,9 @@ function FilterSelect({ value, onChange, placeholder, children }) {
 function SamplePackages() {
   const navigate = useNavigate();
 
+
+  const {searchSamplePackage} = useCommonHooks()
+
   const { getSamplePackages }                       = useSamplePackageHooks();
   const { regions, loading: regionLoading }         = useRegionsData();
 
@@ -146,6 +150,8 @@ function SamplePackages() {
   const currentPageSamplePackages = useSelector(
     (s) => s.samplePackage.samplePackagesByPages?.[currentPage]
   );
+
+  const [searchedSamplePackage, setSearchedSamplePackage] = useState([])
 
   const pagination = useSelector(s=>s.samplePackage.paginationSamplePackages)
 
@@ -169,8 +175,42 @@ function SamplePackages() {
 
   const isLoading = fetchLoading || !currentPageSamplePackages;
 
+  const searchSamplePackages = async()=>{
+    try{
+      setFetchLoading(true)
+      const response = await searchSamplePackage (search,regionId,days)
+      setSearchedSamplePackage(response?.data?.searchedSamplePackage)
+    }
+    catch(error){
+      if (!isProduction) {
+        console.log("========= ERROR DEBUG START =========");
+        console.log("Error:", error);
+        console.log("Response:", error?.response);
+        console.log("========= ERROR DEBUG END =========");
+      }
+      toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin")
+    }
+    finally{
+      setFetchLoading(false)
+    }
+  }
+
+  useEffect(()=>{
+    if(regionId || days || search!==''){
+      setIsSearching(true)
+      searchSamplePackages()
+    }
+    else{
+      setIsSearching(false)
+    }
+  },[regionId, days,search])
+
   // ── Days options (1-10, default null)
-  const DAY_OPTIONS = Array.from({ length: 10 }, (_, i) => i + 1);
+  const DAY_OPTIONS = Array.from({ length: 30 }, (_, i) => i + 1);
+
+  const filteredData = isSearching ? searchedSamplePackage : currentPageSamplePackages
+
+  // console.log("region id and days : ",regionId, days,search)
 
   return (
     <div className="min-h-screen bg-[#f5f6fa] p-6">
@@ -207,7 +247,7 @@ function SamplePackages() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by Name/Phone."
+            placeholder="Search by Trip Name."
             className="w-full bg-white border border-gray-200 rounded-xl pl-9 pr-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#e91e8c]/30 focus:border-[#e91e8c]/60 transition"
           />
         </div>
@@ -222,12 +262,6 @@ function SamplePackages() {
           }
         </FilterSelect>
 
-        {/* Status */}
-        <FilterSelect value={status} onChange={setStatus} placeholder="Status">
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-        </FilterSelect>
-
         {/* Days */}
         <FilterSelect value={days} onChange={setDays} placeholder="Days">
           {DAY_OPTIONS.map((d) => (
@@ -240,14 +274,14 @@ function SamplePackages() {
       {isLoading ? (
         /* Skeleton — component lives in SamplePackageSkeleton.jsx */
         <SamplePackageSkeleton count={pageLimit ?? 8} />
-      ) : currentPageSamplePackages?.length === 0 ? (
+      ) : filteredData?.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 text-gray-400 gap-3">
           <p className="text-lg font-semibold">No packages found</p>
           <p className="text-sm">Try adjusting your filters or create a new package.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-          {currentPageSamplePackages?.map((pkg) => (
+          {filteredData?.map((pkg) => (
             <PackageCard key={pkg._id} pkg={pkg} />
           ))}
         </div>

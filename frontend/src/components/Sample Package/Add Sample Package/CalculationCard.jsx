@@ -116,16 +116,6 @@ function CalculationCard({ price, handlePrice, vendorDetails, handleVendorDetail
 
                             <span className="text-sm">GST {' 5 %'}</span>
 
-                            {/* <input
-                type="number"
-                min={0}
-                value={price?.gstPercent}
-                name="gstPercent"
-                readOnly
-                className="w-12 bg-white/10 rounded px-1 py-0.5 text-xs text-center outline-none"
-              />
-
-              <span className="text-xs">%</span> */}
                         </div>
 
                         <span className="text-pink-400 text-sm font-medium">
