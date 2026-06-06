@@ -204,7 +204,7 @@ function ItineraryBuilderSampLePackage({
     subRegionLoading, hotelLoading, placeLoading,
     activityLoading, roomTypeLoading,
     handleItineraryChange, handleSave, submitLoading,
-    price, handlePrice, vendorDetails, handleVendorDetails
+    price, handlePrice, vendorDetails, handleVendorDetails,fetchRoomRateAgain
 }) {
     const { itineraryBuilder, regionDetails } = formData;
     const { startDate } = regionDetails ?? {};
@@ -361,6 +361,7 @@ function ItineraryBuilderSampLePackage({
                             hotelLoading={hotelLoading}
                             roomTypeLoading={roomTypeLoading}
                             onDayChange={updateDayField}
+                            fetchRoomRateAgain={fetchRoomRateAgain}
                         />
 
                         <PlacesSection

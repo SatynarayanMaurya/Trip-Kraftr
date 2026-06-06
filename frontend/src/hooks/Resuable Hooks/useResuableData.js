@@ -481,14 +481,14 @@ export const useRoomRatesData = ({ hotelId, startDate,enabled, skip = false,
   // const allActivity = useSelector((state)=>state.hotel.activitiesBySubRegionKey?.[subRegionIds?.join(",")])
   const [loading, setLoading] = useState(false);
 
-  const fetchData = async () => {
+  const fetchData = async (fetchAgain=false) => {
     try {
       if (!hotelId  || !startDate) return;
 
-
       setLoading(true);
 
-      const res = await getRoomRateByHotelIdRoomIdDate(hotelId, startDate);
+      const res = await getRoomRateByHotelIdRoomIdDate(hotelId, startDate,fetchAgain);
+      // console.log("res : ",res?.data)
 
     } catch (error) {
       if (!isProduction) {

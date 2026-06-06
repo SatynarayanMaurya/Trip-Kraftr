@@ -99,7 +99,14 @@ export const roomRateSlice = createSlice({
             if (!exists) {
                 state.roomRatesForHotelId[key].push(data);
             }
-        }
+        },
+        clearRoomRatesForHotelId: (state, action) => {
+            const { key } = action.payload;
+        
+            if (state.roomRatesForHotelId?.[key]) {
+                delete state.roomRatesForHotelId[key];
+            }
+        },
 
     }
 })
@@ -110,7 +117,8 @@ export const {
     updateRoomRateReducer,
     deleteSingleRoomRate,
     deleteRoomRateForHotel,
-    setRoomRatesForHotelId
+    setRoomRatesForHotelId,
+    clearRoomRatesForHotelId
 
 } = roomRateSlice.actions
 

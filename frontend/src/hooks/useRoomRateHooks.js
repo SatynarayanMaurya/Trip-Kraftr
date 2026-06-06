@@ -67,51 +67,25 @@ export const useRoomRateHooks = () => {
     }
 
 
-    // const getRoomRateByHotelIdRoomIdDate = async (hotelId, date) => {  // For Normal Org_admin
-    //     try {
-    //         const cachedPage = roomRatesForHotelId?.[hotelId]
 
-    //         if (cachedPage) return cachedPage
-    //         dispatch(setLoading(true));
-    //         const params = new URLSearchParams();
-
-    //         if (hotelId) params.append("hotelId", hotelId);
-    //         if (date) params.append("date", date);
-    //         const response = await apiConnector("GET", `${roomRateEndpoints.GET_ROOM_RATE_BY_HOTELID_ROOMID_DATE}?${params.toString()}`,)
-
-    //         if(response?.data?.success){
-    //             dispatch(setRoomRatesForHotelId({ key: hotelId, data: response?.data?.foundRate }))
-    //         }
-    //         if(response?.status === 404){
-    //             dispatch(setRoomRatesForHotelId({ key: hotelId, data: {} }))
-    //         }
-    //         return response;
-    //     } catch (error) {
-    //         throw error;
-    //     } finally {
-    //         dispatch(setLoading(false));
-    //     }
-    // }
-
-
-    const getRoomRateByHotelIdRoomIdDate = async (hotelId, date) => {
+    const getRoomRateByHotelIdRoomIdDate = async (hotelId, date,fetchAgain=false) => {
         try {
             const hotelCachedRates = roomRatesForHotelId?.[hotelId] || [];
-    
+            
             // Check if date exists in cached ranges
             const matchedRate = hotelCachedRates.find((rate) => {
                 const activeDate = new Date(date);
                 const fromDate = new Date(rate.fromDate);
                 const toDate = new Date(rate.toDate);
-    
+                
                 return activeDate >= fromDate && activeDate <= toDate;
             });
-    
+            
             // Use cached data if found
-            if (matchedRate) {
+            if (matchedRate && !fetchAgain) {
                 return matchedRate;
             }
-    
+            
             dispatch(setLoading(true));
     
             const params = new URLSearchParams();
@@ -123,7 +97,7 @@ export const useRoomRateHooks = () => {
                 "GET",
                 `${roomRateEndpoints.GET_ROOM_RATE_BY_HOTELID_ROOMID_DATE}?${params.toString()}`
             );
-    
+
             if (response?.data?.success) {
                 const foundRate = response?.data?.foundRate;
 

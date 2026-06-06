@@ -3,12 +3,12 @@
 // Drop-in replacement for the HotelDetails function + blankDay + handleItineraryChange
 // ─────────────────────────────────────────────────────────────────────────────
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Hotel, Plus, Trash2 } from 'lucide-react';
 import {
     Wifi, Waves, ParkingCircle, Utensils, Dumbbell, Wind,
     Tv, Coffee, ShowerHead, Car, Shirt, Baby,
-    Flame, Shield, Accessibility, BedDouble,
+    Flame, Shield, Accessibility, BedDouble,RefreshCw
 } from 'lucide-react';
 import { inputStyle } from '../../Common/CommonCss'; // keep your existing import path
 import { toast } from 'react-toastify';
@@ -44,7 +44,7 @@ export const blankRoom = () => ({
     roomType: '',
     mealPlan: 'ep',
     noOfRooms: 1,
-    maxAdults:1,
+    maxAdults: 1,
     noOfExtraMattress: 0,
     noOfCnb: 0,
     roomPrice: 0,
@@ -78,13 +78,13 @@ export const blankDay = () => ({
     }],
     placeDetails: [],
     activities: [
-        { 
-            activityType: 'inventory', 
-            activityId: null, 
-            activityName: '', 
-            isComplimentary: false, 
-            quantity:1,
-            price: 0 
+        {
+            activityType: 'inventory',
+            activityId: null,
+            activityName: '',
+            isComplimentary: false,
+            quantity: 1,
+            price: 0
         },
     ],
 });
@@ -219,7 +219,7 @@ function RoomEntryInventory({
     const handleRoomTypeChange = (roomTypeId) => {
         const rt = roomTypesForActiveDay?.find(r => r._id === roomTypeId);
         const mealPlan = room.mealPlan || 'ep';
-        const roomPrice = rt ? getRoomPrice(roomRatesForActiveDayHotel, roomTypeId, mealPlan):0
+        const roomPrice = rt ? getRoomPrice(roomRatesForActiveDayHotel, roomTypeId, mealPlan) : 0
         if (roomPrice === 0 && rt) {
             toast.warn(
                 "No hotel price is defined for the selected date. Using 0 as the default price."
@@ -229,7 +229,7 @@ function RoomEntryInventory({
             roomTypeId,
             roomType: rt?.roomName ?? '',
             noOfRooms: 1,
-            maxAdults:rt?.adult ?? 1,
+            maxAdults: rt?.adult ?? 1,
             noOfExtraMattress: 0,
             noOfCnb: 0,
             roomPrice: getRoomPrice(roomRatesForActiveDayHotel, roomTypeId, mealPlan),
@@ -237,6 +237,25 @@ function RoomEntryInventory({
             cnbPrice: getCnbPrice(roomRatesForActiveDayHotel, mealPlan),
         });
     };
+
+    useEffect(() => {
+        onRoomChange(roomIndex, {
+            ...room,
+            roomPrice: getRoomPrice(
+                roomRatesForActiveDayHotel,
+                room?.roomTypeId,
+                room?.mealPlan
+            ),
+            extraMattressPrice: getExtraMatPrice(
+                roomRatesForActiveDayHotel,
+                room?.mealPlan
+            ),
+            cnbPrice: getCnbPrice(
+                roomRatesForActiveDayHotel,
+                room?.mealPlan
+            )
+        });
+    }, [roomRatesForActiveDayHotel]);
 
     const handleMealPlanChange = (mealPlan) => {
         onRoomChange(roomIndex, {
@@ -524,6 +543,7 @@ function HotelDetailsSimplePackage({
     hotelLoading,
     roomTypeLoading,
     onDayChange,
+    fetchRoomRateAgain
 }) {
     const hotelType = dayData?.hotelDetails?.hotelType ?? 'inventory';
     const isInventory = hotelType === 'inventory';
@@ -707,7 +727,26 @@ function HotelDetailsSimplePackage({
                         {dayData?.hotelDetails?.hotelId && (
                             <div className="mt-2">
                                 <div className="flex items-center justify-between mb-2">
-                                    <span className="text-[13px] font-bold" style={{ color: BLUE }}>Rooms</span>
+                                    {/* <p className="text-[13px] font-bold" style={{ color: BLUE }}>Rooms  <span onClick={fetchRoomRateAgain}>Refetch Room</span></p> */}
+                                    
+
+                                    <div
+                                        className="text-[13px] font-bold flex gap-4 items-center justify-between"
+                                        style={{ color: BLUE }}
+                                    >
+                                        <span>Rooms</span>
+
+                                        <button
+                                            type="button"
+                                            onClick={fetchRoomRateAgain}
+                                            disabled={!dayData?.hotelDetails?.hotelId}
+                                            title="Refetch room rates"
+                                            className="flex items-center gap-1 text-xs font-medium hover:opacity-80 transition-opacity"
+                                            style={{ color: BLUE }}
+                                        >
+                                            <RefreshCw size={14} />
+                                        </button>
+                                    </div>
                                     <button
                                         type="button"
                                         onClick={handleAddRoom}
@@ -742,7 +781,7 @@ function HotelDetailsSimplePackage({
                     </div>
 
                     {/* Right: image + rating */}
-                    <div className="flex-shrink-0 flex flex-col gap-2" style={{ width: '20vw' }}>
+                    <div className="shrink-0 flex flex-col gap-2" style={{ width: '20vw' }}>
                         <div
                             className="rounded-xl overflow-hidden bg-gray-100 border border-gray-100"
                             style={{ width: '20vw', height: '25vh' }}
@@ -789,7 +828,7 @@ function HotelDetailsSimplePackage({
                     {/* Rooms */}
                     <div>
                         <div className="flex items-center justify-between mb-2">
-                            <span className="text-[13px] font-bold" style={{ color: BLUE }}>Rooms</span>
+                            <p className="text-[13px] font-bold" style={{ color: BLUE }}>Rooms</p>
                             <button
                                 type="button"
                                 onClick={handleAddRoom}

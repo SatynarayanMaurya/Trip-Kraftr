@@ -124,7 +124,7 @@ export const searchSamplePackage = async (req, res) => {
     }
 
     if (search) {
-      query["itineraryBuilder.tripName"] = { $regex: `${search.trim()}`, $options: "i" };
+      query["itineraryBuilder.tripName"] = { $regex: `^${search.trim()}`, $options: "i" };
     }
 
     if (regionId) {

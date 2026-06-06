@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import {
     useActivitiesData, useHotelsData, usePlacesData,
@@ -16,6 +16,8 @@ import { isDayOneValid, isRegionDetailsValid, isValidVendorDetails } from '../Ad
 import { useSamplePackageHooks } from '../../../hooks/useSamplePackageHooks';
 import RegionDetailsSamplePackage from '../Add Sample Package/RegionDetailsSamplePackage';
 import ItineraryBuilderSampLePackage from '../Add Sample Package/ItineraryBuilderSampLePackage';
+import { clearRoomRatesForHotelId } from '../../../redux/slices/roomRateSlice';
+import { ensureFavouritePlaces } from '../../Group Trips/Add Group Trip/ValidateItinerary';
 
 const PINK = '#ED5F8D';
 const BLUE = '#18305C';
@@ -30,10 +32,13 @@ function EditSamplePackage() {
 
     const navigate = useNavigate()
 
+    const dispatch = useDispatch()
+
     const { updateSamplePackageById } = useSamplePackageHooks()
     const { getSamplePackageById } = useSamplePackageHooks()
     const [activeTab, setActiveTab] = useState(1);
     const [activeDay, setActiveDay] = useState(1);
+    const [fetchRoomRateAgain, setFetchRoomRateAgain] = useState(false)
     const [submitLoading, setSubmitLoading] = useState(false)
     const [selectedGroupTripDetails, setSelectedGroupTripDetails] = useState(null)
     const [suggestionPage, setSuggestionPage] = useState(true)
@@ -403,6 +408,14 @@ function EditSamplePackage() {
             refetchRoomRate()
         }
     }, [activeDayData?.hotelDetails?.hotelId])
+
+    useEffect(() => {
+        dispatch(clearRoomRatesForHotelId({key:activeDayData?.hotelDetails?.hotelId}))
+        if (activeDayData?.hotelDetails?.hotelId) {
+            refetchRoomRate({fetchAgain:true})
+        }
+    }, [fetchRoomRateAgain])
+
     const { loading: suggestionGroupTripLoading } = useSuggestionGroupTripsData({
         region1, region2, region3, noOfDays,
         enabled: activeTab === 3 && !!region1 && suggestionPage,
@@ -478,11 +491,25 @@ function EditSamplePackage() {
                 return toast.warn("Give the trip Name")
             }
 
-            const payload = {
+            
+            const updatedDays = ensureFavouritePlaces(
+                formData.itineraryBuilder.daysDetails
+            );
+
+            const updatedFormData = {
                 ...formData,
+                itineraryBuilder: {
+                    ...formData.itineraryBuilder,
+                    daysDetails: updatedDays,
+                },
+            };
+
+            const payload ={
+                ...updatedFormData,
                 vendorDetails,
                 price
             }
+
 
             // console.log("submitted : ", payload)
 
@@ -582,6 +609,7 @@ function EditSamplePackage() {
                     handlePrice={handlePrice}
                     vendorDetails={vendorDetails}
                     handleVendorDetails={handleVendorDetails}
+                    fetchRoomRateAgain={()=>setFetchRoomRateAgain(!fetchRoomRateAgain)}
                 />
             )}
 

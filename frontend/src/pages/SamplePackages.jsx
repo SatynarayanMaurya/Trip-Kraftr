@@ -228,7 +228,7 @@ function SamplePackages() {
 
         <button
           onClick={() => navigate('add-sample-package')}
-          className="flex items-center gap-2 bg-gradient-to-r from-[#e91e8c] to-[#c2185b] hover:from-[#d81b7f] hover:to-[#ad1457] text-white font-semibold text-sm px-5 py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all whitespace-nowrap self-start"
+          className="flex items-center gap-2 bg-linear-to-r from-[#e91e8c] to-[#c2185b] hover:from-[#d81b7f] hover:to-[#ad1457] text-white font-semibold text-sm px-5 py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all whitespace-nowrap self-start"
         >
           <Plus size={16} strokeWidth={2.5} />
           Create Itinerary
@@ -373,60 +373,3 @@ function SamplePackages() {
 }
 
 export default SamplePackages;
-
-
-
-
-
-
-
-
-// import React, { useEffect, useState } from 'react'
-// import { useSelector } from 'react-redux';
-// import { useNavigate } from 'react-router-dom'
-// import { toast } from 'react-toastify';
-// import { useSamplePackageHooks } from '../hooks/useSamplePackageHooks';
-// import { useRegionsData } from '../hooks/Resuable Hooks/useResuableData';
-
-// function SamplePackages() {
-//     const navigate = useNavigate()
-
-//     const {getSamplePackages} = useSamplePackageHooks()
-//     const { regions, loading: regionLoading } = useRegionsData();
-
-//     console.log("regions L ",regions)
-
-//     const [currentPage, setCurrentPage] = useState(1)
-//     const [fetchLoading, setFetchLoading] = useState(false)
-
-//     const isProduction = useSelector(s=>s.user.isProduction)
-//     const pageLimit = useSelector(s=>s.samplePackage.samplePackagePageLimit)
-
-//     const currentPageSamplePackages = useSelector(s=>s.samplePackage.samplePackagesByPages?.[currentPage])
-//     console.log("currentPageSamplePackages L ",currentPageSamplePackages)
-
-//     const fetchGroupTrips = async () => {
-//       try {
-//         setFetchLoading(true);
-//         await getSamplePackages(currentPage, pageLimit);
-//       } catch (error) {
-//         if (!isProduction) console.log('Error:', error);
-//         toast.error(error?.response?.data?.message || error?.message || 'Error fetching group trips');
-//       } finally {
-//         setFetchLoading(false);
-//       }
-//     };
-  
-//     useEffect(() => {
-//       if (!currentPageSamplePackages) fetchGroupTrips();
-//     }, [currentPage, pageLimit]);
-
-
-//   return (
-//     <div>SamplePackages
-//         <button onClick={()=>navigate("add-sample-package")}>Add Package</button>
-//     </div>
-//   )
-// }
-
-// export default SamplePackages
