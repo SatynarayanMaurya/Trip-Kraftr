@@ -175,6 +175,8 @@ const privateTripSchema = new mongoose.Schema(
             discountedPrice: { type: Number },
         },
 
+        status:{type:String, default:'created'}
+
 
 
 

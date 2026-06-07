@@ -16,18 +16,31 @@ export const getPrivateTrips = async (req, res) => {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
-      .lean()
+      // .lean()
       .select({
         _id: 1,
         privateTripId: 1,
+        enquiryId: 1,
+        enquiryModel: 1,
         "regionDetails.region1": 1,
         "regionDetails.startDate": 1,
         "regionDetails.noOfDays": 1,
         "regionDetails.adults": 1,
         "regionDetails.children": 1,
-        'itineraryBuilder.tripName': 1
+        'itineraryBuilder.tripName': 1,
+        'itineraryBuilder.daysDetails.placeDetails': 1,
+        'itineraryBuilder.daysDetails.activities': 1,
+        'price.discountedPrice': 1,
       })
       .populate({ path: 'regionDetails.region1', select: "_id name" })
+      .populate({
+        path: 'enquiryId',
+        select: '_id accountId',
+        populate: {
+            path: 'accountId',
+            select: '_id fullName businessName phone email'
+        }
+    })
 
 
     // Counts
