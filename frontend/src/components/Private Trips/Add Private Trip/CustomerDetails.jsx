@@ -3,8 +3,8 @@ import React from "react";
 const BLUE = "#18305C";
 const PINK = "#ED5F8D";
 
-function CustomerDetails({ customerDetails, enquiryType }) {
-    const account = customerDetails?.accountId || {};
+function CustomerDetails({ enquiryDetails, enquiryType }) {
+    const account = enquiryDetails?.accountId || {};
 
     return (
         <div>

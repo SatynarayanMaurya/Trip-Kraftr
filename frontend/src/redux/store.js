@@ -15,6 +15,7 @@ import groupTripSlice from './slices/groupTripSlice'
 import accountSlice from './slices/accountSlice'
 import enquirySlice from './slices/enquirySlice'
 import samplePackage from './slices/samplePackageSlice'
+import privateTrip from './slices/privateTripSlice'
 export const store = configureStore({
   reducer: {
     plan: planSlice,
@@ -33,5 +34,6 @@ export const store = configureStore({
     account:accountSlice,
     enquiry:enquirySlice,
     samplePackage:samplePackage,
+    privateTrip:privateTrip,
   },
 })

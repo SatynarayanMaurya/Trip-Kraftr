@@ -4,6 +4,7 @@ function EnquiryPrivateTrip({
     searchEnquiry,
     setSearchEnquiry,
     setCustomerDetails,
+    setEnquiryDetails,
     searchedEnquiries,
     setActiveTab,
 }) {
@@ -72,7 +73,7 @@ function EnquiryPrivateTrip({
                                     key={enquiry._id}
                                     type="button"
                                     onClick={() => {
-                                        setCustomerDetails(enquiry);
+                                        setEnquiryDetails(enquiry);
                                         setSearchEnquiry((prev) => ({
                                             ...prev,
                                             search: enquiry?.accountId?.fullName || "",

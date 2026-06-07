@@ -19,6 +19,9 @@ import ItineraryBuilderPrivateTrip from './ItineraryBuilderPrivateTrip';
 import EnquiryPrivateTrip from './EnquiryPrivateTrip';
 import { useEnquiryHooks } from '../../../hooks/useEnquiryHooks';
 import { useCommonHooks } from '../../../hooks/useCommonHooks';
+import { usePrivateTripHooks } from '../../../hooks/usePrivateTripHooks';
+import { isDayOneValid, isRegionDetailsValid } from '../../Sample Package/Add Sample Package/ValidationSimplePackage';
+import { ensureFavouritePlaces } from '../../Group Trips/Add Group Trip/ValidateItinerary';
 
 const PINK = '#ED5F8D';
 const BLUE = '#18305C';
@@ -35,6 +38,7 @@ function AddPrivateTrip() {
     const dispatch = useDispatch()
 
     const { searchB2BEnquiry, searchB2CEnquiry } = useCommonHooks()
+    const { addPrivateTrip } = usePrivateTripHooks()
     const [activeTab, setActiveTab] = useState(1);
     const [activeDay, setActiveDay] = useState(1);
     const [fetchRoomRateAgain, setFetchRoomRateAgain] = useState(false)
@@ -59,10 +63,11 @@ function AddPrivateTrip() {
         },
     });
 
+    const [enquiryDetails, setEnquiryDetails] = useState(null)
     const [customerDetails, setCustomerDetails] = useState(null)
     const [searchedEnquiries, setSearchedEnquiries] = useState([])
     const [searchEnquiry, setSearchEnquiry] = useState({
-        loading:false,
+        loading: false,
         search: '',
         enquiryType: 'b2c'
     })
@@ -71,12 +76,12 @@ function AddPrivateTrip() {
     // The source is working as statsu filter
     const fetchSearchEnquiry = async () => {
         try {
-            setSearchEnquiry(prev=>({
+            setSearchEnquiry(prev => ({
                 ...prev,
-                loading:true
+                loading: true
             }))
 
-            const searchFn = searchEnquiry?.enquiryType === 'b2b' ? searchB2BEnquiry  : searchB2CEnquiry;
+            const searchFn = searchEnquiry?.enquiryType === 'b2b' ? searchB2BEnquiry : searchB2CEnquiry;
             const response = await searchFn(searchEnquiry?.search);
             setSearchedEnquiries(response?.data?.searchedEnquiries)
         }
@@ -89,10 +94,10 @@ function AddPrivateTrip() {
             }
             toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin")
         }
-        finally{
-            setSearchEnquiry(prev=>({
+        finally {
+            setSearchEnquiry(prev => ({
                 ...prev,
-                loading:false
+                loading: false
             }))
         }
     }
@@ -104,17 +109,17 @@ function AddPrivateTrip() {
     }, [searchEnquiry?.search])
 
     const [price, setPrice] = useState({
-        showBreakUp:false,
+        showBreakUp: false,
         baseCost: 0,
-        min_margin:0,
-        max_margin:0,
-        margin:0,
-        commission:0,
-        isMargin:false,
+        min_margin: 0,
+        max_margin: 0,
+        margin: 0,
+        commission: 0,
+        isMargin: false,
         additionalActivities: 0,
         totalCost: 0,
-        festivalSurge:0,
-        discount:0,
+        festivalSurge: 0,
+        discount: 0,
         isGstChecked: false,
         gstPrice: 0,
         finalPrice: 0,
@@ -122,26 +127,26 @@ function AddPrivateTrip() {
     })
 
 
-    useEffect(()=>{
-        if(formData?.regionDetails?.region1){
-            const foundRegion = regions?.find(reg=>reg?._id === formData?.regionDetails?.region1)
-            if(foundRegion){
-                setPrice(prev=>({
+    useEffect(() => {
+        if (formData?.regionDetails?.region1) {
+            const foundRegion = regions?.find(reg => reg?._id === formData?.regionDetails?.region1)
+            if (foundRegion) {
+                setPrice(prev => ({
                     ...prev,
-                    min_margin:foundRegion?.min_margin,
-                    margin:foundRegion?.min_margin,
-                    max_margin:foundRegion?.max_margin,
+                    min_margin: foundRegion?.min_margin,
+                    margin: foundRegion?.min_margin,
+                    max_margin: foundRegion?.max_margin,
                 }))
             }
         }
-    },[formData?.regionDetails?.region1])
+    }, [formData?.regionDetails?.region1])
 
 
 
 
     useEffect(() => {
         setPrice(prev => {
-            let total =0;
+            let total = 0;
             const daysDetails = formData?.itineraryBuilder?.daysDetails || [];
 
             // Total hotel price of all days
@@ -185,24 +190,24 @@ function AddPrivateTrip() {
             }, 0);
 
 
-            total += hotelPrice + totalVehiclePrice +totalActivities
-            const marginValue = (total * prev?.margin)/100
-            const totalAmount = prev?.isMargin ? total+ marginValue  :  total+prev.commission ;
-            const finalPriceTemp = totalAmount + prev.festivalSurge 
-            const gstPrice =( finalPriceTemp * 5)/100
+            total += hotelPrice + totalVehiclePrice + totalActivities
+            const marginValue = (total * prev?.margin) / 100
+            const totalAmount = prev?.isMargin ? total + marginValue : total + prev.commission;
+            const finalPriceTemp = totalAmount + prev.festivalSurge
+            const gstPrice = (finalPriceTemp * 5) / 100
             const finalPrice = prev?.isGstChecked ? finalPriceTemp + gstPrice : finalPriceTemp
 
             return {
                 ...prev,
                 baseCost: hotelPrice + totalVehiclePrice,
-                additionalActivities:totalActivities,
-                totalCost:totalAmount,
-                finalPrice:finalPrice,
-                gstPrice:gstPrice,
-                discountedPrice:finalPrice - prev.discount
+                additionalActivities: totalActivities,
+                totalCost: totalAmount,
+                finalPrice: finalPrice,
+                gstPrice: gstPrice,
+                discountedPrice: finalPrice - prev.discount
             };
         });
-    }, [formData?.itineraryBuilder,price?.discount,price?.festivalSurge, price?.commission, price.margin,price.isGstChecked,price?.isMargin]);
+    }, [formData?.itineraryBuilder, price?.discount, price?.festivalSurge, price?.commission, price.margin, price.isGstChecked, price?.isMargin]);
 
     // console.log("price : ",price)
 
@@ -388,10 +393,52 @@ function AddPrivateTrip() {
     const handleSaveItinerary = async () => {
         try {
             setSubmitLoading(true);
-            console.log("Submitted")
-            // const response = await addSamplePackage(payload)
+            const isRegionValid = isRegionDetailsValid(formData)
+            if (!isRegionValid?.success) {
+                toast.warn(isRegionValid.message || "Error")
+                return;
+            }
+            const isDayValid = isDayOneValid(formData)
+            if (!isDayValid?.success) {
+                toast.warn(isDayValid.message || "Error")
+                return;
+            }
+
+            if (!formData?.itineraryBuilder?.tripName) {
+                return toast.warn("Give the trip Name")
+            }
+            if (!enquiryDetails) {
+                return toast.warn("Select an enquiry first")
+            }
+
+            const updatedDays = ensureFavouritePlaces(
+                formData.itineraryBuilder.daysDetails
+            );
+
+            const updatedFormData = {
+                ...formData,
+                itineraryBuilder: {
+                    ...formData.itineraryBuilder,
+                    daysDetails: updatedDays,
+                },
+            };
+
+            const payload = {
+                ...updatedFormData,
+                price,
+                enquiryDetails,
+                enquiryType:searchEnquiry?.enquiryType
+            }
+            // const payload = {
+            //     ...formData,
+            //     price,
+            //     enquiryDetails,
+            //     enquiryType:searchEnquiry?.enquiryType
+            // }
+            // console.log("Submitted : ",payload)
+            const response = await addPrivateTrip(payload)
             // // console.log("Response : ",response)
-            // toast.success(response?.data?.message)
+            toast.success(response?.data?.message)
             // navigate(-1)
 
 
@@ -416,27 +463,40 @@ function AddPrivateTrip() {
     const tabs = ['Select Enquiry', 'Trip Details', 'Itinerary Builder'];
 
     const tabClick = (i) => {
-        // if (i === 2) {
-        //     if (!isRegionDetailsValid(formData)?.success) {
-        //         toast.warn(isRegionDetailsValid(formData)?.message || "error")
-        //         setActiveTab(i - 1)
-        //     }
-        //     else {
-        //         setActiveTab(i)
-        //     }
-        // }
-        // else {
-        //     setActiveTab(i)
-        // }
+        if (i === 2) {
+            if (!enquiryDetails) {
+                toast.warn("Select one enquiry first")
+                setActiveTab(i - 1)
+            }
+            else {
+                setActiveTab(i)
+            }
+        }
+        else if (i === 3) {
+            if (!enquiryDetails) {
+                toast.warn("Select one enquiry first")
+                return setActiveTab(i - 2)
+            }
 
-        setActiveTab(i)
+            if (!isRegionDetailsValid(formData)?.success) {
+                toast.warn(isRegionDetailsValid(formData)?.message || "error")
+                setActiveTab(i - 1)
+            }
+            else {
+                setActiveTab(i)
+            }
+        }
+        else {
+            setActiveTab(i)
+        }
+
     }
 
     // console.log("Regions : ",regions)
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '24px', background: '#f5f6fa', minHeight: '100vh' }}>
-            <h1 style={{ fontSize: '22px', fontWeight: '700', color: BLUE, margin: 0 }}>Create New Sample Package</h1>
+            <h1 style={{ fontSize: '22px', fontWeight: '700', color: BLUE, margin: 0 }}>Create New Private Trip</h1>
             <button
                 onClick={() => navigate(-1)}
                 className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-[#18305C] -mt-1 transition-colors cursor-pointer"
@@ -458,14 +518,17 @@ function AddPrivateTrip() {
                     searchEnquiry={searchEnquiry}
                     setSearchEnquiry={setSearchEnquiry}
                     setCustomerDetails={setCustomerDetails}
+                    setEnquiryDetails={setEnquiryDetails}
                     searchedEnquiries={searchedEnquiries}
-                    setActiveTab={(val)=>setActiveTab(val)}
+                    setActiveTab={(val) => setActiveTab(val)}
                 />
             )}
 
             {activeTab === 2 && (
                 <TripDetailsPrivateTrip
+
                     customerDetails={customerDetails}
+                    enquiryDetails={enquiryDetails}
                     enquiryType={searchEnquiry?.enquiryType}
                     formData={formData.regionDetails}
                     regions={regions}

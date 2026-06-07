@@ -7,6 +7,7 @@ const BLUE = "#18305C";
 
 function TripDetailsPrivateTrip({
     customerDetails,
+    enquiryDetails,
     enquiryType,          // pass from parent: searchEnquiry.enquiryType
     formData,
     regions,
@@ -18,7 +19,7 @@ function TripDetailsPrivateTrip({
         <div>
             {/* ── Customer Details (read-only) ── */}
             <CustomerDetails
-                customerDetails={customerDetails}
+                enquiryDetails={enquiryDetails}
                 enquiryType={enquiryType}
             />
 

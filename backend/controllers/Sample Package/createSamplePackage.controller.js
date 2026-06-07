@@ -18,7 +18,7 @@ export const createSamplePackage = async (req, res) => {
             .select("samplePackageName")
 
         const latestId = latestPackage?.samplePackageName?.split("-")?.[1]
-        const samplePackageName = `SAMPKG-${Number(latestId) + 1}`
+        const samplePackageName = `SAMPKG-${(Number(latestId)||0) + 1}`
 
         const newSamplePackage = await SamplePackage.create({
             org_id: req.user.org_id,
