@@ -28,6 +28,7 @@ import { GroupTripsRoutes } from "./GroupTripsRoutes";
 import { AccountRoutes } from "./AccountRoutes";
 import { EnquiriesRoutes } from "./EnquiriesRoutes";
 import { SamplePackageRoutes } from "./SamplePackageRoutes";
+import { PrivateTripsRoutes } from "./PrivateTripsRoutes";
 
 function AppRoutes() {
   return (
@@ -65,6 +66,7 @@ function AppRoutes() {
           {AccountRoutes}
           {EnquiriesRoutes}
           {SamplePackageRoutes}
+          {PrivateTripsRoutes}
 
           {/* fallback */}
           <Route path="unauthorized" element={<Unauthorized />} />

@@ -86,7 +86,7 @@ export const getRegions = async (req, res) => {
 
 export const getRegionForOrg = async(req,res)=>{  // This is for region suggestions
     try{
-        const allRegions = await Region.find({org_id:req.user.org_id}).select("_id name country is_active")
+        const allRegions = await Region.find({org_id:req.user.org_id}).select("_id name country is_active min_margin max_margin")
         return res.status(200).json({
             success:true,
             message:"All Regions fetched successfully",

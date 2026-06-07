@@ -464,7 +464,7 @@ function Rooms() {
                                                         placeholder="Extra Mattress"
                                                     />
                                                 ) : (
-                                                    room.extraMattress||1
+                                                    room?.extraMattress||0
                                                 )}
                                             </td>
 
