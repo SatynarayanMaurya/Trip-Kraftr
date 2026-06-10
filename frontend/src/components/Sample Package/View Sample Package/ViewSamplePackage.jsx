@@ -105,19 +105,6 @@ function ViewSamplePackage() {
                     >
                         <Pencil size={14} /> Edit
                     </button>
-                    {/* <button
-                        onClick={handleDelete}
-                        disabled={deleteLoading}
-                        style={{
-                            display: 'flex', alignItems: 'center', gap: '6px',
-                            padding: '8px 18px', borderRadius: '8px', border: 'none',
-                            background: '#ef4444', color: 'white', fontSize: '13px',
-                            fontWeight: '600', cursor: deleteLoading ? 'not-allowed' : 'pointer',
-                            opacity: deleteLoading ? 0.7 : 1,
-                        }}
-                    >
-                        <Trash2 size={14} /> {deleteLoading ? 'Deleting…' : 'Delete'}
-                    </button> */}
                 </div>
             </div>
 

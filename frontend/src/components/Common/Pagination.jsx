@@ -1,6 +1,6 @@
 import React from 'react'
 
-function Pagination({isSearching, currentPage, setCurrentPage,pagination,}) {
+function Pagination({ setCurrentPage,pagination,currentPage=1,isSearching=false,}) {
     return (
         <div
             className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mt-6 bg-white rounded-xl px-4 md:px-5 py-4"

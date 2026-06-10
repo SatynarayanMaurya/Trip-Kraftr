@@ -6,7 +6,8 @@ const initialState = {
 
     privateTripByPages: {},
 
-    samplePackageById: {}, 
+    privateTripById: {}, 
+    privateTripFinanceById: {}, 
 
     privateTripPageLimit: 4,
     currentPagePrivateTrip :1,
@@ -74,11 +75,12 @@ export const privateTripSlice = createSlice({
             if (pagination) state.paginationPrivateTrip = pagination
         },
 
-        setSamplePackageById: (state, action) => {
-            const { id, data } = action.payload || {};
+        setPrivateTripById: (state, action) => {
+            const { id, data,financeDetails } = action.payload || {};
             if (!id ) return;
 
-            state.samplePackageById[id] = data;
+            state.privateTripById[id] = data;
+            state.privateTripFinanceById[id] = financeDetails;
         },
 
 
@@ -89,6 +91,7 @@ export const {
     setCurrentPagePrivateTrip,
     addNewPrivateTrip,
     setPrivateTripsByPage,
+    setPrivateTripById
 } = privateTripSlice.actions
 
 export default privateTripSlice.reducer

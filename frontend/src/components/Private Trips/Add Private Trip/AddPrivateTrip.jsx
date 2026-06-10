@@ -427,19 +427,12 @@ function AddPrivateTrip() {
                 ...updatedFormData,
                 price,
                 enquiryDetails,
-                enquiryType:searchEnquiry?.enquiryType
+                enquiryType: searchEnquiry?.enquiryType
             }
-            // const payload = {
-            //     ...formData,
-            //     price,
-            //     enquiryDetails,
-            //     enquiryType:searchEnquiry?.enquiryType
-            // }
-            // console.log("Submitted : ",payload)
+            console.log("Itinerary builder : ", formData?.itineraryBuilder)
             const response = await addPrivateTrip(payload)
-            // // console.log("Response : ",response)
             toast.success(response?.data?.message)
-            // navigate(-1)
+            navigate(-1)
 
 
         } catch (error) {

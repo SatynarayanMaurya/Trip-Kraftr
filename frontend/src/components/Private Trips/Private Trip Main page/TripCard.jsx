@@ -29,7 +29,7 @@ const formatDate = (dateStr) => {
 function TripCard({ trip, onView, onDelete }) {
     const { privateTripId, enquiryId, regionDetails, itineraryBuilder, status, price } = trip
 
-    const customerName = enquiryId?.accountId?.fullName ?? '—'
+    const customerName = enquiryId?.accountId?.fullName || enquiryId?.accountId?.businessName ||  '—'
     const regionName = regionDetails?.region1?.name ?? null
     const tripName = itineraryBuilder?.tripName ?? null
     const daysDetails = itineraryBuilder?.daysDetails ?? []

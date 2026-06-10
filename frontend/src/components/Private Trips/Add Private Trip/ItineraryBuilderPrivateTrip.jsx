@@ -260,11 +260,11 @@ function ItineraryBuilderPrivateTrip({
     return (
 
         <div>
-             <PriceSection
+             {/* <PriceSection
                 price={price}
                 setPrice={setPrice}
                 noOfDays={formData?.noOfDays || 3}
-            />
+            /> */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
                 {/* Trip Name — UNTOUCHED */}

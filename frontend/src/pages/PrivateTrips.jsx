@@ -1,12 +1,14 @@
 
 
 import React, { useEffect, useState } from 'react'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { usePrivateTripHooks } from '../hooks/usePrivateTripHooks'
 import { Eye, Trash2, Plus, Search, ChevronDown, MapPin, Zap, Calendar, Users } from 'lucide-react'
 import TripCard from '../components/Private Trips/Private Trip Main page/TripCard'
 import PrivateCardSkeleton from '../components/Private Trips/Private Trip Main page/PrivateCardSkeleton'
+import Pagination from '../components/Common/Pagination'
+import { setCurrentPagePrivateTrip } from '../redux/slices/privateTripSlice'
 
 // ── helpers ────────────────────────────────────────────────────────────────
 
@@ -32,11 +34,10 @@ function FilterDropdown({ label, value, onChange, options }) {
             <button
               key={opt}
               onClick={() => { onChange(opt === 'All' || opt === 0 ? '' : opt); setOpen(false) }}
-              className={`w-full text-left px-4 py-2 text-sm hover:bg-pink-50 hover:text-[#E91E8C] transition-colors ${
-                (value === opt || (!value && (opt === 'All' || opt === 0)))
+              className={`w-full text-left px-4 py-2 text-sm hover:bg-pink-50 hover:text-[#E91E8C] transition-colors ${(value === opt || (!value && (opt === 'All' || opt === 0)))
                   ? 'text-[#E91E8C] font-medium bg-pink-50'
                   : 'text-gray-700'
-              }`}
+                }`}
             >
               {opt === 0 ? 'Select Days' : opt}
             </button>
@@ -51,18 +52,19 @@ function FilterDropdown({ label, value, onChange, options }) {
 
 function PrivateTrips() {
   const navigate = useNavigate()
+  const dispatch = useDispatch()
   const { getPrivateTrips } = usePrivateTripHooks()
 
   const [fetchLoading, setFetchLoading] = useState(false)
-  const [search, setSearch]             = useState('')
+  const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [regionFilter, setRegionFilter] = useState('')
-  const [daysFilter, setDaysFilter]     = useState('')
+  const [daysFilter, setDaysFilter] = useState('')
 
-  const currentPage           = useSelector((s) => s.privateTrip.currentPagePrivateTrip)
+  const currentPage = useSelector((s) => s.privateTrip.currentPagePrivateTrip)
   const currentPagePrivateTrip = useSelector((s) => s.privateTrip.privateTripByPages?.[currentPage])
-  const pagination            = useSelector((s) => s.privateTrip.paginationPrivateTrip)
-  const pageLimit             = useSelector((s) => s.privateTrip.privateTripPageLimit)
+  const pagination = useSelector((s) => s.privateTrip.paginationPrivateTrip)
+  const pageLimit = useSelector((s) => s.privateTrip.privateTripPageLimit)
 
   const fetchPrivateTrips = async () => {
     try {
@@ -94,17 +96,17 @@ function PrivateTrips() {
   const filtered = React.useMemo(() => {
     if (!currentPagePrivateTrip) return []
     return currentPagePrivateTrip.filter((trip) => {
-      const name  = trip?.enquiryId?.accountId?.fullName ?? ''
+      const name = trip?.enquiryId?.accountId?.fullName ?? ''
       const phone = String(trip?.enquiryId?.accountId?.phone ?? '')
       const matchSearch = !search || name.toLowerCase().includes(search.toLowerCase()) || phone.includes(search)
       const matchStatus = !statusFilter || (trip?.status ?? 'Created') === statusFilter
       const matchRegion = !regionFilter || trip?.regionDetails?.region1?.name === regionFilter
-      const matchDays   = !daysFilter || trip?.regionDetails?.noOfDays === Number(daysFilter)
+      const matchDays = !daysFilter || trip?.regionDetails?.noOfDays === Number(daysFilter)
       return matchSearch && matchStatus && matchRegion && matchDays
     })
   }, [currentPagePrivateTrip, search, statusFilter, regionFilter, daysFilter])
 
-  const handleView   = (trip) => navigate(`${trip._id}`)
+  const handleView = (trip) => navigate(`view/${trip._id}`)
   const handleDelete = (trip) => {
     // wire up your delete logic here
     console.log('delete', trip._id)
@@ -189,6 +191,10 @@ function PrivateTrips() {
           ))}
         </div>
       )}
+
+
+      {/* Pagination */}
+      <Pagination pagination={pagination} isSearching={false} currentPage={currentPage} setCurrentPage={(val)=>dispatch(setCurrentPagePrivateTrip(val))}/>
     </div>
   )
 }

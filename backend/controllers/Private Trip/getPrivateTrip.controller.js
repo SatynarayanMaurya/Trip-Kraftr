@@ -1,4 +1,5 @@
 import PrivateTrip from "../../models/Private Trip/privateTrip.model.js"
+import PrivateTripFinance from "../../models/Private Trip/privateTripfinances.model.js"
 
 import mongoose from "mongoose"
 
@@ -37,10 +38,10 @@ export const getPrivateTrips = async (req, res) => {
         path: 'enquiryId',
         select: '_id accountId',
         populate: {
-            path: 'accountId',
-            select: '_id fullName businessName phone email'
+          path: 'accountId',
+          select: '_id fullName businessName phone email'
         }
-    })
+      })
 
 
     // Counts
@@ -71,21 +72,21 @@ export const getPrivateTrips = async (req, res) => {
 }
 
 
-export const getSamplePackageById = async (req, res) => {
+export const getPrivateTripById = async (req, res) => {
   try {
-    const { samplePackageId } = req.params;
-    if (!samplePackageId) {
+    const { privateTripId } = req.params;
+    if (!privateTripId) {
       return res.status(400).json({
         success: false,
         message: "Id not provided"
       })
     }
 
-
-    const foundSamplePackage = await SamplePackage.findOne(
+    let foundPrivateTripFinance;
+    const foundPrivateTrip = await PrivateTrip.findOne(
       {
         org_id: req.user.org_id,
-        _id: samplePackageId
+        _id: privateTripId
       }
     )
       .populate({
@@ -103,17 +104,31 @@ export const getSamplePackageById = async (req, res) => {
       .populate({ path: 'itineraryBuilder.daysDetails.subRegion2', select: "_id name" })
       .populate({ path: 'itineraryBuilder.daysDetails.subRegion3', select: "_id name" })
 
-    if (!foundSamplePackage) {
+    if(foundPrivateTrip){
+      foundPrivateTripFinance = await PrivateTripFinance.findOne(
+        {
+          org_id:req.user.org_id,
+          privateTripId:foundPrivateTrip?._id
+        }
+      )
+      .populate({
+        path:'vehiclePayments.vehicleId',
+        select:"_id vendorName contactNo vehicleImageUrl"
+
+      })
+    }
+    if (!foundPrivateTrip) {
       return res.status(404).json({
         success: false,
-        message: "Sample Package not found"
+        message: "Private trip not found"
       })
     }
 
     return res.status(200).json({
       success: true,
-      message: "Sample package found",
-      foundSamplePackage
+      message: "Private Trip found",
+      foundPrivateTrip,
+      foundPrivateTripFinance
     })
   }
   catch (error) {
@@ -133,7 +148,7 @@ export const searchSamplePackage = async (req, res) => {
       org_id: req.user.org_id
     };
 
-    if(days){
+    if (days) {
       query['regionDetails.noOfDays'] = days
     }
 
