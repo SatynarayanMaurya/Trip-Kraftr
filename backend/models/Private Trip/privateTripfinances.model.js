@@ -104,7 +104,7 @@ const privateTripFinanceSchema = new mongoose.Schema(
 privateTripFinanceSchema.index(
     {
         org_id: 1,
-        tripId: 1,
+        privateTripId: 1,
     },
     {
         unique: true,

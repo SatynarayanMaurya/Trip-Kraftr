@@ -304,7 +304,7 @@ function RoomEntryInventory({
             </div>
 
             {/* Row 1: Room Type | Meal Plan */}
-            <div className="grid grid-cols-2 gap-3 mb-3">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-3 mb-3">
 
                 {/* Room Type */}
                 <div>
@@ -359,7 +359,7 @@ function RoomEntryInventory({
             </div>
 
             {/* Row 2: No. of Rooms | Extra Mattress | CNB */}
-            <div className="grid grid-cols-3 gap-3 mb-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 mb-3">
 
                 {/* No. of Rooms */}
                 <div>
@@ -464,7 +464,7 @@ function RoomEntryManual({ room, roomIndex, rooms, canDelete, onRoomChange, onDe
             </div>
 
             {/* Row 1: Room Type | No. of Rooms */}
-            <div className="grid grid-cols-2 gap-3 mb-3">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-3 mb-3">
                 <div>
                     <label className={labelCls} style={labelStyle}>🛏 Room Type</label>
                     <input
@@ -490,7 +490,7 @@ function RoomEntryManual({ room, roomIndex, rooms, canDelete, onRoomChange, onDe
             </div>
 
             {/* Row 2: Extra Mattress | CNB | Room Price */}
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-3">
                 <div>
                     <label className={labelCls} style={labelStyle}>Extra Mattress</label>
                     <input
@@ -663,10 +663,10 @@ function HotelDetailsPrivateTrip({
 
             {/* ── INVENTORY ────────────────────────────────────────────────────── */}
             {isInventory && (
-                <div className="flex gap-4 flex-wrap items-start">
+                <div className="flex flex-col gap-4 flex-wrap items-start">
 
                     {/* Left: dropdowns + rooms */}
-                    <div className="flex-1 min-w-[260px] flex flex-col gap-3">
+                    <div className="flex-1 w-full flex flex-col gap-3">
 
                         {/* Hotel Category | Hotel Name */}
                         <div className="grid grid-cols-2 gap-3">
@@ -716,12 +716,6 @@ function HotelDetailsPrivateTrip({
                             </div>
                         </div>
 
-                        {/* Amenities */}
-                        {amenities?.length > 0 && (
-                            <div className="flex flex-wrap gap-1 mt-1">
-                                {amenities.map((a, i) => <AmenityTag key={i} label={a} />)}
-                            </div>
-                        )}
 
                         {/* Rooms section */}
                         {dayData?.hotelDetails?.hotelId && (
@@ -781,10 +775,10 @@ function HotelDetailsPrivateTrip({
                     </div>
 
                     {/* Right: image + rating */}
-                    <div className="shrink-0 flex flex-col gap-2" style={{ width: '20vw' }}>
+                    <div className="shrink-0 flex flex-col gap-2 w-full" >
                         <div
                             className="rounded-xl overflow-hidden bg-gray-100 border border-gray-100"
-                            style={{ width: '20vw', height: '25vh' }}
+                            style={{ width: '100%', height: '25vh' }}
                         >
                             {hotelImage ? (
                                 <img
@@ -803,6 +797,13 @@ function HotelDetailsPrivateTrip({
                             <div>
                                 <div className="text-[12px] text-gray-400 mb-1">Rating</div>
                                 <StarRating rating={rating} />
+                            </div>
+                        )}
+
+                         {/* Amenities */}
+                         {amenities?.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-1">
+                                {amenities.map((a, i) => <AmenityTag key={i} label={a} />)}
                             </div>
                         )}
                     </div>
@@ -845,7 +846,7 @@ function HotelDetailsPrivateTrip({
                             </button>
                         </div>
 
-                        {rooms.map((room, idx) => (
+                        {rooms?.map((room, idx) => (
                             <RoomEntryManual
                                 key={idx}
                                 room={room}
