@@ -114,7 +114,6 @@ export const getPrivateTripById = async (req, res) => {
       .populate({
         path:'vehiclePayments.vehicleId',
         select:"_id vendorName contactNo vehicleImageUrl"
-
       })
     }
     if (!foundPrivateTrip) {

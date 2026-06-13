@@ -83,6 +83,13 @@ export const privateTripSlice = createSlice({
             state.privateTripFinanceById[id] = financeDetails;
         },
 
+        setPrivateTripFinanceById: (state, action) => {
+            const { id, data } = action.payload || {};
+            if (!id ) return;
+
+            state.privateTripFinanceById[id] = data;
+        },
+
 
     }
 })
@@ -91,7 +98,8 @@ export const {
     setCurrentPagePrivateTrip,
     addNewPrivateTrip,
     setPrivateTripsByPage,
-    setPrivateTripById
+    setPrivateTripById,
+    setPrivateTripFinanceById
 } = privateTripSlice.actions
 
 export default privateTripSlice.reducer

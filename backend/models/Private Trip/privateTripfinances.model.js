@@ -21,9 +21,14 @@ const paymentSchema = new mongoose.Schema(
             required: true,
         },
 
-        utrNo: {
+        receipt: {
             type: String,
-            default: "",
+            default: null,
+        },
+
+        receiptPublicId: {
+            type: String,
+            default: null,
         },
 
         status: {
@@ -73,6 +78,18 @@ const vehiclePaymentSchema = new mongoose.Schema(
 );
 
 /**
+ * Vehicle Vendor Payment Schema
+ */
+const guestPaymentSchema = new mongoose.Schema(
+    {
+        payments: [paymentSchema],
+
+        price:{type:Number, default:0}
+    },
+    { _id: false }
+);
+
+/**
  * Private Trip Finance Schema
  */
 const privateTripFinanceSchema = new mongoose.Schema(
@@ -89,7 +106,10 @@ const privateTripFinanceSchema = new mongoose.Schema(
             required: true,
         },
 
-        guestPayments: [paymentSchema],
+        guestPayments: {
+            type: guestPaymentSchema,
+            default: () => ({ payments: [], price: 0 })
+          },
         hotelPayments: [hotelPaymentSchema],
         vehiclePayments: [vehiclePaymentSchema],
     },

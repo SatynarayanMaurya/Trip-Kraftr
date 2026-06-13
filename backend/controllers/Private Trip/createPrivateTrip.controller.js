@@ -147,6 +147,10 @@ export const createPrivateTrip = async (req, res) => {
                   price: vehicle.price,
                   payments: [],
                 })),
+                guestPayments: {
+                  price: price?.discountedPrice,
+                  payments: [],
+                },
               });
         }
 
