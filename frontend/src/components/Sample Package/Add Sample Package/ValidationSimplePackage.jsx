@@ -64,7 +64,13 @@ export const isDayOneValid = (packageDetails) => {
     const totalMaxAdults = dayDetails?.hotelDetails?.rooms?.reduce((acc, val) => acc + ((val?.maxAdults + val?.noOfExtraMattress) * val?.noOfRooms), 0)
     const totalTakenCNB = dayDetails?.hotelDetails?.rooms?.reduce((acc, val) => acc + (val?.noOfCnb||0), 0)
     const remainingAdultSeats = totalMaxAdults - totalAdults
-
+    const hotelType = dayDetails?.hotelDetails?.hotelType
+    if(hotelType === 'manual'){
+        return {
+            success: true,
+            message: "All Validation passed"
+        }
+    }
     // Room Validation 
     if (totalMaxAdults < totalAdults) {
         return {

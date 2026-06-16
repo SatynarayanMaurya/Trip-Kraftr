@@ -1,6 +1,4 @@
-
-
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef } from 'react'
 import { useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
 import {
@@ -20,10 +18,10 @@ import {
 } from 'lucide-react'
 import { toast } from 'react-toastify'
 import { usePrivateTripHooks } from '../../../hooks/usePrivateTripHooks'
+import LoadingSpinner from './LoadingSpinner'
+import { useEffect } from 'react'
 
 // ─── constants ────────────────────────────────────────────────────────────────
-const PINK = '#ED5F8D'
-const BLUE = '#18305C'
 const PAYMENT_MODES = ['UPI', 'Bank Transfer', 'Cash', 'Cheque', 'NEFT', 'RTGS']
 const PAYMENT_STATUSES = ['Pending', 'Paid']
 
@@ -83,7 +81,9 @@ function FileUploadCell({ file, onChange, readOnly = false }) {
             {file ? (
                 <div className="flex items-center gap-1 max-w-[110px]">
                     <FileText size={12} className="text-indigo-500 shrink-0" />
-                    <span className="text-xs text-gray-600 truncate" title={file.name}>{file.name}</span>
+                    <span className="text-xs text-gray-600 truncate" title={typeof file === 'string' ? file : file.name}>
+                        {typeof file === 'string' ? 'Receipt' : file.name}
+                    </span>
                     <button
                         type="button"
                         onClick={() => onChange(null)}
@@ -107,22 +107,28 @@ function FileUploadCell({ file, onChange, readOnly = false }) {
 
 // ─── PaymentTable ─────────────────────────────────────────────────────────────
 
-function PaymentTable({ price, payments, onSaveNew, onSaveAll, onDelete, entityLabel, submitLoading = false }) {
+function PaymentTable({
+    price,
+    balanceAmount,
+    paidAmount,
+    payments,
+    onSaveNew,
+    onSaveAll,
+    onDelete,      // (row, index) => void  — console only for now
+    onEditSave,    // (payload) => void      — console only for now
+    entityLabel,
+    submitLoading = false,
+}) {
     const [rows, setRows] = useState(payments ?? [])
     const [newRows, setNewRows] = useState([])
     const [editIdx, setEditIdx] = useState(null)
     const [editData, setEditData] = useState(null)
 
-    const totalPaid = rows
-        .filter((r) => r.status === 'Paid')
-        .reduce((s, r) => s + Number(r.amount || 0), 0)
-
+    // ── add helpers (unchanged) ──
     const addRow = () => setNewRows((p) => [...p, emptyRow()])
 
     const updateNew = (tempId, field, val) =>
-        setNewRows((p) =>
-            p.map((r) => (r._tempId === tempId ? { ...r, [field]: val } : r))
-        )
+        setNewRows((p) => p.map((r) => (r._tempId === tempId ? { ...r, [field]: val } : r)))
 
     const removeNew = (tempId) =>
         setNewRows((p) => p.filter((r) => r._tempId !== tempId))
@@ -144,7 +150,7 @@ function PaymentTable({ price, payments, onSaveNew, onSaveAll, onDelete, entityL
         removeNew(row._tempId)
     }
 
-    const saveAllNew = () => {
+    const saveAllNew =async () => {
         const invalid = newRows.find((r) => !r.date || !r.amount || !r.mode)
         if (invalid) {
             alert('All rows need Date, Amount and Mode filled in.')
@@ -157,29 +163,82 @@ function PaymentTable({ price, payments, onSaveNew, onSaveAll, onDelete, entityL
             file: r.file,
             status: r.status,
         }))
-        onSaveAll?.(saved)
-        setRows((p) => [...p, ...saved])
+        await onSaveAll?.(saved)
+        // setRows((p) => [...p, ...saved])
         setNewRows([])
     }
 
-    const startEdit = (i) => { setEditIdx(i); setEditData({ ...rows[i] }) }
-    const saveEdit = () => {
-        const updated = rows.map((r, i) => (i === editIdx ? editData : r))
-        setRows(updated)
-        setEditIdx(null); setEditData(null)
+    // ── edit helpers ──
+    const startEdit = (i) => {
+        setEditIdx(i)
+        setEditData({
+            ...rows[i],
+            file: rows[i].file ?? rows[i].receipt ?? null,
+            _originalReceipt: rows[i].receipt ?? rows[i].file ?? null,
+        })
     }
+
+    const saveEdit =async () => {
+        const original = rows[editIdx]
+
+        // Determine whether the receipt changed
+        const newFileIsObject = editData.file instanceof File
+        const receiptChanged = newFileIsObject ||
+            (editData.file === null && editData._originalReceipt !== null)
+
+        // Build payload — include _id and paymentIndex for backend targeting
+        const payload = {
+            paymentIndex: editIdx,
+            ...(original._id ? { paymentId: original._id } : {}),
+            updatedFields: {
+                date: editData.date,
+                amount: Number(editData.amount),
+                mode: editData.mode,
+                status: editData.status,
+            },
+            ...(receiptChanged
+                ? {
+                    receipt: {
+                        // if newFile is a File object → needs upload; null → remove
+                        newFile: newFileIsObject ? editData.file : null,
+                        previousReceipt: editData._originalReceipt ?? null,
+                        action: newFileIsObject
+                            ? 'replace'          // delete old, upload new
+                            : 'remove',          // delete old, no replacement
+                    },
+                }
+                : {}),
+        }
+
+        await onEditSave?.(payload)
+
+        // Optimistically update local state
+        const updatedRow = {
+            ...original,
+            date: editData.date,
+            amount: Number(editData.amount),
+            mode: editData.mode,
+            status: editData.status,
+            // If a new file was uploaded, show it locally; if removed, clear it
+            file: newFileIsObject ? editData.file : editData.file,
+            receipt: newFileIsObject ? null : editData.file, // new upload has no URL yet
+        }
+        // setRows((p) => p.map((r, i) => (i === editIdx ? updatedRow : r)))
+        setEditIdx(null)
+        setEditData(null)
+    }
+
     const cancelEdit = () => { setEditIdx(null); setEditData(null) }
 
+    // ── delete helper ──
     const deleteRow = (i) => {
         const removed = rows[i]
-        setRows((p) => p.filter((_, idx) => idx !== i))
-        onDelete(removed, i)
+        onDelete?.(removed, i)
+        // setRows((p) => p.filter((_, idx) => idx !== i))
     }
 
     const totalPrice = price || 0
-    const balanceDue = totalPrice - totalPaid
 
-    // ── responsive: card view on mobile, table on sm+ ──
     return (
         <div className="mt-3">
 
@@ -222,6 +281,7 @@ function PaymentTable({ price, payments, onSaveNew, onSaveAll, onDelete, entityL
                                             </select>
                                         </td>
                                         <td className={cellCls}>
+                                            {/* Shows existing URL as a "file" and allows replacing with a new File */}
                                             <FileUploadCell
                                                 file={editData.file}
                                                 onChange={(f) => setEditData({ ...editData, file: f })}
@@ -236,7 +296,11 @@ function PaymentTable({ price, payments, onSaveNew, onSaveAll, onDelete, entityL
                                         </td>
                                         <td className={cellCls}>
                                             <div className="flex items-center gap-1.5">
-                                                <button onClick={saveEdit} className={actionBtn('green')} title="Save"><Save size={13} /></button>
+                                                {
+                                                    submitLoading ?
+                                                    <LoadingSpinner />:
+                                                    <button onClick={saveEdit} className={actionBtn('green')} title="Save"><Save size={13} /></button>
+                                                }
                                                 <button onClick={cancelEdit} className={actionBtn('gray')} title="Cancel"><X size={13} /></button>
                                             </div>
                                         </td>
@@ -250,12 +314,19 @@ function PaymentTable({ price, payments, onSaveNew, onSaveAll, onDelete, entityL
                                             <span className="px-2 py-0.5 rounded-md bg-gray-100 text-gray-600 text-xs font-medium">{row.mode}</span>
                                         </td>
                                         <td className={cellCls}>
-                                            {
-                                                row?.receipt ?
-
-                                                    <a href={row?.receipt} target='_blank' className="px-2 py-0.5 rounded-md underline bg-blue-100 text-blue-600 text-xs font-medium">Receipt</a> :
-                                                    <span className="px-2 py-0.5 rounded-md bg-gray-100 text-gray-600 text-xs font-medium">No file</span>
-                                            }
+                                            {row?.receipt ? (
+                                                <a href={row.receipt} target="_blank" rel="noreferrer"
+                                                    className="px-2 py-0.5 rounded-md underline bg-blue-100 text-blue-600 text-xs font-medium">
+                                                    Receipt
+                                                </a>
+                                            ) : row?.file instanceof File ? (
+                                                <span className="inline-flex items-center gap-1 text-xs text-indigo-600 font-medium">
+                                                    <FileText size={12} />
+                                                    {row.file.name}
+                                                </span>
+                                            ) : (
+                                                <span className="px-2 py-0.5 rounded-md bg-gray-100 text-gray-600 text-xs font-medium">No file</span>
+                                            )}
                                         </td>
                                         <td className={cellCls}>
                                             <StatusBadge status={row.status} />
@@ -271,6 +342,7 @@ function PaymentTable({ price, payments, onSaveNew, onSaveAll, onDelete, entityL
                             </tr>
                         ))}
 
+                        {/* new draft rows — unchanged */}
                         {newRows.map((row, idx) => (
                             <tr key={row._tempId} className="bg-pink-50/30">
                                 <td className={cellCls + ' text-gray-400 font-mono text-xs'}>{rows.length + idx + 1}</td>
@@ -306,19 +378,13 @@ function PaymentTable({ price, payments, onSaveNew, onSaveAll, onDelete, entityL
                                 </td>
                                 <td className={cellCls}>
                                     <div className="flex items-center gap-1.5">
-                                        {
-                                            submitLoading ? (
-                                                <Loader2 className="animate-spin" size={18} />
-                                            ) : (
-                                                <button
-                                                    onClick={() => saveSingleNew(row)}
-                                                    className={actionBtn("green")}
-                                                    title="Save this row"
-                                                >
-                                                    <Save size={13} />
-                                                </button>
-                                            )
-                                        }
+                                        {submitLoading ? (
+                                            <Loader2 className="animate-spin" size={18} />
+                                        ) : (
+                                            <button onClick={() => saveSingleNew(row)} className={actionBtn('green')} title="Save this row">
+                                                <Save size={13} />
+                                            </button>
+                                        )}
                                         <button onClick={() => removeNew(row._tempId)} className={actionBtn('gray')} title="Remove"><X size={13} /></button>
                                     </div>
                                 </td>
@@ -374,8 +440,8 @@ function PaymentTable({ price, payments, onSaveNew, onSaveAll, onDelete, entityL
             {/* ── Summary cards ── */}
             <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-3">
                 <SummaryCard label="Total Price" value={formatINR(totalPrice)} valueClass="text-gray-800" />
-                <SummaryCard label="Total Paid" value={formatINR(totalPaid)} valueClass="text-green-600" />
-                <SummaryCard label="Balance Due" value={formatINR(balanceDue)} valueClass="text-[#E91E8C]" />
+                <SummaryCard label="Total Paid" value={formatINR(paidAmount)} valueClass="text-green-600" />
+                <SummaryCard label="Balance Due" value={formatINR(balanceAmount)} valueClass="text-[#E91E8C]" />
             </div>
 
             {/* ── Bottom actions ── */}
@@ -429,7 +495,10 @@ function MobilePaymentCard({ serial, row, isEditing, editData, onEdit, onSaveEdi
                     </select>
                 </MobileField>
                 <MobileField label="Receipt">
-                    <FileUploadCell file={editData.file} onChange={(f) => onEditChange('file', f)} />
+                    <FileUploadCell
+                        file={editData.file}
+                        onChange={(f) => onEditChange('file', f)}
+                    />
                 </MobileField>
                 <MobileField label="Status">
                     <select value={editData.status} onChange={(e) => onEditChange('status', e.target.value)} className={inputCls + ' w-full'}>
@@ -439,6 +508,7 @@ function MobilePaymentCard({ serial, row, isEditing, editData, onEdit, onSaveEdi
             </div>
         )
     }
+
     return (
         <div className="rounded-xl border border-gray-100 bg-white p-3">
             <div className="flex justify-between items-start">
@@ -455,10 +525,14 @@ function MobilePaymentCard({ serial, row, isEditing, editData, onEdit, onSaveEdi
             <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-gray-500">
                 <span><span className="text-gray-400">Date:</span> {formatDate(row.date)}</span>
                 <span><span className="text-gray-400">Mode:</span> {row.mode}</span>
-                {row.file && (
+                {(row.receipt || row.file) && (
                     <span className="col-span-2">
                         <span className="text-gray-400">Receipt: </span>
-                        <FileUploadCell file={row.file} readOnly />
+                        {row.receipt ? (
+                            <a href={row.receipt} target="_blank" rel="noreferrer" className="underline text-blue-600">View</a>
+                        ) : (
+                            <FileUploadCell file={row.file} readOnly />
+                        )}
                     </span>
                 )}
             </div>
@@ -528,8 +602,7 @@ const actionBtn = (color) => {
 
 function StatusBadge({ status }) {
     return (
-        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${status === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
-            }`}>
+        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${status === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
             {status}
         </span>
     )
@@ -548,16 +621,18 @@ function SummaryCard({ label, value, valueClass }) {
 
 // ─── CollapsibleSection ───────────────────────────────────────────────────────
 
-function CollapsibleSection({ serial, icon: Icon, iconBg, title, subtitle, price, payments, onSaveNew, onSaveAll, onDelete, entityLabel, isOpen, onToggle ,submitLoading}) {
+function CollapsibleSection({
+    serial, icon: Icon, iconBg, title, subtitle, price, balanceAmount, paidAmount,
+    payments, onSaveNew, onSaveAll, onDelete, onEditSave,
+    entityLabel, isOpen, onToggle, submitLoading,
+}) {
     return (
         <div className="rounded-2xl border border-gray-100 shadow-sm bg-white overflow-hidden mb-3">
-            {/* header */}
             <button
                 onClick={onToggle}
                 className="w-full flex items-center justify-between px-4 sm:px-5 py-4 hover:bg-gray-50/60 transition-colors text-left"
             >
                 <div className="flex items-center gap-3 min-w-0">
-                    {/* serial badge */}
                     <span className="shrink-0 w-6 h-6 rounded-full bg-gray-100 text-gray-500 text-xs font-bold flex items-center justify-center font-mono">
                         {serial}
                     </span>
@@ -571,22 +646,21 @@ function CollapsibleSection({ serial, icon: Icon, iconBg, title, subtitle, price
                 </div>
                 <div className="flex items-center gap-2 sm:gap-3 shrink-0 ml-2">
                     <span className="text-sm font-bold text-gray-700">{formatINR(price)}</span>
-                    {isOpen
-                        ? <ChevronUp size={16} className="text-gray-400" />
-                        : <ChevronDown size={16} className="text-gray-400" />
-                    }
+                    {isOpen ? <ChevronUp size={16} className="text-gray-400" /> : <ChevronDown size={16} className="text-gray-400" />}
                 </div>
             </button>
 
-            {/* collapsible body */}
             {isOpen && (
                 <div className="px-4 sm:px-5 pb-5 border-t border-gray-50">
                     <PaymentTable
                         price={price}
+                        balanceAmount={balanceAmount}
+                        paidAmount={paidAmount}
                         payments={payments}
                         onSaveNew={onSaveNew}
                         onSaveAll={onSaveAll}
                         onDelete={onDelete}
+                        onEditSave={onEditSave}
                         entityLabel={entityLabel}
                         submitLoading={submitLoading}
                     />
@@ -596,21 +670,33 @@ function CollapsibleSection({ serial, icon: Icon, iconBg, title, subtitle, price
     )
 }
 
+// ─── SectionHeader ────────────────────────────────────────────────────────────
+
+function SectionHeader({ icon: Icon, iconBg, iconColor, title, count }) {
+    return (
+        <div className="flex items-center gap-2 mb-4">
+            <div className={`w-8 h-8 rounded-xl ${iconBg} flex items-center justify-center`}>
+                <Icon size={16} className={iconColor} />
+            </div>
+            <h2 className="text-base font-bold text-gray-900">{title}</h2>
+            <span className={`ml-1 text-xs font-semibold ${iconBg} ${iconColor} px-2 py-0.5 rounded-full`}>
+                {count}
+            </span>
+        </div>
+    )
+}
+
 // ─── VendorPayment (main) ─────────────────────────────────────────────────────
 
 function VendorPayment() {
-
-    const isProduction = useSelector(s => s.user.isProduction)
-    const { updatePrivateTripHotelPayments, updatePrivateTripVehiclePayments } = usePrivateTripHooks()
+    const isProduction = useSelector((s) => s.user.isProduction)
+    const { updatePrivateTripHotelPayments, updatePrivateTripVehiclePayments, updatePrivateTripHotelPaymentsRowWise, updatePrivateTripVehiclePaymentsRowWise, deletePrivateTripsHotelVehicle } = usePrivateTripHooks()
     const { privateTripId } = useParams()
     const privateTripFinanceDetails = useSelector(
         (s) => s.privateTrip.privateTripFinanceById?.[privateTripId]
     )
     const [submitLoading, setSubmitLoading] = useState(false)
-
-    // accordion state: track which section key is open (null = all closed)
     const [openKey, setOpenKey] = useState(null)
-
     const toggle = (key) => setOpenKey((prev) => (prev === key ? null : key))
 
     if (!privateTripFinanceDetails) {
@@ -620,102 +706,134 @@ function VendorPayment() {
             </div>
         )
     }
+
     const { _id: financeId, hotelPayments = [], vehiclePayments = [] } = privateTripFinanceDetails
 
     // ── hotel handlers ──
     const handleHotelSave = (hotel, payment) => {
-        const payload = {
-            privateTripId,
-            financeId,
-            hotelId: hotel.hotelId ?? null,
-            hotelName: hotel.hotelName,
-            payments: [payment]
-        }
+        const payload = { privateTripId, financeId, hotelId: hotel.hotelId ?? null, hotelName: hotel.hotelName, payments: [payment] }
         hotelPaymentSave(payload)
     }
     const handleHotelSaveAll = (hotel, payments) => {
-        const payload = {
-            privateTripId,
-            financeId,
-            hotelId: hotel.hotelId ?? null,
-            hotelName: hotel.hotelName,
-            payments
-        }
+        const payload = { privateTripId, financeId, hotelId: hotel.hotelId ?? null, hotelName: hotel.hotelName, payments }
         hotelPaymentSave(payload)
     }
-    const handleHotelDelete = (hotel, payment, idx) => {
-        console.log('[VendorPayment] Delete hotel payment:', { financeId, hotelId: hotel.hotelId ?? null, hotelName: hotel.hotelName, paymentIndex: idx, payment })
+    const handleHotelEditSave = async (hotel, editPayload) => {
+
+        try {
+            const payload = {
+                privateTripId,
+                financeId,
+                hotelId: hotel.hotelId ?? null,
+                hotelName: hotel.hotelName,
+                ...editPayload,   // paymentIndex, paymentId?, updatedFields, receipt?
+            }
+            setSubmitLoading(true)
+            const response = await updatePrivateTripHotelPaymentsRowWise(payload)
+            toast.success(response?.data?.message)
+        } catch (error) {
+            if (!isProduction) console.log('Error:', error)
+            toast.error(error?.response?.data?.message || error?.message || 'Error saving hotel payment')
+        } finally {
+            setSubmitLoading(false)
+        }
+    }
+    const handleHotelDelete = async (hotel, payment, idx) => {
+        try {
+            const payload = {
+                privateTripId,
+                financeId,
+                hotelId: hotel.hotelId ?? null,
+                hotelName: hotel.hotelName,
+                paymentIndex: idx,
+            }
+            setSubmitLoading(true)
+            const response = await deletePrivateTripsHotelVehicle(payload)
+            toast.success(response?.data?.message)
+        } catch (error) {
+            if (!isProduction) console.log('Error:', error)
+            toast.error(error?.response?.data?.message || error?.message || 'Error saving hotel payment')
+        } finally {
+            setSubmitLoading(false)
+        }
+
     }
 
     const hotelPaymentSave = async (payload) => {
         try {
-            console.log("Payload : ", payload)
             setSubmitLoading(true)
             const response = await updatePrivateTripHotelPayments(payload)
-            console.log("Response : ", response)
-        }
-        catch (error) {
+            toast.success(response?.data?.success)
+        } catch (error) {
             if (!isProduction) {
-                console.log("========= ERROR DEBUG START =========");
-                console.log("Error:", error);
-                console.log("Response:", error?.response);
-                console.log("========= ERROR DEBUG END =========");
+                console.log('Error:', error)
+                console.log('Error:', error?.response)
             }
-            toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin")
-        }
-        finally {
+            toast.error(error?.response?.data?.message || error?.message || 'Error saving hotel payment')
+        } finally {
             setSubmitLoading(false)
         }
     }
 
     // ── vehicle handlers ──
     const handleVehicleSave = (vehicle, payment) => {
-        const payload = {
-            privateTripId,
-            financeId,
-            vehicleId: vehicle.vehicleId?._id ?? null,
-            vendorName: vehicle.vehicleId?.vendorName ?? null,
-            payments: [payment]
-        }
+        const payload = { privateTripId, financeId, vehicleId: vehicle.vehicleId?._id ?? null, vendorName: vehicle.vehicleId?.vendorName ?? null, payments: [payment] }
         vehiclePaymentSave(payload)
     }
     const handleVehicleSaveAll = (vehicle, payments) => {
-        const payload = {
-            privateTripId,
-            financeId,
-            vehicleId: vehicle.vehicleId?._id ?? null,
-            vendorName: vehicle.vehicleId?.vendorName ?? null,
-            payments
-        }
+        const payload = { privateTripId, financeId, vehicleId: vehicle.vehicleId?._id ?? null, vendorName: vehicle.vehicleId?.vendorName ?? null, payments }
         vehiclePaymentSave(payload)
     }
-    const handleVehicleDelete = (vehicle, payment, idx) => {
-        console.log('[VendorPayment] Delete vehicle payment:', { financeId, vehicleId: vehicle.vehicleId?._id ?? null, vendorName: vehicle.vehicleId?.vendorName ?? null, paymentIndex: idx, payment })
-    }
-
-    console.log("hote; payments : ",vehiclePayments)
-
-    const vehiclePaymentSave = async (payload) => {
+    const handleVehicleEditSave = async (vehicle, editPayload) => {
         try {
-            console.log("Payload : ", payload)
-            setSubmitLoading(true)
-            const response = await updatePrivateTripVehiclePayments(payload)
-            console.log("Response : ", response)
-        }
-        catch (error) {
-            if (!isProduction) {
-                console.log("========= ERROR DEBUG START =========");
-                console.log("Error:", error);
-                console.log("Response:", error?.response);
-                console.log("========= ERROR DEBUG END =========");
+            const payload = {
+                privateTripId,
+                financeId,
+                vehicleId: vehicle.vehicleId?._id ?? null,
+                vendorName: vehicle.vehicleId?.vendorName ?? null,
+                ...editPayload,  // paymentIndex, paymentId?, updatedFields, receipt?
             }
-            toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin")
+            setSubmitLoading(true)
+            const response = await updatePrivateTripVehiclePaymentsRowWise(payload)
+            toast.success(response?.data?.message)
+        } catch (error) {
+            if (!isProduction) console.log('Error:', error)
+            toast.error(error?.response?.data?.message || error?.message || 'Error saving hotel payment')
+        } finally {
+            setSubmitLoading(false)
         }
-        finally {
+    }
+    const handleVehicleDelete = async (vehicle, payment, idx) => {
+        try {
+            const payload = {
+                privateTripId,
+                financeId,
+                vehicleId: vehicle.vehicleId?._id ?? null,
+                paymentIndex: idx,
+            }
+            setSubmitLoading(true)
+            const response = await deletePrivateTripsHotelVehicle(payload)
+            toast.success(response?.data?.message)
+        } catch (error) {
+            if (!isProduction) console.log('Error:', error)
+            toast.error(error?.response?.data?.message || error?.message || 'Error saving hotel payment')
+        } finally {
             setSubmitLoading(false)
         }
     }
 
+    const vehiclePaymentSave = async (payload) => {
+        try {
+            setSubmitLoading(true)
+            const response = await updatePrivateTripVehiclePayments(payload)
+            toast.success(response?.data?.message)
+        } catch (error) {
+            if (!isProduction) console.log('Error:', error)
+            toast.error(error?.response?.data?.message || error?.message || 'Error saving vehicle payment')
+        } finally {
+            setSubmitLoading(false)
+        }
+    }
 
     return (
         <div className="p-4 sm:p-6 lg:p-8">
@@ -724,7 +842,7 @@ function VendorPayment() {
             {hotelPayments?.length > 0 && (
                 <section className="mb-8">
                     <SectionHeader icon={Hotel} iconBg="bg-indigo-100" iconColor="text-indigo-500" title="Hotel Vendors" count={hotelPayments.length} />
-                    {hotelPayments?.map((hotel, i) => {
+                    {hotelPayments.map((hotel, i) => {
                         const key = `hotel-${hotel.hotelId ?? i}`
                         return (
                             <CollapsibleSection
@@ -733,15 +851,17 @@ function VendorPayment() {
                                 icon={Hotel}
                                 iconBg="bg-indigo-500"
                                 title={hotel.hotelName}
-                                // subtitle={hotel.hotelId ? `ID: ${hotel.hotelId}` : 'Manual entry'}
-                                subtitle={""}
+                                subtitle=""
                                 price={hotel.price}
+                                balanceAmount={hotel.balanceAmount}
+                                paidAmount={hotel.paidAmount}
                                 payments={hotel.payments ?? []}
                                 entityLabel="Hotel"
                                 isOpen={openKey === key}
                                 onToggle={() => toggle(key)}
                                 onSaveNew={(payment) => handleHotelSave(hotel, payment)}
                                 onSaveAll={(payments) => handleHotelSaveAll(hotel, payments)}
+                                onEditSave={(editPayload) => handleHotelEditSave(hotel, editPayload)}
                                 onDelete={(payment, idx) => handleHotelDelete(hotel, payment, idx)}
                                 submitLoading={submitLoading}
                             />
@@ -765,13 +885,17 @@ function VendorPayment() {
                                 title={vehicle.vehicleId?.vendorName ?? `Vehicle Vendor ${i + 1}`}
                                 subtitle={vehicle.vehicleId?.contactNo ? `📞 ${vehicle.vehicleId.contactNo}` : null}
                                 price={vehicle.price}
+                                balanceAmount={vehicle.balanceAmount}
+                                paidAmount={vehicle.paidAmount}
                                 payments={vehicle.payments ?? []}
                                 entityLabel="Vehicle"
                                 isOpen={openKey === key}
                                 onToggle={() => toggle(key)}
                                 onSaveNew={(payment) => handleVehicleSave(vehicle, payment)}
                                 onSaveAll={(payments) => handleVehicleSaveAll(vehicle, payments)}
+                                onEditSave={(editPayload) => handleVehicleEditSave(vehicle, editPayload)}
                                 onDelete={(payment, idx) => handleVehicleDelete(vehicle, payment, idx)}
+                                submitLoading={submitLoading}
                             />
                         )
                     })}
@@ -792,22 +916,5 @@ function VendorPayment() {
     )
 }
 
-// ─── SectionHeader ────────────────────────────────────────────────────────────
-
-function SectionHeader({ icon: Icon, iconBg, iconColor, title, count }) {
-    return (
-        <div className="flex items-center gap-2 mb-4">
-            <div className={`w-8 h-8 rounded-xl ${iconBg} flex items-center justify-center`}>
-                <Icon size={16} className={iconColor} />
-            </div>
-            <h2 className="text-base font-bold text-gray-900">{title}</h2>
-            <span className={`ml-1 text-xs font-semibold ${iconBg} ${iconColor} px-2 py-0.5 rounded-full`}>
-                {count}
-            </span>
-        </div>
-    )
-}
-
 export default VendorPayment
-
 

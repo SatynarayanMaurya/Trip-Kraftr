@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import PrivateTripFinance from "../../models/Private Trip/privateTripfinances.model.js";
 import { uploadImageToCloudinary } from "../../utils/uploadToCloudinary.js";
 
-export const updateHotelPayments = async (req, res) => {
+export const AddHotelPayments = async (req, res) => {
     try {
         const { privateTripId } = req.params;
 
@@ -41,6 +41,10 @@ export const updateHotelPayments = async (req, res) => {
         });
 
         const parsedPayments = Object.values(paymentMap);
+        const paidValue = parsedPayments.reduce(
+            (acc, val) => acc + (val?.status === 'Paid' ? Number(val?.amount) : 0),
+            0
+        );
 
         if (!parsedPayments.length) {
             return res.status(400).json({
@@ -138,15 +142,21 @@ export const updateHotelPayments = async (req, res) => {
                 hotel.hotelId?.toString() === hotelId || hotel.hotelName === hotelName
         );
 
+
         if (hotelIndex > -1) {
             finance.hotelPayments[hotelIndex].payments.push(
                 ...paymentsToInsert
             );
+
+            finance.hotelPayments[hotelIndex].balanceAmount = finance.hotelPayments[hotelIndex]?.balanceAmount - paidValue
+            finance.hotelPayments[hotelIndex].paidAmount = finance.hotelPayments[hotelIndex]?.paidAmount + paidValue
         } else {
             finance.hotelPayments.push({
                 hotelId: new mongoose.Types.ObjectId(hotelId),
                 hotelName,
                 payments: paymentsToInsert,
+                balanceAmount: 0,
+                paidAmount: paidValue
             });
         }
 
@@ -207,6 +217,10 @@ export const updateVehicleVendorPayments = async (req, res) => {
         });
 
         const parsedPayments = Object.values(paymentMap);
+        const paidValue = parsedPayments.reduce(
+            (acc, val) => acc + (val?.status === 'Paid' ? Number(val?.amount) : 0),
+            0
+        );
 
         if (!parsedPayments.length) {
             return res.status(400).json({
@@ -301,14 +315,20 @@ export const updateVehicleVendorPayments = async (req, res) => {
                 vehicle.vehicleId?.toString() === vehicleId
         );
 
+
+
         if (vehicleIndex > -1) {
             finance.vehiclePayments[vehicleIndex].payments.push(
                 ...paymentsToInsert
             );
+            finance.vehiclePayments[vehicleIndex].balanceAmount = finance.vehiclePayments[vehicleIndex]?.balanceAmount - paidValue
+            finance.vehiclePayments[vehicleIndex].paidAmount = finance.vehiclePayments[vehicleIndex]?.paidAmount + paidValue
         } else {
             finance.vehiclePayments.push({
                 vehicleId: new mongoose.Types.ObjectId(vehicleId),
                 payments: paymentsToInsert,
+                balanceAmount: 0,
+                paidAmount: paidValue
             });
         }
 
@@ -370,7 +390,12 @@ export const updateGuestPayments = async (req, res) => {
             }
         });
 
-        const parsedPayments = Object.values(paymentMap);
+        const parsedPayments = Object.values(paymentMap);        
+        const paidValue = parsedPayments.reduce(
+            (acc, val) => acc + (val?.status === 'Paid' ? Number(val?.amount) : 0),
+            0
+        );
+        console.log("paid value : ",paidValue)
 
         if (!parsedPayments.length) {
             return res.status(400).json({
@@ -398,7 +423,7 @@ export const updateGuestPayments = async (req, res) => {
         // Upload Receipts
         // =========================
 
-        const uploadPromises = parsedPayments.map((_, index) => {
+        const uploadPromises = parsedPayments?.map((_, index) => {
             const file = files[`payments[${index}][file]`];
 
             if (!file) return Promise.resolve(null);
@@ -458,9 +483,11 @@ export const updateGuestPayments = async (req, res) => {
         }
 
         finance.guestPayments.payments.push(...paymentsToInsert);
+        finance.guestPayments.balanceAmount = finance.guestPayments.balanceAmount - Number(paidValue)
+        finance.guestPayments.paidAmount = finance.guestPayments.paidAmount + Number(paidValue)
 
         await finance.save();
-        
+
         await finance.populate({
             path: "vehiclePayments.vehicleId",
             select: "_id vendorName contactNo vehicleImageUrl",
@@ -475,6 +502,513 @@ export const updateGuestPayments = async (req, res) => {
     } catch (error) {
         console.error(error);
 
+        return res.status(500).json({
+            success: false,
+            message: error?.message || "Internal Server Error",
+        });
+    }
+};
+
+
+// controllers/privateTripFinance.controller.js  (only this function shown)
+
+export const updateHotelPaymentsRowWise = async (req, res) => {
+    try {
+        const { privateTripId } = req.params;
+
+        // ── 1. Parse body ──────────────────────────────────────────────────
+        const { financeId, hotelId, hotelName, paymentIndex } = req.body;
+
+        if (!financeId || !privateTripId || !hotelName || paymentIndex === undefined) {
+            return res.status(400).json({
+                success: false,
+                message: "Required fields are missing (financeId, privateTripId, hotelName, paymentIndex)",
+            });
+        }
+
+        const index = Number(paymentIndex);
+        if (isNaN(index) || index < 0) {
+            return res.status(400).json({
+                success: false,
+                message: "paymentIndex must be a non-negative number",
+            });
+        }
+
+        // ── 2. Parse updatedFields ─────────────────────────────────────────
+        // Sent as updatedFields[amount], updatedFields[date], etc.
+        const rawFields = {};
+        Object.keys(req.body).forEach((key) => {
+            const match = key.match(/^updatedFields\[(.+)\]$/);
+            if (match) rawFields[match[1]] = req.body[key];
+        });
+
+        const { amount, date, mode, status } = rawFields;
+
+        if (!amount || !date || !mode || !status) {
+            return res.status(400).json({
+                success: false,
+                message: "updatedFields must include amount, date, mode and status",
+            });
+        }
+
+        // ── 3. Parse receipt instructions (optional) ───────────────────────
+        const receiptAction = req.body["receipt[action]"] ?? null;  // "replace" | "remove" | null
+        const previousReceiptUrl = req.body["receipt[previousReceipt]"] ?? null;
+        const incomingFile = req.files?.["file"] ?? null;
+
+        // ── 4. Load finance record ─────────────────────────────────────────
+        const finance = await PrivateTripFinance.findOne({org_id:req.user.org_id, privateTripId, _id: financeId,  })
+            .populate({
+                path: "vehiclePayments.vehicleId",
+                select: "_id vendorName contactNo vehicleImageUrl",
+            });
+
+        if (!finance) {
+            return res.status(404).json({
+                success: false,
+                message: "Finance record not found",
+            });
+        }
+
+        // ── 5. Locate hotel ────────────────────────────────────────────────
+        const hotelIdx = finance.hotelPayments.findIndex(
+            (h) => h.hotelId?.toString() === hotelId || h.hotelName === hotelName
+        );
+
+        if (hotelIdx === -1) {
+            return res.status(404).json({
+                success: false,
+                message: `Hotel "${hotelName}" not found in finance record`,
+            });
+        }
+
+        const hotelEntry = finance.hotelPayments[hotelIdx];
+        const findPayment = hotelEntry?.payments?.[index];
+        if (findPayment?.amount !== Number(amount) || findPayment?.status !== status) {
+            // Need to modified the balance and paid
+            if (findPayment?.status !== status) {
+                if (status === 'Paid') {
+                    finance.hotelPayments[hotelIdx].balanceAmount = finance.hotelPayments[hotelIdx].balanceAmount - Number(amount)
+                    finance.hotelPayments[hotelIdx].paidAmount = finance.hotelPayments[hotelIdx].paidAmount + Number(amount)
+                }
+                else {
+                    finance.hotelPayments[hotelIdx].balanceAmount = finance.hotelPayments[hotelIdx].balanceAmount + findPayment?.amount
+                    finance.hotelPayments[hotelIdx].paidAmount = finance.hotelPayments[hotelIdx].paidAmount - findPayment?.amount 
+
+                }
+            }
+            else {
+                if (status === 'Paid') {
+                    finance.hotelPayments[hotelIdx].balanceAmount = finance.hotelPayments[hotelIdx].balanceAmount + findPayment?.amount - Number(amount)
+                    finance.hotelPayments[hotelIdx].paidAmount = finance.hotelPayments[hotelIdx].paidAmount - findPayment?.amount + Number(amount)
+
+                }
+            }
+        }
+
+        if (index >= hotelEntry.payments.length) {
+            return res.status(400).json({
+                success: false,
+                message: `paymentIndex ${index} is out of range (hotel has ${hotelEntry.payments.length} payments)`,
+            });
+        }
+
+        // ── 6. Handle receipt ──────────────────────────────────────────────
+        let newReceiptUrl = hotelEntry.payments[index].receipt ?? null;
+        let newReceiptPublicId = hotelEntry.payments[index].receiptPublicId ?? null;
+
+        if (receiptAction === "replace" || receiptAction === "remove") {
+
+            // Delete previous image from Cloudinary if a public ID is stored
+            const existingPublicId = hotelEntry.payments[index].receiptPublicId ?? null;
+            if (existingPublicId) {
+                try {
+                    await deleteImageFromCloudinary(existingPublicId);
+                } catch (deleteErr) {
+                    // Log but don't block the update — old asset may already be gone
+                    console.error("Cloudinary delete failed:", deleteErr?.message);
+                }
+            }
+
+            if (receiptAction === "replace" && incomingFile) {
+                // Validate file size (1 MB limit — same as add controller)
+                if (incomingFile.size > 1024 * 1024) {
+                    return res.status(400).json({
+                        success: false,
+                        message: `${incomingFile.name} exceeds the 1 MB limit`,
+                    });
+                }
+
+                const uploaded = await uploadImageToCloudinary(
+                    incomingFile,
+                    process.env.HOTEL_RECEIPT
+                );
+
+                newReceiptUrl = uploaded.secure_url;
+                newReceiptPublicId = uploaded.public_id;
+
+            } else {
+                // "remove" or "replace" with no file provided → clear receipt
+                newReceiptUrl = null;
+                newReceiptPublicId = null;
+            }
+        }
+        // If receiptAction is null (no receipt[action] sent) we leave the
+        // existing receipt/receiptPublicId untouched.
+
+        // ── 7. Apply updates ───────────────────────────────────────────────
+        finance.hotelPayments[hotelIdx].payments[index] = {
+            ...hotelEntry.payments[index].toObject(),   // keep any extra fields (_id etc.)
+            date: new Date(date),
+            amount: Number(amount),
+            mode,
+            status,
+            receipt: newReceiptUrl,
+            receiptPublicId: newReceiptPublicId,
+        };
+
+        finance.markModified(`hotelPayments.${hotelIdx}.payments`);
+        await finance.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Hotel payment updated successfully",
+            data: finance,
+        });
+
+    } catch (error) {
+        console.error("updateHotelPaymentsRowWise error:", error);
+        return res.status(500).json({
+            success: false,
+            message: error?.message || "Internal Server Error",
+        });
+    }
+};
+// Replaces the empty stub for updateHotelPaymentsRowWise.
+
+export const updateVehiclePaymentsRowWise = async (req, res) => {
+    try {
+        const { privateTripId } = req.params;
+
+        // ── 1. Parse body ──────────────────────────────────────────────────
+        const { financeId, vehicleId, paymentIndex } = req.body;
+
+        if (!financeId || !privateTripId || !vehicleId || paymentIndex === undefined) {
+            return res.status(400).json({
+                success: false,
+                message: "Required fields are missing (financeId, privateTripId, hotelName, paymentIndex)",
+            });
+        }
+
+        const index = Number(paymentIndex);
+        if (isNaN(index) || index < 0) {
+            return res.status(400).json({
+                success: false,
+                message: "paymentIndex must be a non-negative number",
+            });
+        }
+
+        // ── 2. Parse updatedFields ─────────────────────────────────────────
+        // Sent as updatedFields[amount], updatedFields[date], etc.
+        const rawFields = {};
+        Object.keys(req.body).forEach((key) => {
+            const match = key.match(/^updatedFields\[(.+)\]$/);
+            if (match) rawFields[match[1]] = req.body[key];
+        });
+
+        const { amount, date, mode, status } = rawFields;
+
+        if (!amount || !date || !mode || !status) {
+            return res.status(400).json({
+                success: false,
+                message: "updatedFields must include amount, date, mode and status",
+            });
+        }
+
+        // ── 3. Parse receipt instructions (optional) ───────────────────────
+        // Sent as receipt[action] and receipt[previousReceipt].
+        // The actual file (if any) arrives in req.files["file"].
+        const receiptAction = req.body["receipt[action]"] ?? null;  // "replace" | "remove" | null
+        const previousReceiptUrl = req.body["receipt[previousReceipt]"] ?? null;
+        const incomingFile = req.files?.["file"] ?? null;
+
+        // ── 4. Load finance record ─────────────────────────────────────────
+        const finance = await PrivateTripFinance.findOne({org_id:req.user.org_id, privateTripId, _id: financeId,  })
+            .populate({
+                path: "vehiclePayments.vehicleId",
+                select: "_id vendorName contactNo vehicleImageUrl",
+            });
+
+        if (!finance) {
+            return res.status(404).json({
+                success: false,
+                message: "Finance record not found",
+            });
+        }
+
+        // ── 5. Locate hotel ────────────────────────────────────────────────
+        // const hotelIdx = finance.vehiclePayments.findIndex(
+        const vehicleIdx = finance.vehiclePayments.findIndex(
+            (h) => h.vehicleId?._id?.toString() === vehicleId 
+        );
+
+        if (vehicleIdx === -1) {
+            return res.status(404).json({
+                success: false,
+                message: `Vehlcle  not found in finance record`,
+            });
+        }
+
+        // const hotelEntry = finance.vehiclePayments[vehicleIdx];
+        const vehicleEntry = finance.vehiclePayments[vehicleIdx];
+        const findPayment = vehicleEntry?.payments?.[index];
+        if (findPayment?.amount !== Number(amount) || findPayment?.status !== status) {
+            // Need to modified the balance and paid
+            if (findPayment?.status !== status) {
+                if (status === 'Paid') {
+                    finance.vehiclePayments[vehicleIdx].balanceAmount = finance.vehiclePayments[vehicleIdx].balanceAmount - Number(amount)
+                    finance.vehiclePayments[vehicleIdx].paidAmount = finance.vehiclePayments[vehicleIdx].paidAmount + Number(amount)
+                }
+                else {
+                    finance.vehiclePayments[vehicleIdx].balanceAmount = finance.vehiclePayments[vehicleIdx].balanceAmount + findPayment?.amount
+                    finance.vehiclePayments[vehicleIdx].paidAmount = finance.vehiclePayments[vehicleIdx].paidAmount - findPayment?.amount 
+
+                }
+            }
+            else {
+                if (status === 'Paid') {
+                    finance.vehiclePayments[vehicleIdx].balanceAmount = finance.vehiclePayments[vehicleIdx].balanceAmount + findPayment?.amount - Number(amount)
+                    finance.vehiclePayments[vehicleIdx].paidAmount = finance.vehiclePayments[vehicleIdx].paidAmount - findPayment?.amount + Number(amount)
+
+                }
+            }
+        }
+
+        if (index >= vehicleEntry.payments.length) {
+            return res.status(400).json({
+                success: false,
+                message: `paymentIndex ${index} is out of range (hotel has ${vehicleEntry.payments.length} payments)`,
+            });
+        }
+
+        // ── 6. Handle receipt ──────────────────────────────────────────────
+        let newReceiptUrl = vehicleEntry.payments[index].receipt ?? null;
+        let newReceiptPublicId = vehicleEntry.payments[index].receiptPublicId ?? null;
+
+        if (receiptAction === "replace" || receiptAction === "remove") {
+
+            // Delete previous image from Cloudinary if a public ID is stored
+            const existingPublicId = vehicleEntry.payments[index].receiptPublicId ?? null;
+            if (existingPublicId) {
+                try {
+                    await deleteImageFromCloudinary(existingPublicId);
+                } catch (deleteErr) {
+                    // Log but don't block the update — old asset may already be gone
+                    console.error("Cloudinary delete failed:", deleteErr?.message);
+                }
+            }
+
+            if (receiptAction === "replace" && incomingFile) {
+                // Validate file size (1 MB limit — same as add controller)
+                if (incomingFile.size > 1024 * 1024) {
+                    return res.status(400).json({
+                        success: false,
+                        message: `${incomingFile.name} exceeds the 1 MB limit`,
+                    });
+                }
+
+                const uploaded = await uploadImageToCloudinary(
+                    incomingFile,
+                    process.env.VEHICLE_RECEIPT
+                );
+
+                newReceiptUrl = uploaded.secure_url;
+                newReceiptPublicId = uploaded.public_id;
+
+            } else {
+                // "remove" or "replace" with no file provided → clear receipt
+                newReceiptUrl = null;
+                newReceiptPublicId = null;
+            }
+        }
+        // If receiptAction is null (no receipt[action] sent) we leave the
+        // existing receipt/receiptPublicId untouched.
+
+        // ── 7. Apply updates ───────────────────────────────────────────────
+        finance.vehiclePayments[vehicleIdx].payments[index] = {
+            ...vehicleEntry.payments[index].toObject(),   // keep any extra fields (_id etc.)
+            date: new Date(date),
+            amount: Number(amount),
+            mode,
+            status,
+            receipt: newReceiptUrl,
+            receiptPublicId: newReceiptPublicId,
+        };
+
+        finance.markModified(`vehiclePayments.${vehicleIdx}.payments`);
+        await finance.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Vehicle payment updated successfully",
+            data: finance,
+        });
+
+    } catch (error) {
+        console.error("updateVehiclePaymentsRowWise error:", error);
+        return res.status(500).json({
+            success: false,
+            message: error?.message || "Internal Server Error",
+        });
+    }
+};
+
+export const updateGuestPaymentsRowWise = async (req, res) => {
+    try {
+        const { privateTripId } = req.params;
+
+        // ── 1. Parse body ──────────────────────────────────────────────────
+        const { financeId,  paymentIndex } = req.body;
+
+        if (!financeId || !privateTripId || paymentIndex === undefined) {
+            return res.status(400).json({
+                success: false,
+                message: "Required fields are missing (financeId, privateTripId, paymentIndex)",
+            });
+        }
+
+        const index = Number(paymentIndex);
+        if (isNaN(index) || index < 0) {
+            return res.status(400).json({
+                success: false,
+                message: "paymentIndex must be a non-negative number",
+            });
+        }
+
+        // ── 2. Parse updatedFields ─────────────────────────────────────────
+        // Sent as updatedFields[amount], updatedFields[date], etc.
+        const rawFields = {};
+        Object.keys(req.body).forEach((key) => {
+            const match = key.match(/^updatedFields\[(.+)\]$/);
+            if (match) rawFields[match[1]] = req.body[key];
+        });
+
+        const { amount, date, mode, status } = rawFields;
+
+        if (!amount || !date || !mode || !status) {
+            return res.status(400).json({
+                success: false,
+                message: "updatedFields must include amount, date, mode and status",
+            });
+        }
+
+        // ── 3. Parse receipt instructions (optional) ───────────────────────
+        // Sent as receipt[action] and receipt[previousReceipt].
+        // The actual file (if any) arrives in req.files["file"].
+        const receiptAction = req.body["receipt[action]"] ?? null;  // "replace" | "remove" | null
+        const previousReceiptUrl = req.body["receipt[previousReceipt]"] ?? null;
+        const incomingFile = req.files?.["file"] ?? null;
+
+        // ── 4. Load finance record ─────────────────────────────────────────
+        const finance = await PrivateTripFinance.findOne({ _id: financeId, privateTripId })
+            .populate({
+                path: "vehiclePayments.vehicleId",
+                select: "_id vendorName contactNo vehicleImageUrl",
+            });
+
+        if (!finance) {
+            return res.status(404).json({
+                success: false,
+                message: "Finance record not found",
+            });
+        }
+
+
+        const findPayment = finance?.guestPayments?.payments?.[index];
+        if (findPayment?.amount !== Number(amount) || findPayment?.status !== status) {
+            // Need to modified the balance and paid
+            if (findPayment?.status !== status) {
+                if (status === 'Paid') {
+                    finance.guestPayments.balanceAmount = finance?.guestPayments?.balanceAmount - Number(amount)
+                    finance.guestPayments.paidAmount = finance?.guestPayments?.paidAmount + Number(amount)
+                }
+                else {
+                    finance.guestPayments.balanceAmount = finance?.guestPayments?.balanceAmount + findPayment?.amount
+                    finance.guestPayments.paidAmount = finance?.guestPayments?.paidAmount - findPayment?.amount 
+
+                }
+            }
+            else {
+                if (status === 'Paid') {
+                    finance.guestPayments.balanceAmount = finance?.guestPayments?.balanceAmount + findPayment?.amount - Number(amount)
+                    finance.guestPayments.paidAmount = finance?.guestPayments?.paidAmount - findPayment?.amount + Number(amount)
+
+                }
+            }
+        }
+
+
+        // ── 6. Handle receipt ──────────────────────────────────────────────
+        let newReceiptUrl = finance?.guestPayments?.payments[index].receipt ?? null;
+        let newReceiptPublicId = finance?.guestPayments?.payments[index].receiptPublicId ?? null;
+
+        if (receiptAction === "replace" || receiptAction === "remove") {
+
+            // Delete previous image from Cloudinary if a public ID is stored
+            const existingPublicId = finance?.guestPayments?.payments[index].receiptPublicId ?? null;
+            if (existingPublicId) {
+                try {
+                    await deleteImageFromCloudinary(existingPublicId);
+                } catch (deleteErr) {
+                    // Log but don't block the update — old asset may already be gone
+                    console.error("Cloudinary delete failed:", deleteErr?.message);
+                }
+            }
+
+            if (receiptAction === "replace" && incomingFile) {
+                // Validate file size (1 MB limit — same as add controller)
+                if (incomingFile.size > 1024 * 1024) {
+                    return res.status(400).json({
+                        success: false,
+                        message: `${incomingFile.name} exceeds the 1 MB limit`,
+                    });
+                }
+
+                const uploaded = await uploadImageToCloudinary(
+                    incomingFile,
+                    process.env.GUEST_RECEIPT
+                );
+
+                newReceiptUrl = uploaded.secure_url;
+                newReceiptPublicId = uploaded.public_id;
+
+            } else {
+                // "remove" or "replace" with no file provided → clear receipt
+                newReceiptUrl = null;
+                newReceiptPublicId = null;
+            }
+        }
+        // ── 7. Apply updates ───────────────────────────────────────────────
+        finance.guestPayments.payments[index] = {
+            date: new Date(date),
+            amount: Number(amount),
+            mode,
+            status,
+            receipt: newReceiptUrl,
+            receiptPublicId: newReceiptPublicId,
+        };
+
+        finance.markModified(`vehiclePayments payments`);
+        await finance.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Vehicle payment updated successfully",
+            data: finance,
+        });
+
+    } catch (error) {
+        console.error("updateGuestPaymentsRowWise error:", error);
         return res.status(500).json({
             success: false,
             message: error?.message || "Internal Server Error",

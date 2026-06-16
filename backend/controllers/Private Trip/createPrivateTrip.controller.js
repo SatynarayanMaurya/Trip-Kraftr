@@ -139,16 +139,22 @@ export const createPrivateTrip = async (req, res) => {
                   hotelId: hotel.hotelId || undefined,
                   hotelName: hotel.hotelName,
                   price: hotel.price,
+                  balanceAmount: hotel.price,
+                  paidAmount: 0,
                   payments: [],
                 })),
               
                 vehiclePayments: mergedVehicles.map(vehicle => ({
                   vehicleId: vehicle.vehicleId,
                   price: vehicle.price,
+                  balanceAmount: vehicle.price,
+                  paidAmount: 0,
                   payments: [],
                 })),
                 guestPayments: {
                   price: price?.discountedPrice,
+                  balanceAmount: price?.discountedPrice,
+                  paidAmount: 0,
                   payments: [],
                 },
               });

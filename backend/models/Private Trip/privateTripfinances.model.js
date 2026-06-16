@@ -55,7 +55,10 @@ const hotelPaymentSchema = new mongoose.Schema(
         },
 
         payments: [paymentSchema],
-        price:Number
+        price:Number,
+        balanceAmount:{type:Number, default:0},
+        paidAmount:{type:Number, default:0},
+
     },
     { _id: false }
 );
@@ -72,7 +75,10 @@ const vehiclePaymentSchema = new mongoose.Schema(
 
         payments: [paymentSchema],
 
-        price:Number
+        price:Number,
+        balanceAmount:{type:Number, default:0},
+        paidAmount:{type:Number, default:0},
+
     },
     { _id: false }
 );
@@ -84,7 +90,10 @@ const guestPaymentSchema = new mongoose.Schema(
     {
         payments: [paymentSchema],
 
-        price:{type:Number, default:0}
+        price:{type:Number, default:0},
+        balanceAmount:{type:Number, default:0},
+        paidAmount:{type:Number, default:0},
+
     },
     { _id: false }
 );

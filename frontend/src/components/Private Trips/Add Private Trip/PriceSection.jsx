@@ -238,7 +238,7 @@ export default function PriceSection({ price, setPrice, noOfDays = 1 }) {
     return (
         <>
             {/* ══ DESKTOP / TABLET: sticky card, no scroll of its own ══ */}
-            <div className="hidden sm:block " style={{position: 'sticky', top: '20px', flexShrink: 0, alignSelf: 'flex-start',width: '340px', }}>
+            <div className="hidden sm:block " style={{position: 'sticky', top: '20px', flexShrink: 0, alignSelf: 'flex-start',width: '20vw', }}>
                 {cardJSX}
             </div>
             

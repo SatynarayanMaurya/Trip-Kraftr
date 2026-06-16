@@ -25,7 +25,7 @@ function ViewPrivateTrip() {
 
 
     const [fetchLoading, setFetchLoading] = useState(false)
-    const [activeTab, setActiveTab] = useState(1);
+    const [activeTab, setActiveTab] = useState(4);
 
     // console.log("privateTripDetails", privateTripDetails)
     // console.log("privateTripFinanceDetails", privateTripFinanceDetails)
