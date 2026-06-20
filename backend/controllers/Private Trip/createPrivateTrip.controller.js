@@ -63,7 +63,7 @@ export const createPrivateTrip = async (req, res) => {
                 // Use hotelId if present, otherwise hotelName
                 const key = hotel.hotelId || hotel.hotelName;
 
-                if (!acc[key]) {
+                if (!acc[key] ) {
                     acc[key] = {
                         hotelId: hotel.hotelId,
                         hotelName: hotel.hotelName,

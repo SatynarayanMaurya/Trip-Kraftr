@@ -3,8 +3,8 @@ import { authMiddleware } from "../middlewares/auth.middleware.js";
 import { roleMiddleware } from "../middlewares/role.middleware.js";
 import { createPrivateTrip } from "../controllers/Private Trip/createPrivateTrip.controller.js";
 import { getPrivateTripById, getPrivateTrips } from "../controllers/Private Trip/getPrivateTrip.controller.js";
-import { AddHotelPayments, updateGuestPayments,  updateGuestPaymentsRowWise,  updateHotelPaymentsRowWise, updateVehiclePaymentsRowWise, updateVehicleVendorPayments } from "../controllers/Private Trip/updatePrivateTrip.controller.js";
-import { deleteGuestPaymentRowWise, deleteHotelVehiclePaymentRowWise } from "../controllers/Private Trip/deletePrivateTrip.controller.js";
+import { AddHotelPayments, updateGuestPayments,  updateGuestPaymentsRowWise,  updateHotelPaymentsRowWise, updatePrivateTrip, updateVehiclePaymentsRowWise, updateVehicleVendorPayments } from "../controllers/Private Trip/updatePrivateTrip.controller.js";
+import { deleteGuestPaymentRowWise, deleteHotelVehiclePaymentRowWise, deleteUnusedHotelOrVehicle } from "../controllers/Private Trip/deletePrivateTrip.controller.js";
 const privateTripRouter = express.Router()
 
 
@@ -19,5 +19,7 @@ privateTripRouter.put("/update-private-trip-guest-payments/:privateTripId",authM
 privateTripRouter.put("/update-private-trip-guest-payments-row-wise/:privateTripId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),updateGuestPaymentsRowWise)
 privateTripRouter.put("/delete-hotel-vehicle-payment-row-wise/:privateTripId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),deleteHotelVehiclePaymentRowWise)
 privateTripRouter.put("/delete-guest-payment-row-wise/:privateTripId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),deleteGuestPaymentRowWise)
+privateTripRouter.put("/update-private-trip/:privateTripId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),updatePrivateTrip)
+privateTripRouter.put("/delete-unused-hotel-or-vehicle-private-trip/:privateTripId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),deleteUnusedHotelOrVehicle)
 
 export default privateTripRouter

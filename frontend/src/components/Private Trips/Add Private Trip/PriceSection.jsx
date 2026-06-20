@@ -57,8 +57,8 @@ export default function PriceSection({ price, setPrice, noOfDays = 1 }) {
                 {/* Margin / Commission toggle */}
                 <div className="flex rounded-lg overflow-hidden mb-3" style={{ border: "1px solid rgba(255,255,255,0.2)" }}>
                     {[
-                        { label: "Margin", active: isMarginMode, onClick: () => { setIsMarginMode(true); update({ isMargin: true }); } },
-                        { label: "Commission", active: !isMarginMode, onClick: () => { setIsMarginMode(false); update({ isMargin: false }); } },
+                        { label: "Margin", active: price.isMargin, onClick: () => { setIsMarginMode(true); update({ isMargin: true }); } },
+                        { label: "Commission", active: !price.isMargin, onClick: () => { setIsMarginMode(false); update({ isMargin: false }); } },
                     ].map(({ label, active, onClick }, i) => (
                         <button
                             key={label}
@@ -83,7 +83,7 @@ export default function PriceSection({ price, setPrice, noOfDays = 1 }) {
                 </div>
 
                 {/* Margin slider */}
-                {isMarginMode && (
+                {price.isMargin && (
                     <div className="mb-1">
                         <div className="flex justify-between mb-0.5">
                             <span className="text-xs" style={{ color: "#a8bcd4" }}>0</span>
@@ -106,7 +106,7 @@ export default function PriceSection({ price, setPrice, noOfDays = 1 }) {
                 )}
 
                 {/* Commission input */}
-                {!isMarginMode && (
+                {!price.isMargin && (
                     <input
                         type="number"
                         min={0}

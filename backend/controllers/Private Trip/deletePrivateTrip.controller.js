@@ -27,7 +27,7 @@ export const deleteHotelVehiclePaymentRowWise = async (req, res) => {
             })
         }
 
-        const finance = await PrivateTripFinance.findOne({org_id:req.user.org_id, privateTripId, _id: financeId,  })
+        const finance = await PrivateTripFinance.findOne({ org_id: req.user.org_id, privateTripId, _id: financeId, })
             .populate({
                 path: "vehiclePayments.vehicleId",
                 select: "_id vendorName contactNo vehicleImageUrl",
@@ -50,7 +50,7 @@ export const deleteHotelVehiclePaymentRowWise = async (req, res) => {
 
         const itemIndex = paymentArray.findIndex((item) =>
             isVehicle
-                ? item.vehicleId?.toString() === vehicleId
+                ? item.vehicleId?._id?.toString() === vehicleId
                 : item.hotelId?.toString() === hotelId || item.hotelName === hotelName
         );
 
@@ -95,9 +95,11 @@ export const deleteHotelVehiclePaymentRowWise = async (req, res) => {
         paymentDetails.payments.splice(paymentIndex, 1);
 
         // Recalculate amounts
-        paymentDetails.paidAmount =
-            Number(paymentDetails.paidAmount || 0) -
-            Number(deletedPayment.amount || 0);
+        if (deletedPayment?.status === "Paid") {
+            paymentDetails.paidAmount =
+                Number(paymentDetails.paidAmount || 0) -
+                Number(deletedPayment.amount || 0);
+        }
 
         paymentDetails.balanceAmount =
             Number(paymentDetails.price || 0) -
@@ -193,10 +195,12 @@ export const deleteGuestPaymentRowWise = async (req, res) => {
         // Remove payment
         guestPayments.payments.splice(paymentIndex, 1);
 
-        // Update amounts
-        guestPayments.paidAmount =
-            Number(guestPayments.paidAmount || 0) -
-            Number(deletedPayment?.amount || 0);
+        // Recalculate amounts
+        if (deletedPayment?.status === "Paid") {
+            guestPayments.paidAmount =
+                Number(guestPayments.paidAmount || 0) -
+                Number(deletedPayment.amount || 0);
+        }
 
         guestPayments.balanceAmount =
             Number(guestPayments.price || 0) -
@@ -214,6 +218,108 @@ export const deleteGuestPaymentRowWise = async (req, res) => {
             success: false,
             message:
                 error?.message || "Internal Server Error",
+        });
+    }
+};
+
+
+export const deleteUnusedHotelOrVehicle = async (req, res) => {
+    try {
+        const {
+            financeId,
+            hotelId,
+            hotelName,
+            vehicleId,
+        } = req.body;
+
+        const { privateTripId } = req.params;
+
+        if (!financeId || !privateTripId) {
+            return res.status(400).json({
+                success: false,
+                message: "Required field are missing",
+            });
+        }
+
+        if ((!hotelId && !hotelName) && !vehicleId) {
+            return res.status(400).json({
+                success: false,
+                message: "Choose which payment you want to delete",
+            });
+        }
+
+        const finance = await PrivateTripFinance.findOne({
+            org_id: req.user.org_id,
+            privateTripId,
+            _id: financeId,
+        }).populate({
+            path: "vehiclePayments.vehicleId",
+            select: "_id vendorName contactNo vehicleImageUrl",
+        });
+
+        if (!finance) {
+            return res.status(404).json({
+                success: false,
+                message: "Finance record not found",
+            });
+        }
+
+        // Delete Vehicle Payment
+        if (vehicleId) {
+            const vehicleIndex = finance.vehiclePayments.findIndex(
+                (item) =>
+                    item?.vehicleId?._id?.toString() === vehicleId ||
+                    item?.vehicleId?.toString() === vehicleId
+            );
+
+            if (vehicleIndex === -1) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Vehicle payment not found",
+                });
+            }
+
+            finance.vehiclePayments.splice(vehicleIndex, 1);
+        }
+
+        // Delete Hotel Payment
+        else {
+            const hotelIndex = finance.hotelPayments.findIndex((item) => {
+                if (hotelId) {
+                    return item?.hotelId?.toString() === hotelId;
+                }
+
+                return item?.hotelName?.trim() === hotelName?.trim();
+            });
+
+            if (hotelIndex === -1) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Hotel payment not found",
+                });
+            }
+
+            finance.hotelPayments.splice(hotelIndex, 1);
+        }
+
+        await finance.save();
+
+        const updatedFinance = await PrivateTripFinance.findById(finance._id)
+            .populate({
+                path: "vehiclePayments.vehicleId",
+                select: "_id vendorName contactNo vehicleImageUrl",
+            });
+
+        return res.status(200).json({
+            success: true,
+            message: "Payment deleted successfully",
+            data: updatedFinance,
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error?.message || "Internal Server Error",
         });
     }
 };

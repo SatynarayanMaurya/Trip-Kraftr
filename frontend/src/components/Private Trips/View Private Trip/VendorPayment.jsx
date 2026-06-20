@@ -150,7 +150,7 @@ function PaymentTable({
         removeNew(row._tempId)
     }
 
-    const saveAllNew =async () => {
+    const saveAllNew = async () => {
         const invalid = newRows.find((r) => !r.date || !r.amount || !r.mode)
         if (invalid) {
             alert('All rows need Date, Amount and Mode filled in.')
@@ -164,7 +164,7 @@ function PaymentTable({
             status: r.status,
         }))
         await onSaveAll?.(saved)
-        // setRows((p) => [...p, ...saved])
+        setRows((p) => [...p, ...saved])
         setNewRows([])
     }
 
@@ -178,7 +178,7 @@ function PaymentTable({
         })
     }
 
-    const saveEdit =async () => {
+    const saveEdit = async () => {
         const original = rows[editIdx]
 
         // Determine whether the receipt changed
@@ -223,7 +223,7 @@ function PaymentTable({
             file: newFileIsObject ? editData.file : editData.file,
             receipt: newFileIsObject ? null : editData.file, // new upload has no URL yet
         }
-        // setRows((p) => p.map((r, i) => (i === editIdx ? updatedRow : r)))
+        setRows((p) => p.map((r, i) => (i === editIdx ? updatedRow : r)))
         setEditIdx(null)
         setEditData(null)
     }
@@ -234,7 +234,7 @@ function PaymentTable({
     const deleteRow = (i) => {
         const removed = rows[i]
         onDelete?.(removed, i)
-        // setRows((p) => p.filter((_, idx) => idx !== i))
+        setRows((p) => p.filter((_, idx) => idx !== i))
     }
 
     const totalPrice = price || 0
@@ -298,8 +298,8 @@ function PaymentTable({
                                             <div className="flex items-center gap-1.5">
                                                 {
                                                     submitLoading ?
-                                                    <LoadingSpinner />:
-                                                    <button onClick={saveEdit} className={actionBtn('green')} title="Save"><Save size={13} /></button>
+                                                        <LoadingSpinner /> :
+                                                        <button onClick={saveEdit} className={actionBtn('green')} title="Save"><Save size={13} /></button>
                                                 }
                                                 <button onClick={cancelEdit} className={actionBtn('gray')} title="Cancel"><X size={13} /></button>
                                             </div>
@@ -437,15 +437,8 @@ function PaymentTable({
                 )}
             </div>
 
-            {/* ── Summary cards ── */}
-            <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-3">
-                <SummaryCard label="Total Price" value={formatINR(totalPrice)} valueClass="text-gray-800" />
-                <SummaryCard label="Total Paid" value={formatINR(paidAmount)} valueClass="text-green-600" />
-                <SummaryCard label="Balance Due" value={formatINR(balanceAmount)} valueClass="text-[#E91E8C]" />
-            </div>
-
             {/* ── Bottom actions ── */}
-            <div className="mt-4 flex flex-wrap items-center gap-3">
+            <div className="mt-4 flex flex-wrap items-center justify-end gap-3">
                 <button
                     onClick={addRow}
                     className="flex items-center gap-1.5 text-xs font-semibold text-[#E91E8C] hover:text-[#c71878] transition-colors"
@@ -462,6 +455,14 @@ function PaymentTable({
                     </button>
                 )}
             </div>
+
+            {/* ── Summary cards ── */}
+            <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-3">
+                <SummaryCard label="Total Price" value={formatINR(totalPrice)} valueClass="text-gray-800" />
+                <SummaryCard label="Total Paid" value={formatINR(paidAmount)} valueClass="text-green-600" />
+                <SummaryCard label="Balance Due" value={formatINR(balanceAmount)} valueClass="text-[#E91E8C]" />
+            </div>
+
         </div>
     )
 }
@@ -622,12 +623,12 @@ function SummaryCard({ label, value, valueClass }) {
 // ─── CollapsibleSection ───────────────────────────────────────────────────────
 
 function CollapsibleSection({
-    serial, icon: Icon, iconBg, title, subtitle, price, balanceAmount, paidAmount,
+    serial, icon: Icon, data, iconBg, title, subtitle, price, balanceAmount, paidAmount,
     payments, onSaveNew, onSaveAll, onDelete, onEditSave,
-    entityLabel, isOpen, onToggle, submitLoading,
+    entityLabel, isOpen, deleteUnusedHotelOrVehicle, onToggle, submitLoading, isActive = true,
 }) {
     return (
-        <div className="rounded-2xl border border-gray-100 shadow-sm bg-white overflow-hidden mb-3">
+        <div className={`rounded-2xl ${isActive ? "border-gray-100 bg-white" : "border-red-400 bg-red-100"} border  shadow-sm  overflow-hidden mb-3`}>
             <button
                 onClick={onToggle}
                 className="w-full flex items-center justify-between px-4 sm:px-5 py-4 hover:bg-gray-50/60 transition-colors text-left"
@@ -644,9 +645,20 @@ function CollapsibleSection({
                         {subtitle && <p className="text-xs text-gray-400 truncate">{subtitle}</p>}
                     </div>
                 </div>
-                <div className="flex items-center gap-2 sm:gap-3 shrink-0 ml-2">
-                    <span className="text-sm font-bold text-gray-700">{formatINR(price)}</span>
-                    {isOpen ? <ChevronUp size={16} className="text-gray-400" /> : <ChevronDown size={16} className="text-gray-400" />}
+                <div className='flex gap-4'>
+
+                    <div className="flex items-center gap-2 sm:gap-3 shrink-0 ml-2">
+                        <span className="text-sm font-bold text-gray-700">{formatINR(price)}</span>
+                        {isOpen ? <ChevronUp size={16} className="text-gray-400" /> : <ChevronDown size={16} className="text-gray-400" />}
+                    </div>
+
+                    {
+                        !isActive &&
+                        <p onClick={(e) => {
+                            e.stopPropagation();
+                            deleteUnusedHotelOrVehicle(data)
+                        }} className={actionBtn('red')} title="Delete"><Trash2 size={13} /></p>
+                    }
                 </div>
             </button>
 
@@ -690,7 +702,7 @@ function SectionHeader({ icon: Icon, iconBg, iconColor, title, count }) {
 
 function VendorPayment() {
     const isProduction = useSelector((s) => s.user.isProduction)
-    const { updatePrivateTripHotelPayments, updatePrivateTripVehiclePayments, updatePrivateTripHotelPaymentsRowWise, updatePrivateTripVehiclePaymentsRowWise, deletePrivateTripsHotelVehicle } = usePrivateTripHooks()
+    const { updatePrivateTripHotelPayments, updatePrivateTripVehiclePayments, updatePrivateTripHotelPaymentsRowWise, updatePrivateTripVehiclePaymentsRowWise, deletePrivateTripsHotelVehicle, deleteUnusedHotelOrVehiclePrivateTrip } = usePrivateTripHooks()
     const { privateTripId } = useParams()
     const privateTripFinanceDetails = useSelector(
         (s) => s.privateTrip.privateTripFinanceById?.[privateTripId]
@@ -708,6 +720,7 @@ function VendorPayment() {
     }
 
     const { _id: financeId, hotelPayments = [], vehiclePayments = [] } = privateTripFinanceDetails
+
 
     // ── hotel handlers ──
     const handleHotelSave = (hotel, payment) => {
@@ -835,6 +848,28 @@ function VendorPayment() {
         }
     }
 
+    const deleteUnusedHotelOrVehicle = async (payload) => {
+        try {
+            setSubmitLoading(true)
+            const newPayload = {
+                financeId,
+                vehicleId: payload?.vehicleId?._id,
+                hotelId: payload?.hotelId,
+                hotelName: payload?.hotelName,
+                privateTripId: privateTripId
+            }
+            const response = await deleteUnusedHotelOrVehiclePrivateTrip(newPayload)
+
+            toast.success(response?.data?.message)
+        } catch (error) {
+            if (!isProduction) console.log('Error:', error)
+            toast.error(error?.response?.data?.message || error?.message || 'Error saving vehicle payment')
+        } finally {
+            setSubmitLoading(false)
+        }
+    }
+
+
     return (
         <div className="p-4 sm:p-6 lg:p-8">
 
@@ -847,6 +882,8 @@ function VendorPayment() {
                         return (
                             <CollapsibleSection
                                 key={key}
+                                data={hotel}
+                                isActive={hotel?.isActive}
                                 serial={i + 1}
                                 icon={Hotel}
                                 iconBg="bg-indigo-500"
@@ -858,6 +895,7 @@ function VendorPayment() {
                                 payments={hotel.payments ?? []}
                                 entityLabel="Hotel"
                                 isOpen={openKey === key}
+                                deleteUnusedHotelOrVehicle={(payload) => deleteUnusedHotelOrVehicle(payload)}
                                 onToggle={() => toggle(key)}
                                 onSaveNew={(payment) => handleHotelSave(hotel, payment)}
                                 onSaveAll={(payments) => handleHotelSaveAll(hotel, payments)}
@@ -879,6 +917,8 @@ function VendorPayment() {
                         return (
                             <CollapsibleSection
                                 key={key}
+                                data={vehicle}
+                                isActive={vehicle?.isActive}
                                 serial={i + 1}
                                 icon={Car}
                                 iconBg="bg-[#ED5F8D]"
@@ -890,6 +930,7 @@ function VendorPayment() {
                                 payments={vehicle.payments ?? []}
                                 entityLabel="Vehicle"
                                 isOpen={openKey === key}
+                                deleteUnusedHotelOrVehicle={(payload) => deleteUnusedHotelOrVehicle(payload)}
                                 onToggle={() => toggle(key)}
                                 onSaveNew={(payment) => handleVehicleSave(vehicle, payment)}
                                 onSaveAll={(payments) => handleVehicleSaveAll(vehicle, payments)}

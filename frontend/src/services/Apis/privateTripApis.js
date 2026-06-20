@@ -13,6 +13,8 @@ export const privateTripEndpoints  = {
     UPDATE_PRIVATE_TRIP_GUEST_PAYMENTS_ROW_WISE : BASE_URL + '/update-private-trip-guest-payments-row-wise',
     DELETE_PRIVATE_TRIP_HOTEL_VEHICLE_PAYMENTS_ROW_WISE : BASE_URL + '/delete-hotel-vehicle-payment-row-wise',
     DELETE_PRIVATE_TRIP_GUEST_PAYMENTS_ROW_WISE : BASE_URL + '/delete-guest-payment-row-wise',
+    UPDATE_PRIVATE_TRIP : BASE_URL + '/update-private-trip',
+    DELETE_UNUSED_HOTEL_OR_VEHICLE : BASE_URL + '/delete-unused-hotel-or-vehicle-private-trip',
     // SEARCH_SAMPLE_PACKAGE : BASE_URL + '/search-sample-package',
 }
 

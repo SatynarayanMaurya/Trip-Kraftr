@@ -560,6 +560,7 @@ function HotelDetailsPrivateTrip({
         onDayChange('hotelDetails', {
             ...dayData?.hotelDetails,
             hotelType: type,
+            hotelId:type==='manual'?null:dayData?.hotelDetails?.hotelId,
             rooms: [blankRoom()],
         });
     };

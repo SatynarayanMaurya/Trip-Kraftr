@@ -97,6 +97,14 @@ export const getPrivateTripById = async (req, res) => {
           select: "_id name" // choose fields you need
         }
       })
+      .populate({
+        path: 'enquiryId',
+        select: "_id accountId",
+        populate: {
+          path: 'accountId',
+          select: "_id fullName businessName email phone source" // choose fields you need
+        }
+      })
       .populate({ path: 'regionDetails.region1', select: "_id name" })
       .populate({ path: 'regionDetails.region2', select: "_id name" })
       .populate({ path: 'regionDetails.region3', select: "_id name" })

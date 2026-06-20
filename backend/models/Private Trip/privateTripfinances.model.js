@@ -58,6 +58,7 @@ const hotelPaymentSchema = new mongoose.Schema(
         price:Number,
         balanceAmount:{type:Number, default:0},
         paidAmount:{type:Number, default:0},
+        isActive:{type:Boolean,default:true}
 
     },
     { _id: false }
@@ -78,6 +79,7 @@ const vehiclePaymentSchema = new mongoose.Schema(
         price:Number,
         balanceAmount:{type:Number, default:0},
         paidAmount:{type:Number, default:0},
+        isActive:{type:Boolean,default:true}
 
     },
     { _id: false }

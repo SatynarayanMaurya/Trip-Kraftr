@@ -15,9 +15,12 @@ function ProfitAndLoss() {
   const hotelCost = privateTripFinanceDetails?.hotelPayments?.reduce((acc, val) => acc + val?.price, 0) || 0
   const vehicleCost = privateTripFinanceDetails?.vehiclePayments?.reduce((acc, val) => acc + val?.price, 0) || 0
   const totalCost = hotelCost + vehicleCost + (tripPrice?.additionalActivities || 0)
-  const finalCost = tripPrice?.discountedPrice || 0
-  const netProfit = finalCost - totalCost
-  const netMargin = (tripPrice?.min_margin || 0) + (tripPrice?.margin || 0)
+
+  const sellingPrice = (tripPrice?.isMargin ? totalCost + (totalCost * tripPrice?.margin) / 100 : totalCost + tripPrice?.commission) + (tripPrice?.isGstChecked ? tripPrice?.gstPrice : 0)
+  const netRevenue = sellingPrice + tripPrice?.festivalSurge - tripPrice?.discount - (tripPrice?.isGstChecked ? tripPrice?.gstPrice : 0)
+  const netProfit = (netRevenue - totalCost)
+
+  const netMargin = ((netProfit / totalCost) * 100)?.toFixed(2)
 
   const fmt = (val) => `₹${Number(val || 0).toLocaleString('en-IN')}`
 
@@ -51,13 +54,13 @@ function ProfitAndLoss() {
         <div className="flex-1 bg-white border border-[#F0E0E8] rounded-xl p-4 md:p-6">
           <p className="font-bold text-sm text-[#18305C] mb-4">Revenue Summary</p>
           <div className="flex flex-col gap-3">
-            <Row label="Selling Price" value={fmt(tripPrice?.baseCost)} />
-            <Row label="Festival Surge" value={fmt(tripPrice?.surgeCost)} />
+            <Row label="Selling Price" value={fmt(sellingPrice)} />
+            <Row label="Festival Surge" value={fmt(tripPrice?.festivalSurge)} />
             <Row label="GST (5%)" value={fmt(tripPrice?.gstPrice)} />
             <Row label="Discount" value={fmt(tripPrice?.discount)} />
           </div>
           <div className="border-t border-gray-200 mt-4 pt-4">
-            <Row label="Final Revenue" value={fmt(finalCost)} bold />
+            <Row label="Net Revenue" value={fmt(netRevenue)} bold />
           </div>
         </div>
 
@@ -68,7 +71,12 @@ function ProfitAndLoss() {
                         justify-around md:justify-center
                         md:w-52 md:gap-6">
           <p className="hidden md:block font-bold text-base text-[#18305C]">Profitability</p>
-          <ProfitStat label="Net Profit" value={fmt(netProfit)} />
+          <div>
+            <div>
+              <p className="text-xs text-gray-500 mb-1">Net Profit ({tripPrice?.isMargin ? "Margin":"Commission"}  Basis)</p>
+              <p className="text-lg md:text-xl font-bold text-green-600">{fmt(netRevenue)}</p>
+            </div>
+          </div>
           <div className="w-px h-10 bg-green-200 md:hidden" />
           <ProfitStat label="Net Margin" value={`${netMargin}%`} />
         </div>

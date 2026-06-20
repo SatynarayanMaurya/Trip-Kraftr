@@ -9,6 +9,7 @@ import GroupTripPolicies from '../../Group Trips/Add Group Trip/GroupTripPolicie
 import GuestPayment from './GuestPayment'
 import ProfitAndLoss from './ProfitAndLoss'
 import VendorPayment from './VendorPayment'
+import DaysDetails from './DaysDetails'
 const BLUE = '#18305C';
 const PINK = '#ED5F8D';
 
@@ -25,10 +26,8 @@ function ViewPrivateTrip() {
 
 
     const [fetchLoading, setFetchLoading] = useState(false)
-    const [activeTab, setActiveTab] = useState(4);
+    const [activeTab, setActiveTab] = useState(1);
 
-    // console.log("privateTripDetails", privateTripDetails)
-    // console.log("privateTripFinanceDetails", privateTripFinanceDetails)
 
     const fetchPrivateTrip = async () => {
         try {
@@ -95,6 +94,12 @@ function ViewPrivateTrip() {
             </p>
 
             <StepperTab steps={tabs} activeStep={activeTab} onStepClick={setActiveTab} />
+
+            
+            {activeTab === 1 && (
+                <DaysDetails />
+            )}
+
 
             {activeTab === 2 && (
                 <GroupTripPolicies

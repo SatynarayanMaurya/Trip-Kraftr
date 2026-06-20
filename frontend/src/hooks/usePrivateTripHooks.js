@@ -448,6 +448,61 @@ export const usePrivateTripHooks = () => {
         }
     }
 
+    const updatePrivateTripById = async (details) => {
+        try {
+
+            dispatch(setLoading(true))
+
+            const response = await apiConnector(
+                "PUT",
+                `${privateTripEndpoints.UPDATE_PRIVATE_TRIP}/${details?.privateTripId}`, details
+            )
+            if (response?.data?.success) {
+                dispatch(
+                    setPrivateTripById({
+                        id: details.privateTripId,
+                        data: response?.data?.data,
+                        financeDetails: response?.data?.data2
+                    })
+                )
+            }
+
+            return response
+
+        } catch (error) {
+            throw error
+        } finally {
+            dispatch(setLoading(false))
+        }
+    }
+
+    const deleteUnusedHotelOrVehiclePrivateTrip = async (details) => {
+        try {
+
+            dispatch(setLoading(true))
+
+            const response = await apiConnector(
+                "PUT",
+                `${privateTripEndpoints.DELETE_UNUSED_HOTEL_OR_VEHICLE}/${details?.privateTripId}`, details
+            )
+            if (response?.data?.success) {
+                dispatch(
+                    setPrivateTripFinanceById({
+                        id: details.privateTripId,
+                        data: response?.data?.data,
+                    })
+                )
+            }
+
+            return response
+
+        } catch (error) {
+            throw error
+        } finally {
+            dispatch(setLoading(false))
+        }
+    }
+
     return {
         addPrivateTrip,
         getPrivateTrips,
@@ -459,7 +514,9 @@ export const usePrivateTripHooks = () => {
         updatePrivateTripVehiclePaymentsRowWise,
         updatePrivateTripGuestPaymentsRowWise,
         deletePrivateTripsHotelVehicle,
-        deletePrivateTripsGuestPayment
+        deletePrivateTripsGuestPayment,
+        updatePrivateTripById,
+        deleteUnusedHotelOrVehiclePrivateTrip
 
     };
 };

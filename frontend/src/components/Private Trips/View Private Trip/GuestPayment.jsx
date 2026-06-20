@@ -179,7 +179,7 @@ function PaymentTable({
     })
   }
 
-  const saveEdit =async () => {
+  const saveEdit = async () => {
     const original = rows[editIdx]
 
     // Determine whether the receipt changed
@@ -212,6 +212,18 @@ function PaymentTable({
     }
 
     await onEditSave?.(payload)
+    // Optimistically update local state
+    const updatedRow = {
+      ...original,
+      date: editData.date,
+      amount: Number(editData.amount),
+      mode: editData.mode,
+      status: editData.status,
+      // If a new file was uploaded, show it locally; if removed, clear it
+      file: newFileIsObject ? editData.file : editData.file,
+      receipt: newFileIsObject ? null : editData.file, // new upload has no URL yet
+    }
+    setRows((p) => p.map((r, i) => (i === editIdx ? updatedRow : r)))
 
     setEditIdx(null)
     setEditData(null)
@@ -220,10 +232,10 @@ function PaymentTable({
   const cancelEdit = () => { setEditIdx(null); setEditData(null) }
 
   // ── delete helper ──
-  const deleteRow = (i) => {
+  const deleteRow = async (i) => {
     const removed = rows[i]
-    onDelete?.(removed, i)
-    // setRows((p) => p.filter((_, idx) => idx !== i))
+    await onDelete?.(removed, i)
+    setRows((p) => p.filter((_, idx) => idx !== i))
   }
 
   const totalPrice = price || 0
@@ -288,7 +300,7 @@ function PaymentTable({
                         {
                           submitLoading ?
                             (
-                              <LoadingSpinner/>
+                              <LoadingSpinner />
                             ) :
                             <button onClick={saveEdit} className={actionBtn('green')} title="Save"><Save size={13} /></button>
                         }
@@ -429,15 +441,8 @@ function PaymentTable({
         )}
       </div>
 
-      {/* ── Summary cards ── */}
-      <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-3">
-        <SummaryCard label="Total Price" value={formatINR(totalPrice)} valueClass="text-gray-800" />
-        <SummaryCard label="Total Paid" value={formatINR(paidAmount)} valueClass="text-green-600" />
-        <SummaryCard label="Balance Due" value={formatINR(balanceAmount)} valueClass="text-[#E91E8C]" />
-      </div>
-
       {/* ── Bottom actions ── */}
-      <div className="mt-4 flex flex-wrap items-center gap-3">
+      <div className="mt-4 flex flex-wrap items-center justify-end gap-3">
         <button
           onClick={addRow}
           className="flex items-center gap-1.5 text-xs font-semibold text-[#E91E8C] hover:text-[#c71878] transition-colors"
@@ -453,6 +458,13 @@ function PaymentTable({
             <Send size={13} /> Save All ({newRows.length})
           </button>
         )}
+      </div>
+
+      {/* ── Summary cards ── */}
+      <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-3">
+        <SummaryCard label="Total Price" value={formatINR(totalPrice)} valueClass="text-gray-800" />
+        <SummaryCard label="Total Paid" value={formatINR(paidAmount)} valueClass="text-green-600" />
+        <SummaryCard label="Balance Due" value={formatINR(balanceAmount)} valueClass="text-[#E91E8C]" />
       </div>
     </div>
   )
