@@ -248,7 +248,7 @@ function Rooms() {
                     className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-[#18305C] mt-3 transition-colors cursor-pointer"
                 >
                     <ArrowLeft size={15} />
-                    Back to List
+                    Back to Hotel
                 </button>
             </div>
 
@@ -311,7 +311,7 @@ function Rooms() {
                     </div>
                 ) : allRooms?.length === 0 ? (
                     /* Empty State */
-                    <div className="flex min-h-[280px] flex-col items-center justify-center px-6 py-12 text-center">
+                    <div className="flex min-h-70 flex-col items-center justify-center px-6 py-12 text-center">
                         <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-pink-50">
                             <BedDouble size={28} className="text-pink-500" />
                         </div>
@@ -338,11 +338,10 @@ function Rooms() {
                             <thead className="bg-[#f2f2f5]">
                                 <tr className="text-left text-sm font-bold text-[#1d3561]">
                                     <th className="px-5 py-4">Room Name</th>
-                                    <th className="px-5 py-4">Quantity</th>
-                                    <th className="px-5 py-4">Capacity</th>
+                                    <th className="px-5 py-4">No. of Rooms</th>
+                                    <th className="px-5 py-4">Capacity (A + EM)</th>
                                     <th className="px-5 py-4">Adult</th>
-                                    {/* <th className="px-5 py-4">Child</th> */}
-                                    <th className="px-5 py-4">Extra Mattress</th>
+                                    <th className="px-5 py-4">Mattress</th>
                                     <th className="px-5 py-4">Room Photos</th>
                                     <th className="px-5 py-4 text-center">Action</th>
                                 </tr>
@@ -549,9 +548,6 @@ function Rooms() {
                         Manage Rates
                     </button>
 
-                    <button className="rounded-xl bg-[#ED5F8D] px-5 py-3 text-sm font-semibold text-white shadow-md transition ">
-                        Save
-                    </button>
                 </div>
             )}
 

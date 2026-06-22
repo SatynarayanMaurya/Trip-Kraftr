@@ -696,7 +696,7 @@ export default function AddHotel() {
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="flex items-center gap-2 px-6 py-2.5 border border-gray-300 text-[#18305C] text-sm font-semibold rounded-lg hover:bg-gray-50 transition-colors"
+          className="cursor-pointer flex items-center gap-2 px-6 py-2.5 border border-gray-300 text-[#18305C] text-sm font-semibold rounded-lg hover:bg-gray-50 transition-colors"
         >
           <XCircle size={16} />
           Cancel

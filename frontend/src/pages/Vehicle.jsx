@@ -392,26 +392,6 @@ export default function Vehicle() {
           <CustomSelect value={region} onChange={setRegion} options={allRegions} />
           <CustomSelect value={type} onChange={setType} options={ALL_TYPES} />
           <CustomSelect value={sort} onChange={setSort} options={SORT_OPTIONS} />
-
-          <button
-            className="w-10 h-10 flex items-center justify-center bg-white rounded-xl shrink-0"
-            onClick={() => resetFilter()}
-            style={{
-              border: '1.5px solid #E5E7EB',
-              boxShadow: '0 1px 6px rgba(0,0,0,0.09)',
-              transition: 'all 0.15s ease',
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.borderColor = '#18305C'
-              e.currentTarget.style.boxShadow = '0 0 0 3px rgba(24,48,92,0.07), 0 2px 8px rgba(0,0,0,0.09)'
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.borderColor = '#E5E7EB'
-              e.currentTarget.style.boxShadow = '0 1px 6px rgba(0,0,0,0.09)'
-            }}
-          >
-            <SlidersHorizontal size={16} className="text-[#18305C]" strokeWidth={2} />
-          </button>
         </div>
       </div>
 

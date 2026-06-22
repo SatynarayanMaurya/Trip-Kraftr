@@ -134,6 +134,30 @@ export const useHotelHooks = () => {
   }
 
   // For update Hotels by Id
+  const updateHotelStatusById = async (hotelId, status) => {
+    try {
+
+      dispatch(setLoading(true))
+
+      const response = await apiConnector(
+        "PUT",
+        `${hotelEndpoinsts.UPDATE_HOTEL_STATUS_BY_ID}/${hotelId}`, {status:status},
+      )
+
+      if(response?.data?.success){
+        dispatch(updateHotel(response?.data?.data))
+        dispatch(setHotelDetails({hotelId: hotelId, hotel: response?.data?.data }))
+      }
+      return response
+
+    } catch (error) {
+      throw error
+    } finally {
+      dispatch(setLoading(false))
+    }
+  }
+
+  // For update Hotels by Id
   const deleteHotelById = async (hotelId, regionId) => {
     try {
 
@@ -166,6 +190,7 @@ export const useHotelHooks = () => {
     getHotels,
     getHotelById,
     updateHotelById,
+    updateHotelStatusById,
     deleteHotelById,
     getHotelsBySubRegionIds
 

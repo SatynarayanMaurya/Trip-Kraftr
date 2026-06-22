@@ -118,7 +118,7 @@ function ViewActivity() {
           className="flex items-center gap-2 text-sm text-gray-500 hover:text-[#08255B] cursor-pointer w-fit transition-colors"
         >
           <ArrowLeft size={16} />
-          Back to List
+          Back to Activities
         </button>
       </div>
 
@@ -216,22 +216,6 @@ function ViewActivity() {
             </Field>
           </div>
 
-          {/* Divider */}
-          <div className="border-t border-gray-100 pt-4">
-            <div className="flex justify-end">
-              <button
-                onClick={() => navigate(`/activities/update-activity/${activityId}`)}
-                className="flex items-center gap-2 px-6 py-2.5 text-white text-sm font-semibold rounded-lg transition-all hover:opacity-90"
-                style={{
-                  backgroundColor: PINK,
-                  boxShadow: "0 4px 14px rgba(237,95,141,0.30)"
-                }}
-              >
-                <Pencil size={15} />
-                Edit Activity
-              </button>
-            </div>
-          </div>
 
         </div>
       </div>

@@ -213,7 +213,7 @@ function AddRoom({ onClose, hotelId }) {
                         {/* Capacity */}
                         <div>
                             <label className="mb-2 block text-sm font-semibold text-slate-700">
-                                Capacity
+                                Capacity (A + EM)
                             </label>
                             <div className="relative">
                                 <Users
@@ -325,7 +325,7 @@ function AddRoom({ onClose, hotelId }) {
                         {/* Google Photos link */}
                         <div>
                             <label className="mb-2 block text-sm font-semibold text-slate-700">
-                                Image Link
+                                Room Photos
                             </label>
                             <div className="relative">
                                 <Image

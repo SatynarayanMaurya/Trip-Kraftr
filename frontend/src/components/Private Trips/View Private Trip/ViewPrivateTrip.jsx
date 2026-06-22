@@ -10,6 +10,7 @@ import GuestPayment from './GuestPayment'
 import ProfitAndLoss from './ProfitAndLoss'
 import VendorPayment from './VendorPayment'
 import DaysDetails from './DaysDetails'
+import PriceSection from '../Add Private Trip/PriceSection'
 const BLUE = '#18305C';
 const PINK = '#ED5F8D';
 
@@ -22,7 +23,7 @@ function ViewPrivateTrip() {
 
     const isProduction = useSelector(s => s.user.isProduction)
     const privateTripDetails = useSelector(s => s.privateTrip.privateTripById?.[privateTripId])
-    
+
 
 
     const [fetchLoading, setFetchLoading] = useState(false)
@@ -54,7 +55,7 @@ function ViewPrivateTrip() {
         }
     }, [privateTripId])
 
-    const tabs = ['Day Details', 'Policy', 'Guest Payment', 'P & L','Vendor Payment'];
+    const tabs = ['Day Details', 'Policy', 'Guest Payment', 'P & L', 'Vendor Payment'];
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', padding: '24px', background: '#f5f6fa', minHeight: '100vh' }}>
@@ -95,18 +96,33 @@ function ViewPrivateTrip() {
 
             <StepperTab steps={tabs} activeStep={activeTab} onStepClick={setActiveTab} />
 
-            
+
             {activeTab === 1 && (
                 <DaysDetails />
             )}
 
-
             {activeTab === 2 && (
-                <GroupTripPolicies
-                    regionId={privateTripDetails?.regionDetails?.region1?._id}
-                    regionName={privateTripDetails?.regionDetails?.region1?.name}
-                    readOnly
-                />
+                <div
+                    style={{
+                        display: "flex",
+                        gap: "20px",
+                        alignItems: "flex-start",
+                    }}
+                >
+                    <div style={{ flex: 1, minWidth: 0 }}>  {/* ← add minWidth: 0 */}
+                        <GroupTripPolicies
+                            regionId={privateTripDetails?.regionDetails?.region1?._id}
+                            regionName={privateTripDetails?.regionDetails?.region1?.name}
+                            readOnly
+                        />
+                    </div>
+
+                    <PriceSection
+                        price={privateTripDetails?.price}
+                        noOfDays={privateTripDetails?.regionDetails?.noOfDays || 3}
+                        isEditable={false}
+                    />
+                </div>
             )}
 
             {activeTab === 3 && (

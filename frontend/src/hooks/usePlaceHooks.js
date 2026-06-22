@@ -26,7 +26,7 @@ export const usePlaceHooks = () => {
   }
 
   // For getting place with paginated
-  const getPlaces = async (page = 1, limit = 5) => {
+  const getPlaces = async (page = 1, limit = 5,isGlobal=false) => {
     try {
       const cachedPage = placesPages?.[page]
 
@@ -36,7 +36,7 @@ export const usePlaceHooks = () => {
 
       const response = await apiConnector(
         "GET",
-        `${placeEndpoints.GET_PLACE}?page=${page}&limit=${limit}`
+        `${placeEndpoints.GET_PLACE}?page=${page}&limit=${limit}&isGlobal=${isGlobal}`
       )
       dispatch(
         setPlacesByPage({

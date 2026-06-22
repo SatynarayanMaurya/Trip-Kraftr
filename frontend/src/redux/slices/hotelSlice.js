@@ -8,7 +8,7 @@ const initialState = {
 
     hotelDetails :{},  // This is only for storing a single hotel details according for view details
 
-    HotelPageLimit: 4,
+    HotelPageLimit: 12,
 
     paginationHotels: {
         currentPage: 1,

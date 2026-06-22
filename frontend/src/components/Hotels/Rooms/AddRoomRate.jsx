@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { X, CalendarDays, Save, Tag, BedDouble } from "lucide-react";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
@@ -9,7 +9,7 @@ function AddRoomRate({ onClose, hotelId, allRooms }) {
     const isProduction = useSelector((state) => state.user.isProduction)
     const { addRoomRate } = useRoomRateHooks()
     const [loading, setLoading] = useState(false)
-    // console.log("allRooms : ",allRooms)
+    const dateRef = useRef(null);
 
     const initialRoomRates = allRooms?.map((room) => ({
         roomId: room._id,
@@ -266,6 +266,8 @@ function AddRoomRate({ onClose, hotelId, allRooms }) {
                                     className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
                                 />
                                 <input
+                                    ref={dateRef}
+                                    onClick={() => dateRef.current?.showPicker()}
                                     type="date"
                                     name="fromDate"
                                     value={formData.fromDate}
@@ -292,6 +294,8 @@ function AddRoomRate({ onClose, hotelId, allRooms }) {
                                     className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
                                 />
                                 <input
+                                    ref={dateRef}
+                                    onClick={() => dateRef.current?.showPicker()}
                                     type="date"
                                     name="toDate"
                                     value={formData.toDate}

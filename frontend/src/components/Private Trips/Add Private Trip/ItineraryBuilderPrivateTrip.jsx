@@ -461,9 +461,7 @@ function ItineraryBuilderPrivateTrip({
             </div>
 
             {/* RIGHT: sticky price section, desktop only */}
-            {/* <div className="hidden sm:block" style={{ position: 'sticky', top: '20px', flexShrink: 0 }}> */}
-                <PriceSection price={price} setPrice={setPrice} noOfDays={formData?.noOfDays || 3} />
-            {/* </div> */}
+            <PriceSection price={price} setPrice={setPrice} noOfDays={formData?.noOfDays || 3} />
         </div>
     );
 }

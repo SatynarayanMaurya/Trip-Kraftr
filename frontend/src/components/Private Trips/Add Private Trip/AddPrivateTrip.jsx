@@ -115,7 +115,7 @@ function AddPrivateTrip() {
         max_margin: 0,
         margin: 0,
         commission: 0,
-        isMargin: false,
+        isMargin: true,
         additionalActivities: 0,
         totalCost: 0,
         festivalSurge: 0,
@@ -261,19 +261,13 @@ function AddPrivateTrip() {
 
     const sortedSubRegionNames = sortIdsConsistently(selectedSubRegionNames);
 
-    // console.log("active day data : ", activeDayData)
-
-
     const keyForFindHotel = sortedSubRegionId.join(',') + activeDayData?.hotelDetails?.hotelCategory;
-    // console.log("Key For find hotel : ",keyForFindHotel)
     const hotelsForActiveDay = useSelector(s => s.hotel.hotelsBysubRegionKey?.[sortedSubRegionId.join(',') + activeDayData?.hotelDetails?.hotelCategory]);
     // const placesForActiveDay = useSelector(s => s.place.placesBySubRegionKey?.[sortedSubRegionId.join(',')]);
     const placesForActiveDay = useSelector(s => s.place.placesBySubRegionNameKey?.[sortedSubRegionNames?.join(',')]);
     const activitiesForActiveDay = useSelector(s => s.activity.activitiesBySubRegionKey?.[sortedSubRegionId.join(',')]);
     const activeHotelId = activeDayData?.hotelDetails?.hotelId;
     const roomTypesForActiveDay = useSelector(s => s.room.roomTypesForHotelId?.[activeHotelId]);
-    // const roomRatesForActiveDayHotel = useSelector(s => s.roomRate.roomRatesForHotelId?.[activeHotelId]);
-    // console.log("roomTypesForActiveDay : ",roomTypesForActiveDay)
     const hotelRates = useSelector(s => s.roomRate.roomRatesForHotelId?.[activeHotelId]) || [];
     function addDaysForRate(days) {
         const date = new Date(formData?.regionDetails?.startDate);
@@ -334,8 +328,6 @@ function AddPrivateTrip() {
         }
     }, [activeDayData?.hotelDetails?.hotelId])
 
-
-    // console.log("roomRatesForActiveDayHotel : ",roomRatesForActiveDayHotel)
 
     useEffect(() => {
         dispatch(clearRoomRatesForHotelId({ key: activeDayData?.hotelDetails?.hotelId }))

@@ -1,4 +1,4 @@
-const SKELETON_COUNT = 4
+const SKELETON_COUNT = 8
 
 export default function HotelCardSkeleton() {
   return (

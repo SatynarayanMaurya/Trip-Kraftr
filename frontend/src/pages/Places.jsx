@@ -16,8 +16,8 @@ const PINK = "#ED5F8D";
 function Places() {
 
   const { getPlaces, deletePlaceById } = usePlaceHooks()
-  const userDetails = useSelector((state)=>state.user.userDetails)
-  
+  const userDetails = useSelector((state) => state.user.userDetails)
+
   const [isGlobal, setIsGlobal] = useState(true);
   const { searchPlaces } = useCommonHooks()
   const { getRegionsForOrg } = useRegionHooks()
@@ -45,6 +45,10 @@ function Places() {
   const isProduction = useSelector((state) => state.user.isProduction)
   const currentPagePlaces = useSelector((state) => state.place.placesPages?.[currentPage]);
   const pageLimit = useSelector((state) => state.place.placesPageLimit)
+
+  const [searchedCurrentPage, setSearchedCurrentPage] = useState(1)
+  const [searhedTotalPages, setSearchedTotalPages] = useState(1)
+  const [showSearchData, setShowSearchData] = useState([])
 
   const [allRegions, setAllRegions] = useState([])
   let allRegionsForSuggestions = useSelector((state) => state.user.allRegionsForSuggestions)
@@ -75,7 +79,6 @@ function Places() {
     }
   }, [])
 
-  // console.log("All Regions : ",allRegions)
 
   useEffect(() => {
     if (!allRegionsForSuggestions) return;
@@ -93,8 +96,9 @@ function Places() {
       setIsSearching(true)
       setFetchLoading(true)
       const regionId = allRegionsForSuggestions?.find((region) => region?.name === selectedRegion)?._id
-      const response = await searchPlaces(search, regionId || null,selectedRegion||null, pageLimit,isGlobal)
+      const response = await searchPlaces(search, regionId || null, selectedRegion || null, pageLimit, isGlobal)
       setSearchedPlaces(response?.data?.searchedPlaces)
+      setSearchedTotalPages(Math.ceil(response?.data?.searchedPlaces?.length / pageLimit))
       setFetchLoading(false)
     }
     catch (error) {
@@ -115,7 +119,7 @@ function Places() {
   const fetchPlaces = async () => {
     try {
       setFetchLoading(true)
-      await getPlaces(currentPage, pageLimit)
+      await getPlaces(currentPage, pageLimit, isGlobal)
       setFetchLoading(false)
     }
     catch (error) {
@@ -136,7 +140,7 @@ function Places() {
       fetchPlaces()
     }
 
-  }, [currentPage, pageLimit])
+  }, [currentPage, pageLimit, isGlobal])
 
   useEffect(() => {
     if (search !== "" || selectedRegion !== 'Region') {
@@ -145,11 +149,18 @@ function Places() {
     else {
       setIsSearching(false)
     }
-  }, [search, pageLimit, selectedRegion,isGlobal])
+  }, [search, pageLimit, selectedRegion, isGlobal])
 
-  // const pageLimit = 10
+  
+  useEffect(()=>{
+    const skip = (searchedCurrentPage-1) * pageLimit
+    setShowSearchData(searchedPlaces?.slice(skip, skip + pageLimit))
+    setSearchedTotalPages(Math.ceil(searchedPlaces?.length/pageLimit))
+  },[searchedPlaces,searchedCurrentPage])
 
-  const filtered = isSearching ? searchedPlaces : currentPagePlaces
+
+  const filtered = isSearching ? showSearchData : currentPagePlaces
+
 
   const handleDelete = (placeDetails) => {
     setDeletePlaceDetails(placeDetails)
@@ -183,6 +194,11 @@ function Places() {
       toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin")
     }
 
+  }
+
+  const toggleGlobalSearch = async (e) => {
+    dispatch(clearPlaces())
+    setIsGlobal(e.target.checked)
   }
 
 
@@ -239,51 +255,6 @@ function Places() {
           />
         </div>
 
-        {/* Sub-Region Dropdown */}
-        {/* <div style={{ position: "relative" }}>
-          <button
-            onClick={() => { setSubRegionOpen(!subRegionOpen); setRegionOpen(false); }}
-            style={{
-              display: "flex", alignItems: "center", gap: "32px",
-              backgroundColor: "#fff", border: "1px solid #eaecf0",
-              borderRadius: "10px", padding: "10px 14px",
-              fontSize: "13.5px", color: "#495057", fontWeight: "500",
-              cursor: "pointer", boxShadow: "0 2px 8px rgba(8,37,91,0.07)",
-              minWidth: "148px", justifyContent: "space-between"
-            }}
-          >
-            {selectedSubRegion}
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#adb5bd" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-          {subRegionOpen && (
-            <div style={{
-              position: "absolute", top: "calc(100% + 6px)", left: 0,
-              backgroundColor: "#fff", border: "1px solid #eaecf0",
-              borderRadius: "10px", boxShadow: "0 8px 24px rgba(8,37,91,0.12)",
-              zIndex: 30, minWidth: "148px", overflow: "hidden"
-            }}>
-              {subRegionOptions.map((opt) => (
-                <button
-                  key={opt}
-                  onClick={() => { setSelectedSubRegion(opt); setSubRegionOpen(false); }}
-                  style={{
-                    width: "100%", textAlign: "left", padding: "9px 14px",
-                    fontSize: "13px", color: selectedSubRegion === opt ? PINK : "#495057",
-                    backgroundColor: selectedSubRegion === opt ? "#fff5f8" : "transparent",
-                    border: "none", cursor: "pointer", fontWeight: selectedSubRegion === opt ? 600 : 400
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.backgroundColor = "#fff5f8"}
-                  onMouseLeave={e => e.currentTarget.style.backgroundColor = selectedSubRegion === opt ? "#fff5f8" : "transparent"}
-                >
-                  {opt}
-                </button>
-              ))}
-            </div>
-          )}
-        </div> */}
-
         {/* Region Dropdown */}
         <div style={{ position: "relative" }}>
           <button
@@ -333,23 +304,12 @@ function Places() {
           <input
             type="checkbox"
             checked={isGlobal}
-            onChange={(e) => setIsGlobal(e.target.checked)}
+            onChange={(e) => toggleGlobalSearch(e)}
             className="w-4 h-4"
           />
           <label>Global Search</label>
         </div>
 
-        {/* Filter sliders icon */}
-        <button style={{
-          display: "flex", alignItems: "center", justifyContent: "center",
-          backgroundColor: "#fff", border: "1px solid #eaecf0",
-          borderRadius: "10px", padding: "10px 12px",
-          cursor: "pointer", boxShadow: "0 2px 8px rgba(8,37,91,0.07)"
-        }}>
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#6c757d" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-          </svg>
-        </button>
       </div>
 
       {/* Table Card */}
@@ -383,14 +343,14 @@ function Places() {
                 onMouseLeave={e => e.currentTarget.style.backgroundColor = "transparent"}
               >
                 <td style={{ padding: "15px 24px", color: BLUE, fontWeight: "600", fontSize: "13.5px" }}>
-                  <div>{place.placeName}</div>
-                  {
-                    isSearching&&
-                    (userDetails?.org_id === place?.org_id  ? 
-                    <span style={{  color: "#32cd32", fontSize: "10px" }}>you</span>:
-                    <span style={{  color: "red", fontSize: "10px" }}>other</span>)
-                  }
-                  </td>
+                  <div className="flex gap-2 items-center">{place.placeName}
+                    {
+                      (userDetails?.org_id === place?.org_id ?
+                        <span style={{ color: "#32cd32", fontSize: "8px" }}>you</span> :
+                        <span style={{ color: "red", fontSize: "8px" }}>other</span>)
+                    }
+                  </div>
+                </td>
 
                 <td style={{ padding: "15px 20px", color: "#8a94a6", fontSize: "13px" }}>{place.notes}</td>
                 <td style={{ padding: "15px 20px", color: "#6c757d", fontSize: "13px" }}>{place.regionId?.name}</td>
@@ -402,14 +362,14 @@ function Places() {
                     <button
                       onClick={() => navigate(`view-place/${place?._id}`)}
                       style={{
-                        background: "none", border: "none", cursor: "pointer",color:PINK,
+                        background: "none", border: "none", cursor: "pointer", color: PINK,
                         padding: "4px", display: "flex", alignItems: "center",
                         borderRadius: "6px"
                       }}
                       onMouseEnter={e => e.currentTarget.style.backgroundColor = "#fff5f8"}
                       onMouseLeave={e => e.currentTarget.style.backgroundColor = "transparent"}
                     >
-                      <Eye size={16}/>
+                      <Eye size={16} />
                     </button>
                     {/* Delete icon */}
                     <button
@@ -447,9 +407,10 @@ function Places() {
         {/* Prev / Next */}
         <div className="flex items-center gap-3">
           <button
-            disabled={currentPage === 1 || isSearching}
-            onClick={() => setCurrentPage((p) => p - 1)}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold border transition-all ${currentPage === 1 || isSearching
+            disabled={isSearching ? searchedCurrentPage ===1 :currentPage === 1}
+            onClick={
+              isSearching ? ()=>setSearchedCurrentPage((p)=>p-1) :() => setCurrentPage((p) => p - 1)}
+            className={`px-4 py-2 rounded-lg text-sm font-semibold border transition-all  ${(isSearching ? searchedCurrentPage ===1 :currentPage === 1)
               ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
               : 'bg-pink-500 border-pink-500 text-white hover:bg-pink-600 cursor-pointer'
               }`}
@@ -457,13 +418,15 @@ function Places() {
             ← Prev
           </button>
           <p className="text-sm text-gray-500">
-            Page <span className="text-gray-800 font-semibold">{currentPage}</span> of{' '}
-            <span className="text-gray-800 font-semibold">{pagination?.totalPages || 1}</span>
+            Page <span className="text-gray-800 font-semibold">{isSearching ? searchedCurrentPage:currentPage || 1}</span> of{' '}
+            <span className="text-gray-800 font-semibold">{isSearching ? searhedTotalPages : pagination?.totalPages || 0}</span>
           </p>
           <button
-            disabled={currentPage === pagination.totalPages || isSearching}
-            onClick={() => setCurrentPage((p) => p + 1)}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold border transition-all ${currentPage === pagination?.totalPages || isSearching
+            // disabled={currentPage === pagination.totalPages || isSearching}
+            disabled={isSearching ? searhedTotalPages===searchedCurrentPage :currentPage === pagination?.totalPages }
+            onClick={
+              isSearching ? ()=>setSearchedCurrentPage((p)=>p + 1) :() => setCurrentPage((p) => p + 1)}
+            className={`px-4 py-2 rounded-lg text-sm font-semibold border transition-all  ${(isSearching ? searhedTotalPages===searchedCurrentPage :currentPage === pagination?.totalPages)
               ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
               : 'bg-pink-500 border-pink-500 text-white hover:bg-pink-600 cursor-pointer'
               }`}
@@ -472,17 +435,6 @@ function Places() {
           </button>
         </div>
 
-        {/* Limit */}
-        <div className="flex items-center gap-2 text-sm text-gray-500">
-          <span>Rows per page</span>
-          <select
-            value={pageLimit}
-            onChange={(e) => changePageLimit(e)}
-            className="bg-gray-50 border border-gray-200 text-gray-700 text-sm px-3 py-2 rounded-lg outline-none focus:border-pink-400 cursor-pointer"
-          >
-            {[5, 10, 20].map((v) => <option key={v} value={v}>{v}</option>)}
-          </select>
-        </div>
 
         {/* Go to page */}
         <div className="flex items-center gap-2 text-sm text-gray-500">

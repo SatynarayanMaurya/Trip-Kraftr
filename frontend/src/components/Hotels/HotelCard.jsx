@@ -29,13 +29,6 @@ function HotelCard({ hotel, onEdit, onDelete, onView }) {
             {hotel?.is_active ? 'Active' : 'Inactive'}
           </span>
           <div className="flex items-center gap-0.5">
-            {/* <button
-              onClick={() => onEdit?.(hotel)}
-              title="Edit"
-              className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:text-[#E91E8C] hover:bg-pink-50 transition-colors"
-            >
-              <Pencil size={14} />
-            </button> */}
             <button
               onClick={() => onDelete?.(hotel)}
               title="Delete"
@@ -69,7 +62,7 @@ function HotelCard({ hotel, onEdit, onDelete, onView }) {
           </div>
           <button
             onClick={() => onView?.(hotel)}
-            className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-[#18305C] text-[#18305C] hover:bg-[#18305C] hover:text-white transition-colors"
+            className="cursor-pointer text-xs font-semibold px-3 py-1.5 rounded-lg border border-[#18305C] text-[#18305C] hover:bg-[#18305C] hover:text-white transition-colors"
           >
             View Details
           </button>

@@ -13,6 +13,7 @@ import { toast } from 'react-toastify'
 import { useRegionHooks } from '../hooks/useRegionHooks'
 import { useCommonHooks } from '../hooks/useCommonHooks'
 import DeleteModal from '../components/DeleteModals/DeleteModal'
+import Pagination from '../components/Common/Pagination'
 
 
 const CATEGORIES = ['All', 'Budget', 'Premium', 'Luxury']
@@ -48,7 +49,7 @@ function FilterSelect({ label, value, onChange, options }) {
         <ChevronDown size={14} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
       {open && (
-        <div className="absolute z-30 mt-1 min-w-[150px] bg-white border border-gray-200 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.13)] overflow-hidden">
+        <div className="absolute z-30 mt-1 min-w-37.5 bg-white border border-gray-200 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.13)] overflow-hidden">
           {options.map((opt) => (
             <button
               key={opt}
@@ -80,7 +81,6 @@ export default function Hotels() {
   const [filterSub, setFilterSub] = useState('All')
   const [filterCat, setFilterCat] = useState('All')
   const [filterOpen, setFilterOpen] = useState(false)
-  const [deleteTarget, setDeleteTarget] = useState(null)
   const [currentPage, setCurrentPage] = useState(1)
   const currentPageHotels = useSelector((state) => state.hotel.hotelsPages?.[currentPage])
   const pagination = useSelector((state) => state.hotel.paginationHotels)
@@ -243,7 +243,7 @@ export default function Hotels() {
       <div className="flex items-center justify-end gap-2.5 mb-5 flex-wrap">
         <button
           onClick={() => navigate('add-hotel')}
-          className="flex items-center gap-2 px-4 py-2.5 bg-[#ED5F8D] hover:bg-[#ED5F8D] text-white text-sm font-semibold rounded-xl transition-colors whitespace-nowrap"
+          className="cursor-pointer flex items-center gap-2 px-4 py-2.5 bg-[#ED5F8D] hover:bg-[#ED5F8D] text-white text-sm font-semibold rounded-xl transition-colors whitespace-nowrap"
           style={{ boxShadow: '0 2px 8px rgba(233,30,140,0.30)' }}
         >
           <Plus size={15} />
@@ -260,7 +260,7 @@ export default function Hotels() {
             Pill-shaped, with its own visible shadow, full width inside the container
         */}
         <div
-          className="flex items-center gap-3 bg-white rounded-2xl px-5 py-3 mb-5"
+          className="flex items-center gap-3 bg-white rounded-2xl px-5 py-2 mb-5"
           style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.10)', border: '1px solid #f0f0f0' }}
         >
           <Search size={16} className="text-gray-400 shrink-0" />
@@ -276,30 +276,10 @@ export default function Hotels() {
             </button>
           )}
 
-          {/* Divider */}
-          <div className="h-5 w-px bg-gray-200" />
 
-          {/* Filter icon */}
-          <button
-            onClick={() => setFilterOpen((o) => !o)}
-            className={`relative w-8 h-8 flex items-center justify-center rounded-lg border transition-colors
-              ${filterOpen || activeFilters > 0
-                ? 'border-[#E91E8C] bg-pink-50 text-[#E91E8C]'
-                : 'border-gray-200 text-gray-400 hover:border-gray-300'
-              }`}
-          >
-            <SlidersHorizontal size={15} />
-            {activeFilters > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-[#E91E8C] text-white text-[9px] font-bold rounded-full flex items-center justify-center">
-                {activeFilters}
-              </span>
-            )}
-          </button>
-        </div>
 
-        {/* Filter pills */}
-        {filterOpen && (
-          <div className="flex items-center gap-2.5 mb-5 flex-wrap">
+          {/* Filter pills */}
+          <div className="flex items-center gap-2.5  flex-wrap">
             <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Filter:</span>
             <FilterSelect label="Region" value={filterRegion} onChange={setFilterRegion} options={allRegions} />
             {/* <FilterSelect label="Sub-Region" value={filterSub} onChange={setFilterSub} options={SUB_REGIONS} /> */}
@@ -313,7 +293,7 @@ export default function Hotels() {
               </button>
             )}
           </div>
-        )}
+        </div>
 
         {/* Results count */}
         {(search || activeFilters > 0) && filtered?.length > 0 && (
@@ -322,6 +302,8 @@ export default function Hotels() {
             <span className="text-[#18305C] font-semibold">{pagination?.totalRecords}</span> hotels
           </p>
         )}
+
+
 
         {/* ── Hotel Cards grid ─────────────────────────────────────────── */}
 
@@ -370,7 +352,14 @@ export default function Hotels() {
 
 
       {/* Pagination */}
-      <div
+      <Pagination
+        setCurrentPage={setCurrentPage}
+        pagination={pagination}
+        currentPage={currentPage}
+        isSearching={isSearching}
+      />
+
+      {/* <div
         className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mt-6 bg-white rounded-xl px-4 md:px-5 py-4"
         style={{
           border: '1.5px solid #E5E7EB',
@@ -378,13 +367,10 @@ export default function Hotels() {
         }}
       >
 
-        {/* 🔹 Left Controls */}
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full md:w-auto">
 
-          {/* Row: Prev → Page → Next */}
           <div className="flex items-center justify-between sm:justify-start gap-3 w-full">
 
-            {/* Prev */}
             <button
               disabled={currentPage === 1 || isSearching}
               onClick={() => setCurrentPage(currentPage - 1)}
@@ -397,13 +383,11 @@ export default function Hotels() {
               ← Prev
             </button>
 
-            {/* Page Info */}
             <p className="text-sm text-gray-400 whitespace-nowrap">
               Page <span className="text-[#18305C] font-semibold">{currentPage || 1}</span> of{" "}
               <span className="text-[#18305C] font-semibold">{pagination?.totalPages || 0}</span>
             </p>
 
-            {/* Next */}
             <button
               disabled={currentPage === pagination?.totalPages || isSearching}
               onClick={() => setCurrentPage(Number(currentPage + 1))}
@@ -420,10 +404,8 @@ export default function Hotels() {
 
         </div>
 
-        {/* 🔹 Right Controls */}
         <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 w-full md:w-auto">
 
-          {/* Limit */}
           <div className="flex items-center justify-between sm:justify-start gap-3 text-sm text-gray-400 w-full sm:w-auto">
             <span>Limit</span>
 
@@ -443,7 +425,6 @@ export default function Hotels() {
             </select>
           </div>
 
-          {/* Go to page */}
           <div className="flex items-center justify-between sm:justify-start gap-3 text-sm text-gray-400 w-full sm:w-auto">
             <span>Go to page</span>
 
@@ -466,7 +447,7 @@ export default function Hotels() {
 
         </div>
 
-      </div>
+      </div> */}
 
       {/* Delete Hotel  */}
       {isDeleteModal &&

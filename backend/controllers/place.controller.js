@@ -114,11 +114,17 @@ export const getPlaces = async (req, res) => {
     try {
         const page = Math.max(parseInt(req.query.page) || 1, 1)
         const limit = Math.max(parseInt(req.query.limit) || 5, 1)
+        const isGlobal = req.query.isGlobal === "true";
 
         const skip = (page - 1) * limit;
+        const query = {}
+
+        if(!isGlobal){
+            query.org_id=req.user.org_id
+        }
 
         const allPlaces = await Place
-            .find({ org_id: req.user.org_id })
+            .find(query)
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)
@@ -403,7 +409,6 @@ export const searchPlaces = async (req, res) => {
         const searchedPlaces = await Place
             .find(query)
             .sort({ createdAt: -1 })
-            .limit(pageLimit)
             .select("_id regionId subRegionId org_id placeName notes category")
             .populate({ path: "regionId", select: "_id name country" })
             .populate({ path: "subRegionId", select: "_id name" })

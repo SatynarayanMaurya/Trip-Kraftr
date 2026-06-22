@@ -404,7 +404,7 @@ function AddPlace() {
               <input
                 type="number"
                 name="price"
-                placeholder="$300"
+                placeholder="₹300"
                 value={formData.price||''}
                 onChange={handleChange}
                 className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-transparent transition-all"

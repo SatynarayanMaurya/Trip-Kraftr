@@ -859,7 +859,6 @@ function VendorPayment() {
                 privateTripId: privateTripId
             }
             const response = await deleteUnusedHotelOrVehiclePrivateTrip(newPayload)
-
             toast.success(response?.data?.message)
         } catch (error) {
             if (!isProduction) console.log('Error:', error)

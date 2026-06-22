@@ -14,7 +14,7 @@ const PINK = '#ED5F8D';
 
 // ── Category badge style ───────────────────────────────────────────────────
 const categoryStyle = (cat) => {
-  if (cat === 'Luxury')  return 'text-amber-600 bg-amber-50 border-amber-200'
+  if (cat === 'Luxury') return 'text-amber-600 bg-amber-50 border-amber-200'
   if (cat === 'Premium') return 'text-purple-600 bg-purple-50 border-purple-200'
   return 'text-blue-600 bg-blue-50 border-blue-200'
 }
@@ -62,6 +62,7 @@ function ImagePlaceholder() {
   )
 }
 
+
 // ── Loading Skeleton ───────────────────────────────────────────────────────
 function Skeleton() {
   return (
@@ -76,13 +77,13 @@ function Skeleton() {
       </div>
       {/* Image row skeleton */}
       <div className="flex gap-4 mb-6">
-        {[1,2,3].map(i => <div key={i} className="flex-1 h-44 bg-gray-100 rounded-xl" />)}
+        {[1, 2, 3].map(i => <div key={i} className="flex-1 h-44 bg-gray-100 rounded-xl" />)}
       </div>
       {/* Details card skeleton */}
       <div className="rounded-2xl border border-gray-200 p-6 space-y-4">
         <div className="h-4 w-64 bg-gray-100 rounded" />
         <div className="flex gap-3 flex-wrap">
-          {[1,2,3,4,5].map(i => <div key={i} className="h-6 w-20 bg-gray-100 rounded" />)}
+          {[1, 2, 3, 4, 5].map(i => <div key={i} className="h-6 w-20 bg-gray-100 rounded" />)}
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div className="h-8 w-full bg-gray-100 rounded" />
@@ -90,7 +91,7 @@ function Skeleton() {
         </div>
         <div className="h-4 w-32 bg-gray-100 rounded" />
         <div className="flex gap-1">
-          {[1,2,3,4,5].map(i => <div key={i} className="w-5 h-5 bg-gray-100 rounded" />)}
+          {[1, 2, 3, 4, 5].map(i => <div key={i} className="w-5 h-5 bg-gray-100 rounded" />)}
         </div>
       </div>
     </div>
@@ -99,12 +100,12 @@ function Skeleton() {
 
 // ── Main Component ─────────────────────────────────────────────────────────
 export default function ViewHotel() {
-  const { getHotelById } = useHotelHooks()
+  const { getHotelById ,updateHotelStatusById} = useHotelHooks()
   const isProduction = useSelector((state) => state?.user?.isProduction)
-  const { hotelId }  = useParams()
-  const navigate     = useNavigate()
+  const { hotelId } = useParams()
+  const navigate = useNavigate()
 
-  const hotelDetails = useSelector((state)=>state.hotel.hotelDetails?.[hotelId])
+  const hotelDetails = useSelector((state) => state.hotel.hotelDetails?.[hotelId])
   const [fetchLoading, setFetchLoading] = useState(false)
 
   const fetchHotelDetails = async () => {
@@ -124,6 +125,27 @@ export default function ViewHotel() {
     }
   }
 
+
+  const statusUpdated = async (val) => {
+    try {
+      setFetchLoading(true)
+      const response = await updateHotelStatusById(hotelId, val)
+      toast.success(response?.data?.message)
+    }
+    catch (error) {
+      if (!isProduction) {
+        console.log("========= ERROR DEBUG START =========");
+        console.log("Error:", error);
+        console.log("Response:", error?.response);
+        console.log("========= ERROR DEBUG END =========");
+      }
+      toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin")
+    }
+    finally {
+      setFetchLoading(false)
+    }
+  }
+
   useEffect(() => {
     if (!hotelDetails) fetchHotelDetails()
   }, [])
@@ -139,14 +161,13 @@ export default function ViewHotel() {
       {/* ── Page title ────────────────────────────────────────────────── */}
       <div className="mb-5">
         <h1 className="text-2xl font-bold text-[#18305C]">Hotel Details</h1>
-        <p className="text-sm text-gray-400 mt-0.5">The hotel provides comfortable rooms, essential amenities, and quality services for a pleasant stay.</p>
         <button
-                    onClick={() => navigate(-1)}
-                    className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-[#18305C] mt-3 transition-colors cursor-pointer"
-                >
-                    <ArrowLeft size={15} />
-                    Back to List
-                </button>
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-[#18305C] mt-3 transition-colors cursor-pointer"
+        >
+          <ArrowLeft size={15} />
+          Back to List
+        </button>
       </div>
 
       {/* ── Hotel name + region pills ─────────────────────────────────── */}
@@ -169,15 +190,24 @@ export default function ViewHotel() {
               {hotelDetails?.regionId?.name ?? '—'}
             </span>
           </div>
+
+          {/* Hotel Category */}
+          <div className="shrink-0">
+            <p className="text-[11px] text-gray-400 font-medium mb-1">Hotel Category</p>
+            <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-semibold ${categoryStyle(hotelDetails?.category)}`}>
+              <MapPin size={11} />
+              {hotelDetails?.category ?? '—'}
+            </div>
+          </div>
         </div>
       </div>
 
       {/* ── Image gallery ─────────────────────────────────────────────── */}
       <div
         className="bg-white rounded-2xl p-5 mb-5"
-        style={{ 
-            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)' 
-          }}
+        style={{
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)'
+        }}
       >
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {imageSlots.map((img, idx) => (
@@ -200,8 +230,8 @@ export default function ViewHotel() {
       {/* ── Details card ──────────────────────────────────────────────── */}
       <div
         className="bg-white rounded-2xl p-5 md:p-6 mb-8"
-        style={{ 
-          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)' 
+        style={{
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)'
         }}
       >
         {/* Top row: address + edit + toggle */}
@@ -224,7 +254,7 @@ export default function ViewHotel() {
               <Pencil size={15} />
             </button>
             {/* <Toggle checked={isActive} onChange={setIsActive} /> */}
-            <Toggle checked={hotelDetails?.is_active} />
+            <Toggle checked={hotelDetails?.is_active} onChange={statusUpdated} />
           </div>
         </div>
 
@@ -259,14 +289,6 @@ export default function ViewHotel() {
             </div>
           </div>
 
-          {/* Hotel Category */}
-          <div className="shrink-0">
-            <p className="text-xs font-semibold text-[#18305C] mb-1.5">Hotel Category</p>
-            <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-semibold ${categoryStyle(hotelDetails?.category)}`}>
-              <MapPin size={11} />
-              {hotelDetails?.category ?? '—'}
-            </div>
-          </div>
         </div>
 
         {/* Rating */}
@@ -280,7 +302,7 @@ export default function ViewHotel() {
       {/* ── Manage Rooms button — bottom right ────────────────────────── */}
       <div className="flex justify-end">
         <button
-          onClick={() => navigate("manage-rooms", { state: { hotel:hotelDetails } })}
+          onClick={() => navigate("manage-rooms", { state: { hotel: hotelDetails } })}
           className="flex items-center gap-2 px-6 py-3 bg-[#ED5F8D]  text-white text-sm font-bold rounded-xl transition-colors"
           style={{ boxShadow: '0 4px 14px rgba(233,30,140,0.35)' }}
         >

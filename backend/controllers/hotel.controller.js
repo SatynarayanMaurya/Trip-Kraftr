@@ -446,6 +446,69 @@ export const updateHotelById = async (req, res) => {
 };
 
 
+export const updateHotelStatusById = async (req, res) => {
+    try {
+        const { hotelId } = req.params;
+        const { status } = req.body;
+
+        if (!mongoose.Types.ObjectId.isValid(hotelId)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid Hotel ID"
+            });
+        }
+
+        const allowedStatuses = [true, false];
+
+        if (!allowedStatuses.includes(status)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid status value"
+            });
+        }
+
+        const hotel = await Hotel.findOneAndUpdate(
+            {
+                _id: hotelId,
+                org_id: req.user.org_id
+            },
+            {
+                $set: { is_active:status }
+            },
+            {
+                new: true,
+            }
+        );
+
+        if (!hotel) {
+            return res.status(404).json({
+                success: false,
+                message: "Hotel not found"
+            });
+        }
+
+        await hotel.populate([
+            { path: "regionId", select: "_id name country" },
+            { path: "subRegionId", select: "_id name" }
+        ]);
+
+        return res.status(200).json({
+            success: true,
+            message: "Status updated successfully",
+            data: hotel
+        });
+
+    } catch (error) {
+        console.error("Update Hotel Status Error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: error.message || "Internal Server Error"
+        });
+    }
+};
+
+
 export const deleteHotelById = async (req, res) => {
     const session = await mongoose.startSession();
 
