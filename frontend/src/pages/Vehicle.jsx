@@ -45,7 +45,7 @@ function CustomSelect({ value, onChange, options }) {
           border: open ? '1.5px solid #18305C' : '1.5px solid #E5E7EB',
           transition: 'all 0.15s ease',
         }}
-        className="flex items-center gap-2 px-3.5 py-[9px] bg-white text-sm font-semibold rounded-xl whitespace-nowrap text-[#18305C]"
+        className="flex items-center gap-2 px-3.5 py-2.25 bg-white text-sm font-semibold rounded-xl whitespace-nowrap text-[#18305C]"
       >
         {value}
         <ChevronDown
@@ -359,7 +359,7 @@ export default function Vehicle() {
 
         {/* Search */}
         <div
-          className="flex-1 flex items-center gap-2.5 bg-white rounded-xl px-4 py-[10px]"
+          className="flex-1 flex items-center gap-2.5 bg-white rounded-xl px-4 py-2.5"
           style={{
             border: searchFocused ? '1.5px solid #18305C' : '1.5px solid #E5E7EB',
             boxShadow: searchFocused

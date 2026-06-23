@@ -170,7 +170,7 @@ export const getB2CEnquiryById = async (req, res) => {
 
 export const searchB2BEnquiry = async (req, res) => {
   try {
-    const { search, filter, forParticipant } = req.query;
+    const { search, filter, region, month, forParticipant } = req.query;
 
     // Account query
     const accountQuery = {
@@ -201,11 +201,11 @@ export const searchB2BEnquiry = async (req, res) => {
       accountQuery
     ).select("_id");
 
-    
+
     const accountIds = matchedAccounts.map(
       (acc) => acc._id
     );
-    
+
     // If no matching accounts
     if (accountIds.length === 0) {
       return res.status(200).json({
@@ -220,16 +220,22 @@ export const searchB2BEnquiry = async (req, res) => {
       org_id: req.user.org_id,
       accountId: { $in: accountIds },
     };
-    
+
     // add status filter only if provided
     if (filter) {
       query.status = filter;
     }
+    if (month) {
+      query.month = month;
+    }
+    if (region) {
+      query.destinations = region;
+    }
 
-    if(forParticipant ==='true'){
+    if (forParticipant === 'true') {
       query.status = 'New'
     }
-    
+
     const searchedEnquiries = await B2BEnquiry.find(query)
       .sort({ createdAt: -1 })
       .populate(
@@ -253,7 +259,7 @@ export const searchB2BEnquiry = async (req, res) => {
 
 export const searchB2CEnquiry = async (req, res) => {
   try {
-    const { search, filter, forParticipant } = req.query;
+    const { search, filter, region, month, forParticipant } = req.query;
 
     // Account query
     const accountQuery = {
@@ -303,16 +309,22 @@ export const searchB2CEnquiry = async (req, res) => {
       org_id: req.user.org_id,
       accountId: { $in: accountIds },
     };
-    
+
     // add status filter only if provided
     if (filter) {
       query.status = filter;
     }
+    if (month) {
+      query.month = month;
+    }
+    if (region) {
+      query.destinations = region;
+    }
 
-    if(forParticipant ==='true'){
+    if (forParticipant === 'true') {
       query.status = 'New'
     }
-    
+
     const searchedEnquiries = await B2CEnquiry.find(query)
       .sort({ createdAt: -1 })
       .populate(
@@ -357,7 +369,7 @@ export const searchB2BAccountsForEnquiry = async (req, res) => {
     const searchedAccounts = await B2BAccount
       .find(query)
       .limit(Number(pageLimit) || 5)
-      .select("_id fullName businessName email phone destinations source accountId isActive");
+      .select("_id fullName businessName email phone state destinations source accountId isActive");
 
     return res.status(200).json({
       success: true,
@@ -394,7 +406,7 @@ export const searchB2CAccountsForEnquiry = async (req, res) => {
     const searchedAccounts = await B2CAccount
       .find(query)
       .limit(Number(pageLimit) || 5)
-      .select("_id fullName email phone  source accountId noOfMembers")
+      .select("_id fullName email phone  source accountId state noOfMembers")
 
     return res.status(200).json({
       success: true,

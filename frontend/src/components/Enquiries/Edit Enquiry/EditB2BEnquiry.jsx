@@ -25,16 +25,8 @@ const HOTEL_CATEGORIES = ['Budget', 'Premium', 'Luxury'];
 const DIETARY_OPTIONS = ['Vegetarian', 'Non-Vegetarian', 'Both (Veg & Non-Veg)', 'Vegan', 'Jain'];
 const TRIP_TYPES = ['Group Trip', 'Private'];
 const STATUS_OPTIONS = ['New', 'In Progress', 'Warm', 'Won', 'Lost'];
-const INDIAN_STATES = [
-  'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
-  'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka',
-  'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram',
-  'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu',
-  'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal',
-  'Andaman and Nicobar Islands', 'Chandigarh',
-  'Dadra and Nagar Haveli and Daman and Diu',
-  'Delhi', 'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry',
-];
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'];
 
 // ── Tiny helpers ────────────────────────────────────────────────────────────
 const inputStyle = (disabled = false) => ({
@@ -66,16 +58,17 @@ const fieldWrap = { display: 'flex', flexDirection: 'column', gap: 0 };
 function EditB2BEnquiry({ onCancel }) {
 
   const navigate = useNavigate()
+  const dateRef = useRef(null);
   const { enquiryId } = useParams()
   const isProduction = useSelector(s => s.user.isProduction);
   const { searchB2BAccountsForEnquiry } = useCommonHooks?.() ?? {};
-  const { updateB2BEnquiryById,getb2bEnquiryById } = useEnquiryHooks()
+  const { updateB2BEnquiryById, getb2bEnquiryById } = useEnquiryHooks()
   const { regions, loading: regionLoading } = useRegionsData();
   const [suggestedDestinations, setSuggestedDestinations] = useState([])
-  useEffect(()=>{
-      if(!regions)return ;
-      setSuggestedDestinations(regions?.map(val=>val?.name))
-  },[regions])
+  useEffect(() => {
+    if (!regions) return;
+    setSuggestedDestinations(regions?.map(val => val?.name))
+  }, [regions])
 
   // ── search state ──
   const [searchInput, setSearchInput] = useState('');
@@ -122,27 +115,29 @@ function EditB2BEnquiry({ onCancel }) {
     dietaryPreference: '',
     destinations: [],
     notes: '',
+    month:''
   });
 
-  useEffect(()=>{
-    if(!enquiryDetails) return 
+  useEffect(() => {
+    if (!enquiryDetails) return
     setSearchInput(enquiryDetails?.accountId?.businessName)
     setForm({
       tripType: enquiryDetails?.tripType || 'Group Trip',
-      status:  enquiryDetails?.status || 'New',
+      status: enquiryDetails?.status || 'New',
       assignedTo: enquiryDetails?.assignedTo || '',
-      noOfDays:  enquiryDetails?.noOfDays || '',
-      totalMembers: enquiryDetails?.totalMembers ||  '',
-      adult: enquiryDetails?.adult ||  '',
-      child:  enquiryDetails?.child || '',
-      childAges: enquiryDetails?.childAges ||  [],
-      startDate:  enquiryDetails?.startDate?.split("T")?.[0] || '',
-      hotelCategory:  enquiryDetails?.hotelCategory || '',
-      dietaryPreference: enquiryDetails?.dietaryPreference ||  '',
-      destinations: enquiryDetails?.destinations ||  [],
-      notes:  enquiryDetails?.notes || '',
+      noOfDays: enquiryDetails?.noOfDays || '',
+      totalMembers: enquiryDetails?.totalMembers || '',
+      adult: enquiryDetails?.adult || '',
+      child: enquiryDetails?.child || '',
+      childAges: enquiryDetails?.childAges || [],
+      startDate: enquiryDetails?.startDate?.split("T")?.[0] || '',
+      hotelCategory: enquiryDetails?.hotelCategory || '',
+      dietaryPreference: enquiryDetails?.dietaryPreference || '',
+      destinations: enquiryDetails?.destinations || [],
+      notes: enquiryDetails?.notes || '',
+      month: enquiryDetails?.month || '',
     })
-  },[enquiryDetails])
+  }, [enquiryDetails])
 
   const [destInput, setDestInput] = useState('');
   const [showDestDrop, setShowDestDrop] = useState(false);
@@ -250,7 +245,7 @@ function EditB2BEnquiry({ onCancel }) {
 
     const payload = {
       ...form,
-      _id:enquiryDetails?._id,
+      _id: enquiryDetails?._id,
       child: parseInt(form.child) || 0,
       adult: parseInt(form.adult) || 0,
       noOfDays: parseInt(form.noOfDays) || 0,
@@ -304,7 +299,7 @@ function EditB2BEnquiry({ onCancel }) {
           </svg>
         </button>
         <div>
-          <h2 style={{ margin: 0, fontSize: '22px', fontWeight: '700', color: BLUE }}>Update Enquiry  {enquiryDetails?.enquiryId||''}</h2>
+          <h2 style={{ margin: 0, fontSize: '22px', fontWeight: '700', color: BLUE }}>Update Enquiry  {enquiryDetails?.enquiryId || ''}</h2>
           <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#6b7280' }}>Update this enquiry</p>
         </div>
       </div>
@@ -514,7 +509,7 @@ function EditB2BEnquiry({ onCancel }) {
               <label style={labelStyle}>Child Ages *</label>
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
                 gap: '10px',
               }}>
                 {form.childAges.map((age, i) => (
@@ -522,12 +517,18 @@ function EditB2BEnquiry({ onCancel }) {
                     <label style={{ ...labelStyle, fontSize: '12px', color: '#6b7280' }}>
                       Child {i + 1}
                     </label>
-                    <input
-                      type="number" min="0" max="17" placeholder="0"
+                    <select
                       value={age}
                       onChange={e => handleChildAge(i, e.target.value)}
                       style={{ ...inputStyle(), textAlign: 'center' }}
-                    />
+                    >
+                      <option value="">Select Age</option>
+                      {Array.from({ length: 18 }, (_, index) => (
+                        <option key={index + 1} value={index + 1}>
+                          {index + 1}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 ))}
               </div>
@@ -539,6 +540,8 @@ function EditB2BEnquiry({ onCancel }) {
             <div style={fieldWrap}>
               <label style={labelStyle}>Start Date *</label>
               <input type="date"
+                ref={dateRef}
+                onClick={() => dateRef.current?.showPicker()}
                 value={form.startDate}
                 onChange={e => setForm(f => ({ ...f, startDate: e.target.value }))}
                 style={inputStyle()} />
@@ -574,6 +577,22 @@ function EditB2BEnquiry({ onCancel }) {
                   onChange={e => setForm(f => ({ ...f, dietaryPreference: e.target.value }))}>
                   <option value="">Select</option>
                   {DIETARY_OPTIONS.map(d => <option key={d}>{d}</option>)}
+                </select>
+                <FiChevronDown style={chevronIcon} />
+              </div>
+            </div>
+          </div>
+
+
+          <div style={gridTwo}>
+
+            <div style={{ ...fieldWrap, marginBottom: '20px' }}>
+              <label style={labelStyle}>Month</label>
+              <div style={{ position: 'relative' }}>
+                <select style={selectStyle} value={form.month}
+                  onChange={e => setForm(f => ({ ...f, month: e.target.value }))}>
+                  <option value="">Select</option>
+                  {MONTHS.map(d => <option key={d}>{d}</option>)}
                 </select>
                 <FiChevronDown style={chevronIcon} />
               </div>

@@ -82,6 +82,11 @@ const B2BEnquirySchema = new mongoose.Schema({
         default: null
     },
 
+    month: {
+        type: String,
+        default: null
+    },
+
 }, { timestamps: true });
 
 // Case-insensitive unique index

@@ -58,9 +58,9 @@ function AddParticipant({ closeModal, setIsUpdated }) {
       setFetchLoading(true)
       let response
       if (account === 'b2b') {
-        response = await searchB2BEnquiry(search, null, true)
+        response = await searchB2BEnquiry(search, null,null,null, true)
       } else {
-        response = await searchB2CEnquiry(search, null, true)
+        response = await searchB2CEnquiry(search, null,null,null, true)
       }
       setSearchedEnquiries(response?.data?.searchedEnquiries)
       setShowSuggestions(true)

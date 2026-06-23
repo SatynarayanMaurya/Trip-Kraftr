@@ -29,7 +29,7 @@ export const updateB2BAccount = async (req, res) => {
 
         return res.status(201).json({
             success: true,
-            message: "New B2B Account Updated",
+            message: "Account Details Updated",
             updatedAccount
         })
     }
@@ -50,7 +50,7 @@ export const updateB2BAccount = async (req, res) => {
 
 export const updateB2CAccount = async (req, res) => {
     try {
-        const { fullName, email, source, referralby, phone, state, month, dietaryPreference, noOfMembers, destinations, tripType, assignedTo } = req.body;
+        const { fullName, email, source, referralby, phone, state, month, dietaryPreference, noOfMembers, destinations, tripType, assignedTo,gstNo } = req.body;
         const {accountId} = req.params;
         if (!fullName || !email || !phone) {
             return res.status(400).json({
@@ -73,12 +73,13 @@ export const updateB2CAccount = async (req, res) => {
             noOfMembers,
             destinations,
             tripType,
-            assignedTo
+            assignedTo,
+            gstNo
         }},{new:true})
 
         return res.status(201).json({
             success: true,
-            message: "New B2C Account Updated",
+            message: "Account Details Updated",
             updatedAccount
         })
     }

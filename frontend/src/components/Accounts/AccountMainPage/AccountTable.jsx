@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Search, Eye, MessageCircle } from 'lucide-react';
 import TableSkeleton from './TableSkeleton';
-
+import { FaWhatsapp } from "react-icons/fa";
 const PINK = '#ED5F8D';
 const SOURCE_OPTIONS = ['Instagram', 'Referral', 'Direct'];
 
@@ -71,7 +71,7 @@ export default function AccountTable({ data = [], columns, fetchLoading, onView,
                         <Eye size={18} color={PINK} />
                       </button>
                       <button style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex' }}>
-                        <MessageCircle size={18} color={PINK} />
+                        <FaWhatsapp size={18} color='#008000' />
                       </button>
                       <Toggle
                         value={row.isActive ?? true}

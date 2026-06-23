@@ -142,12 +142,8 @@ function ViewB2BAccount() {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <Toggle value={accountDetails?.isActive} />
           <button  onClick={()=>navigate(`/accounts/update-b2b/${accountId}`)}  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
             <Pencil size={18} color={PINK} />
-          </button>
-          <button style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
-            <Trash2 size={18} color={PINK} />
           </button>
         </div>
       </div>
@@ -180,13 +176,7 @@ function ViewB2BAccount() {
           border: '1px solid #e5e7eb', padding: '20px',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '18px' }}>
-            <div style={{
-              width: '32px', height: '32px', borderRadius: '50%',
-              background: '#fce7ef', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <Phone size={15} color={PINK} />
-            </div>
-            <h3 style={{ margin: 0, fontSize: '15px', fontWeight: '700', color: BLUE }}>Contact</h3>
+            <h3 style={{ margin: 0, fontSize: '15px', fontWeight: '700', color: BLUE }}>Contact Information</h3>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <ContactRow icon={Phone} label="Phone Number" value={accountDetails?.phone ? `+91 ${accountDetails.phone}` : '—'} />
@@ -205,7 +195,7 @@ function ViewB2BAccount() {
           }}>
             <Package size={18} color="#7c6fcd" />
           </div>
-          <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: BLUE }}>Packages</h3>
+          <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: BLUE }}>Linked Packages</h3>
           <button style={{
             background: 'none', border: 'none', cursor: 'pointer',
             color: PINK, fontSize: '22px', fontWeight: '300', lineHeight: 1, padding: '0 4px',

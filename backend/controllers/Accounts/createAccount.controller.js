@@ -63,7 +63,7 @@ export const addB2BAccount = async (req, res) => {
 
 export const addB2CAccount = async (req, res) => {
     try {
-        const { fullName, email, source, referralby, phone, state, month, dietaryPreference, noOfMembers, destinations, tripType, assignedTo } = req.body;
+        const { fullName, email, source, referralby, phone, state, month, dietaryPreference, noOfMembers, destinations, tripType, assignedTo, gstNo} = req.body;
         if (!fullName || !email || !phone) {
             return res.status(400).json({
                 success: false,
@@ -96,7 +96,8 @@ export const addB2CAccount = async (req, res) => {
             noOfMembers,
             destinations,
             tripType,
-            assignedTo
+            assignedTo,
+            gstNo
 
         })
 

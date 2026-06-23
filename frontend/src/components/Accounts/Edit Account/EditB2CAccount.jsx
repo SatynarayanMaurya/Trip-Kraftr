@@ -114,7 +114,6 @@ function EditB2CAccount() {
   const {accountId} = useParams();
 
   const accountDetails = useSelector(s => s.account.b2cAccountsByIds?.[accountId])
-//   console.log("account details : ",accountDetails)
 
   const fetchAccountDetails = async () => {
     try {
@@ -141,7 +140,7 @@ function EditB2CAccount() {
     fullName: '', email: '', phone: '', month: '',
     source: '', referralby: '', destinations: [],
     noOfMembers: '', state: '', tripType: 'Group Trip',
-    dietaryPreference: '', assignedTo: '',
+    dietaryPreference: '', assignedTo: '',gstNo:''
   });
   const [errors, setErrors] = useState({});
 
@@ -160,6 +159,7 @@ function EditB2CAccount() {
         tripType: accountDetails.tripType || 'Group Trip',
         dietaryPreference: accountDetails.dietaryPreference || '',
         assignedTo: accountDetails.assignedTo || '',
+        gstNo: accountDetails.gstNo || '',
       });
     }
   }, [accountDetails]);
@@ -329,6 +329,12 @@ function EditB2CAccount() {
         <label style={labelStyle}>Assigned To</label>
         <input style={inputStyle} placeholder="Enter name" maxLength={50}
           value={form.assignedTo} onChange={e => set('assignedTo', e.target.value)} />
+      </div>
+
+      <div>
+        <label style={labelStyle}>GST Number</label>
+        <input style={inputStyle} placeholder="Enter name" maxLength={50}
+          value={form.gstNo} onChange={e => set('gstNo', e.target.value)} />
       </div>
 
       {/* Buttons */}

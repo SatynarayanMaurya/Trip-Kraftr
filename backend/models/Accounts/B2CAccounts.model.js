@@ -81,6 +81,11 @@ const b2cAccountSchema = new mongoose.Schema(
       type: String
     },
 
+    gstNo: {
+      type: String,
+      default:null
+    },
+
     isActive: {
       type: Boolean,
       default: true

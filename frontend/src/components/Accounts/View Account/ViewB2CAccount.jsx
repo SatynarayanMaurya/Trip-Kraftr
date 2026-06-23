@@ -138,12 +138,8 @@ function ViewB2CAccount() {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <Toggle value={d?.isActive} />
           <button onClick={()=>navigate(`/accounts/update-b2c/${accountId}`)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
             <Pencil size={18} color={PINK} />
-          </button>
-          <button style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
-            <Trash2 size={18} color={PINK} />
           </button>
         </div>
       </div>
@@ -170,10 +166,7 @@ function ViewB2CAccount() {
           </div>
 
           {/* Row 2 */}
-          {/* <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: '16px' }}> */}
-          <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr 1fr', gap: '16px' }}>
-            {/* Destinations */}
-            {/* <div style={{ gridColumn: '1 / -1' }}> */}
+          <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr ', gap: '16px' }}>
             <div >
               <p style={{ margin: '0 0 6px', fontSize: '12px', color: '#9ca3af' }}>Destinations</p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
@@ -184,7 +177,14 @@ function ViewB2CAccount() {
               </div>
             </div>
             <InfoRow label="State" value={d?.state} />
+            {/* <InfoRow label="Dietary" value={d?.dietaryPreference} /> */}
+
+          </div>
+
+          {/* Row 3 */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr ', gap: '16px', marginTop: '18px' }}>
             <InfoRow label="Dietary" value={d?.dietaryPreference} />
+            <InfoRow label="GST Number" value={d?.gstNo} />
 
           </div>
         </div>
@@ -195,13 +195,7 @@ function ViewB2CAccount() {
           border: '1px solid #e5e7eb', padding: '20px',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '18px' }}>
-            <div style={{
-              width: '32px', height: '32px', borderRadius: '50%',
-              background: '#fce7ef', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <Phone size={15} color={PINK} />
-            </div>
-            <h3 style={{ margin: 0, fontSize: '15px', fontWeight: '700', color: BLUE }}>Contact</h3>
+            <h3 style={{ margin: 0, fontSize: '15px', fontWeight: '700', color: BLUE }}>Contact Information</h3>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <ContactRow icon={Phone} label="Phone Number"   value={d?.phone ? `+91 ${d.phone}` : '—'} />
@@ -219,7 +213,7 @@ function ViewB2CAccount() {
           }}>
             <Package size={18} color="#7c6fcd" />
           </div>
-          <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: BLUE }}>Packages</h3>
+          <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: BLUE }}>Linked Packages</h3>
           <button style={{
             background: 'none', border: 'none', cursor: 'pointer',
             color: PINK, fontSize: '22px', fontWeight: '300', lineHeight: 1, padding: '0 4px',

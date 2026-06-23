@@ -113,7 +113,7 @@ function AddB2CAccounts() {
     fullName: '', email: '', phone: '', month: '',
     source: '', referralby: '', destinations: [],
     noOfMembers: '', state: '', tripType: 'Group Trip',
-    dietaryPreference: '', assignedTo: '',
+    dietaryPreference: '', assignedTo: '',gstNo:'',
   });
   const [errors, setErrors] = useState({});
 
@@ -256,6 +256,12 @@ function AddB2CAccounts() {
         <label style={labelStyle}>Assigned To</label>
         <input style={inputStyle} placeholder="Enter name" maxLength={50}
           value={form.assignedTo} onChange={e => set('assignedTo', e.target.value)} />
+      </div>
+
+      <div>
+        <label style={labelStyle}>GST Number</label>
+        <input style={inputStyle} placeholder="Enter name" maxLength={50}
+          value={form.gstNo} onChange={e => set('gstNo', e.target.value)} />
       </div>
 
       {/* Buttons */}

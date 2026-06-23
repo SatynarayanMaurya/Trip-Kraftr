@@ -177,7 +177,7 @@ export const getB2CAccountById = async (req, res) => {
 
 export const searchB2BAccounts = async (req, res) => {
     try {
-      const { search, filter, pageLimit } = req.query;
+      const { search, filter,region, pageLimit } = req.query;
       const query = {
         org_id: req.user.org_id
       };
@@ -194,11 +194,14 @@ export const searchB2BAccounts = async (req, res) => {
       if (filter) {
         query.source = filter;
       }
+      if (region) {
+        query.state = region;
+      }
   
       const searchedAccounts = await B2BAccount
         .find(query)
         // .limit(Number(pageLimit) || 5)
-        .select("_id fullName businessName email phone destinations source accountId isActive");
+        .select("_id fullName businessName email phone destinations source accountId isActive state");
   
       return res.status(200).json({
         success: true,
@@ -216,7 +219,7 @@ export const searchB2BAccounts = async (req, res) => {
 
 export const searchB2CAccounts = async (req, res) => {
     try {
-      const { search, filter, pageLimit } = req.query;
+      const { search, filter,region, pageLimit } = req.query;
       const query = {
         org_id: req.user.org_id
       };
@@ -232,11 +235,14 @@ export const searchB2CAccounts = async (req, res) => {
       if (filter) {
         query.source = filter;
       }
+      if (region) {
+        query.state = region;
+      }
   
       const searchedAccounts = await B2CAccount
         .find(query)
         // .limit(Number(pageLimit) || 5)
-        .select("_id fullName email phone destinations source accountId isActive")
+        .select("_id fullName email phone destinations source state accountId isActive")
   
       return res.status(200).json({
         success: true,

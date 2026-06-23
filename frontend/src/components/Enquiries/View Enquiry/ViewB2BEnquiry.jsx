@@ -164,6 +164,7 @@ function ViewB2BEnquiry() {
             <InfoItem label="Dietary Preference" value={d?.dietaryPreference} />
             <InfoItem label="Assigned To" value={d?.assignedTo} />
             <InfoItem label="Source" value={acc?.source} />
+            <InfoItem label="Month" value={d?.month||null} />
           </div>
         </div>
 

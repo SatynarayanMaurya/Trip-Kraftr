@@ -89,7 +89,6 @@ function PrivateTrips() {
     return ['All', ...new Set(names)]
   }, [currentPagePrivateTrip])
 
-  // days options: 0 means "Select Days" (no filter), then 1–30
   const daysOptions = [0, ...Array.from({ length: 30 }, (_, i) => i + 1)]
 
   // client-side filtering
@@ -108,7 +107,6 @@ function PrivateTrips() {
 
   const handleView = (trip) => navigate(`view/${trip._id}`)
   const handleDelete = (trip) => {
-    // wire up your delete logic here
     console.log('delete', trip._id)
   }
 

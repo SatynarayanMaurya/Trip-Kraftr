@@ -12,13 +12,18 @@ import { useNavigate } from 'react-router-dom'
 import { useEnquiryHooks } from '../../../hooks/useEnquiryHooks';
 import EnquiryTable from './EnquiryTable';
 import DeleteModal from '../../DeleteModals/DeleteModal';
+import { useRegionsData } from '../../../hooks/Resuable Hooks/useResuableData';
 
 const STATUS_OPTIONS = ['New', 'In Progress', 'Warm', 'Won', 'Lost'];
+    const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'];
 
 
 function B2CEnquries() {
     const dispatch = useDispatch();
     const navigate = useNavigate()
+          const {regions,loading:regionLoading} = useRegionsData()
+          const regionsDropdown = regions?.map(val=>val?.name)
     const { searchB2CEnquiry } = useCommonHooks()
     const [isUpdated, setIsUpdated] = useState(false)
     const { getb2cEnquiries, deleteB2CEnquiryById } = useEnquiryHooks()
@@ -31,6 +36,8 @@ function B2CEnquries() {
     const pageLimit = useSelector(s => s.enquiry.b2cEnquiryPerPages)
     const [showSearchedEnquiry, setShowSearchedEnquiry] = useState(searchedEnquiries?.slice(0, pageLimit))
     const [sourceFilter, setSourceFilter] = useState('');
+    const [region, setRegion] = useState('')
+    const [month, setMonth] = useState('')
     const isProduction = useSelector(s => s.user.isProduction)
     const currentPageData = useSelector(s => s.enquiry.b2cEnquiriesByPage?.[currentPage])
     // console.log("currentPageData : ", currentPageData)
@@ -75,7 +82,7 @@ function B2CEnquries() {
         try {
             setFetchLoading(true)
             setIsSearching(true)
-            const response = await searchB2CEnquiry(search, sourceFilter);
+            const response = await searchB2CEnquiry(search, sourceFilter, region , month);
             setSearchedEnquiries(response?.data?.searchedEnquiries)
         }
         catch (error) {
@@ -93,13 +100,13 @@ function B2CEnquries() {
     }
 
     useEffect(() => {
-        if (search?.trim() || sourceFilter) {
+        if (search?.trim() || sourceFilter||region || month) {
             searchEnquiry()
         }
         else {
             setIsSearching(false)
         }
-    }, [search, sourceFilter, pageLimit])
+    }, [search, sourceFilter,region, month, pageLimit])
 
 
     const filtered = isSearching ? showSearchedEnquiry : currentPageData;
@@ -155,7 +162,33 @@ function B2CEnquries() {
                 </div>
 
                 <select
-                    // value={sourceFilter}
+                    value={region}
+                    onChange={e => setRegion(e.target.value)}
+                    style={{
+                        padding: '10px 14px', border: '1.5px solid #e5e7eb', borderRadius: '10px',
+                        fontSize: '14px', color: '#374151', background: 'white',
+                        cursor: 'pointer', outline: 'none', minWidth: '140px',
+                    }}
+                >
+                    <option value="">All Region</option>
+                    {regionsDropdown?.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+
+                <select
+                    value={month}
+                    onChange={e => setMonth(e.target.value)}
+                    style={{
+                        padding: '10px 14px', border: '1.5px solid #e5e7eb', borderRadius: '10px',
+                        fontSize: '14px', color: '#374151', background: 'white',
+                        cursor: 'pointer', outline: 'none', minWidth: '140px',
+                    }}
+                >
+                    <option value="">Month</option>
+                    {MONTHS?.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+
+                <select
+                    value={sourceFilter}
                     onChange={e => setSourceFilter(e.target.value)}
                     style={{
                         padding: '10px 14px', border: '1.5px solid #e5e7eb', borderRadius: '10px',

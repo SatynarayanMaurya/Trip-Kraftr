@@ -8,6 +8,7 @@ import { clearB2CAccounts, setB2CAccountPageLimit } from '../../../redux/slices/
 import { Search, Eye, MessageCircle, Filter } from 'lucide-react';
 import { useCommonHooks } from '../../../hooks/useCommonHooks'
 import { useNavigate } from 'react-router-dom'
+import { useRegionsData } from '../../../hooks/Resuable Hooks/useResuableData'
 const SOURCE_OPTIONS = ['Instagram', 'Referral', 'Direct'];
 
 const COLUMNS = [
@@ -52,6 +53,8 @@ function B2CAccounts() {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const {searchB2CAccounts} = useCommonHooks()
+    const {regions,loading:regionLoading} = useRegionsData()
+  const regionsDropdown = regions?.map(val=>val?.name)
   const { getb2cAccounts,updateB2CAccountStatusById } = useAccountHooks()
   const [currentPage, setCurrentPage] = useState(1)
   const [isUpdated, setIsUpdated] = useState(false)
@@ -60,6 +63,7 @@ function B2CAccounts() {
   const [search, setSearch] = useState('');
   const [searchedAccounts, setSearchedAccounts] = useState([])
   const [sourceFilter, setSourceFilter] = useState('');
+    const [region, setRegion] = useState('')
   const [fetchLoading, setFetchLoading] = useState(false)
   const isProduction = useSelector(s => s.user.isProduction)
   const pageLimit = useSelector(s => s.account.b2cAccountPerPages)
@@ -103,7 +107,7 @@ function B2CAccounts() {
     try{  
       setFetchLoading(true)
       setIsSearching(true)
-      const response = await searchB2CAccounts(search,sourceFilter,pageLimit)
+      const response = await searchB2CAccounts(search,sourceFilter,region,pageLimit)
       setSearchedAccounts(response?.data?.searchedAccounts)
     }
     catch(error){
@@ -121,13 +125,13 @@ function B2CAccounts() {
   }
 
   useEffect(()=>{
-    if(search?.trim() || sourceFilter){
+    if(search?.trim() || sourceFilter || region){
       searchAccounts()
     }
     else{
       setIsSearching(false)
     }
-  },[search,sourceFilter,pageLimit])
+  },[search,sourceFilter,pageLimit,region])
 
 
   const filtered = isSearching ? showSearchedAccount : currentPageData;
@@ -175,6 +179,19 @@ function B2CAccounts() {
                   }}
                 />
               </div>
+
+              <select
+                value={region}
+                onChange={e => setRegion(e.target.value)}
+                style={{
+                  padding: '10px 14px', border: '1.5px solid #e5e7eb', borderRadius: '10px',
+                  fontSize: '14px', color: '#374151', background: 'white',
+                  cursor: 'pointer', outline: 'none', minWidth: '140px',
+                }}
+              >
+                <option value="">All Regions</option>
+                {regionsDropdown?.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
 
               <select
                 value={sourceFilter}

@@ -287,7 +287,6 @@ function AddPrivateTrip() {
         return currentDate >= fromDate && currentDate <= toDate;
     });
 
-    // console.log("roomTypesForActiveDay : ",roomTypesForActiveDay)
     // ─── conditional fetches ─────────────────────────────────────────────────
 
     const { loading: vehicleLoading } = useVehiclesData({
@@ -476,8 +475,6 @@ function AddPrivateTrip() {
         }
 
     }
-
-    // console.log("Regions : ",regions)
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '24px', background: '#f5f6fa', minHeight: '100vh' }}>

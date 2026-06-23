@@ -203,11 +203,12 @@ export const useCommonHooks = () => {
           // ---------- Subregion Search for org ( ) ----------
     const searchB2BAccounts = debounceSearch(
         "searchB2BAccounts",
-        (searchTerm,filter,pageLimit=10) => {
+        (searchTerm,filter,region,pageLimit=10) => {
           const params = new URLSearchParams();
       
           if (searchTerm) params.append("search", searchTerm);
           if (filter) params.append("filter", filter);
+          if (region) params.append("region", region);
           if (pageLimit) params.append("pageLimit", pageLimit);
       
           return apiConnector(
@@ -221,11 +222,13 @@ export const useCommonHooks = () => {
           // ---------- Subregion Search for org ( ) ----------
     const searchB2BEnquiry = debounceSearch(
         "searchB2BEnquiry",
-        (searchTerm,filter,forParticipant =false) => {
+        (searchTerm,filter,region, month,forParticipant =false) => {
           const params = new URLSearchParams();
       
           if (searchTerm) params.append("search", searchTerm);
           if (filter) params.append("filter", filter);
+          if (region) params.append("region", region);
+          if (month) params.append("month", month);
           params.append("forParticipant", forParticipant);
       
           return apiConnector(
@@ -239,11 +242,12 @@ export const useCommonHooks = () => {
           // ---------- Subregion Search for org ( ) ----------
     const searchB2CEnquiry = debounceSearch(
         "searchB2CEnquiry",
-        (searchTerm,filter,forParticipant=false) => {
+        (searchTerm,filter,region, month, forParticipant=false) => {
           const params = new URLSearchParams();
-      
           if (searchTerm) params.append("search", searchTerm);
           if (filter) params.append("filter", filter);
+          if (region) params.append("region", region);
+          if (month) params.append("month", month);
           params.append("forParticipant", forParticipant);
       
           return apiConnector(
@@ -257,11 +261,12 @@ export const useCommonHooks = () => {
           // ---------- Subregion Search for org ( ) ----------
     const searchB2CAccounts = debounceSearch(
         "searchB2CAccounts",
-        (searchTerm,filter,pageLimit=10) => {
+        (searchTerm,filter,region,pageLimit=10) => {
           const params = new URLSearchParams();
       
           if (searchTerm) params.append("search", searchTerm);
           if (filter) params.append("filter", filter);
+          if (region) params.append("region", region);
           if (pageLimit) params.append("pageLimit", pageLimit);
       
           return apiConnector(

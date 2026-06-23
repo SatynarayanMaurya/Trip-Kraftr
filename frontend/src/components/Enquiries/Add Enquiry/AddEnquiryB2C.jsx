@@ -11,7 +11,7 @@ import {
 } from 'react-icons/fi';
 import { MdOutlineTravelExplore } from 'react-icons/md';
 
-import { gridTwo,cardLabelStyle,cardValueStyle,saveBtn,cancelBtn,destTag,suggestionItem,suggestionBox,spinnerStyle,searchIcon, chevronIcon } from './CommonCssForEnquiry';
+import { gridTwo, cardLabelStyle, cardValueStyle, saveBtn, cancelBtn, destTag, suggestionItem, suggestionBox, spinnerStyle, searchIcon, chevronIcon } from './CommonCssForEnquiry';
 import { useNavigate } from 'react-router-dom';
 import { useRegionsData } from '../../../hooks/Resuable Hooks/useResuableData';
 
@@ -20,20 +20,10 @@ const PINK = '#ED5F8D';
 const LIGHT_PINK = '#FFF6F9';
 const BLUE = '#18305C';
 
-const HOTEL_CATEGORIES = ['Budget', 'Premium', 'Luxury'];
+const HOTEL_CATEGORIES = ['Budget', 'Premium', 'Luxury', 'Any'];
 const DIETARY_OPTIONS = ['Vegetarian', 'Non-Vegetarian', 'Both (Veg & Non-Veg)', 'Vegan', 'Jain'];
 const TRIP_TYPES = ['Group Trip', 'Private'];
 const STATUS_OPTIONS = ['New', 'In Progress', 'Warm', 'Won', 'Lost'];
-const INDIAN_STATES = [
-    'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
-    'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka',
-    'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram',
-    'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu',
-    'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal',
-    'Andaman and Nicobar Islands', 'Chandigarh',
-    'Dadra and Nagar Haveli and Daman and Diu',
-    'Delhi', 'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry',
-];
 
 // ── Tiny helpers ────────────────────────────────────────────────────────────
 const inputStyle = (disabled = false) => ({
@@ -63,16 +53,18 @@ const fieldWrap = { display: 'flex', flexDirection: 'column', gap: 0 };
 
 // ── Component ───────────────────────────────────────────────────────────────
 function AddEnquiryB2C({ onCancel }) {
+
+    const dateRef = useRef(null);
     const isProduction = useSelector(s => s.user.isProduction);
     const { searchB2CAccountsForEnquiry } = useCommonHooks?.() ?? {};
     const { addEnquiryB2C } = useEnquiryHooks()
     const navigate = useNavigate()
     const { regions, loading: regionLoading } = useRegionsData();
     const [suggestedDestinations, setSuggestedDestinations] = useState([])
-    useEffect(()=>{
-        if(!regions)return ;
-        setSuggestedDestinations(regions?.map(val=>val?.name))
-    },[regions])
+    useEffect(() => {
+        if (!regions) return;
+        setSuggestedDestinations(regions?.map(val => val?.name))
+    }, [regions])
 
     // ── search state ──
     const [searchInput, setSearchInput] = useState('');
@@ -81,6 +73,9 @@ function AddEnquiryB2C({ onCancel }) {
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [selectedAccount, setSelectedAccount] = useState(null);
     const searchRef = useRef(null);
+
+    const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'];
 
     // ── form state ──
     const [form, setForm] = useState({
@@ -127,7 +122,7 @@ function AddEnquiryB2C({ onCancel }) {
             setShowSuggestions(false);
             return;
         }
-        if(selectedAccount) return ;
+        if (selectedAccount) return;
         fetchSuggestions()
     }, [searchInput]);
 
@@ -338,7 +333,7 @@ function AddEnquiryB2C({ onCancel }) {
                                         onMouseLeave={e => e.currentTarget.style.background = 'white'}
                                     >
                                         <div style={{ fontWeight: '600', color: BLUE, fontSize: '13px' }}>
-                                            {acc.fullName}
+                                            {acc.fullName} · {acc.state}
                                         </div>
                                         <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '2px' }}>
                                             {acc.email} · {acc.phone}
@@ -457,7 +452,7 @@ function AddEnquiryB2C({ onCancel }) {
                     <label style={labelStyle}>Child Ages *</label>
                     <div style={{
                         display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))',
+                        gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
                         gap: '10px',
                     }}>
                         {form.childAges.map((age, i) => (
@@ -465,12 +460,18 @@ function AddEnquiryB2C({ onCancel }) {
                                 <label style={{ ...labelStyle, fontSize: '12px', color: '#6b7280' }}>
                                     Child {i + 1}
                                 </label>
-                                <input
-                                    type="number" min="0" max="17" placeholder="0"
+                                <select
                                     value={age}
                                     onChange={e => handleChildAge(i, e.target.value)}
                                     style={{ ...inputStyle(), textAlign: 'center' }}
-                                />
+                                >
+                                    <option value="">Select Age</option>
+                                    {Array.from({ length: 18 }, (_, index) => (
+                                        <option key={index + 1} value={index + 1}>
+                                            {index + 1}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
                         ))}
                     </div>
@@ -482,6 +483,8 @@ function AddEnquiryB2C({ onCancel }) {
                 <div style={fieldWrap}>
                     <label style={labelStyle}>Start Date *</label>
                     <input type="date"
+                        ref={dateRef}
+                        onClick={() => dateRef.current?.showPicker()}
                         value={form.startDate}
                         onChange={e => setForm(f => ({ ...f, startDate: e.target.value }))}
                         style={inputStyle()} />
@@ -517,6 +520,22 @@ function AddEnquiryB2C({ onCancel }) {
                             onChange={e => setForm(f => ({ ...f, dietaryPreference: e.target.value }))}>
                             <option value="">Select</option>
                             {DIETARY_OPTIONS.map(d => <option key={d}>{d}</option>)}
+                        </select>
+                        <FiChevronDown style={chevronIcon} />
+                    </div>
+                </div>
+            </div>
+
+
+            <div style={gridTwo}>
+
+                <div style={{ ...fieldWrap, marginBottom: '20px' }}>
+                    <label style={labelStyle}>Month</label>
+                    <div style={{ position: 'relative' }}>
+                        <select style={selectStyle} value={form.month}
+                            onChange={e => setForm(f => ({ ...f, month: e.target.value }))}>
+                            <option value="">Select</option>
+                            {MONTHS.map(d => <option key={d}>{d}</option>)}
                         </select>
                         <FiChevronDown style={chevronIcon} />
                     </div>

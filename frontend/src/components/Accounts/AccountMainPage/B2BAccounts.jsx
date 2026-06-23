@@ -9,6 +9,8 @@ import { Search, Eye, MessageCircle } from 'lucide-react';
 import { clearB2BAccounts, setB2BAccountPageLimit } from '../../../redux/slices/accountSlice'
 import { useCommonHooks } from '../../../hooks/useCommonHooks'
 import { useNavigate } from 'react-router-dom'
+import { FaWhatsapp } from "react-icons/fa";
+import { useRegionsData } from '../../../hooks/Resuable Hooks/useResuableData'
 
 const SOURCE_OPTIONS = ['Instagram', 'Referral', 'Direct'];
 const COLUMNS = [
@@ -40,6 +42,8 @@ const COLUMNS = [
 function B2BAccounts() {
   const dispatch = useDispatch();
   const navigate = useNavigate()
+  const {regions,loading:regionLoading} = useRegionsData()
+  const regionsDropdown = regions?.map(val=>val?.name)
   const {searchB2BAccounts} = useCommonHooks()
   const [isUpdated, setIsUpdated] = useState(false)
   const { getb2bAccounts,updateB2BAccountStatusById } = useAccountHooks()
@@ -51,6 +55,7 @@ function B2BAccounts() {
   const [searchedAccounts, setSearchedAccounts] = useState([])
   const pageLimit = useSelector(s => s.account.b2bAccountPerPages)
   const [showSearchedAccount, setShowSearchedAccount] = useState(searchedAccounts?.slice(0,pageLimit))
+  const [region, setRegion] = useState('')
   const [sourceFilter, setSourceFilter] = useState('');
   const isProduction = useSelector(s => s.user.isProduction)
   const currentPageData = useSelector(s => s.account.b2bAccountsByPage?.[currentPage])
@@ -92,7 +97,7 @@ function B2BAccounts() {
     try{  
       setFetchLoading(true)
       setIsSearching(true)
-      const response = await searchB2BAccounts(search,sourceFilter,pageLimit)
+      const response = await searchB2BAccounts(search,sourceFilter,region, pageLimit)
       setSearchedAccounts(response?.data?.searchedAccounts)
     }
     catch(error){
@@ -110,13 +115,13 @@ function B2BAccounts() {
   }
 
   useEffect(()=>{
-    if(search?.trim() || sourceFilter){
+    if(search?.trim() || sourceFilter || region){
       searchAccounts()
     }
     else{
       setIsSearching(false)
     }
-  },[search,sourceFilter,pageLimit])
+  },[search,sourceFilter,pageLimit,region])
 
 
   const filtered = isSearching ? showSearchedAccount : currentPageData;
@@ -142,6 +147,7 @@ function B2BAccounts() {
     }
   }
 
+
   return (
     <div>
 
@@ -166,7 +172,19 @@ function B2BAccounts() {
             </div>
 
             <select
-              // value={sourceFilter}
+              value={region}
+              onChange={e => setRegion(e.target.value)}
+              style={{
+                padding: '10px 14px', border: '1.5px solid #e5e7eb', borderRadius: '10px',
+                fontSize: '14px', color: '#374151', background: 'white',
+                cursor: 'pointer', outline: 'none', minWidth: '140px',
+              }}
+            >
+              <option value="">All Regions</option>
+              {regionsDropdown?.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+
+            <select
               onChange={e => setSourceFilter(e.target.value)}
               style={{
                 padding: '10px 14px', border: '1.5px solid #e5e7eb', borderRadius: '10px',
