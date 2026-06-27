@@ -1,6 +1,6 @@
 
 
-import React from "react";
+import React, { useRef } from "react";
 import { inputStyle, labelStyle } from "../../Common/CommonCss";
 
 const PINK = "#ED5F8D";
@@ -14,6 +14,9 @@ function RegionDetails({
   handleSave,
   getFilteredRegions,
 }) {
+
+  const dateRef = useRef(null);
+  const dateRef2 = useRef(null);
 
 
   return (
@@ -32,7 +35,7 @@ function RegionDetails({
           gap: "20px",
         }}
       >
-        
+
         {/* Region 1 */}
         <div>
           <label style={labelStyle}>
@@ -40,7 +43,7 @@ function RegionDetails({
           </label>
           <select
             style={inputStyle}
-            value={formData.region1||''}
+            value={formData.region1 || ''}
             onChange={(e) => handleChange("region1", e.target.value)}
           >
             <option value="">Select Region</option>
@@ -56,7 +59,7 @@ function RegionDetails({
         <div>
           <label style={labelStyle}>Region 2</label>
           <select
-            style={{...inputStyle,backgroundColor: !formData?.region1 ? "#f0f0f0" : undefined,}}
+            style={{ ...inputStyle, backgroundColor: !formData?.region1 ? "#f0f0f0" : undefined, }}
             value={formData.region2 || ''}
             disabled={!formData?.region1}
             onChange={(e) => handleChange("region2", e.target.value)}
@@ -74,8 +77,8 @@ function RegionDetails({
         <div>
           <label style={labelStyle}>Region 3</label>
           <select
-            style={{...inputStyle,backgroundColor: !formData?.region2 ? "#f0f0f0" : undefined}}
-            value={formData.region3||''}
+            style={{ ...inputStyle, backgroundColor: !formData?.region2 ? "#f0f0f0" : undefined }}
+            value={formData.region3 || ''}
             disabled={!formData?.region2}
             onChange={(e) => handleChange("region3", e.target.value)}
           >
@@ -94,6 +97,8 @@ function RegionDetails({
             From <span style={{ color: PINK }}>*</span>
           </label>
           <input
+            ref={dateRef}
+            onClick={() => dateRef.current?.showPicker()}
             type="date"
             style={inputStyle}
             value={formData.fromDate}
@@ -107,6 +112,8 @@ function RegionDetails({
             To <span style={{ color: PINK }}>*</span>
           </label>
           <input
+            ref={dateRef2}
+            onClick={() => dateRef2.current?.showPicker()}
             type="date"
             style={inputStyle}
             value={formData.toDate}

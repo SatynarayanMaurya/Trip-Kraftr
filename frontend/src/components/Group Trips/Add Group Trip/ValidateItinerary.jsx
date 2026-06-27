@@ -11,9 +11,7 @@ const handleSaveVehicle = (formData) => {
 
 
 export const validateItinerary = (formData) => {
-    // const tripDetails = formData?.tripDetails;
     const isTripDetailsValid = handleSaveVehicle(formData)
-    console.log(" isTripDetailsValid",isTripDetailsValid)
     if(!isTripDetailsValid) return { isValid: false, message: 'Trip Details Missing' };
     
     const day1 = formData.itineraryBuilder?.daysDetails?.[0];

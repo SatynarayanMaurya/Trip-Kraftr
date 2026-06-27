@@ -9,15 +9,12 @@ import {
 import { useNavigate } from 'react-router-dom';
 
 import { ArrowLeft } from 'lucide-react'
-import GroupTripPolicies from '../../Group Trips/Add Group Trip/GroupTripPolicies';
 import StepperTab from '../../Group Trips/Edit Group Trip/StepperTab';
-import { useSamplePackageHooks } from '../../../hooks/useSamplePackageHooks';
 import { clearRoomRatesForHotelId } from '../../../redux/slices/roomRateSlice';
 import { blankDay } from './HotelDetailsPrivateTrip';
 import TripDetailsPrivateTrip from './TripDetailsPrivateTrip';
 import ItineraryBuilderPrivateTrip from './ItineraryBuilderPrivateTrip';
 import EnquiryPrivateTrip from './EnquiryPrivateTrip';
-import { useEnquiryHooks } from '../../../hooks/useEnquiryHooks';
 import { useCommonHooks } from '../../../hooks/useCommonHooks';
 import { usePrivateTripHooks } from '../../../hooks/usePrivateTripHooks';
 import { isDayOneValid, isRegionDetailsValid } from '../../Sample Package/Add Sample Package/ValidationSimplePackage';
@@ -209,8 +206,6 @@ function AddPrivateTrip() {
         });
     }, [formData?.itineraryBuilder, price?.discount, price?.festivalSurge, price?.commission, price.margin, price.isGstChecked, price?.isMargin]);
 
-    // console.log("price : ",price)
-
     function addDays(days) {
         const date = new Date(formData?.regionDetails?.startDate || '2026-05-27');
 
@@ -262,13 +257,19 @@ function AddPrivateTrip() {
     const sortedSubRegionNames = sortIdsConsistently(selectedSubRegionNames);
 
     const keyForFindHotel = sortedSubRegionId.join(',') + activeDayData?.hotelDetails?.hotelCategory;
+
     const hotelsForActiveDay = useSelector(s => s.hotel.hotelsBysubRegionKey?.[sortedSubRegionId.join(',') + activeDayData?.hotelDetails?.hotelCategory]);
-    // const placesForActiveDay = useSelector(s => s.place.placesBySubRegionKey?.[sortedSubRegionId.join(',')]);
+
     const placesForActiveDay = useSelector(s => s.place.placesBySubRegionNameKey?.[sortedSubRegionNames?.join(',')]);
+
     const activitiesForActiveDay = useSelector(s => s.activity.activitiesBySubRegionKey?.[sortedSubRegionId.join(',')]);
+
     const activeHotelId = activeDayData?.hotelDetails?.hotelId;
+
     const roomTypesForActiveDay = useSelector(s => s.room.roomTypesForHotelId?.[activeHotelId]);
+
     const hotelRates = useSelector(s => s.roomRate.roomRatesForHotelId?.[activeHotelId]) || [];
+
     function addDaysForRate(days) {
         const date = new Date(formData?.regionDetails?.startDate);
 
@@ -299,14 +300,22 @@ function AddPrivateTrip() {
     });
     const shouldFetchHotel = activeTab === 3 && activeDayData?.hotelDetails?.hotelCategory && selectedSubRegionIds.length > 0;
     const shouldFetchMore = activeTab === 3 && selectedSubRegionIds.length > 0;
-    const { loading: hotelLoading, refetch: refetchHotels } = useHotelsData({ subRegionIds: sortedSubRegionId, category: activeDayData?.hotelDetails?.hotelCategory, enabled: shouldFetchHotel });
+
+    const { loading: hotelLoading, refetch: refetchHotels } = useHotelsData({ 
+        subRegionIds: sortedSubRegionId, 
+        category: activeDayData?.hotelDetails?.hotelCategory, 
+        enabled: shouldFetchHotel 
+    });
+
     useEffect(() => {
         if (activeDayData?.hotelDetails?.hotelCategory) {
             refetchHotels()
         }
     }, [activeDayData?.hotelDetails?.hotelCategory])
     const { loading: placeLoading } = usePlacesDataBySubRegionNames({ subRegionNames: sortedSubRegionNames, enabled: shouldFetchMore });
+
     const { loading: activityLoading } = useActivitiesData({ subRegionIds: sortedSubRegionId, enabled: shouldFetchMore });
+
     const { loading: roomTypeLoading } = useRoomTypesData({
         hotelId: activeHotelId,
         enabled: activeTab === 3 && !!activeHotelId,

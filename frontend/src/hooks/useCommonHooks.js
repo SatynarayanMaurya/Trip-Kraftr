@@ -261,12 +261,13 @@ export const useCommonHooks = () => {
           // ---------- Subregion Search for org ( ) ----------
     const searchB2CAccounts = debounceSearch(
         "searchB2CAccounts",
-        (searchTerm,filter,region,pageLimit=10) => {
+        (searchTerm,filter,region,month,pageLimit=10) => {
           const params = new URLSearchParams();
       
           if (searchTerm) params.append("search", searchTerm);
           if (filter) params.append("filter", filter);
           if (region) params.append("region", region);
+          if (month) params.append("month", month);
           if (pageLimit) params.append("pageLimit", pageLimit);
       
           return apiConnector(

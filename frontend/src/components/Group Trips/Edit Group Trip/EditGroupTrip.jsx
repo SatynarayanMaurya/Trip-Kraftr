@@ -29,6 +29,7 @@ const blankDay = () => ({
     subRegion3: null,
     hotelDetails: {
         hotelType: 'inventory',
+        hotelCategory: '',
         hotelId: null,
         hotelName: '',
         roomTypeId: null,
@@ -158,6 +159,7 @@ function EditGroupTrip() {
                     hotelDetails: {
                         hotelId: day?.hotelDetails?.hotelId?._id || day?.hotelDetails?.hotelId || null,
                         hotelType: day?.hotelDetails?.hotelType || 'inventory',
+                        hotelCategory: day?.hotelDetails?.hotelCategory || '',
                         hotelName: day?.hotelDetails?.hotelName || '',
                         roomTypeId: day?.hotelDetails?.roomTypeId?._id || day?.hotelDetails?.roomTypeId || null,
                         roomType: day?.hotelDetails?.roomType || '',
@@ -215,13 +217,21 @@ function EditGroupTrip() {
     // ─── selectors ───────────────────────────────────────────────────────────
 
     const { regions, loading: regionLoading } = useRegionsData();
+
     const isProduction = useSelector((state) => state.user.isProduction)
+
     const allSubRegions = useSelector(s => s.subRegion.subRegionByRegionKey?.[sortedRegionId.join(',')]);
+
     const allVehicles = useSelector(s => s.vehicle.vehiclesByRegionKey?.[sortedRegionId.join(',')]);
-    const hotelsForActiveDay = useSelector(s => s.hotel.hotelsBysubRegionKey?.[sortedSubRegionId.join(',')]);
+
+    const hotelsForActiveDay = useSelector(s => s.hotel.hotelsBysubRegionKey?.[sortedSubRegionId.join(',') + activeDayData?.hotelDetails?.hotelCategory]);
+
     const placesForActiveDay = useSelector(s => s.place.placesBySubRegionKey?.[sortedSubRegionId.join(',')]);
+
     const activitiesForActiveDay = useSelector(s => s.activity.activitiesBySubRegionKey?.[sortedSubRegionId.join(',')]);
+
     const activeHotelId = activeDayData?.hotelDetails?.hotelId;
+
     const roomTypesForActiveDay = useSelector(s => s.room.roomTypesForHotelId?.[activeHotelId]);
 
     // ─── conditional fetches ─────────────────────────────────────────────────
@@ -234,8 +244,13 @@ function EditGroupTrip() {
         regionIds: sortedRegionId,
         enabled: activeTab === 3 && selectedRegionIds.length > 0,
     });
-    const shouldFetchHotel = activeTab === 3 && selectedSubRegionIds.length > 0;
-    const { loading: hotelLoading } = useHotelsData({ subRegionIds: sortedSubRegionId, enabled: shouldFetchHotel });
+    const shouldFetchHotel = activeTab === 3 && activeDayData?.hotelDetails?.hotelCategory && selectedSubRegionIds.length > 0;
+
+    const { loading: hotelLoading, refetch: refetchHotels } = useHotelsData({
+        subRegionIds: sortedSubRegionId,
+        category: activeDayData?.hotelDetails?.hotelCategory,
+        enabled: shouldFetchHotel
+    });
     const { loading: placeLoading } = usePlacesData({ subRegionIds: sortedSubRegionId, enabled: shouldFetchHotel });
     const { loading: activityLoading } = useActivitiesData({ subRegionIds: sortedSubRegionId, enabled: shouldFetchHotel });
     const { loading: roomTypeLoading } = useRoomTypesData({
@@ -273,12 +288,10 @@ function EditGroupTrip() {
 
 
     const handleItineraryChange = (dayIndex, fieldOrUpdates, value) => {
-        // console.log("value : ",value)
         setFormData(prev => {
             const iti = prev.itineraryBuilder;
 
             if (dayIndex === null) {
-                // tripOverview top-level update
                 return { ...prev, itineraryBuilder: { ...iti, [fieldOrUpdates]: value } };
             }
 
@@ -295,7 +308,7 @@ function EditGroupTrip() {
         });
     };
 
-    const handleSaveRegion = (isSave=true) => {
+    const handleSaveRegion = (isSave = true) => {
         if (!region1 || !fromDate || !toDate) {
             toast.error('Please fill all Basic Details');
             return false;
@@ -308,12 +321,12 @@ function EditGroupTrip() {
             toast.error('To date cannot be earlier than From date');
             return false;
         }
-        if(isSave){
+        if (isSave) {
             setActiveTab(2);
         }
-        else{
+        else {
             return true;
-        } 
+        }
         // if (!region1 || !fromDate || !toDate) {
         //     toast.error('Please fill all Basic Details');
         //     return;
@@ -394,24 +407,15 @@ function EditGroupTrip() {
     const tabs = ['Basic Details', 'Trip Details', 'Itinerary Builder', "Policies"];
 
     const tabClick = (i) => {
-        // if (i === 1) {
-        //     handleSaveRegion()
-        // }
-        // else if (i === 2) {
-        //     handleSaveVehicle()
-        // }
-        // else {
-        //     setActiveTab(i + 1)
-        // }
-        if(i===1){
+        if (i === 1) {
             setActiveTab(i)
             return;
         }
         const isValidJump = handleSaveRegion(false)
-        if(isValidJump && i!==1){
+        if (isValidJump && i !== 1) {
             setActiveTab(i)
         }
-        else{
+        else {
             setActiveTab(1)
         }
     }

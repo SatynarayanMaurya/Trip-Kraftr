@@ -25,6 +25,8 @@ const HOTEL_CATEGORIES = ['Budget', 'Premium', 'Luxury', "Any"];
 const DIETARY_OPTIONS = ['Vegetarian', 'Non-Vegetarian', 'Both (Veg & Non-Veg)', 'Vegan', 'Jain'];
 const TRIP_TYPES = ['Group Trip', 'Private'];
 const STATUS_OPTIONS = ['New', 'In Progress', 'Warm', 'Won', 'Lost'];
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'];
 
 // ── Tiny helpers ────────────────────────────────────────────────────────────
 const inputStyle = (disabled = false) => ({
@@ -501,6 +503,21 @@ function AddEnquiryB2B({ onCancel }) {
                             onChange={e => setForm(f => ({ ...f, dietaryPreference: e.target.value }))}>
                             <option value="">Select</option>
                             {DIETARY_OPTIONS.map(d => <option key={d}>{d}</option>)}
+                        </select>
+                        <FiChevronDown style={chevronIcon} />
+                    </div>
+                </div>
+            </div>
+
+            <div style={gridTwo}>
+
+                <div style={{ ...fieldWrap, marginBottom: '20px' }}>
+                    <label style={labelStyle}>Month</label>
+                    <div style={{ position: 'relative' }}>
+                        <select style={selectStyle} value={form.month}
+                            onChange={e => setForm(f => ({ ...f, month: e.target.value }))}>
+                            <option value="">Select</option>
+                            {MONTHS.map(d => <option key={d}>{d}</option>)}
                         </select>
                         <FiChevronDown style={chevronIcon} />
                     </div>

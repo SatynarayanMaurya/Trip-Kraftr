@@ -231,21 +231,6 @@ function ViewGroupTrip() {
                         <CopyIcon />
                     </button>
 
-                    {/* Edit Trip */}
-                    {/* {
-                        isEditable &&
-                        <button
-                            onClick={() => navigate(`/group-trips/edit/${groupTripId}`)}
-                            style={{
-                                display: 'flex', alignItems: 'center', gap: '8px',
-                                background: GREEN, color: 'white', border: 'none',
-                                borderRadius: '8px', padding: '9px 18px',
-                                fontSize: '13px', fontWeight: '600', cursor: 'pointer',
-                            }}
-                        >
-                            <EditIcon /> Edit Trip
-                        </button>
-                    } */}
                     <button
                         onClick={() => {
                             if (isEditable) {

@@ -52,6 +52,7 @@ const groupTripSchema = new mongoose.Schema({
                     hotelId:{type:mongoose.Schema.Types.ObjectId,ref:"Hotel",default:null},
                     hotelName:{type:String},
                     hotelType:{type:String,enum:['inventory',"manual"]},
+                    hotelCategory:{type:String, default:''},
                     meals:{type:String},
                     roomType:{type:String},
                     roomTypeId:{type:mongoose.Schema.Types.ObjectId,ref:"Room",default:null},

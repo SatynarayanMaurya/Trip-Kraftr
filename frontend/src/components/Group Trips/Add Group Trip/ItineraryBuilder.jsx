@@ -218,15 +218,15 @@ function HotelDetails({ dayData, hotelsForActiveDay, roomTypesForActiveDay, hote
                                     </label>
                                     <div style={{ position: 'relative' }}>
                                         <select
+                                            disabled={!dayData?.subRegion1}
                                             style={{ ...inputStyle, appearance: 'none', paddingRight: '28px', fontSize: '13px' }}
-                                            value={selectedHotel?.category ?? ''}
-                                            // onChange={e => updateHotel('hotelCategory', e.target.value)}
-                                            disabled
+                                            value={dayData?.hotelDetails?.hotelCategory ?? ''}
+                                            onChange={e => updateHotel('hotelCategory', e.target.value)}
                                         >
                                             <option value="">Category</option>
-                                            {[...new Set((hotelsForActiveDay ?? []).map(h => h.category).filter(Boolean))].map(cat => (
-                                                <option key={cat} value={cat}>{cat}</option>
-                                            ))}
+                                            <option value="Budget">Budget</option>
+                                            <option value="Premium">Premium</option>
+                                            <option value="Luxury">Luxury</option>
                                         </select>
                                         <span style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', fontSize: '10px', color: '#aaa', pointerEvents: 'none' }}>▼</span>
                                     </div>
@@ -241,6 +241,7 @@ function HotelDetails({ dayData, hotelsForActiveDay, roomTypesForActiveDay, hote
                                         <select
                                             style={{ ...inputStyle, appearance: 'none', paddingRight: '28px', fontSize: '13px' }}
                                             value={dayData?.hotelDetails?.hotelId ?? ''}
+                                            disabled={dayData?.hotelDetails?.hotelCategory === '' || hotelLoading}
                                             onChange={e => {
                                                 const h = hotelsForActiveDay?.find(h => h._id === e.target.value);
                                                 onDayChange('hotelDetails', {
@@ -253,7 +254,6 @@ function HotelDetails({ dayData, hotelsForActiveDay, roomTypesForActiveDay, hote
                                                     roomTypeId: null,
                                                 });
                                             }}
-                                            disabled={hotelLoading}
                                         >
                                             <option value="">Hotel Name</option>
                                             {(hotelsForActiveDay ?? [])
@@ -620,8 +620,8 @@ function ItineraryBuilder({
         if (!hotelsForActiveDay || !currentDay) return;
         const ids = new Set(hotelsForActiveDay.map(h => h._id));
         const cur = currentDay?.hotelDetails;
-        const updated = (cur && (!ids.has(cur.hotelId)&&cur?.hotelType !== 'manual'))
-            ? { hotelType: 'inventory', hotelId: null, hotelName: '', roomTypeId: null, roomType: '', meals: '' }
+        const updated = (cur && (!ids.has(cur.hotelId) && cur?.hotelType !== 'manual'))
+            ? { hotelType: 'inventory', hotelCategory: cur?.hotelCategory, hotelId: null, hotelName: '', roomTypeId: null, roomType: '', meals: '' }
             : cur;
         handleItineraryChange(activeDay - 1, { hotelDetails: updated });
     }, [hotelsForActiveDay]);

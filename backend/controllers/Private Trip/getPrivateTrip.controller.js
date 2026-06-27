@@ -17,7 +17,6 @@ export const getPrivateTrips = async (req, res) => {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
-      // .lean()
       .select({
         _id: 1,
         privateTripId: 1,

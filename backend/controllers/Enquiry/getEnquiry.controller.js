@@ -2,6 +2,7 @@ import B2BAccount from "../../models/Accounts/B2BAccounts.model.js";
 import B2CAccount from "../../models/Accounts/B2CAccounts.model.js";
 import B2BEnquiry from "../../models/Enquiry/B2BEnquiry.model.js"
 import B2CEnquiry from "../../models/Enquiry/B2CEnquiry.model.js"
+import PrivateTrip from "../../models/Private Trip/privateTrip.model.js"
 import mongoose from "mongoose";
 
 
@@ -347,6 +348,52 @@ export const searchB2CEnquiry = async (req, res) => {
 };
 
 
+export const getAllGroupTripAndPrivateTripAssociatedWithEnquiryId = async (req, res) => {
+  try {
+    const { enquiryId } = req.params
+    if (!enquiryId) {
+      return res.status(400).json({
+        success: false,
+        message: "Enquiry id not found"
+      })
+    }
+
+    const privateTrips = await PrivateTrip.find(
+      {
+        org_id: req.user.org_id,
+        enquiryId
+      }
+    )
+      .select({
+        _id: 1,
+        privateTripId: 1,
+        enquiryId: 1,
+        enquiryModel: 1,
+        "regionDetails.region1": 1,
+        "regionDetails.region2": 1,
+        "regionDetails.region3": 1,
+        "regionDetails.startDate": 1,
+        "regionDetails.noOfDays": 1,
+        'itineraryBuilder.tripName': 1,
+        'price.discountedPrice': 1,
+      })
+      .populate({ path: 'regionDetails.region1', select: "_id name" })
+      .populate({ path: 'regionDetails.region2', select: "_id name" })
+      .populate({ path: 'regionDetails.region3', select: "_id name" })
+
+    return res.status(200).json({
+      success: true,
+      message: "All Trip fetched",
+      data: privateTrips
+    })
+  }
+  catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error?.message || "Internal Server Error"
+    })
+  }
+}
 
 export const searchB2BAccountsForEnquiry = async (req, res) => {
   try {

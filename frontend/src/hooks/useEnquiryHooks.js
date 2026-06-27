@@ -94,6 +94,25 @@ export const useEnquiryHooks = () => {
     }
     
     // For getting accounts with paginated
+    const getAllGroupTripAndPrivateTripAssociatedWithEnquiryId = async (enquiryId) => {
+        try {
+
+            dispatch(setLoading(true))
+
+            const response = await apiConnector(
+                "GET",
+                `${enquiriessEndpoints.GET_ALL_GROUPTRIP_AND_PRIVATETRIP_ASSOCIATED_WITH_ENQUIRYID}/${enquiryId}`
+            )
+            return response
+
+        } catch (error) {
+            throw error
+        } finally {
+            dispatch(setLoading(false))
+        }
+    }
+    
+    // For getting accounts with paginated
     const getb2cEnquiries = async (page = 1, limit = 5) => {
         try {
             const cachedPage = b2cEnquiriesByPage?.[page]
@@ -250,6 +269,7 @@ export const useEnquiryHooks = () => {
         updateB2BEnquiryById,
         updateB2CEnquiryById,
         deleteB2BEnquiryById,
-        deleteB2CEnquiryById
+        deleteB2CEnquiryById,
+        getAllGroupTripAndPrivateTripAssociatedWithEnquiryId
     };
 };

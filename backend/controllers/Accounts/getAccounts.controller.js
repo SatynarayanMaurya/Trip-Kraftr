@@ -219,7 +219,7 @@ export const searchB2BAccounts = async (req, res) => {
 
 export const searchB2CAccounts = async (req, res) => {
     try {
-      const { search, filter,region, pageLimit } = req.query;
+      const { search, filter,region, month,pageLimit } = req.query;
       const query = {
         org_id: req.user.org_id
       };
@@ -238,11 +238,14 @@ export const searchB2CAccounts = async (req, res) => {
       if (region) {
         query.state = region;
       }
+      if (month) {
+        query.month = month;
+      }
   
       const searchedAccounts = await B2CAccount
         .find(query)
         // .limit(Number(pageLimit) || 5)
-        .select("_id fullName email phone destinations source state accountId isActive")
+        .select("_id fullName month email phone destinations source state accountId isActive")
   
       return res.status(200).json({
         success: true,

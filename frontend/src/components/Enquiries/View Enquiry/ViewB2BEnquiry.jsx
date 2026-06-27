@@ -7,7 +7,9 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useEnquiryHooks } from '../../../hooks/useEnquiryHooks';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify'
-import { ArrowLeft, MapPin, Calendar, Users, Hotel, Utensils, User, Phone, Mail, Building2, Tag, Pencil, Trash2 } from 'lucide-react'
+import { ArrowLeft, MapPin, Package, Users, Hotel, Utensils, User, Phone, Mail, Building2, Tag, Pencil, Trash2 } from 'lucide-react'
+import PackageCard from '../../Accounts/View Account/PackageCard';
+import PackageCardEnquiry from './PackageCardEnquiry';
 
 const STATUS_STYLES = {
   New: 'bg-[#EFF6FF] text-[#3B82F6]',
@@ -16,6 +18,9 @@ const STATUS_STYLES = {
   Won: 'bg-[#F0FDF4] text-[#16A34A]',
   Lost: 'bg-[#FFF1F2] text-[#E11D48]',
 }
+
+const PINK = '#ED5F8D'
+const BLUE = '#18305C'
 
 function Skeleton({ className }) {
   return <div className={`animate-pulse bg-gray-200 rounded ${className}`} />
@@ -89,9 +94,10 @@ function ViewB2BEnquiry() {
   const { enquiryId } = useParams()
   const navigate = useNavigate()
   const isProduction = useSelector(s => s.user.isProduction)
-  const { getb2bEnquiryById } = useEnquiryHooks()
+  const { getb2bEnquiryById, getAllGroupTripAndPrivateTripAssociatedWithEnquiryId } = useEnquiryHooks()
   const [fetchLoading, setFetchLoading] = useState(false)
   const [enquiryDetails, setEnquiryDetails] = useState(null)
+  const [allPrivateTrips, setAllPrivateTrips] = useState(null)
 
   const fetchEnquiry = async () => {
     try {
@@ -105,9 +111,30 @@ function ViewB2BEnquiry() {
       setFetchLoading(false)
     }
   }
+  
+  const fetchAllGroupTripAndPrivateTripAssociatedWithEnquiryId = async () => {
+    try {
+      setFetchLoading(true)
+      const response = await getAllGroupTripAndPrivateTripAssociatedWithEnquiryId(enquiryId)
+      setAllPrivateTrips(response?.data?.data ||[])
+    }
+    catch (error) {
+      if (!isProduction) {
+        console.log("========= ERROR DEBUG START =========");
+        console.log("Error:", error);
+        console.log("Response:", error?.response);
+        console.log("========= ERROR DEBUG END =========");
+      }
+      toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin")
+    }
+    finally {
+      setFetchLoading(false)
+    }
+  }
 
   useEffect(() => {
     if (enquiryId && !enquiryDetails) fetchEnquiry()
+    if (enquiryId && !allPrivateTrips ) fetchAllGroupTripAndPrivateTripAssociatedWithEnquiryId()
   }, [enquiryId])
 
   if (fetchLoading) return <LoadingSkeleton />
@@ -137,7 +164,7 @@ function ViewB2BEnquiry() {
           <p className="text-xs text-gray-400">Created on {formatDate(d?.createdAt)}</p>
         </div>
         <div className="flex gap-2">
-          <button onClick={()=>navigate(`/enquiries/edit-b2b/${enquiryId}`)} className="p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-500">
+          <button onClick={() => navigate(`/enquiries/edit-b2b/${enquiryId}`)} className="p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-500">
             <Pencil size={16} />
           </button>
         </div>
@@ -164,7 +191,7 @@ function ViewB2BEnquiry() {
             <InfoItem label="Dietary Preference" value={d?.dietaryPreference} />
             <InfoItem label="Assigned To" value={d?.assignedTo} />
             <InfoItem label="Source" value={acc?.source} />
-            <InfoItem label="Month" value={d?.month||null} />
+            <InfoItem label="Month" value={d?.month || null} />
           </div>
         </div>
 
@@ -201,6 +228,29 @@ function ViewB2BEnquiry() {
           ? <p className="text-sm text-gray-600 bg-[#FFF0F5CF] rounded-xl px-4 py-3 italic">"{d.notes}"</p>
           : <p className="text-sm text-gray-400 bg-gray-50 rounded-xl px-4 py-3">No notes added.</p>
         }
+      </div>
+
+
+
+      {/* Packages */}
+      <div className='mt-6'>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+          <div style={{
+            width: '36px', height: '36px', borderRadius: '10px',
+            background: '#B9AEF240', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <Package size={18} color="#7c6fcd" />
+          </div>
+          <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: BLUE }}>Linked Packages</h3>
+          <button style={{
+            background: 'none', border: 'none', cursor: 'pointer',
+            color: PINK, fontSize: '22px', fontWeight: '300', lineHeight: 1, padding: '0 4px',
+          }}>+</button>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '16px' }}>
+          {allPrivateTrips?.map(pkg => <PackageCardEnquiry key={pkg._id} pkg={pkg} />)}
+        </div>
       </div>
     </div>
   )

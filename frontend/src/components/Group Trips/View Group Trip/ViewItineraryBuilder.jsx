@@ -182,64 +182,11 @@ function DayView({ day }) {
                 </div>
             </div>
 
-            {/* Hotel Details */}
-            {/* <div style={{
-                border: '1px solid #eee', borderRadius: '10px',
-                padding: '18px', background: 'white',
-            }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                    <span style={{ fontSize: '14px', fontWeight: '700', color: BLUE }}>Hotel Details</span>
-                    <span style={{
-                        background: isInventory ? '#E8F5E9' : '#FFDDE6',
-                        color: isInventory ? '#388E3C' : PINK,
-                        border: `1px solid ${isInventory ? '#A5D6A7' : '#F48FB1'}`,
-                        borderRadius: '20px', padding: '3px 12px',
-                        fontSize: '12px', fontWeight: '600',
-                    }}>
-                        {isInventory ? 'Inventory' : 'Manual'}
-                    </span>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}>
-                    <ReadField label="Hotel Name" value={day?.hotelDetails?.hotelName} />
-                    <ReadField label="Room Type"  value={day?.hotelDetails?.roomType}  />
-
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <span style={{ fontSize: '12px', fontWeight: '600', color: '#888' }}>Meals</span>
-                        {meals.length > 0 ? (
-                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', paddingTop: '4px' }}>
-                                {meals.map(m => <MealPill key={m} label={m} />)}
-                            </div>
-                        ) : (
-                            <span style={{ fontSize: '14px', color: '#aaa', paddingTop: '4px' }}>—</span>
-                        )}
-                    </div>
-                </div>
-            </div> */}
 
 
             <HotelDetails dayData={day}/>
             <PlacesSection dayData={day}/>
 
-            {/* Places */}
-            {/* <div>
-                <span style={{ fontSize: '13px', fontWeight: '700', color: BLUE, display: 'block', marginBottom: '10px' }}>
-                    Places
-                </span>
-                {day?.placeDetails?.length > 0 ? (
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-                        {day.placeDetails.map((p, i) => (
-                            <PlaceChip
-                                key={p._id ?? i}
-                                placeName={p?.placeName || p?.placeId?.placeName || '—'}
-                                isFavourite={p?.isFavourite}
-                            />
-                        ))}
-                    </div>
-                ) : (
-                    <span style={{ fontSize: '13px', color: '#aaa' }}>No places added</span>
-                )}
-            </div> */}
 
             {/* Activities */}
             <div>
@@ -371,7 +318,7 @@ function HotelDetails({ dayData}) {
                                     <div style={{ position: 'relative' }}>
                                         <input
                                             style={{ ...inputStyle, appearance: 'none', paddingRight: '28px', fontSize: '13px' }}
-                                            value={dayData?.hotelDetails?.hotelId?.category ?? ''}
+                                            value={dayData?.hotelDetails?.hotelCategory ?? ''}
                                             readOnly
                                         >
                                         </input>

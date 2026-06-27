@@ -145,7 +145,6 @@ function EditPrivateTrips() {
         setPrice(prev => ({
           ...prev,
           min_margin: foundRegion?.min_margin,
-          // margin: foundRegion?.min_margin,
           max_margin: foundRegion?.max_margin,
         }))
       }

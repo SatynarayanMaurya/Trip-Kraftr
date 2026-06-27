@@ -1,7 +1,3 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// HotelDetails.jsx  —  fully updated hotel section
-// Drop-in replacement for the HotelDetails function + blankDay + handleItineraryChange
-// ─────────────────────────────────────────────────────────────────────────────
 
 import React, { useEffect } from 'react';
 import { Hotel, Plus, Trash2 } from 'lucide-react';
@@ -10,7 +6,6 @@ import {
     Tv, Coffee, ShowerHead, Car, Shirt, Baby,
     Flame, Shield, Accessibility, BedDouble,RefreshCw
 } from 'lucide-react';
-import { inputStyle } from '../../Common/CommonCss'; // keep your existing import path
 import { toast } from 'react-toastify';
 
 // ─── constants ────────────────────────────────────────────────────────────────
@@ -74,7 +69,6 @@ export const blankDay = () => ({
         vehicleModel: '',
         vehicleType: '',
         quantity: 1,
-        // _id: '',
     }],
     placeDetails: [],
     activities: [
@@ -648,7 +642,7 @@ function HotelDetailsPrivateTrip({
                                 key={type}
                                 type="button"
                                 onClick={() => handleTypeToggle(type)}
-                                className="px-[18px] py-1.5 rounded-full text-[13px] font-semibold cursor-pointer transition-all"
+                                className="px-4.5 py-1.5 rounded-full text-[13px] font-semibold cursor-pointer transition-all"
                                 style={{
                                     background: active ? PINK : 'transparent',
                                     color: active ? 'white' : '#aaa',
