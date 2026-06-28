@@ -15,6 +15,7 @@ export const groupTripEndpoints  = {
     UPDATE_GROUP_TRIP_PARTICIPANT_BY_ID : BASE_URL + '/update-group-trip-participant-by-id',
     UPDATE_GROUP_TRIP_SUMMARY_BY_ID : BASE_URL + '/update-group-trip-summary-by-id',
     UPDATE_GROUP_TRIP_STATUS_BY_ID : BASE_URL + '/update-group-trip-status-by-id',
-    DELETE_GROUP_TRIP_STATUS_BY_ID : BASE_URL + '/delete-group-trip-participant-by-id',
+    DELETE_GROUP_TRIP_PARTICIPANT_BY_ID : BASE_URL + '/delete-group-trip-participant-by-id',
+    DELETE_GROUP_TRIP_BY_ID : BASE_URL + '/delete-group-trip',
 }
 

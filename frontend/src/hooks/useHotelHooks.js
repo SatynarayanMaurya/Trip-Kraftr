@@ -86,8 +86,8 @@ export const useHotelHooks = () => {
     try {
       const subRegionKey = subRegionIds?.join(",")+category;
       // console.log("Sub region key : ",subRegionKey)
-      const cachedPage = hotelsBysubRegionKey?.[subRegionKey]
-      if (cachedPage) return cachedPage
+      // const cachedPage = hotelsBysubRegionKey?.[subRegionKey]
+      // if (cachedPage) return cachedPage
 
       dispatch(setLoading(true))
 

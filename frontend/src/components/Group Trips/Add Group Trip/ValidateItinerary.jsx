@@ -1,8 +1,8 @@
 import { toast } from "react-toastify";
 
 const handleSaveVehicle = (formData) => {
-    const { assignedTo, totalSeats, minSeats, selectedVehicleId } = formData.tripDetails;
-    if (!assignedTo || !totalSeats || !minSeats || !selectedVehicleId) {
+    const { assignedTo, totalSeats, minSeats,  } = formData.tripDetails;
+    if (!assignedTo || !totalSeats || !minSeats) {
         return false;
     }
     return true

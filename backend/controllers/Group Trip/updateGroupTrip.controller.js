@@ -85,6 +85,19 @@ export const updateGroupTripById = async (req, res) => {
         }
         const { itineraryBuilder, regionDetails, tripDetails } = req.body;
 
+        const prevSummary = await GroupTripSummary.findOne({
+            org_id: req.user.org_id,
+            groupTripId
+        }).lean();
+
+        const confirmedBookings = prevSummary?.bookingSummary?.confirmedBookings || 0;
+
+        const bookingSummary = {
+            totalSeats: tripDetails.totalSeats,
+            confirmedBookings,
+            availableSeats: Math.max(0, tripDetails.totalSeats - confirmedBookings)
+        };
+
         const [updatedGroupTrip, updateGroupTripSummary] = await Promise.all([
             GroupTrip.findOneAndUpdate(
                 {
@@ -117,12 +130,10 @@ export const updateGroupTripById = async (req, res) => {
             GroupTripSummary.findOneAndUpdate(
                 {
                     org_id: req.user.org_id,
-                    groupTripId: groupTripId
+                    groupTripId
                 },
                 {
-                    $set: {
-                        bookingSummary: { totalSeats: tripDetails?.totalSeats }
-                    }
+                    $set: { bookingSummary }
                 },
                 { new: true }
             )
@@ -211,165 +222,163 @@ export const updateGroupTripParticipantById = async (req, res) => {
             })
         }
 
+        // 1. Get current document
+        const summary = await GroupTripSummary.findOne({
+            org_id: req.user.org_id,
+            groupTripId
+        });
 
-            if (status !== 'enquiry' && findParticipant?.status !== 'enquiry') {
+        if (!summary) return;
 
-                // 1. Get current document
-                const summary = await GroupTripSummary.findOne({
+        const remainingSeats = summary?.bookingSummary?.availableSeats - (findParticipant?.status !=='enquiry' ?findParticipant?.totalMembers:0)
+        if(remainingSeats < totalMembers){
+            return res.status(409).json({
+                success:false,
+                message:"Available seat less that your total members"
+            })
+        }
+
+
+        if (status !== 'enquiry' && findParticipant?.status !== 'enquiry') {
+
+
+            // 2. Calculate new values safely
+            const updatedConfirmedBookings = (summary.bookingSummary?.confirmedBookings || 0) - findParticipant?.totalMembers + Number(totalMembers);
+
+            const updatedAvailableSeats = (summary.bookingSummary?.availableSeats || 0) + findParticipant?.totalMembers - Number(totalMembers);
+
+            const updatedPotentialRevenue = (summary.paymentSummary?.potentialRevenue || 0) + Number(saleAmount) - findParticipant?.saleAmount;
+
+            const updatedTotalPaid = (summary.paymentSummary?.totalPaid || 0) + Number(paidAmount) - findParticipant?.paidAmount;
+
+            const updatedTotalRevenue = (summary.financialOverview?.totalRevenue || 0) + Number(saleAmount) - findParticipant?.saleAmount;
+
+            const updatedTotalBalance = updatedPotentialRevenue - updatedTotalPaid;
+
+            const updatedProfitLoss = updatedTotalRevenue - (summary.financialOverview?.totalCost || 0);
+
+            // 3. Save back
+            await GroupTripSummary.updateOne(
+                {
                     org_id: req.user.org_id,
                     groupTripId
-                });
+                },
+                {
+                    $set: {
+                        "bookingSummary.confirmedBookings": updatedConfirmedBookings,
+                        "bookingSummary.availableSeats": updatedAvailableSeats,
+                        "paymentSummary.potentialRevenue": updatedPotentialRevenue,
+                        "paymentSummary.totalPaid": updatedTotalPaid,
+                        "paymentSummary.totalBalance": updatedTotalBalance,
 
-                if (!summary) return;
-                // return
-
-                // 2. Calculate new values safely
-
-                const updatedPotentialRevenue = (summary.paymentSummary?.potentialRevenue || 0) + Number(saleAmount) - findParticipant?.saleAmount;
-
-                const updatedTotalPaid = (summary.paymentSummary?.totalPaid || 0) + Number(paidAmount) - findParticipant?.paidAmount;
-
-                const updatedTotalRevenue = (summary.financialOverview?.totalRevenue || 0) + Number(saleAmount) - findParticipant?.saleAmount;
-
-                const updatedTotalBalance = updatedPotentialRevenue - updatedTotalPaid;
-
-                const updatedProfitLoss = updatedTotalRevenue - (summary.financialOverview?.totalCost || 0);
-
-                // 3. Save back
-                await GroupTripSummary.updateOne(
-                    {
-                        org_id: req.user.org_id,
-                        groupTripId
-                    },
-                    {
-                        $set: {
-                            "paymentSummary.potentialRevenue": updatedPotentialRevenue,
-                            "paymentSummary.totalPaid": updatedTotalPaid,
-                            "paymentSummary.totalBalance": updatedTotalBalance,
-
-                            "financialOverview.totalRevenue": updatedTotalRevenue,
-                            "financialOverview.totalProfitLoss": updatedProfitLoss
-                        }
+                        "financialOverview.totalRevenue": updatedTotalRevenue,
+                        "financialOverview.totalProfitLoss": updatedProfitLoss
                     }
-                );
-            }
-            else if (status !== 'enquiry' && findParticipant?.status === 'enquiry') {
-                // 1. Get current document
-                const summary = await GroupTripSummary.findOne({
+                }
+            );
+        }
+        else if (status !== 'enquiry' && findParticipant?.status === 'enquiry') {
+
+
+            // 2. Calculate new values safely
+            const updatedConfirmedBookings = (summary.bookingSummary?.confirmedBookings || 0) + Number(totalMembers);
+
+            const updatedAvailableSeats = (summary.bookingSummary?.availableSeats || 0) - Number(totalMembers);
+
+            const updatedPotentialRevenue = (summary.paymentSummary?.potentialRevenue || 0) + Number(saleAmount);
+
+            const updatedTotalPaid = (summary.paymentSummary?.totalPaid || 0) + Number(paidAmount);
+
+            const updatedTotalRevenue = (summary.financialOverview?.totalRevenue || 0) + Number(saleAmount);
+
+            const updatedTotalBalance = updatedPotentialRevenue - updatedTotalPaid;
+
+            const updatedProfitLoss = updatedTotalRevenue - (summary.financialOverview?.totalCost || 0);
+
+            // 3. Save back
+            await GroupTripSummary.updateOne(
+                {
                     org_id: req.user.org_id,
                     groupTripId
-                });
+                },
+                {
+                    $set: {
+                        "bookingSummary.confirmedBookings": updatedConfirmedBookings,
+                        "bookingSummary.availableSeats": updatedAvailableSeats,
 
-                if (!summary) return;
-                // return
+                        "paymentSummary.potentialRevenue": updatedPotentialRevenue,
+                        "paymentSummary.totalPaid": updatedTotalPaid,
+                        "paymentSummary.totalBalance": updatedTotalBalance,
 
-                // 2. Calculate new values safely
-                const updatedConfirmedBookings = (summary.bookingSummary?.confirmedBookings || 0) + 1;
-
-                const updatedAvailableSeats = (summary.bookingSummary?.availableSeats || 0) - 1;
-
-                const updatedPotentialRevenue = (summary.paymentSummary?.potentialRevenue || 0) + Number(saleAmount);
-
-                const updatedTotalPaid = (summary.paymentSummary?.totalPaid || 0) + Number(paidAmount);
-
-                const updatedTotalRevenue = (summary.financialOverview?.totalRevenue || 0) + Number(saleAmount);
-
-                const updatedTotalBalance = updatedPotentialRevenue - updatedTotalPaid;
-
-                const updatedProfitLoss = updatedTotalRevenue - (summary.financialOverview?.totalCost || 0);
-
-                // 3. Save back
-                await GroupTripSummary.updateOne(
-                    {
-                        org_id: req.user.org_id,
-                        groupTripId
-                    },
-                    {
-                        $set: {
-                            "bookingSummary.confirmedBookings": updatedConfirmedBookings,
-                            "bookingSummary.availableSeats": updatedAvailableSeats,
-
-                            "paymentSummary.potentialRevenue": updatedPotentialRevenue,
-                            "paymentSummary.totalPaid": updatedTotalPaid,
-                            "paymentSummary.totalBalance": updatedTotalBalance,
-
-                            "financialOverview.totalRevenue": updatedTotalRevenue,
-                            "financialOverview.totalProfitLoss": updatedProfitLoss
-                        }
+                        "financialOverview.totalRevenue": updatedTotalRevenue,
+                        "financialOverview.totalProfitLoss": updatedProfitLoss
                     }
-                );
-            }
-            else if (status === 'enquiry' && findParticipant?.status !== 'enquiry') {
-                // 1. Get current document
-                const summary = await GroupTripSummary.findOne({
+                }
+            );
+        }
+        else if (status === 'enquiry' && findParticipant?.status !== 'enquiry') {
+
+            // 2. Calculate new values safely
+            const updatedConfirmedBookings = (summary.bookingSummary?.confirmedBookings || 0) - Number(totalMembers);
+
+            const updatedAvailableSeats = (summary.bookingSummary?.availableSeats || 0) + Number(totalMembers);
+
+            const updatedPotentialRevenue = (summary.paymentSummary?.potentialRevenue || 0) - Number(findParticipant?.saleAmount);
+
+            const updatedTotalPaid = (summary.paymentSummary?.totalPaid || 0) - Number(findParticipant?.paidAmount);
+
+            const updatedTotalRevenue = (summary.financialOverview?.totalRevenue || 0) - Number(findParticipant?.saleAmount);
+
+            const updatedTotalBalance = updatedPotentialRevenue - updatedTotalPaid;
+
+            const updatedProfitLoss = updatedTotalRevenue - (summary.financialOverview?.totalCost || 0);
+
+            // 3. Save back
+            await GroupTripSummary.updateOne(
+                {
                     org_id: req.user.org_id,
                     groupTripId
-                });
+                },
+                {
+                    $set: {
+                        "bookingSummary.confirmedBookings": updatedConfirmedBookings,
+                        "bookingSummary.availableSeats": updatedAvailableSeats,
 
-                if (!summary) return;
-                // return
+                        "paymentSummary.potentialRevenue": updatedPotentialRevenue,
+                        "paymentSummary.totalPaid": updatedTotalPaid,
+                        "paymentSummary.totalBalance": updatedTotalBalance,
 
-                // 2. Calculate new values safely
-                const updatedConfirmedBookings = (summary.bookingSummary?.confirmedBookings || 0) - 1;
-
-                const updatedAvailableSeats = (summary.bookingSummary?.availableSeats || 0)+ 1;
-
-                const updatedPotentialRevenue = (summary.paymentSummary?.potentialRevenue || 0) - Number(findParticipant?.saleAmount);
-
-                const updatedTotalPaid = (summary.paymentSummary?.totalPaid || 0) - Number(findParticipant?.paidAmount);
-
-                const updatedTotalRevenue = (summary.financialOverview?.totalRevenue || 0) - Number(findParticipant?.saleAmount);
-
-                const updatedTotalBalance = updatedPotentialRevenue - updatedTotalPaid;
-
-                const updatedProfitLoss = updatedTotalRevenue - (summary.financialOverview?.totalCost || 0);
-
-                // 3. Save back
-                await GroupTripSummary.updateOne(
-                    {
-                        org_id: req.user.org_id,
-                        groupTripId
-                    },
-                    {
-                        $set: {
-                            "bookingSummary.confirmedBookings": updatedConfirmedBookings,
-                            "bookingSummary.availableSeats": updatedAvailableSeats,
-
-                            "paymentSummary.potentialRevenue": updatedPotentialRevenue,
-                            "paymentSummary.totalPaid": updatedTotalPaid,
-                            "paymentSummary.totalBalance": updatedTotalBalance,
-
-                            "financialOverview.totalRevenue": updatedTotalRevenue,
-                            "financialOverview.totalProfitLoss": updatedProfitLoss
-                        }
+                        "financialOverview.totalRevenue": updatedTotalRevenue,
+                        "financialOverview.totalProfitLoss": updatedProfitLoss
                     }
-                );
-            }
+                }
+            );
+        }
 
         const updatedParticipant = await GroupTripParticipant.findOneAndUpdate(
             {
-                org_id:req.user.org_id,
+                org_id: req.user.org_id,
                 groupTripId,
                 _id
             },
             {
-                $set:{
-                    contact, 
-                    dietaryPreference, 
-                    status, 
-                    occupancy, 
-                    paidAmount, 
-                    saleAmount, 
-                    totalMembers, 
-                    travellerName, 
+                $set: {
+                    contact,
+                    dietaryPreference,
+                    status,
+                    occupancy,
+                    paidAmount,
+                    saleAmount,
+                    totalMembers,
+                    travellerName,
                     visaStatus
                 }
-            },{new:true}
+            }, { new: true }
         )
 
         return res.status(200).json({
-            success:false,
-            message:"Participant updated ",
+            success: false,
+            message: "Participant updated ",
             updatedParticipant
         })
     }

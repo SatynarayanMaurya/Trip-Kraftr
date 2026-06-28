@@ -1,13 +1,16 @@
 import React from "react";
 
 function EnquiryPrivateTrip({
+    enquiryDetails,
     searchEnquiry,
     setSearchEnquiry,
     setCustomerDetails,
     setEnquiryDetails,
     searchedEnquiries,
     setActiveTab,
+    setFormData,
 }) {
+
     return (
         <div className="w-full">
             <p className="mb-3 text-sm text-gray-500">
@@ -39,12 +42,17 @@ function EnquiryPrivateTrip({
                     <input
                         type="text"
                         value={searchEnquiry.search}
-                        onChange={(e) =>
+                        onChange={(e) => {
                             setSearchEnquiry((prev) => ({
                                 ...prev,
                                 search: e.target.value,
-                            }))
-                        }
+                            }));
+
+                            // Clear selected enquiry so suggestions appear again
+                            if (enquiryDetails?._id) {
+                                setEnquiryDetails(null);
+                            }
+                        }}
                         placeholder="Search by name or phone no"
                         className="w-full rounded-xl border border-gray-200 pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-transparent"
                     />
@@ -54,8 +62,10 @@ function EnquiryPrivateTrip({
             </div>
 
             {/* Results dropdown */}
-            {(searchEnquiry.loading || searchedEnquiries?.length > 0 ||
-                (searchEnquiry.search?.trim() && !searchEnquiry.loading)) && (
+            {!enquiryDetails?._id &&
+                (searchEnquiry.loading ||
+                    searchedEnquiries?.length > 0 ||
+                    (searchEnquiry.search?.trim() && !searchEnquiry.loading)) && (
                     <div className="mt-2 rounded-xl border border-gray-100 bg-white shadow-sm overflow-hidden">
                         {searchEnquiry.loading ? (
                             <div className="divide-y divide-gray-100">
@@ -67,59 +77,159 @@ function EnquiryPrivateTrip({
                                     </div>
                                 ))}
                             </div>
-                        ) : searchedEnquiries?.length > 0 ? (
-                            <div className="max-h-92 overflow-y-auto divide-y divide-gray-100">
-                                {searchedEnquiries?.map((enquiry) => (
-                                    <button
-                                        key={enquiry._id}
-                                        type="button"
-                                        onClick={() => {
-                                            setEnquiryDetails(enquiry);
-                                            setSearchEnquiry((prev) => ({
-                                                ...prev,
-                                                search: enquiry?.accountId?.fullName || "",
-                                            }));
-                                            setActiveTab(2);
-                                        }}
-                                        className="w-full text-left px-4 py-3.5 hover:bg-gray-50 transition-colors"
-                                    >
-                                        <div className="flex items-start justify-between gap-3">
-                                            <div className="min-w-0">
-                                                <p className="text-xs text-gray-400 mb-0.5">
-                                                    {enquiry?.enquiryId}
-                                                </p>
-                                                <p className="text-sm font-medium text-gray-900 truncate">
-                                                    {enquiry?.accountId?.fullName || enquiry?.accountId?.businessName}
-                                                </p>
-                                                <p className="text-sm text-gray-500 mt-0.5">
-                                                    {enquiry?.accountId?.phone}
-                                                </p>
-                                            </div>
-                                            <div className="flex flex-col items-end gap-1.5 shrink-0">
-                                                <p className="text-xs text-gray-500">
-                                                    {enquiry?.destinations?.join(", ")}
-                                                </p>
-                                                <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full ${searchEnquiry.enquiryType === "b2b"
+                        ) :
+                            searchedEnquiries?.length > 0 ? (
+                                <div className="max-h-92 overflow-y-auto divide-y divide-gray-100">
+                                    {searchedEnquiries?.map((enquiry) => (
+                                        <button
+                                            key={enquiry._id}
+                                            type="button"
+                                            onClick={() => {
+                                                setEnquiryDetails(enquiry);
+                                                setFormData(prev=>({
+                                                    ...prev,
+                                                    customerNotes:enquiry?.notes
+                                                }))
+                                                setSearchEnquiry((prev) => ({
+                                                    ...prev,
+                                                    search: enquiry?.accountId?.fullName || "",
+                                                }));
+                                                setActiveTab(2);
+                                            }}
+                                            className="w-full text-left px-4 py-3.5 hover:bg-gray-50 transition-colors"
+                                        >
+                                            <div className="flex items-start justify-between gap-3">
+                                                <div className="min-w-0">
+                                                    <p className="text-xs text-gray-400 mb-0.5">
+                                                        {enquiry?.enquiryId}
+                                                    </p>
+                                                    <p className="text-sm font-medium text-gray-900 truncate">
+                                                        {enquiry?.accountId?.fullName || enquiry?.accountId?.businessName}
+                                                    </p>
+                                                    <p className="text-sm text-gray-500 mt-0.5">
+                                                        {enquiry?.accountId?.phone}
+                                                    </p>
+                                                </div>
+                                                <div className="flex flex-col items-end gap-1.5 shrink-0">
+                                                    <p className="text-xs text-gray-500">
+                                                        {enquiry?.destinations?.join(", ")}
+                                                    </p>
+                                                    <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full ${searchEnquiry.enquiryType === "b2b"
                                                         ? "bg-pink-50 text-pink-700"
                                                         : "bg-blue-50 text-blue-700"
-                                                    }`}>
-                                                    {searchEnquiry.enquiryType.toUpperCase()}
-                                                </span>
-                                                <p className="text-xs text-gray-400">
-                                                    {enquiry?.totalMembers} members
-                                                </p>
+                                                        }`}>
+                                                        {searchEnquiry.enquiryType.toUpperCase()}
+                                                    </span>
+                                                    <p className="text-xs text-gray-400">
+                                                        {enquiry?.totalMembers} members
+                                                    </p>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </button>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="p-6 text-center text-sm text-gray-400">
-                                No enquiries found
-                            </div>
-                        )}
+                                        </button>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="p-6 text-center text-sm text-gray-400">
+                                    No enquiries found
+                                </div>
+                            )}
                     </div>
                 )}
+
+            {/* Enquiry Details */}
+            {enquiryDetails?._id && (
+                <div className="mt-6 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+
+                    <div className="flex items-center justify-between mb-5">
+                        <div>
+                            <h3 className="text-lg font-semibold">
+                                {enquiryDetails.accountId?.fullName || enquiryDetails.accountId?.businessName}
+                            </h3>
+                            <p className="text-sm text-gray-500">
+                                {enquiryDetails.enquiryId}
+                            </p>
+                        </div>
+
+                        <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700">
+                            {enquiryDetails.status}
+                        </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+
+                        <div>
+                            <p className="text-gray-500">Phone</p>
+                            <p className="font-medium">
+                                {enquiryDetails.accountId?.phone}
+                            </p>
+                        </div>
+
+                        <div>
+                            <p className="text-gray-500">Email</p>
+                            <p className="font-medium">
+                                {enquiryDetails.accountId?.email || "-"}
+                            </p>
+                        </div>
+
+                        <div>
+                            <p className="text-gray-500">Trip Type</p>
+                            <p className="font-medium">
+                                {enquiryDetails.tripType}
+                            </p>
+                        </div>
+
+                        <div>
+                            <p className="text-gray-500">Destination</p>
+                            <p className="font-medium">
+                                {enquiryDetails.destinations?.join(", ")}
+                            </p>
+                        </div>
+
+                        <div>
+                            <p className="text-gray-500">Start Date</p>
+                            <p className="font-medium">
+                                {new Date(enquiryDetails.startDate).toLocaleDateString()}
+                            </p>
+                        </div>
+
+                        <div>
+                            <p className="text-gray-500">Duration</p>
+                            <p className="font-medium">
+                                {enquiryDetails.noOfDays} Days
+                            </p>
+                        </div>
+
+                        <div>
+                            <p className="text-gray-500">Adults</p>
+                            <p className="font-medium">
+                                {enquiryDetails.adult}
+                            </p>
+                        </div>
+
+                        <div>
+                            <p className="text-gray-500">Children</p>
+                            <p className="font-medium">
+                                {enquiryDetails.child}
+                            </p>
+                        </div>
+
+                        <div>
+                            <p className="text-gray-500">Total Members</p>
+                            <p className="font-medium">
+                                {enquiryDetails.totalMembers}
+                            </p>
+                        </div>
+
+                        <div>
+                            <p className="text-gray-500">Source</p>
+                            <p className="font-medium">
+                                {enquiryDetails.accountId?.source}
+                            </p>
+                        </div>
+
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

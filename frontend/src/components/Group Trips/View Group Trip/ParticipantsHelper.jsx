@@ -3,10 +3,10 @@ const PINK = '#ED5F8D';
 const BLUE = '#18305C';
 // ─── Status badge ─────────────────────────────────────────────────────────────
 const STATUS_MAP = {
-    paid:    { label: 'Paid',    bg: '#E8F5E9', color: '#388E3C', border: '#A5D6A7' },
-    enquiry: { label: 'enquiry', bg: '#FFF9C4', color: '#F9A825', border: '#FFE082' },
-    partial: { label: 'Partial', bg: '#FFF3E0', color: '#E65100', border: '#FFCC80' },
-    unpaid:  { label: 'Unpaid',  bg: '#FFDDE6', color: PINK,      border: '#F48FB1' },
+    paid:    { label: 'Fully Paid',    bg: '#E8F5E9', color: '#388E3C', border: '#A5D6A7' },
+    enquiry: { label: 'Enquiry', bg: '#FFF9C4', color: '#F9A825', border: '#FFE082' },
+    partial: { label: 'Partial Paid', bg: '#FFF3E0', color: '#E65100', border: '#FFCC80' },
+    confirmed:  { label: 'Confirmed',  bg: '#FFDDE6', color: PINK,      border: '#F48FB1' },
 };
 
 const actionBtnStyle = {
@@ -54,7 +54,6 @@ export function ParticipantCard({ p, onEdit, onView, onWhatsApp }) {
             {/* Actions */}
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', borderTop: '1px solid #f5f5f5', paddingTop: '10px' }}>
                 <button onClick={() => onEdit(p)} style={actionBtnStyle}><PencilIcon /></button>
-                {/* <button onClick={() => onView(p)} style={actionBtnStyle}><EyeIcon /></button> */}
                 <button onClick={() => onWhatsApp(p)} style={actionBtnStyle}><WhatsAppIcon /></button>
             </div>
         </div>

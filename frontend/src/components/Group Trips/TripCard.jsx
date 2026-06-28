@@ -56,7 +56,7 @@ const STATUS_CONFIG = {
     return '#ED5F8D';
   };
 
-function TripCard({ trip, onDelete, onCopy, onView }) {
+function TripCard({ trip, onDelete, onView }) {
     const status = trip?.status ?? 'created';
     const statusCfg = STATUS_CONFIG[status] ?? STATUS_CONFIG.created;
   
@@ -153,13 +153,6 @@ function TripCard({ trip, onDelete, onCopy, onView }) {
           </button>
   
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <button
-              onClick={() => onCopy?.(trip)}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#666', display: 'flex', alignItems: 'center', padding: '4px' }}
-              title="Duplicate trip"
-            >
-              <CopyIcon />
-            </button>
             <button
               onClick={() => onDelete?.(trip)}
               style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}

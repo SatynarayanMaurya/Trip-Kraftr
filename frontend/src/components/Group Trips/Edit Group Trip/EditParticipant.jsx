@@ -51,6 +51,36 @@ function EditParticipant({ closeModal,selectedParticipant,setIsUpdated }) {
     }));
   }, [form.occupancy, form.totalMembers, groupTripDetails]);
 
+  
+    useEffect(() => {
+  
+      if (Number(form.paidAmount) === 0) {
+        setForm(prev => ({
+          ...prev,
+          status: 'enquiry',
+        }))
+      }
+      else {
+        setForm(prev => ({
+          ...prev,
+          status: 'partial',
+        }))
+  
+      }
+  
+    }, [form.paidAmount])
+  
+    useEffect(() => {
+      if (form.status === 'enquiry') {
+        setForm(prev => ({
+          ...prev,
+          paidAmount: 0,
+        }))
+  
+      }
+  
+    }, [form.status])
+
   const [errors, setErrors] = useState({})
 
   const searchEnquiry = async () => {
@@ -198,10 +228,6 @@ function EditParticipant({ closeModal,selectedParticipant,setIsUpdated }) {
               <select
                 value={account}
                 disabled
-                // onChange={e => {
-                //     setAccount(e.target.value) 
-                //     clearEnquiry()
-                // }}
                 className="h-full pl-3 pr-8 py-2.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-pink-400 cursor-pointer"
               >
                 <option value="b2c">B2C</option>
@@ -222,11 +248,9 @@ function EditParticipant({ closeModal,selectedParticipant,setIsUpdated }) {
                   ${selectedEnquiry
                     ? 'border-pink-300 bg-pink-50 text-gray-700 cursor-default focus:ring-0'
                     : 'border-pink-300 bg-pink-50 text-gray-700 cursor-default focus:ring-0'
-                    // : 'border-gray-200 focus:ring-2 focus:ring-pink-400 bg-white'
                   }`}
               />
 
-              {/* Clear button (X) when enquiry is selected */}
               {selectedEnquiry ? (
                 <button
                   type="button"
@@ -277,10 +301,9 @@ function EditParticipant({ closeModal,selectedParticipant,setIsUpdated }) {
                     handleChange('status', e.target.value)}}
                 className="h-full pl-3 pr-8 py-2.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-pink-400 cursor-pointer"
               >
-                {/* <option value="">Status</option> */}
                 <option value="enquiry">Enquiry</option>
-                <option value="paid">Paid</option>
-                <option value="partial">Partial</option>
+                <option value="partial">Partial Paid</option>
+                <option value="paid">Fully Paid</option>
                 <option value="confirmed">Confirmed</option>
               </select>
               <ChevronDown size={14} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />

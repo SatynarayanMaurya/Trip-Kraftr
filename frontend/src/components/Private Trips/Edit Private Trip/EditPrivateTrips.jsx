@@ -87,6 +87,8 @@ function EditPrivateTrips() {
       tripOverview: '',
       daysDetails: [],
     },
+    customerNotes:'',
+    internalNotes:''
   });
 
 
@@ -189,6 +191,9 @@ function EditPrivateTrips() {
             })),
           })),
         },
+
+        internalNotes:privateTripDetails?.internalNotes,
+        customerNotes:privateTripDetails?.customerNotes,
 
       }))
 
@@ -456,6 +461,14 @@ function EditPrivateTrips() {
   const handleSaveItinerary = async () => {
     try {
       setSubmitLoading(true);
+
+      if (!price?.isMargin) {
+        if (price?.commission <= 0) {
+          return toast.warn("Commission must be greater that 0")
+        }
+      }
+
+
       const isRegionValid = isRegionDetailsValid(formData)
       if (!isRegionValid?.success) {
         toast.warn(isRegionValid.message || "Error")
@@ -486,9 +499,14 @@ function EditPrivateTrips() {
         },
       };
 
+      const updatedPrice = {
+        ...price,
+        gstPrice: price?.isGstChecked ? price?.gstPrice : 0,
+      };
+
       const payload = {
         ...updatedFormData,
-        price,
+        price:updatedPrice,
         privateTripId
       }
       const response = await updatePrivateTripById(payload)
@@ -569,6 +587,7 @@ function EditPrivateTrips() {
       {activeTab === 1 && (
         <EnquiryPrivateTrip
           searchEnquiry={searchEnquiry}
+          setFormData={setFormData}
           setSearchEnquiry={setSearchEnquiry}
           setCustomerDetails={setCustomerDetails}
           setEnquiryDetails={setEnquiryDetails}
@@ -579,7 +598,8 @@ function EditPrivateTrips() {
 
       {activeTab === 2 && (
         <TripDetailsPrivateTrip
-
+          customerNotes = {formData?.customerNotes}
+          setFormData={setFormData}
           customerDetails={customerDetails}
           enquiryDetails={enquiryDetails}
           enquiryType={searchEnquiry?.enquiryType}
@@ -594,6 +614,7 @@ function EditPrivateTrips() {
       {activeTab === 3 && (
         <ItineraryBuilderPrivateTrip
           formData={formData}
+          setFormData={setFormData}
           activeDay={activeDay}
           setActiveDay={setActiveDay}
           allSubRegions={allSubRegions}

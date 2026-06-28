@@ -10,6 +10,7 @@ import TripCard from '../components/Group Trips/TripCard';
 import GroupTripSkeletonCard from '../components/Group Trips/GroupTripSkeletonCard';
 import { useRegionsData } from '../hooks/Resuable Hooks/useResuableData';
 import { useCommonHooks } from '../hooks/useCommonHooks';
+import DeleteModal from '../components/DeleteModals/DeleteModal';
 const PINK = '#ED5F8D';
 const BLUE = '#18305C';
 
@@ -19,9 +20,9 @@ function GroupTrips() {
   const navigate = useNavigate();
   const dispatch = useDispatch()
 
-  const { getGroupTrips, deleteGroupTrip } = useGroupTripHooks();
+  const { getGroupTrips, deleteGroupTripById } = useGroupTripHooks();
   const { regions, loading: regionLoading } = useRegionsData();
-  const {searchGroupTrips} = useCommonHooks()
+  const { searchGroupTrips } = useCommonHooks()
 
   const [fetchLoading, setFetchLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -37,6 +38,10 @@ function GroupTrips() {
   const currentPageGroupTrips = useSelector(s => s.groupTrip.groupTripsPages?.[currentPage]);
   const pagination = useSelector(s => s.groupTrip.paginationGroupTrips)
 
+  const [isDeleteModal, setIsDeleteModal] = useState(false)
+  const [deleteGroupTripDetails, setDeleteGroupTripDetails] = useState(null)
+  const [isDeleted, setIsDeleted] = useState(false)
+
   const fetchGroupTrips = async () => {
     try {
       setFetchLoading(true);
@@ -51,17 +56,17 @@ function GroupTrips() {
 
   useEffect(() => {
     if (!currentPageGroupTrips) fetchGroupTrips();
-  }, [currentPage, pageLimit]);
+  }, [currentPage, pageLimit,isDeleted]);
 
-  const filterGroupTrips = async()=>{
-    try{
+  const filterGroupTrips = async () => {
+    try {
       setFetchLoading(true)
       setIsSearching(true)
-      const res = await searchGroupTrips(searchQuery,regionFilter,pageLimit)
+      const res = await searchGroupTrips(searchQuery, regionFilter, pageLimit)
       setSearchedGroupTrips(res?.data?.searchedGroupTrips)
       setFetchLoading(false)
     }
-    catch(error){
+    catch (error) {
       setFetchLoading(false)
       setIsSearching(false)
       if (!isProduction) {
@@ -72,32 +77,43 @@ function GroupTrips() {
       }
       toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin")
     }
-  } 
+  }
 
-  useEffect(()=>{
-    if((searchQuery && searchQuery?.trim() !=='') || regionFilter !== '' ){
+  useEffect(() => {
+    if ((searchQuery && searchQuery?.trim() !== '') || regionFilter !== '') {
       filterGroupTrips()
     }
-    else{
+    else {
       setIsSearching(false)
     }
-  },[searchQuery,regionFilter])
+  }, [searchQuery, regionFilter])
 
   // ── derived data ─────────────────────────────────────────────────────────
   const allTrips = currentPageGroupTrips ?? [];
 
 
-  const filteredTrips =isSearching?searchedGroupTrips: allTrips
+  const filteredTrips = isSearching ? searchedGroupTrips : allTrips
 
   const handleDelete = (trip) => {
-    if (!window.confirm('Are you sure you want to delete this trip?')) return;
-    // deleteGroupTrip(trip._id);
-    toast.success('Trip deleted');
+    setDeleteGroupTripDetails(trip)
+    setIsDeleteModal(true)
   };
 
-  const handleCopy = (trip) => {
-    toast.info('Trip duplicated');
-  };
+  const handleDeleteGroupTrip = async () => {
+    try {
+      setFetchLoading(true);
+      console.log("Deleted trip : ", deleteGroupTripDetails)
+      const response = await deleteGroupTripById(deleteGroupTripDetails?._id);
+      toast.success(response?.data?.message)
+      setIsDeleted(!isDeleted)
+       setIsDeleteModal(false)
+    } catch (error) {
+      if (!isProduction) console.log('Error:', error);
+      toast.error(error?.response?.data?.message || error?.message || 'Error fetching group trips');
+    } finally {
+      setFetchLoading(false);
+    }
+  }
 
   const handleView = (trip) => {
     navigate(`view/${trip._id}`);
@@ -170,7 +186,7 @@ function GroupTrips() {
               cursor: 'pointer', whiteSpace: 'nowrap',
             }}
           >
-            <FilterIcon /> {allRegionsForSuggestions?.find(r=>r?._id===regionFilter)?.name || 'Region'}
+            <FilterIcon /> {allRegionsForSuggestions?.find(r => r?._id === regionFilter)?.name || 'Region'}
             {regionFilter && (
               <span
                 onClick={e => { e.stopPropagation(); setRegionFilter(''); }}
@@ -235,7 +251,6 @@ function GroupTrips() {
               key={trip._id}
               trip={trip}
               onDelete={handleDelete}
-              onCopy={handleCopy}
               onView={handleView}
             />
           ))}
@@ -294,26 +309,6 @@ function GroupTrips() {
         {/* 🔹 Right Controls */}
         <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 w-full md:w-auto">
 
-          {/* Limit */}
-          <div className="flex items-center justify-between sm:justify-start gap-3 text-sm text-gray-400 w-full sm:w-auto">
-            <span>Limit</span>
-
-            <select
-              value={pageLimit}
-              onChange={(e) => changePageLimit(Number(e.target.value))}
-              className="w-[100px] bg-white border border-gray-200 text-[#18305C] text-sm px-3 py-2 rounded-lg outline-none focus:border-[#E91E8C] cursor-pointer"
-              style={{
-                boxShadow: '0 1px 6px rgba(0,0,0,0.06)',
-              }}
-            >
-              <option value="4">4</option>
-              <option value="8">8</option>
-              <option value="12">12</option>
-              <option value="16">16</option>
-              <option value="20">20</option>
-            </select>
-          </div>
-
           {/* Go to page */}
           <div className="flex items-center justify-between sm:justify-start gap-3 text-sm text-gray-400 w-full sm:w-auto">
             <span>Go to page</span>
@@ -338,6 +333,20 @@ function GroupTrips() {
         </div>
 
       </div>
+
+
+      {/* Delete Modal  */}
+      <>
+        {
+          isDeleteModal && 
+          <DeleteModal  
+            onClose={()=>setIsDeleteModal(false)} 
+            onDelete={handleDeleteGroupTrip} 
+            itemName = "Group Trip" 
+            confirmText = {deleteGroupTripDetails?.tripId}
+          />
+        }
+      </>
 
 
       <style>{`

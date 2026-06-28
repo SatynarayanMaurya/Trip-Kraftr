@@ -72,10 +72,11 @@ function AddGroupTrip() {
             totalSeats: '',
             minSeats: '',
             occupancy: { single: '', double: '', triple: '' },
-            selectedVehicleId: '',
+            selectedVehicleId: null,
             quantity: 1,
         },
         itineraryBuilder: {
+            tripName: '',
             tripOverview: '',
             daysDetails: [],
         },
@@ -169,7 +170,11 @@ function AddGroupTrip() {
         category: activeDayData?.hotelDetails?.hotelCategory,
         enabled: shouldFetchHotel
     });
-
+    useEffect(() => {
+        if (activeDayData?.hotelDetails?.hotelCategory) {
+            refetchHotels()
+        }
+    }, [activeDayData?.hotelDetails?.hotelCategory])
 
 
 
@@ -248,18 +253,13 @@ function AddGroupTrip() {
             toast.error('To date cannot be earlier than From date');
             return false;
         }
-        if (isSave) {
-            setActiveTab(2);
-        }
-        else {
-            return true;
-        }
+        setActiveTab(2);
 
     };
 
-    const handleSaveVehicle = (isSave = true) => {
-        const { assignedTo, totalSeats, minSeats, selectedVehicleId } = formData.tripDetails;
-        if (!assignedTo || !totalSeats || !minSeats || !selectedVehicleId) {
+    const handleSaveVehicle = () => {
+        const { assignedTo, totalSeats, minSeats,  } = formData.tripDetails;
+        if (!assignedTo || !totalSeats || !minSeats ) {
             toast.error('Please fill all Trip Details');
             return;
         }
@@ -269,6 +269,10 @@ function AddGroupTrip() {
     const handleSaveItinerary = async () => {
         try {
             setSubmitLoading(true);
+
+            if (!formData?.itineraryBuilder?.tripName) {
+                return toast.error("Trip Name is required")
+            }
 
             // ✅ Validation
             const { isValid, message } = validateItinerary(formData);
@@ -319,16 +323,26 @@ function AddGroupTrip() {
     const tabs = ['Basic Details', 'Trip Details', 'Itinerary Builder', "Policies"];
 
     const tabClick = (i) => {
-        if(i===1){
+        if (i === 1) {
             setActiveTab(i)
             return;
         }
+
+        if(i===2){
+            handleSaveRegion(false)
+            return ;
+        }
+
+        if(i===3){
+            handleSaveVehicle()
+            return ;
+        }
         const isValidJump = handleSaveRegion(false)
-        if(isValidJump && i!==1){
+        if (isValidJump && i !== 1) {
             setActiveTab(i)
         }
-        else{
-        setActiveTab(1)
+        else {
+            setActiveTab(1)
         }
     }
 

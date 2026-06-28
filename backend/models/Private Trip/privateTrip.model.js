@@ -156,6 +156,9 @@ const privateTripSchema = new mongoose.Schema(
             ]
         },
 
+        internalNotes:{type:String,default:null},
+        customerNotes:{type:String,default:null},
+
 
         price: {
             showBreakUp: { type: Boolean },
@@ -169,13 +172,13 @@ const privateTripSchema = new mongoose.Schema(
             totalCost: { type: Number },
             festivalSurge: { type: Number },
             discount: { type: Number },
-            isGstChecked: { type: Boolean },
-            gstPrice: { type: Number },
+            isGstChecked: { type: Boolean, default: false },
+            gstPrice: { type: Number, default: 0 },
             finalPrice: { type: Number },
             discountedPrice: { type: Number },
         },
 
-        status:{type:String, default:'created'}
+        status: { type: String, default: 'created' }
 
 
 
@@ -188,5 +191,7 @@ const privateTripSchema = new mongoose.Schema(
  * Indexes
  */
 privateTripSchema.index({ org_id: 1 });
+
+
 
 export default mongoose.model("PrivateTrip", privateTripSchema);

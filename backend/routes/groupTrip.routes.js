@@ -4,7 +4,7 @@ import { roleMiddleware } from "../middlewares/role.middleware.js";
 import { addGroupTrip, addGroupTripParticipant } from "../controllers/Group Trip/createGroupTrip.controller.js";
 import { getAllGroupTripParticipant, getGroupTripById, getGroupTrips, searchGroupTrip, suggestionGroupTrip } from "../controllers/Group Trip/getGroupTrip.controller.js";
 import { updateGroupTripById, updateGroupTripParticipantById, updateGroupTripStatus, updateGroupTripSummaryById } from "../controllers/Group Trip/updateGroupTrip.controller.js";
-import { deleteGroupTripParticipantById } from "../controllers/Group Trip/deleteGroupTrip.controller.js";
+import { deleteGroupTrip, deleteGroupTripParticipantById } from "../controllers/Group Trip/deleteGroupTrip.controller.js";
 // import { addGroupTrip, getGroupTripById, getGroupTrips, searchGroupTrip, updateGroupTripById, updateGroupTripSummaryById } from "../controllers/groupTrip.controller.js";
 const groupTripRouter = express.Router()
 
@@ -15,13 +15,12 @@ groupTripRouter.get("/get-group-trip-participants/:groupTripId",authMiddleware,r
 groupTripRouter.get("/get-group-trips",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),getGroupTrips)
 groupTripRouter.get("/suggestion-group-trips",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),suggestionGroupTrip)
 groupTripRouter.get("/search-group-Trips",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),searchGroupTrip)
-// groupTripRouter.get("/search-places",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),searchPlaces)
 groupTripRouter.get("/get-group-trip-by-id/:groupTripId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),getGroupTripById)
-// groupTripRouter.delete("/delete-place/:placeId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),deletePlaceById)
 groupTripRouter.put("/update-group-trip-by-id/:groupTripId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),updateGroupTripById)
 groupTripRouter.put("/update-group-trip-summary-by-id/:groupTripId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),updateGroupTripSummaryById)
 groupTripRouter.put("/update-group-trip-participant-by-id/:groupTripId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),updateGroupTripParticipantById)
 groupTripRouter.patch("/update-group-trip-status-by-id/:groupTripId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),updateGroupTripStatus)
 groupTripRouter.delete("/delete-group-trip-participant-by-id/:groupTripId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),deleteGroupTripParticipantById)
+groupTripRouter.delete("/delete-group-trip/:groupTripId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),deleteGroupTrip)
 
 export default groupTripRouter

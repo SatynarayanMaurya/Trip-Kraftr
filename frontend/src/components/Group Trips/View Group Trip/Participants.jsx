@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { EditIcon, PlusIcon, EyeIcon, WhatsAppIcon,PencilIcon } from '../../Icons/Icons';
+import { WhatsAppIcon, PencilIcon, TrashIcon } from '../../Icons/Icons';
 import AddParticipant from './AddParticipant';
 import { Avatar, ParticipantCard, StatusBadge } from './ParticipantsHelper';
 import { useGroupTripHooks } from '../../../hooks/useGroupTripHooks';
 import { useParams } from 'react-router-dom';
 import EditParticipant from '../Edit Group Trip/EditParticipant';
-
+import DeleteModal from '../../DeleteModals/DeleteModal';
+import { toast } from 'react-toastify';
+import { useSelector } from 'react-redux';
 const PINK = '#ED5F8D';
 const BLUE = '#18305C';
 
@@ -44,15 +46,18 @@ const actionBtnStyle = {
 
 // ─── Main component ───────────────────────────────────────────────────────────
 function Participants() {
-    const {getGroupTripParticipantsById} = useGroupTripHooks()
+    const { getGroupTripParticipantsById, deleteGroupTripParticipantById } = useGroupTripHooks()
     const [isMobile, setIsMobile] = useState(false);
     const [isAddParticipant, setIsAddParticipant] = useState(false)
+    const isProduction = useSelector(s=>s.user.isProduction)
     const [isEditParticipant, setIsEditParticipant] = useState(false)
     const [participants, setParticipants] = useState([])
     const [fetchLoading, setFetchLoading] = useState(false)
     const [selectedParticipant, setSelectedParticipant] = useState(null)
-    const {groupTripId} = useParams()
-    const [isUpdated,setIsUpdated] = useState(false)
+    const { groupTripId } = useParams()
+    const [isUpdated, setIsUpdated] = useState(false)
+    const [isDeleteModal, setIsDeleteModal] = useState(false)
+    const [deleteParticipantDetails, setDeleteParticipantDetails] = useState(null)
 
     React.useEffect(() => {
         const check = () => setIsMobile(window.innerWidth < 768);
@@ -61,41 +66,67 @@ function Participants() {
         return () => window.removeEventListener('resize', check);
     }, []);
 
-    const handleEdit     = (p) => {
+    const handleEdit = (p) => {
         setSelectedParticipant(p)
         setIsEditParticipant(true)
     };
-    const handleView     = (p) => console.log('View',      p);
+    const handleView = (p) => console.log('View', p);
     const handleWhatsApp = (p) => window.open(`https://wa.me/${p.contact}`, '_blank');
-    const handleAdd      = ()  => setIsAddParticipant(true);
+    const handleAdd = () => setIsAddParticipant(true);
     // const handleAdd      = ()  => console.log("Add");
 
 
-    const fetchParticipants = async()=>{
-        try{
+    const fetchParticipants = async () => {
+        try {
             setFetchLoading(true)
             const response = await getGroupTripParticipantsById(groupTripId)
             setParticipants(response?.data?.allParticipants)
         }
-        catch(error){
-          if (!isProduction) {
-            console.log("========= ERROR DEBUG START =========");
-            console.log("Error:", error);
-            console.log("Response:", error?.response);
-            console.log("========= ERROR DEBUG END =========");
-          }
-          toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin")
+        catch (error) {
+            if (!isProduction) {
+                console.log("========= ERROR DEBUG START =========");
+                console.log("Error:", error);
+                console.log("Response:", error?.response);
+                console.log("========= ERROR DEBUG END =========");
+            }
+            toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin")
+        }
+        finally {
+            setFetchLoading(false)
+        }
+    }
+
+    useEffect(() => {
+        if (groupTripId) {
+            fetchParticipants()
+        }
+    }, [groupTripId, isUpdated])
+
+    const handleDelete = (p)=>{
+        setDeleteParticipantDetails(p)
+        setIsDeleteModal(true)
+    }
+
+    const handleDeleteParticipant = async (p) => {
+        try {
+            setFetchLoading(true)
+            const response = await deleteGroupTripParticipantById(groupTripId,deleteParticipantDetails?._id)
+            toast.success(response?.data?.message)
+            setIsUpdated(!isUpdated)
+        }
+        catch (error) {
+            if (!isProduction) {
+                console.log("========= ERROR DEBUG START =========");
+                console.log("Error:", error);
+                console.log("Response:", error?.response);
+                console.log("========= ERROR DEBUG END =========");
+            }
+            toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin")
         }
         finally{
             setFetchLoading(false)
         }
     }
-
-    useEffect(()=>{
-        if(groupTripId){
-            fetchParticipants()
-        }
-    },[groupTripId,isUpdated])
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -146,9 +177,9 @@ function Participants() {
                                     {/* Name cell */}
                                     <TD>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                            <Avatar name={p?.travellerName || p?.enquiryId?.accountId?.fullName||p?.enquiryId?.accountId?.businessName} />
+                                            <Avatar name={p?.travellerName || p?.enquiryId?.accountId?.fullName || p?.enquiryId?.accountId?.businessName} />
                                             <div>
-                                                <div style={{ fontSize: '14px', fontWeight: '700', color: BLUE }}>{p?.travellerName || p?.enquiryId?.accountId?.fullName||p?.enquiryId?.accountId?.businessName}</div>
+                                                <div style={{ fontSize: '14px', fontWeight: '700', color: BLUE }}>{p?.travellerName || p?.enquiryId?.accountId?.fullName || p?.enquiryId?.accountId?.businessName}</div>
                                                 <div style={{ fontSize: '12px', color: '#aaa', marginTop: '2px' }}>Member : {p?.totalMembers}</div>
                                             </div>
                                         </div>
@@ -187,11 +218,11 @@ function Participants() {
                                             <button onClick={() => handleEdit(p)} style={actionBtnStyle} title="Edit">
                                                 <PencilIcon />
                                             </button>
-                                            {/* <button onClick={() => handleView(p)} style={actionBtnStyle} title="View">
-                                                <EyeIcon />
-                                            </button> */}
                                             <button onClick={() => handleWhatsApp(p)} style={actionBtnStyle} title="WhatsApp">
                                                 <WhatsAppIcon />
+                                            </button>
+                                            <button onClick={() => handleDelete(p)} style={actionBtnStyle} title="Delete">
+                                                <TrashIcon />
                                             </button>
                                         </div>
                                     </TD>
@@ -233,16 +264,24 @@ function Participants() {
             {/* Add Participant */}
             <>
                 {
-                    isAddParticipant && 
-                    <AddParticipant closeModal = {()=>setIsAddParticipant(false)} setIsUpdated={()=>{setIsUpdated(!isUpdated)}}/>
+                    isAddParticipant &&
+                    <AddParticipant closeModal={() => setIsAddParticipant(false)} setIsUpdated={() => { setIsUpdated(!isUpdated) }} />
                 }
             </>
 
             {/* Edit Participant */}
             <>
                 {
-                    isEditParticipant && 
-                    <EditParticipant closeModal = {()=>setIsEditParticipant(false)} selectedParticipant={selectedParticipant}  setIsUpdated={()=>{setIsUpdated(!isUpdated)}}/>
+                    isEditParticipant &&
+                    <EditParticipant closeModal={() => setIsEditParticipant(false)} selectedParticipant={selectedParticipant} setIsUpdated={() => { setIsUpdated(!isUpdated) }} />
+                }
+            </>
+
+            {/* Delete Participant */}
+            <>
+                {
+                    isDeleteModal &&
+                    <DeleteModal  onClose={()=>setIsDeleteModal(false)} onDelete={()=>handleDeleteParticipant()} itemName = "Participant" confirmText = "DELETE"  />
                 }
             </>
         </div>

@@ -1,14 +1,20 @@
 
 
 import React, { useState } from "react";
+import { ChevronDown } from "lucide-react";
 
 const PINK = "#ED5F8D";
 const NAVY = "#18305C";
 
-export default function PriceSection({ price, noOfDays = 1, setPrice = () => { }, isEditable = true }) {
+export default function PriceSection({ price, noOfDays = 1, setPrice = () => { }, isEditable = true, formData = {} }) {
+
+    const allActivities = formData?.itineraryBuilder?.daysDetails?.flatMap(day =>
+        day.activities?.filter(activity => activity.activityName?.trim()) || []
+    ) || [];
+
     const [isMarginMode, setIsMarginMode] = useState(price?.isMargin ?? true);
-    const [actOpen, setActOpen] = useState(false);
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [isActivitiesOpen, setIsActivitiesOpen] = useState(false)
 
     // const update = (fields) => setPrice((prev) => ({ ...prev, ...fields }));
     const update = (fields) => {
@@ -25,7 +31,10 @@ export default function PriceSection({ price, noOfDays = 1, setPrice = () => { }
     const onSurgeInput = (val) => update({ festivalSurge: Math.min(50000, Math.max(0, Number(val) || 0)) });
     const onDiscountInput = (val) => update({ discount: Math.min(50000, Math.max(0, Number(val) || 0)) });
 
-    const fmt = (v) => "₹" + Math.round(v || 0).toLocaleString("en-IN");
+    const fmt = (v) => "₹" + Number(v || 0).toLocaleString("en-IN", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
     const fmt2 = (v) => "₹" + (v || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const nights = Math.max(0, (noOfDays || 1) - 1);
 
@@ -43,7 +52,7 @@ export default function PriceSection({ price, noOfDays = 1, setPrice = () => { }
                     <label className="flex items-center gap-2 text-white text-sm font-semibold cursor-pointer select-none">
                         <input
                             type="checkbox"
-                            checked={price?.showBreakUp}
+                            checked={price?.showBreakUp ?? false}
                             onChange={(e) => update({ showBreakUp: e.target.checked })}
                             className="w-4 h-4 cursor-pointer"
                             style={{ accentColor: PINK }}
@@ -133,19 +142,55 @@ export default function PriceSection({ price, noOfDays = 1, setPrice = () => { }
                 {/* Additional Activities */}
                 <div
                     className="flex items-center justify-between cursor-pointer mb-2"
-                    onClick={() => setActOpen(p => !p)}
-                    role="button" tabIndex={0}
-                    onKeyDown={(e) => e.key === "Enter" && setActOpen(p => !p)}
+                    onClick={() => setIsActivitiesOpen(prev => !prev)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => e.key === "Enter" && setIsActivitiesOpen(prev => !prev)}
                 >
                     <div className="flex items-center gap-2">
-                        <span className="text-sm font-bold" style={{ color: NAVY }}>Additional Activities</span>
-                        <span className="text-sm font-bold" style={{ color: NAVY }}>{fmt(price?.additionalActivities)}</span>
+                        <span className="text-sm font-bold" style={{ color: NAVY }}>
+                            Additional Activities
+                        </span>
+
+                        <span className="text-sm font-bold" style={{ color: NAVY }}>
+                            {fmt(price?.additionalActivities)}
+                        </span>
                     </div>
-                    <span
-                        className="text-sm transition-transform duration-200"
-                        style={{ color: NAVY, display: "inline-block", transform: actOpen ? "rotate(180deg)" : "none" }}
-                    >⌄</span>
+
+                    <ChevronDown
+                        size={18}
+                        color={NAVY}
+                        className={`transition-transform duration-200 ${isActivitiesOpen ? "rotate-180" : ""
+                            }`}
+                    />
                 </div>
+
+                {isActivitiesOpen && (
+                    <div className="space-y-2 mt-3">
+                        {allActivities.map((activity) => (
+                            <div
+                                key={activity._id}
+                                className="flex items-center justify-between p-2 rounded-md bg-gray-50"
+                            >
+                                <div>
+                                    <p className="text-sm font-semibold" style={{ color: NAVY }}>
+                                        {activity.activityName?.length>18 ?activity.activityName?.slice(0,18) + "..." : activity.activityName}
+                                    </p>
+                                </div>
+
+                                <div className="flex items-center gap-4 text-sm" style={{ color: NAVY }}>
+                                    <span>
+                                         {activity.quantity}
+                                    </span>
+
+                                    <span className="font-semibold">
+                                        {fmt(activity.price)}
+                                    </span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
 
                 <hr className="border-t border-gray-100 my-2" />
 
@@ -208,7 +253,7 @@ export default function PriceSection({ price, noOfDays = 1, setPrice = () => { }
                         <span className="text-xs text-gray-500">GST @5%</span>
                         <input
                             type="checkbox"
-                            checked={price?.isGstChecked}
+                            checked={price?.isGstChecked ?? false}
                             onChange={(e) => update({ isGstChecked: e.target.checked })}
                             className="w-3.5 h-3.5 cursor-pointer ml-1"
                             style={{ accentColor: PINK }}
@@ -246,7 +291,7 @@ export default function PriceSection({ price, noOfDays = 1, setPrice = () => { }
     return (
         <>
             {/* ══ DESKTOP / TABLET: sticky card, no scroll of its own ══ */}
-            <div className="hidden sm:block " style={{ position: 'sticky', top: '20px', flexShrink: 0, alignSelf: 'flex-start', width: '20vw', }}>
+            <div className="hidden sm:block " style={{ position: 'sticky', top: '20px', flexShrink: 0, alignSelf: 'flex-start', width: '20vw',maxHeight: "calc(100vh - 40px)",  overflowY: "auto", }}>
                 {cardJSX}
             </div>
 

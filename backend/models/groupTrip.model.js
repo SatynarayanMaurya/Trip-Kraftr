@@ -36,11 +36,12 @@ const groupTripSchema = new mongoose.Schema({
             double: Number,
             triple: Number
         },
-        selectedVehicleId:{type:mongoose.Schema.Types.ObjectId,ref:"Vehicle"},
-        quantity:{type:Number,required:true}  // Vehicle quantity
+        selectedVehicleId:{type:mongoose.Schema.Types.ObjectId,ref:"Vehicle",default:null},
+        quantity:{type:Number,default:0}  // Vehicle quantity
     },
 
     itineraryBuilder:{
+        tripName:{type:String,required:true},
         tripOverview:String,
         daysDetails:[
             {

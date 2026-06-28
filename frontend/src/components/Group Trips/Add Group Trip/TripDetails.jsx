@@ -188,40 +188,14 @@ function TripDetails({
                         />
                     </div>
 
-                    {/* Row 4 right: Save button — bottom-aligned */}
-                    <div style={{
-                        gridColumn: '1 / -1', // 🔥 span all columns
-                        display: 'flex',
-                        justifyContent: 'flex-end',
-                    }}>
-                        <button
-                            onClick={handleSave}
-                            style={{
-                                background: '#28a745',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '8px',
-                                padding: '10px 28px',
-                                fontSize: '14px',
-                                fontWeight: '600',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '8px',
-                                height: '40px',
-                            }}
-                        >
-                            <Save size={16}/> Save
-                        </button>
-                    </div>
-
+                    
                 </div>
             </div>
 
             {/* ── Vehicle Selection Card ── */}
             <div style={cardStyle}>
                 <div className='flex justify-center'>
-                <BlueButton text={"Vehicle"}/>
+                    <BlueButton text={"Vehicle"} />
                 </div>
                 <div style={{
                     display: 'grid',
@@ -247,7 +221,7 @@ function TripDetails({
                                 onChange={(e) => handleChange('selectedVehicleId', e.target.value)}
                                 disabled={vehicleLoading}
                             >
-                                <option value="">
+                                <option value={null}>
                                     {vehicleLoading ? 'Loading...' : 'Select Vehicle'}
                                 </option>
                                 {!vehicleLoading && allVehicles?.map((v) => (
@@ -359,6 +333,33 @@ function TripDetails({
                     </div>
 
                 </div>
+            </div>
+            
+            {/* Row 4 right: Save button — bottom-aligned */}
+            <div style={{
+                gridColumn: '1 / -1', // 🔥 span all columns
+                display: 'flex',
+                justifyContent: 'flex-end',
+            }}>
+                <button
+                    onClick={handleSave}
+                    style={{
+                        background: '#28a745',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '8px',
+                        padding: '10px 28px',
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        height: '40px',
+                    }}
+                >
+                    <Save size={16} /> Save
+                </button>
             </div>
 
             <style>{`

@@ -23,7 +23,7 @@ const calculateHotelPrice = (rooms) => {
 
 export const createPrivateTrip = async (req, res) => {
     try {
-        const { regionDetails, itineraryBuilder, price, enquiryDetails, enquiryType } = req.body;
+        const { regionDetails, itineraryBuilder, price, enquiryDetails, enquiryType,customerNotes,internalNotes } = req.body;
 
         if (!regionDetails || !itineraryBuilder || !enquiryDetails || !price) {
             return res.status(400).json({
@@ -113,6 +113,8 @@ export const createPrivateTrip = async (req, res) => {
             privateTripId,
             regionDetails,
             itineraryBuilder,
+            customerNotes,
+            internalNotes,
             price,
             enquiryType: enquiryType,
             enquiryModel,

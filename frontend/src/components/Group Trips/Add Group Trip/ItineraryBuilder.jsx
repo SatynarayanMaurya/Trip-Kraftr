@@ -629,6 +629,26 @@ function ItineraryBuilder({
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
+
+            {/* Trip Name — UNTOUCHED */}
+            <div className="w-full flex items-center gap-3 border border-[#18305C] rounded-full px-5 py-2 bg-white">
+
+                <span className="text-[18px] font-bold text-[#18305C] whitespace-nowrap">
+                    Trip Name :
+                </span>
+
+                <input
+                    type="text"
+                    placeholder="Enter Trip Name..."
+                    value={itineraryBuilder?.tripName ?? ""}
+                    onChange={(e) =>
+                        handleItineraryChange(null, "tripName", e.target.value)
+                    }
+                    className="w-full bg-transparent outline-none border-none text-[18px]  text-[#18305C] placeholder:text-[#18305C]"
+                />
+
+            </div>
+
             {/* Trip Overview — UNTOUCHED */}
             <div style={{ ...cardStyle }}>
                 <div style={{ fontSize: '18px', fontWeight: '700', color: BLUE, marginBottom: '12px' }}>Trip Overview</div>

@@ -342,7 +342,7 @@ function RoomEntryInventory({
                                     value={mp}
                                     checked={room.mealPlan === mp}
                                     onChange={() => handleMealPlanChange(mp)}
-                                    className="w-[14px] h-[14px] cursor-pointer"
+                                    className="w-3.5 h-3.5 cursor-pointer"
                                     style={{ accentColor: PINK }}
                                 />
                                 {mp.toUpperCase()}

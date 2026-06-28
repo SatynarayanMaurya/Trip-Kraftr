@@ -519,7 +519,13 @@ function DaysDetails() {
 
             </div>
 
-            <PriceSection price={privateTripDetails?.price} noOfDays={privateTripDetails?.regionDetails?.noOfDays || 3} isEditable={false} />
+            <PriceSection 
+                price={privateTripDetails?.price} 
+                noOfDays={privateTripDetails?.regionDetails?.noOfDays || 3} 
+                isEditable={false} 
+                formData={privateTripDetails} 
+                
+            />
         </div>
     )
 }

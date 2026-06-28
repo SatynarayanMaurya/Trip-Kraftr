@@ -1040,7 +1040,7 @@ export const updatePrivateTrip = async (req, res) => {
     try {
 
         const { privateTripId } = req.params;
-        const { regionDetails, itineraryBuilder, price } = req.body;
+        const { regionDetails, itineraryBuilder, price, customerNotes, internalNotes } = req.body;
 
         if (!privateTripId || !regionDetails || !itineraryBuilder || !price) {
             return res.status(400).json({
@@ -1187,7 +1187,7 @@ export const updatePrivateTrip = async (req, res) => {
 
                 updatedHotelPayments[existingIndex].isActive = true;
 
-            } 
+            }
             else {
 
                 updatedHotelPayments.push({
@@ -1300,7 +1300,7 @@ export const updatePrivateTrip = async (req, res) => {
         // ==========================================
 
         const updatedGuestPayments = {
-            ...existingPrivateTripFinance.guestPayments,
+            ...existingPrivateTripFinance.guestPayments.toObject(),
             price: price?.discountedPrice,
             balanceAmount: Math.max(
                 0,
@@ -1309,6 +1309,7 @@ export const updatePrivateTrip = async (req, res) => {
             )
         };
 
+        console.log(("updatedGuestPayments : ", updatedGuestPayments))
         // ==========================================
         // UPDATE FINANCE
         // ==========================================
@@ -1329,6 +1330,7 @@ export const updatePrivateTrip = async (req, res) => {
                 select: "_id vendorName contactNo vehicleImageUrl"
             })
 
+        console.log(("updatedPrivateTripFinance : ", updatedPrivateTripFinance))
         // ==========================================
         // UPDATE TRIP
         // ==========================================
@@ -1338,7 +1340,9 @@ export const updatePrivateTrip = async (req, res) => {
             {
                 regionDetails,
                 itineraryBuilder,
-                price
+                price,
+                customerNotes,
+                internalNotes
             },
             {
                 new: true

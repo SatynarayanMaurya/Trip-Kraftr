@@ -29,6 +29,13 @@ function AddParticipant({ closeModal, setIsUpdated }) {
   const [showSuggestions, setShowSuggestions] = useState(false)
   const searchRef = useRef(null)
 
+  const STATUS = [
+    {enquiry:"Enquiry"}, 
+    {confirmed:"Confirmed"}, 
+    {partialPaid:"Partial Paid"},
+    {fullyPaid: "Fully paid"}
+  ]
+
   const [form, setForm] = useState({
     travellerName: '',
     totalMembers: '',
@@ -291,7 +298,6 @@ function AddParticipant({ closeModal, setIsUpdated }) {
                           
                         </p>
                         <span>• {enq.accountId?.phone}</span>
-                        {/* <span className="bg-gray-100 px-1.5 rounded text-gray-600">{enq.status}</span> */}
                       </div>
                     </button>
                   ))}
@@ -313,10 +319,9 @@ function AddParticipant({ closeModal, setIsUpdated }) {
                 }}
                 className="h-full pl-3 pr-8 py-2.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-pink-400 cursor-pointer"
               >
-                {/* <option value="">Status</option> */}
                 <option value="enquiry">Enquiry</option>
-                <option value="paid">Paid</option>
-                <option value="partial">Partial</option>
+                <option value="partial">Partial Paid</option>
+                <option value="paid">Fully Paid</option>
                 <option value="confirmed">Confirmed</option>
               </select>
               <ChevronDown size={14} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />

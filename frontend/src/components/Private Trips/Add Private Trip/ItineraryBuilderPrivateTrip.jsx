@@ -198,7 +198,7 @@ function PlacesSection({ dayData, placesForActiveDay, onDayChange }) {
 
 // ─── ItineraryBuilder — props + Trip Overview + sidebar UNCHANGED ─────────────
 function ItineraryBuilderPrivateTrip({
-    formData, activeDay, setActiveDay,
+    formData, setFormData, activeDay, setActiveDay,
     allSubRegions, allVehicles, hotelsForActiveDay, placesForActiveDay,
     activitiesForActiveDay, roomTypesForActiveDay, roomRatesForActiveDayHotel,
     subRegionLoading, hotelLoading, placeLoading,
@@ -413,15 +413,70 @@ function ItineraryBuilderPrivateTrip({
                     </div>
 
                     <style>{`
-                    .day-tabs-mobile  { display: none !important; }
-                    .day-sidebar-desktop { display: flex !important; }
-                    .day-layout-desktop  { display: flex !important; }
-                    @media (max-width: 640px) {
-                        .day-tabs-mobile     { display: flex !important; }
-                        .day-sidebar-desktop { display: none !important; }
-                        .day-layout-desktop  { flex-direction: column !important; }
-                    }
-                `}</style>
+                        .day-tabs-mobile  { display: none !important; }
+                        .day-sidebar-desktop { display: flex !important; }
+                        .day-layout-desktop  { display: flex !important; }
+                        @media (max-width: 640px) {
+                            .day-tabs-mobile     { display: flex !important; }
+                            .day-sidebar-desktop { display: none !important; }
+                            .day-layout-desktop  { flex-direction: column !important; }
+                        }
+                    `}</style>
+
+                    {/* Notes  */}
+                    <div className="flex flex-col lg:flex-row gap-4">
+                        <div className="flex-1 flex flex-col gap-2">
+                            <label
+                                htmlFor="internalNotes"
+                                className="text-sm font-semibold text-gray-700"
+                            >
+                                Internal Notes
+                            </label>
+
+                            <textarea
+                                value={formData?.internalNotes||''}
+                                onChange={(e) => {
+                                    setFormData(prev => ({
+                                        ...formData,
+                                        internalNotes: e.target.value
+                                    }))
+                                }}
+                                id="internalNotes"
+                                name="internalNotes"
+                                rows={4}
+                                placeholder="Add internal notes..."
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-800
+                                    outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200
+                                    resize-none"
+                            />
+                        </div>
+
+                        <div className="flex-1 flex flex-col gap-2">
+                            <label
+                                htmlFor="customerNotes"
+                                className="text-sm font-semibold text-gray-700"
+                            >
+                                Customer Notes
+                            </label>
+
+                            <textarea
+                                value={formData?.customerNotes||''}
+                                onChange={(e) => {
+                                    setFormData(prev => ({
+                                        ...formData,
+                                        customerNotes: e.target.value
+                                    }))
+                                }}
+                                id="customerNotes"
+                                name="customerNotes"
+                                rows={4}
+                                placeholder="Add customer notes..."
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-800
+                                    outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200
+                                    resize-none"
+                            />
+                        </div>
+                    </div>
 
                     {/* Save button */}
                     <div className="flex justify-end">
@@ -458,10 +513,11 @@ function ItineraryBuilderPrivateTrip({
                         </button>
                     </div>
                 </div>
+
             </div>
 
             {/* RIGHT: sticky price section, desktop only */}
-            <PriceSection price={price} setPrice={setPrice} noOfDays={formData?.noOfDays || 3} />
+            <PriceSection price={price} setPrice={setPrice} noOfDays={formData?.noOfDays || 3} formData={formData} />
         </div>
     );
 }

@@ -317,11 +317,11 @@ function AddRoomRate({ onClose, hotelId, allRooms }) {
                             <table className="min-w-full">
                                 <thead className="bg-[#f2f2f5]">
                                     <tr className="text-left text-sm font-bold text-[#1d3561]">
-                                        <th className="px-4 py-3 min-w-[220px]">Room Category</th>
-                                        <th className="px-4 py-3 min-w-[110px]">EP</th>
-                                        <th className="px-4 py-3 min-w-[110px]">CP</th>
-                                        <th className="px-4 py-3 min-w-[110px]">MAP</th>
-                                        <th className="px-4 py-3 min-w-[110px]">AP</th>
+                                        <th className="px-4 py-3 min-w-55">Room Category</th>
+                                        <th className="px-4 py-3 min-w-55">EP</th>
+                                        <th className="px-4 py-3 min-w-55">CP</th>
+                                        <th className="px-4 py-3 min-w-55">MAP</th>
+                                        <th className="px-4 py-3 min-w-55">AP</th>
                                     </tr>
                                 </thead>
 

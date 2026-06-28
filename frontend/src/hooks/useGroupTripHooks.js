@@ -3,7 +3,7 @@ import { apiConnector } from '../services/apiConnector'
 import { useDispatch, useSelector } from 'react-redux'
 import { setLoading } from '../redux/slices/userSlice'
 import { groupTripEndpoints } from '../services/Apis/groupTripApis';
-import { addNewGroupTrip, removeGroupTripById, setGroupTripById, setGroupTripByPage, setGroupTripSummaryById, setSuggestionGroupTripByRegionId, setUpdateGroupTripStatus, setUpdateGroupTripStatusEverywhere, setUpdateGroupTripStatusForPages, updateGroupTrip } from '../redux/slices/groupTripSlice';
+import { addNewGroupTrip, clearGroupTrips, removeGroupTripById, setGroupTripById, setGroupTripByPage, setGroupTripSummaryById, setSuggestionGroupTripByRegionId, setUpdateGroupTripStatus, setUpdateGroupTripStatusEverywhere, setUpdateGroupTripStatusForPages, updateGroupTrip } from '../redux/slices/groupTripSlice';
 
 export const useGroupTripHooks = () => {
   const dispatch = useDispatch();
@@ -279,11 +279,37 @@ export const useGroupTripHooks = () => {
       dispatch(setLoading(true))
 
       const response = await apiConnector(
-        "PUT",
-        `${groupTripEndpoints.DELETE_GROUP_TRIP_STATUS_BY_ID}/${groupTripId}`, {_id}
+        "DELETE",
+        `${groupTripEndpoints.DELETE_GROUP_TRIP_PARTICIPANT_BY_ID}/${groupTripId}`, {_id}
       )
 
-      dispatch(removeGroupTripById({id:groupTripId}))
+      if(response?.data?.success){
+        dispatch(removeGroupTripById({id:groupTripId}))
+      }
+
+      return response
+
+    } catch (error) {
+      throw error
+    } finally {
+      dispatch(setLoading(false))
+    }
+  }
+
+  // For getting Hotels with paginated
+  const deleteGroupTripById = async (groupTripId) => {
+    try {
+
+      dispatch(setLoading(true))
+
+      const response = await apiConnector(
+        "DELETE",
+        `${groupTripEndpoints.DELETE_GROUP_TRIP_BY_ID}/${groupTripId}`
+      )
+
+      if(response?.data?.success){
+        dispatch(clearGroupTrips())
+      }
 
       return response
 
@@ -307,6 +333,7 @@ export const useGroupTripHooks = () => {
     updateGroupTripStatusById,
     getGroupTripParticipantsById,
     updateGroupTripParticipantById,
-    deleteGroupTripParticipantById
+    deleteGroupTripParticipantById,
+    deleteGroupTripById
   };
 };

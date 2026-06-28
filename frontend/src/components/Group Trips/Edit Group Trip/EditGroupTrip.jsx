@@ -78,6 +78,7 @@ function EditGroupTrip() {
             quantity: 1,
         },
         itineraryBuilder: {
+            tripName:"",
             tripOverview: '',
             daysDetails: [],
         },
@@ -147,6 +148,7 @@ function EditGroupTrip() {
             },
 
             itineraryBuilder: {
+                tripName: groupTripDetails?.itineraryBuilder?.tripName || '',
                 tripOverview: groupTripDetails?.itineraryBuilder?.tripOverview || '',
 
                 daysDetails: (groupTripDetails?.itineraryBuilder?.daysDetails || []).map(day => ({

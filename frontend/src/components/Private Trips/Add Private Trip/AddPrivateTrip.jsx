@@ -58,6 +58,8 @@ function AddPrivateTrip() {
             tripOverview: '',
             daysDetails: [],
         },
+        internalNotes:'',
+        customerNotes:'',
     });
 
     const [enquiryDetails, setEnquiryDetails] = useState(null)
@@ -112,7 +114,7 @@ function AddPrivateTrip() {
         max_margin: 0,
         margin: 0,
         commission: 0,
-        isMargin: true,
+        isMargin: false,
         additionalActivities: 0,
         totalCost: 0,
         festivalSurge: 0,
@@ -301,10 +303,10 @@ function AddPrivateTrip() {
     const shouldFetchHotel = activeTab === 3 && activeDayData?.hotelDetails?.hotelCategory && selectedSubRegionIds.length > 0;
     const shouldFetchMore = activeTab === 3 && selectedSubRegionIds.length > 0;
 
-    const { loading: hotelLoading, refetch: refetchHotels } = useHotelsData({ 
-        subRegionIds: sortedSubRegionId, 
-        category: activeDayData?.hotelDetails?.hotelCategory, 
-        enabled: shouldFetchHotel 
+    const { loading: hotelLoading, refetch: refetchHotels } = useHotelsData({
+        subRegionIds: sortedSubRegionId,
+        category: activeDayData?.hotelDetails?.hotelCategory,
+        enabled: shouldFetchHotel
     });
 
     useEffect(() => {
@@ -393,6 +395,13 @@ function AddPrivateTrip() {
     const handleSaveItinerary = async () => {
         try {
             setSubmitLoading(true);
+
+            if (!price?.isMargin) {
+                if (price?.commission <= 0) {
+                    return toast.warn("Commission must be greater that 0")
+                }
+            }
+
             const isRegionValid = isRegionDetailsValid(formData)
             if (!isRegionValid?.success) {
                 toast.warn(isRegionValid.message || "Error")
@@ -423,9 +432,15 @@ function AddPrivateTrip() {
                 },
             };
 
+            const updatedPrice = {
+                ...price,
+                gstPrice: price?.isGstChecked ? price?.gstPrice : 0,
+            };
+
+
             const payload = {
                 ...updatedFormData,
-                price,
+                price:updatedPrice,
                 enquiryDetails,
                 enquiryType: searchEnquiry?.enquiryType
             }
@@ -506,6 +521,8 @@ function AddPrivateTrip() {
 
             {activeTab === 1 && (
                 <EnquiryPrivateTrip
+                    enquiryDetails={enquiryDetails}
+                    setFormData={setFormData}
                     searchEnquiry={searchEnquiry}
                     setSearchEnquiry={setSearchEnquiry}
                     setCustomerDetails={setCustomerDetails}
@@ -517,7 +534,9 @@ function AddPrivateTrip() {
 
             {activeTab === 2 && (
                 <TripDetailsPrivateTrip
-
+                    formData={formData}
+                    customerNotes = {formData?.customerNotes}
+                    setFormData={setFormData}
                     customerDetails={customerDetails}
                     enquiryDetails={enquiryDetails}
                     enquiryType={searchEnquiry?.enquiryType}
@@ -532,6 +551,7 @@ function AddPrivateTrip() {
             {activeTab === 3 && (
                 <ItineraryBuilderPrivateTrip
                     formData={formData}
+                    setFormData={setFormData}
                     activeDay={activeDay}
                     setActiveDay={setActiveDay}
                     allSubRegions={allSubRegions}
@@ -555,9 +575,6 @@ function AddPrivateTrip() {
                 />
             )}
 
-            {/* {activeTab === 3 && (
-                <GroupTripPolicies regionId={region1} regionName={regions?.find(r => r?._id === region1)?.name} />
-            )} */}
         </div>
     );
 }

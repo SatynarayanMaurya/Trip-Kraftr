@@ -1,20 +1,24 @@
 import React from "react";
 import { inputStyle, labelStyle } from "../../Common/CommonCss";
 import CustomerDetails from "./CustomerDetails";
+import { useRef } from "react";
 
 const PINK = "#ED5F8D";
 const BLUE = "#18305C";
 
 function TripDetailsPrivateTrip({
+    formData,
+    customerNotes,
+    setFormData,
     customerDetails,
     enquiryDetails,
     enquiryType,          // pass from parent: searchEnquiry.enquiryType
-    formData,
     regions,
     handleChange,
     handleSave,
     getFilteredRegions,
 }) {
+    const dateRef = useRef(null);
     return (
         <div>
             {/* ── Customer Details (read-only) ── */}
@@ -51,9 +55,7 @@ function TripDetailsPrivateTrip({
                 <div
                     style={{
                         display: "grid",
-                        // gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
                         gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-                        // gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
                         gap: "20px",
                     }}
                 >
@@ -133,6 +135,9 @@ function TripDetailsPrivateTrip({
                             Start Date <span style={{ color: PINK }}>*</span>
                         </label>
                         <input
+
+                            ref={dateRef}
+                            onClick={() => dateRef.current?.showPicker()}
                             type="date"
                             style={inputStyle}
                             value={formData.startDate || ""}
@@ -208,6 +213,33 @@ function TripDetailsPrivateTrip({
                         ))}
                     </div>
                 )}
+
+
+                <div className="flex-1 flex flex-col gap-2 mt-4">
+                    <label
+                        htmlFor="customerNotes"
+                         style={labelStyle}
+                    >
+                        Customer Notes
+                    </label>
+
+                    <textarea
+                        value={customerNotes}
+                        onChange={(e) => {
+                            setFormData(prev => ({
+                                ...formData,
+                                customerNotes: e.target.value
+                            }))
+                        }}
+                        id="customerNotes"
+                        name="customerNotes"
+                        rows={4}
+                        placeholder="Add customer notes..."
+                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-800
+                                    outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200
+                                    resize-none"
+                    />
+                </div>
 
                 {/* Save Button */}
                 <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "24px" }}>
