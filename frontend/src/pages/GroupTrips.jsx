@@ -317,7 +317,7 @@ function GroupTrips() {
               value={currentPage}
               disabled={isSearching}
               onChange={(e) => setCurrentPage(Number(e.target.value))}
-              className="w-[100px] bg-white border border-gray-200 text-[#18305C] text-sm px-3 py-2 rounded-lg outline-none focus:border-[#E91E8C] cursor-pointer"
+              className="w-25 bg-white border border-gray-200 text-[#18305C] text-sm px-3 py-2 rounded-lg outline-none focus:border-[#E91E8C] cursor-pointer"
               style={{
                 boxShadow: '0 1px 6px rgba(0,0,0,0.06)',
               }}

@@ -9,7 +9,7 @@ const initialState = {
     privateTripById: {}, 
     privateTripFinanceById: {}, 
 
-    privateTripPageLimit: 4,
+    privateTripPageLimit: 12,
     currentPagePrivateTrip :1,
 
 
@@ -80,7 +80,9 @@ export const privateTripSlice = createSlice({
             if (!id ) return;
 
             state.privateTripById[id] = data;
-            state.privateTripFinanceById[id] = financeDetails;
+            if(financeDetails){
+                state.privateTripFinanceById[id] = financeDetails;
+            }
         },
 
         setPrivateTripFinanceById: (state, action) => {
@@ -96,6 +98,10 @@ export const privateTripSlice = createSlice({
             delete state.privateTripFinanceById[id];
         },
 
+        clearPrivateTrip:(state,action)=>{
+            state.privateTripByPages={}
+        }
+
 
     }
 })
@@ -106,7 +112,8 @@ export const {
     setPrivateTripsByPage,
     setPrivateTripById,
     setPrivateTripFinanceById,
-    clearPrivateTripFinanceById
+    clearPrivateTripFinanceById,
+    clearPrivateTrip,
 } = privateTripSlice.actions
 
 export default privateTripSlice.reducer

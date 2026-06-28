@@ -14,10 +14,10 @@ const formatPrice = (price) => {
 }
 
 const STATUS_STYLES = {
-    Created: 'bg-green-100 text-green-700',
-    Confirmed: 'bg-blue-100 text-blue-700',
-    Cancelled: 'bg-red-100 text-red-700',
-    Completed: 'bg-gray-100 text-gray-600',
+    created: 'bg-green-100 text-green-700',
+    confirmed: 'bg-blue-100 text-blue-700',
+    cancelled: 'bg-red-100 text-red-700',
+    completed: 'bg-gray-100 text-gray-600',
 }
 
 const formatDate = (dateStr) => {
@@ -35,12 +35,12 @@ function TripCard({ trip, onView, onDelete }) {
     const daysDetails = itineraryBuilder?.daysDetails ?? []
     const places = countPlaces(daysDetails)
     const activities = countActivities(daysDetails)
-    const nights = regionDetails?.noOfDays ?? null
+    const nights = regionDetails?.noOfDays -1 ?? null
     const days = nights ? nights + 1 : null
     const adults = regionDetails?.adults ?? 0
     const children = regionDetails?.children ?? 0
     const startDate = regionDetails?.startDate ? formatDate(regionDetails.startDate) : null
-    const tripStatus = status ?? 'Created'
+    const tripStatus = status ?? 'created'
 
     return (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-pink-100 transition-all duration-200 flex flex-col overflow-hidden">
@@ -50,7 +50,7 @@ function TripCard({ trip, onView, onDelete }) {
                     <p className="text-xs text-gray-400 font-medium tracking-wide mb-0.5">{privateTripId}</p>
                     <h3 className="font-bold text-gray-900 text-base leading-tight">{customerName}</h3>
                     {(regionName || tripName) && (
-                        <p className="text-xs text-gray-500 mt-0.5 truncate max-w-[200px]">
+                        <p className="text-xs text-gray-500 mt-0.5 truncate max-w-50">
                             {tripName ?? regionName}
                         </p>
                     )}

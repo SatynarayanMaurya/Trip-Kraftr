@@ -9,10 +9,14 @@ import TripCard from '../components/Private Trips/Private Trip Main page/TripCar
 import PrivateCardSkeleton from '../components/Private Trips/Private Trip Main page/PrivateCardSkeleton'
 import Pagination from '../components/Common/Pagination'
 import { setCurrentPagePrivateTrip } from '../redux/slices/privateTripSlice'
+import DeleteModal from '../components/DeleteModals/DeleteModal'
+import { toast } from 'react-toastify'
+import { useCommonHooks } from '../hooks/useCommonHooks'
+import { useRegionsData } from '../hooks/Resuable Hooks/useResuableData'
 
 // ── helpers ────────────────────────────────────────────────────────────────
 
-const STATUS_OPTIONS = ['All', 'Created', 'Confirmed', 'Cancelled', 'Completed']
+const STATUS_OPTIONS = ['All', 'created', 'confirmed', 'cancelled', 'completed']
 
 
 // ── sub-components ─────────────────────────────────────────────────────────
@@ -23,20 +27,20 @@ function FilterDropdown({ label, value, onChange, options }) {
     <div className="relative">
       <button
         onClick={() => setOpen((p) => !p)}
-        className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-xl bg-white text-sm font-medium text-gray-700 hover:border-[#E91E8C] hover:text-[#E91E8C] transition-colors min-w-[110px] justify-between shadow-sm"
+        className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-xl bg-white text-sm font-medium text-gray-700 hover:border-[#E91E8C] hover:text-[#E91E8C] transition-colors min-w-27.5 justify-between shadow-sm"
       >
         <span>{value || label}</span>
         <ChevronDown size={14} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
       {open && (
-        <div className="absolute z-20 max-h-[40vh] top-full mt-1 left-0 bg-white border border-gray-100 rounded-xl shadow-lg min-w-[130px] py-1 overflow-auto">
+        <div className="absolute z-20 max-h-[40vh] top-full mt-1 left-0 bg-white border border-gray-100 rounded-xl shadow-lg min-w-32.5 py-1 overflow-auto">
           {options?.map((opt) => (
             <button
               key={opt}
               onClick={() => { onChange(opt === 'All' || opt === 0 ? '' : opt); setOpen(false) }}
               className={`w-full text-left px-4 py-2 text-sm hover:bg-pink-50 hover:text-[#E91E8C] transition-colors ${(value === opt || (!value && (opt === 'All' || opt === 0)))
-                  ? 'text-[#E91E8C] font-medium bg-pink-50'
-                  : 'text-gray-700'
+                ? 'text-[#E91E8C] font-medium bg-pink-50'
+                : 'text-gray-700'
                 }`}
             >
               {opt === 0 ? 'Select Days' : opt}
@@ -48,23 +52,51 @@ function FilterDropdown({ label, value, onChange, options }) {
   )
 }
 
+function FilterSelect({ value, onChange, placeholder, children }) {
+  return (
+    <div className="relative">
+      <select
+        value={value ?? ''}
+        onChange={(e) => onChange(e.target.value === '' ? null : e.target.value)}
+        className="appearance-none bg-white border border-gray-200 text-gray-700 text-sm rounded-xl pl-3.5 pr-9 py-2.5 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#e91e8c]/30 focus:border-[#e91e8c]/60 transition min-w-[110px]"
+      >
+        <option value="">{placeholder}</option>
+        {children}
+      </select>
+      <ChevronDown
+        size={15}
+        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+      />
+    </div>
+  );
+}
+
+
 // ── main component ──────────────────────────────────────────────────────────
 
 function PrivateTrips() {
   const navigate = useNavigate()
   const dispatch = useDispatch()
-  const { getPrivateTrips } = usePrivateTripHooks()
+  const {searchPrivateTrips } = useCommonHooks()
+  const { getPrivateTrips, deletePrivateTripById } = usePrivateTripHooks()
+
+  const { regions, loading: regionLoading }         = useRegionsData();
 
   const [fetchLoading, setFetchLoading] = useState(false)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
-  const [regionFilter, setRegionFilter] = useState('')
   const [daysFilter, setDaysFilter] = useState('')
-
+  const isProduction = useSelector(s=>s.user.isProduction)
+  const [regionId,  setRegionId]  = useState(null);
+  const [isSearching, setIsSearching] = useState(false)
+  const [searchedPrivatetrips, setSearchedPrivateTrips] = useState([])
   const currentPage = useSelector((s) => s.privateTrip.currentPagePrivateTrip)
   const currentPagePrivateTrip = useSelector((s) => s.privateTrip.privateTripByPages?.[currentPage])
   const pagination = useSelector((s) => s.privateTrip.paginationPrivateTrip)
   const pageLimit = useSelector((s) => s.privateTrip.privateTripPageLimit)
+  const [isDeleteModal, setIsDeleteModal] = useState(false)
+  const [deleteTripDetails, setDeleteTripDetails] = useState(null)
+  const [isDeleted, setIsDeleted] = useState(false)
 
   const fetchPrivateTrips = async () => {
     try {
@@ -77,9 +109,32 @@ function PrivateTrips() {
     }
   }
 
+  const searchPrivatetrip = async () => {
+    try {
+      setIsSearching(true)
+      setFetchLoading(true)
+      const response = await searchPrivateTrips(search,regionId,daysFilter,statusFilter)
+      setSearchedPrivateTrips(response?.data?.data)
+    } catch (error) {
+      console.error('Error fetching private trips:', error)
+    } finally {
+      setFetchLoading(false)
+    }
+  }
+
+
   useEffect(() => {
     if (!currentPagePrivateTrip) fetchPrivateTrips()
-  }, [currentPage, pageLimit])
+  }, [currentPage, pageLimit,isDeleted])
+
+  useEffect(()=>{
+    if(search || regionId || daysFilter || statusFilter){
+      searchPrivatetrip()
+    }
+    else{
+      setIsSearching(false)
+    }
+  },[search,regionId,daysFilter,statusFilter])
 
   // derive unique regions from loaded data
   const allRegions = React.useMemo(() => {
@@ -92,22 +147,28 @@ function PrivateTrips() {
   const daysOptions = [0, ...Array.from({ length: 30 }, (_, i) => i + 1)]
 
   // client-side filtering
-  const filtered = React.useMemo(() => {
-    if (!currentPagePrivateTrip) return []
-    return currentPagePrivateTrip.filter((trip) => {
-      const name = trip?.enquiryId?.accountId?.fullName ?? ''
-      const phone = String(trip?.enquiryId?.accountId?.phone ?? '')
-      const matchSearch = !search || name.toLowerCase().includes(search.toLowerCase()) || phone.includes(search)
-      const matchStatus = !statusFilter || (trip?.status ?? 'Created') === statusFilter
-      const matchRegion = !regionFilter || trip?.regionDetails?.region1?.name === regionFilter
-      const matchDays = !daysFilter || trip?.regionDetails?.noOfDays === Number(daysFilter)
-      return matchSearch && matchStatus && matchRegion && matchDays
-    })
-  }, [currentPagePrivateTrip, search, statusFilter, regionFilter, daysFilter])
+  const filtered = isSearching ? searchedPrivatetrips : currentPagePrivateTrip
 
   const handleView = (trip) => navigate(`view/${trip._id}`)
+
   const handleDelete = (trip) => {
-    console.log('delete', trip._id)
+    setDeleteTripDetails(trip)
+    setIsDeleteModal(true)
+  };
+
+  const handleDeleteTrip = async () => {
+    try {
+      setFetchLoading(true);
+      const response = await deletePrivateTripById(deleteTripDetails?._id);
+      toast.success(response?.data?.message)
+      setIsDeleted(!isDeleted)
+       setIsDeleteModal(false)
+    } catch (error) {
+      if (!isProduction) console.log('Error:', error);
+      toast.error(error?.response?.data?.message || error?.message || 'Error fetching group trips');
+    } finally {
+      setFetchLoading(false);
+    }
   }
 
   return (
@@ -143,12 +204,14 @@ function PrivateTrips() {
 
         {/* dropdowns */}
         <div className="flex items-center gap-2 flex-wrap">
-          <FilterDropdown
-            label="Region"
-            value={regionFilter}
-            onChange={setRegionFilter}
-            options={allRegions}
-          />
+                  <FilterSelect value={regionId} onChange={setRegionId} placeholder="Region">
+          {regionLoading
+            ? <option disabled>Loading…</option>
+            : regions?.map((r) => (
+                <option key={r._id} value={r._id}>{r.name}</option>
+              ))
+          }
+        </FilterSelect>
           <FilterDropdown
             label="Status"
             value={statusFilter}
@@ -169,7 +232,7 @@ function PrivateTrips() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {Array.from({ length: 8 }).map((_, i) => <PrivateCardSkeleton key={i} />)}
         </div>
-      ) : filtered.length === 0 ? (
+      ) : filtered?.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <div className="w-16 h-16 rounded-full bg-pink-50 flex items-center justify-center mb-4">
             <MapPin size={28} className="text-[#E91E8C]" />
@@ -179,7 +242,7 @@ function PrivateTrips() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {filtered.map((trip) => (
+          {filtered?.map((trip) => (
             <TripCard
               key={trip._id}
               trip={trip}
@@ -192,7 +255,15 @@ function PrivateTrips() {
 
 
       {/* Pagination */}
-      <Pagination pagination={pagination} isSearching={false} currentPage={currentPage} setCurrentPage={(val)=>dispatch(setCurrentPagePrivateTrip(val))}/>
+      <Pagination pagination={pagination} isSearching={false} currentPage={currentPage} setCurrentPage={(val) => dispatch(setCurrentPagePrivateTrip(val))} />
+
+        {/* Delete Modal  */}
+        <>
+          {
+            isDeleteModal && 
+            <DeleteModal  onClose={()=>setIsDeleteModal(false)} onDelete={handleDeleteTrip} itemName = "Private Trip" confirmText = {deleteTripDetails?.privateTripId}/>
+          }
+        </>
     </div>
   )
 }

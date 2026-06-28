@@ -53,36 +53,111 @@ export const isRegionDetailsValid = (packageDetails) => {
 };
 
 
+// export const isDayOneValid = (packageDetails) => {
+
+//     const adult = packageDetails?.regionDetails?.adults;
+//     const childAge = packageDetails?.regionDetails?.childAges
+//     const adultChildMax12 = childAge?.filter(v => v > 6 && v <= 12)?.length;
+//     const adultChildMin12 = childAge?.filter(v => v > 12)?.length;
+//     const totalAdults = adult + adultChildMin12;
+//     const dayDetails = packageDetails?.itineraryBuilder?.daysDetails?.[0];
+//     const totalMaxAdults = dayDetails?.hotelDetails?.rooms?.reduce((acc, val) => acc + ((val?.maxAdults + val?.noOfExtraMattress) * val?.noOfRooms), 0)
+//     const totalTakenCNB = dayDetails?.hotelDetails?.rooms?.reduce((acc, val) => acc + (val?.noOfCnb||0), 0)
+//     const remainingAdultSeats = totalMaxAdults - totalAdults
+//     const hotelType = dayDetails?.hotelDetails?.hotelType
+//     if(hotelType === 'manual'){
+//         return {
+//             success: true,
+//             message: "All Validation passed"
+//         }
+//     }
+//     // Room Validation 
+//     if (totalMaxAdults < totalAdults) {
+//         return {
+//             success: false,
+//             message: "You need to add more room in Day-1"
+//         }
+//     }
+
+//     if((remainingAdultSeats+totalTakenCNB) < adultChildMax12){
+//         return {
+//             success: false,
+//             message: "You need to add CNB for child in Day-1"
+//         }
+//     }
+
+
+//     return {
+//         success: true,
+//         message: "All Validation passed"
+//     }
+// }
+
 export const isDayOneValid = (packageDetails) => {
+    const adult = packageDetails?.regionDetails?.adults || 0;
+    const childAge = packageDetails?.regionDetails?.childAges || [];
 
-    const adult = packageDetails?.regionDetails?.adults;
-    const childAge = packageDetails?.regionDetails?.childAges
-    const adultChildMax12 = childAge?.filter(v => v > 6 && v <= 12)?.length;
-    const adultChildMin12 = childAge?.filter(v => v > 12)?.length;
+    const adultChildMax12 = childAge.filter(v => v > 6 && v <= 12).length;
+    const adultChildMin12 = childAge.filter(v => v > 12).length;
+
     const totalAdults = adult + adultChildMin12;
-    const dayDetails = packageDetails?.itineraryBuilder?.daysDetails?.[0];
-    const totalMaxAdults = dayDetails?.hotelDetails?.rooms?.reduce((acc, val) => acc + ((val?.maxAdults + val?.noOfExtraMattress) * val?.noOfRooms), 0)
-    const totalTakenCNB = dayDetails?.hotelDetails?.rooms?.reduce((acc, val) => acc + (val?.noOfCnb||0), 0)
-    const remainingAdultSeats = totalMaxAdults - totalAdults
-    const hotelType = dayDetails?.hotelDetails?.hotelType
-    if(hotelType === 'manual'){
-        return {
-            success: true,
-            message: "All Validation passed"
-        }
-    }
-    // Room Validation 
-    if (totalMaxAdults < totalAdults) {
-        return {
-            success: false,
-            message: "You need to add more room in Day-1"
-        }
-    }
 
-    if((remainingAdultSeats+totalTakenCNB) < adultChildMax12){
-        return {
-            success: false,
-            message: "You need to add CNB for child in Day-1"
+    const daysDetails = packageDetails?.itineraryBuilder?.daysDetails || [];
+
+    for (let i = 0; i < daysDetails.length; i++) {
+
+        const dayDetails = daysDetails[i];
+        const hotelDetails = dayDetails?.hotelDetails;
+
+        // Day-1 hotel mandatory, other days skip if no hotel
+        if (!hotelDetails && i === 0) {
+            return {
+                success: false,
+                message: "Hotel is required in Day-1"
+            };
+        }
+
+        if (!hotelDetails || !hotelDetails?.hotelName) continue;
+
+
+        // Skip manual hotel validation
+        if (hotelDetails?.hotelType === "manual") {
+            continue;
+        }
+
+
+        const rooms = hotelDetails?.rooms || [];
+
+        const totalMaxAdults = rooms.reduce(
+            (acc, val) =>
+                acc + ((val?.maxAdults + val?.noOfExtraMattress) * val?.noOfRooms),
+            0
+        );
+
+        const totalTakenCNB = rooms.reduce(
+            (acc, val) => acc + (val?.noOfCnb || 0),
+            0
+        );
+
+
+        const remainingAdultSeats = totalMaxAdults - totalAdults;
+
+
+        // Room validation
+        if (totalMaxAdults < totalAdults) {
+            return {
+                success: false,
+                message: `You need to add more room in Day-${i + 1}`
+            };
+        }
+
+
+        // CNB validation
+        if ((remainingAdultSeats + totalTakenCNB) < adultChildMax12) {
+            return {
+                success: false,
+                message: `You need to add CNB for child in Day-${i + 1}`
+            };
         }
     }
 
@@ -90,9 +165,51 @@ export const isDayOneValid = (packageDetails) => {
     return {
         success: true,
         message: "All Validation passed"
-    }
-}
+    };
+};
 
+export const isVehicleValid = (packageDetails) => {
+    const adult = packageDetails?.regionDetails?.adults || 0;
+    const childAge = packageDetails?.regionDetails?.childAges || [];
+
+    const adultChildMax12 = childAge.filter(v => v > 6 && v <= 12).length;
+    const adultChildMin12 = childAge.filter(v => v > 12).length;
+
+    const totalAdults = adult + adultChildMin12 + adultChildMax12;
+
+    const daysDetails = packageDetails?.itineraryBuilder?.daysDetails || [];
+
+
+    for (let i = 0; i < daysDetails.length; i++) {
+
+        const vehicleDetails = daysDetails[i]?.vehicleDetails || [];
+
+
+        // Skip if no vehicle added
+        if (!vehicleDetails.length || !vehicleDetails?.[0]?.vehicleId) continue;
+
+
+        const totalVehicleCapacity = vehicleDetails.reduce(
+            (acc, vehicle) =>
+                acc + ((vehicle?.capacity || 0) * (vehicle?.quantity || 1)),
+            0
+        );
+
+
+        if (totalVehicleCapacity < totalAdults) {
+            return {
+                success: false,
+                message: `You need to add more Vehicle in Day-${i + 1}`
+            };
+        }
+    }
+
+
+    return {
+        success: true,
+        message: "All Validation passed"
+    };
+};
 
 export const isValidVendorDetails = (vendorDetails) => {
     const {

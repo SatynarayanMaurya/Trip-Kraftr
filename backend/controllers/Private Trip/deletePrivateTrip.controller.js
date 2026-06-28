@@ -1,6 +1,7 @@
 import PrivateTripFinance from "../../models/Private Trip/privateTripfinances.model.js";
+import PrivateTrip from "../../models/Private Trip/privateTrip.model.js";
 import { deleteImageFromCloudinary } from "../../utils/uploadToCloudinary.js";
-
+import mongoose from "mongoose";
 export const deleteHotelVehiclePaymentRowWise = async (req, res) => {
     try {
         const {
@@ -321,5 +322,64 @@ export const deleteUnusedHotelOrVehicle = async (req, res) => {
             success: false,
             message: error?.message || "Internal Server Error",
         });
+    }
+};
+
+
+export const deletePrivateTripById = async (req, res) => {
+    const session = await mongoose.startSession();
+
+    try {
+        const { privateTripId } = req.params;
+
+        if (!privateTripId) {
+            return res.status(400).json({
+                success: false,
+                message: "Private Trip id is required"
+            });
+        }
+
+        session.startTransaction();
+
+        const deletedPrivateTrip = await PrivateTrip.findOneAndDelete(
+            {
+                org_id: req.user.org_id,
+                _id: privateTripId
+            },
+            { session }
+        );
+
+        if (!deletedPrivateTrip) {
+            await session.abortTransaction();
+            return res.status(404).json({
+                success: false,
+                message: "Private Trip not found"
+            });
+        }
+
+        await PrivateTripFinance.findOneAndDelete(
+            {
+                org_id: req.user.org_id,
+                privateTripId
+            },
+            { session }
+        );
+
+        await session.commitTransaction();
+
+        return res.status(200).json({
+            success: true,
+            message: "Private Trip deleted successfully"
+        });
+
+    } catch (error) {
+        await session.abortTransaction();
+
+        return res.status(500).json({
+            success: false,
+            message: error?.message || "Internal Server Error"
+        });
+    } finally {
+        session.endSession();
     }
 };

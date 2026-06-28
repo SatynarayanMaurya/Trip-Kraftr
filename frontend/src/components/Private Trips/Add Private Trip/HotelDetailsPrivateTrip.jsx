@@ -493,7 +493,7 @@ function RoomEntryManual({ room, roomIndex, rooms, canDelete, onRoomChange, onDe
                         placeholder="0"
                         onWheel={(e) => e.currentTarget.blur()}
                         className={numInputCls}
-                        value={room.noOfExtraMattress ?? 0}
+                        value={room.noOfExtraMattress || ''}
                         onChange={e => handleField('noOfExtraMattress', Math.max(0, Number(e.target.value)))}
                     />
                 </div>
@@ -505,7 +505,7 @@ function RoomEntryManual({ room, roomIndex, rooms, canDelete, onRoomChange, onDe
                         placeholder="0"
                         onWheel={(e) => e.currentTarget.blur()}
                         className={numInputCls}
-                        value={room.noOfCnb ?? 0}
+                        value={room.noOfCnb ||''}
                         onChange={e => handleField('noOfCnb', Math.max(0, Number(e.target.value)))}
                     />
                 </div>
@@ -517,7 +517,7 @@ function RoomEntryManual({ room, roomIndex, rooms, canDelete, onRoomChange, onDe
                         placeholder="0"
                         onWheel={(e) => e.currentTarget.blur()}
                         className={numInputCls}
-                        value={room.roomPrice ?? 0}
+                        value={room.roomPrice || ''}
                         onChange={e => handleField('roomPrice', Math.max(0, Number(e.target.value)))}
                     />
                 </div>

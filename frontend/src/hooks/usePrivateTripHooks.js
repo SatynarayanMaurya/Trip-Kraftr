@@ -3,7 +3,7 @@ import { apiConnector } from '../services/apiConnector'
 import { useDispatch, useSelector } from 'react-redux'
 import { setLoading } from '../redux/slices/userSlice'
 import { privateTripEndpoints } from '../services/Apis/privateTripApis';
-import { addNewPrivateTrip, setPrivateTripById, setPrivateTripFinanceById, setPrivateTripsByPage } from '../redux/slices/privateTripSlice';
+import { addNewPrivateTrip, clearPrivateTrip, setPrivateTripById, setPrivateTripFinanceById, setPrivateTripsByPage } from '../redux/slices/privateTripSlice';
 
 export const usePrivateTripHooks = () => {
     const dispatch = useDispatch();
@@ -503,6 +503,57 @@ export const usePrivateTripHooks = () => {
         }
     }
 
+    const deletePrivateTripById = async (privateTripId) => {
+        try {
+
+            dispatch(setLoading(true))
+
+            const response = await apiConnector(
+                "DELETE",
+                `${privateTripEndpoints.DELETE_PRIVATE_TRIP_BY_ID}/${privateTripId}`,
+            )
+            if (response?.data?.success) {
+                dispatch(
+                    clearPrivateTrip()
+                )
+            }
+
+            return response
+
+        } catch (error) {
+            throw error
+        } finally {
+            dispatch(setLoading(false))
+        }
+    }
+
+    const updatePrivateTripStatus = async (privateTripId,status) => {
+        try {
+
+            dispatch(setLoading(true))
+
+            const response = await apiConnector(
+                "PUT",
+                `${privateTripEndpoints.UPDATE_PRIVATE_TRIP_STATUS}/${privateTripId}`,{status}
+            )
+            if (response?.data?.success) {
+                dispatch(
+                     setPrivateTripById({
+                        id:privateTripId,
+                        data: response?.data?.data,
+                    })
+                )
+            }
+
+            return response
+
+        } catch (error) {
+            throw error
+        } finally {
+            dispatch(setLoading(false))
+        }
+    }
+
     return {
         addPrivateTrip,
         getPrivateTrips,
@@ -516,7 +567,9 @@ export const usePrivateTripHooks = () => {
         deletePrivateTripsHotelVehicle,
         deletePrivateTripsGuestPayment,
         updatePrivateTripById,
-        deleteUnusedHotelOrVehiclePrivateTrip
+        deleteUnusedHotelOrVehiclePrivateTrip,
+        deletePrivateTripById,
+        updatePrivateTripStatus
 
     };
 };

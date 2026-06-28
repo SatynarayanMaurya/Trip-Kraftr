@@ -14,7 +14,7 @@ import RegionDetailsSamplePackage from './RegionDetailsSamplePackage';
 import GroupTripPolicies from '../../Group Trips/Add Group Trip/GroupTripPolicies';
 import StepperTab from '../../Group Trips/Edit Group Trip/StepperTab';
 import { blankDay } from './HotelDetailsSimplePackage';
-import { isDayOneValid, isRegionDetailsValid, isValidVendorDetails } from './ValidationSimplePackage';
+import { isDayOneValid, isRegionDetailsValid, isValidVendorDetails, isVehicleValid } from './ValidationSimplePackage';
 import { useSamplePackageHooks } from '../../../hooks/useSamplePackageHooks';
 import { clearRoomRatesForHotelId } from '../../../redux/slices/roomRateSlice';
 import { ensureFavouritePlaces } from '../../Group Trips/Add Group Trip/ValidateItinerary';
@@ -24,7 +24,7 @@ const BLUE = '#18305C';
 
 
 function sortIdsConsistently(arr) {
-    if(!arr) return 
+    if (!arr) return
     return [...arr]?.sort((a, b) => a.localeCompare(b));
 }
 
@@ -33,7 +33,7 @@ function AddSamplePackage() {
     const navigate = useNavigate()
     const dispatch = useDispatch()
 
-    const {addSamplePackage} = useSamplePackageHooks()
+    const { addSamplePackage } = useSamplePackageHooks()
     const [activeTab, setActiveTab] = useState(1);
     const [activeDay, setActiveDay] = useState(1);
     const [fetchRoomRateAgain, setFetchRoomRateAgain] = useState(false)
@@ -120,7 +120,7 @@ function AddSamplePackage() {
     // Price Calculation 
     useEffect(() => {
         setPrice(prev => {
-            let total = ((vendorDetails?.vendorPrice||0) + (vendorDetails?.commission||0)) || 0 ;
+            let total = ((vendorDetails?.vendorPrice || 0) + (vendorDetails?.commission || 0)) || 0;
 
             const daysDetails = formData?.itineraryBuilder?.daysDetails || [];
 
@@ -172,7 +172,7 @@ function AddSamplePackage() {
                 totalPrice: total
             };
         });
-    }, [formData?.itineraryBuilder,vendorDetails?.vendorPrice,vendorDetails?.commission]);
+    }, [formData?.itineraryBuilder, vendorDetails?.vendorPrice, vendorDetails?.commission]);
 
 
     function addDays(days) {
@@ -220,9 +220,9 @@ function AddSamplePackage() {
 
     const sortedSubRegionId = sortIdsConsistently(selectedSubRegionIds);
     const selectedSubRegionNames = allSubRegions
-    ?.filter(subregion => selectedSubRegionIds?.includes(subregion?._id))
-    ?.map(subregion => subregion?.name);
-    
+        ?.filter(subregion => selectedSubRegionIds?.includes(subregion?._id))
+        ?.map(subregion => subregion?.name);
+
     const sortedSubRegionNames = sortIdsConsistently(selectedSubRegionNames);
 
     // console.log("active day data : ", activeDayData)
@@ -301,9 +301,9 @@ function AddSamplePackage() {
     // console.log("roomRatesForActiveDayHotel : ",roomRatesForActiveDayHotel)
 
     useEffect(() => {
-        dispatch(clearRoomRatesForHotelId({key:activeDayData?.hotelDetails?.hotelId}))
+        dispatch(clearRoomRatesForHotelId({ key: activeDayData?.hotelDetails?.hotelId }))
         if (activeDayData?.hotelDetails?.hotelId) {
-            refetchRoomRate({fetchAgain:true})
+            refetchRoomRate({ fetchAgain: true })
         }
     }, [fetchRoomRateAgain])
     const { loading: suggestionGroupTripLoading } = useSuggestionGroupTripsData({
@@ -367,7 +367,6 @@ function AddSamplePackage() {
             }
             const isDayValid = isDayOneValid(formData)
             const validateVendorDetails = isValidVendorDetails(vendorDetails)
-            // console.log("is Day valid : ",isDayValid)
             if (!validateVendorDetails?.success) {
                 toast.warn(validateVendorDetails.message || "Error")
                 return;
@@ -376,8 +375,13 @@ function AddSamplePackage() {
                 toast.warn(isDayValid.message || "Error")
                 return;
             }
+            const vehicleValid = isVehicleValid(formData)
+            if (!vehicleValid?.success) {
+                toast.warn(vehicleValid.message || "Error")
+                return;
+            }
 
-            if(!formData?.itineraryBuilder?.tripName){
+            if (!formData?.itineraryBuilder?.tripName) {
                 return toast.warn("Give the trip Name")
             }
 
@@ -393,7 +397,7 @@ function AddSamplePackage() {
                 },
             };
 
-            const payload ={
+            const payload = {
                 ...updatedFormData,
                 vendorDetails,
                 price
@@ -498,7 +502,7 @@ function AddSamplePackage() {
                     handlePrice={handlePrice}
                     vendorDetails={vendorDetails}
                     handleVendorDetails={handleVendorDetails}
-                    fetchRoomRateAgain={()=>setFetchRoomRateAgain(!fetchRoomRateAgain)}
+                    fetchRoomRateAgain={() => setFetchRoomRateAgain(!fetchRoomRateAgain)}
                 />
             )}
 

@@ -145,6 +145,20 @@ function TripDetailsPrivateTrip({
                         />
                     </div>
 
+                    {/* Category */}
+                    <div>
+                        <label style={labelStyle}>
+                            Category 
+                        </label>
+                        <input
+
+                            readOnly
+                            type="text"
+                            style={inputStyle}
+                            value={enquiryDetails?.hotelCategory || "Not Decided Yet"}
+                        />
+                    </div>
+
                     {/* Adults */}
                     <div>
                         <label style={labelStyle}>

@@ -133,7 +133,7 @@ function PaymentTable({
     const removeNew = (tempId) =>
         setNewRows((p) => p.filter((r) => r._tempId !== tempId))
 
-    const saveSingleNew = (row) => {
+    const saveSingleNew = async (row) => {
         if (!row.date || !row.amount || !row.mode) {
             alert('Date, Amount and Mode are required.')
             return
@@ -145,7 +145,7 @@ function PaymentTable({
             file: row.file,
             status: row.status,
         }
-        onSaveNew(saved)
+        await onSaveNew(saved)
         setRows((p) => [...p, saved])
         removeNew(row._tempId)
     }
@@ -378,13 +378,18 @@ function PaymentTable({
                                 </td>
                                 <td className={cellCls}>
                                     <div className="flex items-center gap-1.5">
-                                        {submitLoading ? (
+                                        {/* {submitLoading ? (
                                             <Loader2 className="animate-spin" size={18} />
                                         ) : (
                                             <button onClick={() => saveSingleNew(row)} className={actionBtn('green')} title="Save this row">
                                                 <Save size={13} />
                                             </button>
-                                        )}
+                                        )} */}
+                                        {
+                                            submitLoading ?
+                                                <LoadingSpinner /> :
+                                                <button onClick={() => saveSingleNew(row)} className={actionBtn('green')} title="Save this row"><Save size={13} /></button>
+                                        }
                                         <button onClick={() => removeNew(row._tempId)} className={actionBtn('gray')} title="Remove"><X size={13} /></button>
                                     </div>
                                 </td>
@@ -711,6 +716,7 @@ function VendorPayment() {
     const [openKey, setOpenKey] = useState(null)
     const toggle = (key) => setOpenKey((prev) => (prev === key ? null : key))
 
+
     if (!privateTripFinanceDetails) {
         return (
             <div className="flex items-center justify-center py-20 text-sm text-gray-400">
@@ -744,6 +750,7 @@ function VendorPayment() {
             setSubmitLoading(true)
             const response = await updatePrivateTripHotelPaymentsRowWise(payload)
             toast.success(response?.data?.message)
+            setOpenKey(null)
         } catch (error) {
             if (!isProduction) console.log('Error:', error)
             toast.error(error?.response?.data?.message || error?.message || 'Error saving hotel payment')
@@ -751,6 +758,7 @@ function VendorPayment() {
             setSubmitLoading(false)
         }
     }
+
     const handleHotelDelete = async (hotel, payment, idx) => {
         try {
             const payload = {
@@ -763,6 +771,7 @@ function VendorPayment() {
             setSubmitLoading(true)
             const response = await deletePrivateTripsHotelVehicle(payload)
             toast.success(response?.data?.message)
+            setOpenKey(null)
         } catch (error) {
             if (!isProduction) console.log('Error:', error)
             toast.error(error?.response?.data?.message || error?.message || 'Error saving hotel payment')
@@ -777,6 +786,7 @@ function VendorPayment() {
             setSubmitLoading(true)
             const response = await updatePrivateTripHotelPayments(payload)
             toast.success(response?.data?.success)
+            setOpenKey(null)
         } catch (error) {
             if (!isProduction) {
                 console.log('Error:', error)
@@ -809,6 +819,7 @@ function VendorPayment() {
             setSubmitLoading(true)
             const response = await updatePrivateTripVehiclePaymentsRowWise(payload)
             toast.success(response?.data?.message)
+            setOpenKey(null)
         } catch (error) {
             if (!isProduction) console.log('Error:', error)
             toast.error(error?.response?.data?.message || error?.message || 'Error saving hotel payment')
@@ -827,6 +838,7 @@ function VendorPayment() {
             setSubmitLoading(true)
             const response = await deletePrivateTripsHotelVehicle(payload)
             toast.success(response?.data?.message)
+            setOpenKey(null)
         } catch (error) {
             if (!isProduction) console.log('Error:', error)
             toast.error(error?.response?.data?.message || error?.message || 'Error saving hotel payment')
@@ -840,6 +852,7 @@ function VendorPayment() {
             setSubmitLoading(true)
             const response = await updatePrivateTripVehiclePayments(payload)
             toast.success(response?.data?.message)
+            setOpenKey(null)
         } catch (error) {
             if (!isProduction) console.log('Error:', error)
             toast.error(error?.response?.data?.message || error?.message || 'Error saving vehicle payment')
@@ -860,6 +873,7 @@ function VendorPayment() {
             }
             const response = await deleteUnusedHotelOrVehiclePrivateTrip(newPayload)
             toast.success(response?.data?.message)
+            setOpenKey(null)
         } catch (error) {
             if (!isProduction) console.log('Error:', error)
             toast.error(error?.response?.data?.message || error?.message || 'Error saving vehicle payment')

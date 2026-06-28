@@ -12,7 +12,7 @@ import { ArrowLeft } from 'lucide-react'
 import GroupTripPolicies from '../../Group Trips/Add Group Trip/GroupTripPolicies';
 import StepperTab from '../../Group Trips/Edit Group Trip/StepperTab';
 import { blankDay } from '../Add Sample Package/HotelDetailsSimplePackage';
-import { isDayOneValid, isRegionDetailsValid, isValidVendorDetails } from '../Add Sample Package/ValidationSimplePackage';
+import { isDayOneValid, isRegionDetailsValid, isValidVendorDetails, isVehicleValid } from '../Add Sample Package/ValidationSimplePackage';
 import { useSamplePackageHooks } from '../../../hooks/useSamplePackageHooks';
 import RegionDetailsSamplePackage from '../Add Sample Package/RegionDetailsSamplePackage';
 import ItineraryBuilderSampLePackage from '../Add Sample Package/ItineraryBuilderSampLePackage';
@@ -165,26 +165,26 @@ function EditSamplePackage() {
                     childAges: samplePackageDetails?.regionDetails?.childAges || [],
                 },
 
-                
-            itineraryBuilder: {
-                tripName: samplePackageDetails?.itineraryBuilder?.tripName || '',
-                tripOverview: samplePackageDetails?.itineraryBuilder?.tripOverview || '',
 
-                daysDetails: (samplePackageDetails?.itineraryBuilder?.daysDetails || []).map(day => ({
-                    ...day,
+                itineraryBuilder: {
+                    tripName: samplePackageDetails?.itineraryBuilder?.tripName || '',
+                    tripOverview: samplePackageDetails?.itineraryBuilder?.tripOverview || '',
 
-                    // ✅ normalize subRegions
-                    subRegion1: day?.subRegion1?._id || day?.subRegion1 || null,
-                    subRegion2: day?.subRegion2?._id || null,
-                    subRegion3: day?.subRegion3?._id || null,
+                    daysDetails: (samplePackageDetails?.itineraryBuilder?.daysDetails || []).map(day => ({
+                        ...day,
 
-                    // ✅ normalize places
-                    placeDetails: (day?.placeDetails || []).map(place => ({
-                        ...place,
-                        placeId: place?.placeId?._id || place?.placeId || null,
+                        // ✅ normalize subRegions
+                        subRegion1: day?.subRegion1?._id || day?.subRegion1 || null,
+                        subRegion2: day?.subRegion2?._id || null,
+                        subRegion3: day?.subRegion3?._id || null,
+
+                        // ✅ normalize places
+                        placeDetails: (day?.placeDetails || []).map(place => ({
+                            ...place,
+                            placeId: place?.placeId?._id || place?.placeId || null,
+                        })),
                     })),
-                })),
-            },
+                },
 
             }))
 
@@ -410,9 +410,9 @@ function EditSamplePackage() {
     }, [activeDayData?.hotelDetails?.hotelId])
 
     useEffect(() => {
-        dispatch(clearRoomRatesForHotelId({key:activeDayData?.hotelDetails?.hotelId}))
+        dispatch(clearRoomRatesForHotelId({ key: activeDayData?.hotelDetails?.hotelId }))
         if (activeDayData?.hotelDetails?.hotelId) {
-            refetchRoomRate({fetchAgain:true})
+            refetchRoomRate({ fetchAgain: true })
         }
     }, [fetchRoomRateAgain])
 
@@ -486,12 +486,18 @@ function EditSamplePackage() {
                 toast.warn(isDayValid.message || "Error")
                 return;
             }
+            
+            const vehicleValid = isVehicleValid(formData)
+            if (!vehicleValid?.success) {
+                toast.warn(vehicleValid.message || "Error")
+                return;
+            }
 
             if (!formData?.itineraryBuilder?.tripName) {
                 return toast.warn("Give the trip Name")
             }
 
-            
+
             const updatedDays = ensureFavouritePlaces(
                 formData.itineraryBuilder.daysDetails
             );
@@ -504,7 +510,7 @@ function EditSamplePackage() {
                 },
             };
 
-            const payload ={
+            const payload = {
                 ...updatedFormData,
                 vendorDetails,
                 price
@@ -513,7 +519,7 @@ function EditSamplePackage() {
 
             // console.log("submitted : ", payload)
 
-            const response = await updateSamplePackageById(samplePackageId,payload)
+            const response = await updateSamplePackageById(samplePackageId, payload)
             // console.log("Response : ",response)
             toast.success(response?.data?.message)
             navigate(-1)
@@ -609,7 +615,7 @@ function EditSamplePackage() {
                     handlePrice={handlePrice}
                     vendorDetails={vendorDetails}
                     handleVendorDetails={handleVendorDetails}
-                    fetchRoomRateAgain={()=>setFetchRoomRateAgain(!fetchRoomRateAgain)}
+                    fetchRoomRateAgain={() => setFetchRoomRateAgain(!fetchRoomRateAgain)}
                 />
             )}
 

@@ -17,7 +17,7 @@ import ItineraryBuilderPrivateTrip from './ItineraryBuilderPrivateTrip';
 import EnquiryPrivateTrip from './EnquiryPrivateTrip';
 import { useCommonHooks } from '../../../hooks/useCommonHooks';
 import { usePrivateTripHooks } from '../../../hooks/usePrivateTripHooks';
-import { isDayOneValid, isRegionDetailsValid } from '../../Sample Package/Add Sample Package/ValidationSimplePackage';
+import { isDayOneValid, isRegionDetailsValid, isVehicleValid } from '../../Sample Package/Add Sample Package/ValidationSimplePackage';
 import { ensureFavouritePlaces } from '../../Group Trips/Add Group Trip/ValidateItinerary';
 
 const PINK = '#ED5F8D';
@@ -412,6 +412,11 @@ function AddPrivateTrip() {
                 toast.warn(isDayValid.message || "Error")
                 return;
             }
+            const vehicleValid = isVehicleValid(formData)
+            if (!vehicleValid?.success) {
+                toast.warn(vehicleValid.message || "Error")
+                return;
+            }
 
             if (!formData?.itineraryBuilder?.tripName) {
                 return toast.warn("Give the trip Name")
@@ -444,7 +449,7 @@ function AddPrivateTrip() {
                 enquiryDetails,
                 enquiryType: searchEnquiry?.enquiryType
             }
-            console.log("Itinerary builder : ", formData?.itineraryBuilder)
+            // console.log("Itinerary builder : ", formData?.itineraryBuilder)
             const response = await addPrivateTrip(payload)
             toast.success(response?.data?.message)
             navigate(-1)

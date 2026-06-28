@@ -14,7 +14,7 @@ import { clearRoomRatesForHotelId } from '../../../redux/slices/roomRateSlice';
 import EnquiryPrivateTrip from '../Add Private Trip/EnquiryPrivateTrip';
 import { useCommonHooks } from '../../../hooks/useCommonHooks';
 import { usePrivateTripHooks } from '../../../hooks/usePrivateTripHooks';
-import { isDayOneValid, isRegionDetailsValid } from '../../Sample Package/Add Sample Package/ValidationSimplePackage';
+import { isDayOneValid, isRegionDetailsValid, isVehicleValid } from '../../Sample Package/Add Sample Package/ValidationSimplePackage';
 import { ensureFavouritePlaces } from '../../Group Trips/Add Group Trip/ValidateItinerary';
 import TripDetailsPrivateTrip from '../Add Private Trip/TripDetailsPrivateTrip';
 import ItineraryBuilderPrivateTrip from '../Add Private Trip/ItineraryBuilderPrivateTrip';
@@ -87,8 +87,8 @@ function EditPrivateTrips() {
       tripOverview: '',
       daysDetails: [],
     },
-    customerNotes:'',
-    internalNotes:''
+    customerNotes: '',
+    internalNotes: ''
   });
 
 
@@ -192,8 +192,8 @@ function EditPrivateTrips() {
           })),
         },
 
-        internalNotes:privateTripDetails?.internalNotes,
-        customerNotes:privateTripDetails?.customerNotes,
+        internalNotes: privateTripDetails?.internalNotes,
+        customerNotes: privateTripDetails?.customerNotes,
 
       }))
 
@@ -479,6 +479,11 @@ function EditPrivateTrips() {
         toast.warn(isDayValid.message || "Error")
         return;
       }
+      const vehicleValid = isVehicleValid(formData)
+      if (!vehicleValid?.success) {
+        toast.warn(vehicleValid.message || "Error")
+        return;
+      }
 
       if (!formData?.itineraryBuilder?.tripName) {
         return toast.warn("Give the trip Name")
@@ -506,7 +511,7 @@ function EditPrivateTrips() {
 
       const payload = {
         ...updatedFormData,
-        price:updatedPrice,
+        price: updatedPrice,
         privateTripId
       }
       const response = await updatePrivateTripById(payload)
@@ -598,7 +603,7 @@ function EditPrivateTrips() {
 
       {activeTab === 2 && (
         <TripDetailsPrivateTrip
-          customerNotes = {formData?.customerNotes}
+          customerNotes={formData?.customerNotes}
           setFormData={setFormData}
           customerDetails={customerDetails}
           enquiryDetails={enquiryDetails}

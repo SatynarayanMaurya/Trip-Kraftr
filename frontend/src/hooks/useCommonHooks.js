@@ -13,6 +13,7 @@ import { accountsEndpoints } from "../services/Apis/accountsApis"
 import { enquiriessEndpoints } from "../services/Apis/enquiriesApis"
 import { roomRateEndpoints } from "../services/Apis/roomRateApis"
 import { samplePackageEndpoints } from "../services/Apis/samplePackageApis"
+import { privateTripEndpoints } from "../services/Apis/privateTripApis"
 
 export const useCommonHooks = () => {
     const dispatch = useDispatch()
@@ -333,6 +334,25 @@ export const useCommonHooks = () => {
         },
         300
       );
+          // ---------- Subregion Search for org ( ) ----------
+    const searchPrivateTrips = debounceSearch(
+        "searchPrivateTrips",
+        (search,regionId,daysFilter,statusFilter) => {
+          const params = new URLSearchParams();
+      
+          if (search) params.append("search", search);
+          if (regionId) params.append("regionId", regionId);
+          if (daysFilter) params.append("daysFilter", daysFilter);
+          if (statusFilter) params.append("statusFilter", statusFilter);
+      
+          return apiConnector(
+            "GET",
+            `${privateTripEndpoints.SEARCH_PRIVATE_TRIPS}?${params.toString()}`
+          );
+
+        },
+        300
+      );
 
 
 
@@ -354,7 +374,8 @@ export const useCommonHooks = () => {
         searchB2CAccounts,
         searchB2BAccountsForEnquiry,
         searchB2CAccountsForEnquiry,
-        searchSamplePackage
+        searchSamplePackage,
+        searchPrivateTrips
 
     }
 }

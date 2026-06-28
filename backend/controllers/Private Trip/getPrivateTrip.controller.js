@@ -22,6 +22,7 @@ export const getPrivateTrips = async (req, res) => {
         privateTripId: 1,
         enquiryId: 1,
         enquiryModel: 1,
+        status:1,
         "regionDetails.region1": 1,
         "regionDetails.startDate": 1,
         "regionDetails.noOfDays": 1,
@@ -146,22 +147,24 @@ export const getPrivateTripById = async (req, res) => {
 }
 
 
-export const searchSamplePackage = async (req, res) => {
+export const searchPrivateTrips = async (req, res) => {
   try {
-    const { search, regionId, days, pageLimit } = req.query;
+    const { search,regionId,daysFilter,statusFilter } = req.query;
 
     const query = {
       org_id: req.user.org_id
     };
+    if (daysFilter) {
+      query['regionDetails.noOfDays'] = daysFilter
+    }
 
-    if (days) {
-      query['regionDetails.noOfDays'] = days
+    if (statusFilter) {
+      query.status = statusFilter
     }
 
     if (search) {
       query["itineraryBuilder.tripName"] = { $regex: `^${search.trim()}`, $options: "i" };
     }
-
     if (regionId) {
       const regionObjectId = new mongoose.Types.ObjectId(regionId);
 
@@ -172,29 +175,43 @@ export const searchSamplePackage = async (req, res) => {
       ];
     }
 
-    const searchedSamplePackage = await SamplePackage
+    const searchedPrivateTrips = await PrivateTrip
       .find(query)
-      .limit(pageLimit || 5)
       .lean()
       .select({
         _id: 1,
-        samplePackageName: 1,
+        privateTripId: 1,
+        enquiryId: 1,
+        enquiryModel: 1,
+        status:1,
         "regionDetails.region1": 1,
         "regionDetails.startDate": 1,
         "regionDetails.noOfDays": 1,
         "regionDetails.adults": 1,
         "regionDetails.children": 1,
-        'itineraryBuilder.tripName': 1
+        'itineraryBuilder.tripName': 1,
+        'itineraryBuilder.daysDetails.placeDetails': 1,
+        'itineraryBuilder.daysDetails.activities': 1,
+        'price.discountedPrice': 1,
       })
       .populate({ path: 'regionDetails.region1', select: "_id name" })
+      .populate({
+        path: 'enquiryId',
+        select: '_id accountId',
+        populate: {
+          path: 'accountId',
+          select: '_id fullName businessName phone email'
+        }
+      })
 
     return res.status(200).json({
       success: true,
-      message: "Searched sample package found",
-      searchedSamplePackage
+      message: "Searched private trips found",
+      data:searchedPrivateTrips
     });
 
   } catch (error) {
+    console.log("error : ",error)
     return res.status(500).json({
       success: false,
       message: error?.message || "Internal Server Error"
