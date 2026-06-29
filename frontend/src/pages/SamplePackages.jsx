@@ -112,7 +112,7 @@ function FilterSelect({ value, onChange, placeholder, children }) {
       <select
         value={value ?? ''}
         onChange={(e) => onChange(e.target.value === '' ? null : e.target.value)}
-        className="appearance-none bg-white border border-gray-200 text-gray-700 text-sm rounded-xl pl-3.5 pr-9 py-2.5 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#e91e8c]/30 focus:border-[#e91e8c]/60 transition min-w-[110px]"
+        className="appearance-none bg-white border border-gray-200 text-gray-700 text-sm rounded-xl pl-3.5 pr-9 py-2.5 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#e91e8c]/30 focus:border-[#e91e8c]/60 transition min-w-27.5"
       >
         <option value="">{placeholder}</option>
         {children}
@@ -238,7 +238,7 @@ function SamplePackages() {
       {/* ── Filters ── */}
       <div className="flex flex-wrap gap-3 mb-7">
         {/* Search */}
-        <div className="relative flex-1 min-w-[220px]">
+        <div className="relative flex-1 min-w-55">
           <Search
             size={15}
             className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
@@ -352,7 +352,7 @@ function SamplePackages() {
               value={currentPage}
               disabled={isSearching}
               onChange={(e) => setCurrentPage(Number(e.target.value))}
-              className="w-[100px] bg-white border border-gray-200 text-[#18305C] text-sm px-3 py-2 rounded-lg outline-none focus:border-[#E91E8C] cursor-pointer"
+              className="w-25 bg-white border border-gray-200 text-[#18305C] text-sm px-3 py-2 rounded-lg outline-none focus:border-[#E91E8C] cursor-pointer"
               style={{
                 boxShadow: '0 1px 6px rgba(0,0,0,0.06)',
               }}
