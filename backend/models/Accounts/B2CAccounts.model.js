@@ -52,6 +52,10 @@ const b2cAccountSchema = new mongoose.Schema(
       required: true,
       unique:true
     },
+    whatsappNo: {
+      type: Number,
+      default:null,
+    },
 
     phone_str: {
       type: String

@@ -4,8 +4,9 @@ import { useAccountHooks } from '../../hooks/useAccountHooks';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
-import {Save} from 'lucide-react'
+import { Save } from 'lucide-react';
 import { useRegionsData } from '../../hooks/Resuable Hooks/useResuableData';
+
 const PINK = '#ED5F8D';
 
 const INDIAN_STATES = [
@@ -33,11 +34,12 @@ function DestinationSelect({ selected, onChange }) {
   const [search, setSearch] = useState('');
   const ref = useRef();
   const { regions, loading: regionLoading } = useRegionsData();
-  const [suggestedDestinations, setSuggestedDestinations] = useState([])
-  useEffect(()=>{
-      if(!regions)return ;
-      setSuggestedDestinations(regions?.map(val=>val?.name))
-  },[regions])
+  const [suggestedDestinations, setSuggestedDestinations] = useState([]);
+
+  useEffect(() => {
+    if (!regions) return;
+    setSuggestedDestinations(regions?.map(val => val?.name));
+  }, [regions]);
 
   const available = suggestedDestinations?.filter(s =>
     !selected.includes(s) && s.toLowerCase().includes(search.toLowerCase())
@@ -51,7 +53,6 @@ function DestinationSelect({ selected, onChange }) {
 
   return (
     <div ref={ref} style={{ position: 'relative' }}>
-      {/* Trigger box */}
       <div onClick={() => setOpen(o => !o)} style={{
         ...inputStyle, cursor: 'pointer', minHeight: '40px',
         display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center',
@@ -69,7 +70,6 @@ function DestinationSelect({ selected, onChange }) {
         ))}
       </div>
 
-      {/* Dropdown */}
       {open && (
         <div style={{
           position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, zIndex: 100,
@@ -103,21 +103,47 @@ function DestinationSelect({ selected, onChange }) {
 }
 
 function AddB2CAccounts() {
-
-  const {addB2CAccount} = useAccountHooks()
-  const isProduction = useSelector(s=>s.user.isProduction)
-  const navigate = useNavigate()
-  const [submitLoading, setSubmitLoading] = useState(false)
+  const { addB2CAccount } = useAccountHooks();
+  const isProduction = useSelector(s => s.user.isProduction);
+  const navigate = useNavigate();
+  const [submitLoading, setSubmitLoading] = useState(false);
+  const [sameAsPhone, setSameAsPhone] = useState(false);
 
   const [form, setForm] = useState({
-    fullName: '', email: '', phone: '', month: '',
-    source: '', referralby: '', destinations: [],
-    noOfMembers: '', state: '', tripType: 'Group Trip',
-    dietaryPreference: '', assignedTo: '',gstNo:'',
+    fullName: '',
+    email: '',
+    phone: '',
+    whatsappNo: '',
+    month: '',
+    source: '',
+    referralby: '',
+    destinations: [],
+    noOfMembers: '',
+    state: '',
+    tripType: 'Group Trip',
+    dietaryPreference: '',
+    assignedTo: '',
+    gstNo: '',
   });
   const [errors, setErrors] = useState({});
 
   const set = (key, val) => setForm(p => ({ ...p, [key]: val }));
+
+
+  const handlePhoneChange = (val) => {
+    const cleaned = val.replace(/\D/, '');
+    setForm(p => ({
+      ...p,
+      phone: cleaned,
+      ...(sameAsPhone ? { whatsappNo: cleaned } : {}),
+    }));
+  };
+
+  const handleSameAsPhone = () => {
+    const next = !sameAsPhone;
+    setSameAsPhone(next);
+    if (next) set('whatsappNo', form.phone);
+  };
 
   const validate = (data) => {
     const e = {};
@@ -128,38 +154,33 @@ function AddB2CAccounts() {
     else if (!/\S+@\S+\.\S+/.test(data.email)) e.email = 'Enter a valid email';
     if (!data.phone.trim()) e.phone = 'Phone number is required';
     else if (!/^\d{10}$/.test(data.phone)) e.phone = 'Enter valid 10-digit number';
+    if (data.whatsappNo && !/^\d{10}$/.test(data.whatsappNo)) e.whatsappNo = 'Enter valid 10-digit number';
     if (data.source === 'Referral' && !data.referralby.trim()) e.referralby = 'Referral name is required';
     if (data.noOfMembers && (isNaN(data.noOfMembers) || Number(data.noOfMembers) < 1)) e.noOfMembers = 'Enter a valid number';
     return e;
   };
 
-  const handleSubmit = async() => {
+  const handleSubmit = async () => {
     const e = validate(form);
     setErrors(e);
-    if (Object.keys(e).length !== 0) {
-      return ;
-    }
-    try{
-        setSubmitLoading(true)
-        const response = await addB2CAccount(form)
-        toast.success(response?.data?.message)
-        navigate(-1)
-    }
-    catch(error){
+    if (Object.keys(e).length !== 0) return;
+    try {
+      setSubmitLoading(true);
+      const response = await addB2CAccount(form);
+      toast.success(response?.data?.message);
+      navigate(-1);
+    } catch (error) {
       if (!isProduction) {
         console.log("========= ERROR DEBUG START =========");
         console.log("Error:", error);
         console.log("Response:", error?.response);
         console.log("========= ERROR DEBUG END =========");
       }
-      toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin")
+      toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin");
+    } finally {
+      setSubmitLoading(false);
     }
-    finally{
-        setSubmitLoading(false)
-    }
-
   };
-
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
@@ -184,8 +205,47 @@ function AddB2CAccounts() {
         <label style={labelStyle}>Phone Number <span style={{ color: PINK }}>*</span></label>
         <input style={{ ...inputStyle, ...(errors.phone ? errorBorder : {}) }}
           type="tel" maxLength={10} placeholder="Enter Phone Number"
-          value={form.phone} onChange={e => set('phone', e.target.value.replace(/\D/, ''))} />
+          value={form.phone} onChange={e => handlePhoneChange(e.target.value)} />
         {errors.phone && <p style={{ color: '#ef4444', fontSize: '12px', margin: '4px 0 0' }}>{errors.phone}</p>}
+      </div>
+
+      {/* WhatsApp Number */}
+      <div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+          <label style={{ ...labelStyle, margin: 0 }}>WhatsApp Number</label>
+          <button
+            type="button"
+            onClick={handleSameAsPhone}
+            style={{
+              fontSize: '11px',
+              padding: '2px 10px',
+              borderRadius: '20px',
+              border: `1.5px solid ${PINK}`,
+              background: sameAsPhone ? PINK : 'white',
+              color: sameAsPhone ? 'white' : PINK,
+              cursor: 'pointer',
+              fontWeight: '600',
+              transition: 'all 0.15s',
+              lineHeight: '1.6',
+            }}
+          >
+            Same as Phone
+          </button>
+        </div>
+        <input
+          style={{
+            ...inputStyle,
+            ...(errors.whatsappNo ? errorBorder : {}),
+            ...(sameAsPhone ? { background: '#f5f5f5' } : {}),
+          }}
+          type="tel"
+          maxLength={10}
+          placeholder="Enter WhatsApp Number"
+          value={form.whatsappNo}
+          disabled={sameAsPhone}
+          onChange={e => set('whatsappNo', e.target.value.replace(/\D/, ''))}
+        />
+        {errors.whatsappNo && <p style={{ color: '#ef4444', fontSize: '12px', margin: '4px 0 0' }}>{errors.whatsappNo}</p>}
       </div>
 
       <div>
@@ -197,8 +257,8 @@ function AddB2CAccounts() {
       </div>
 
       <div>
-        <label style={labelStyle}>Source</label>
-        <select style={inputStyle} value={form.source}
+        <label style={labelStyle}>Source <span style={{ color: PINK }}>*</span></label>
+        <select style={{ ...inputStyle, ...(errors.source ? errorBorder : {}) }} value={form.source}
           onChange={e => { set('source', e.target.value); if (e.target.value !== 'Referral') set('referralby', ''); }}>
           <option value="">Select Source</option>
           {SOURCE_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
@@ -210,7 +270,7 @@ function AddB2CAccounts() {
         <label style={labelStyle}>Referral {form.source === 'Referral' && <span style={{ color: PINK }}>*</span>}</label>
         <input
           style={{ ...inputStyle, ...(errors.referralby ? errorBorder : {}), background: form.source !== 'Referral' ? '#f5f5f5' : 'white' }}
-          placeholder="Enter referralby name" maxLength={50}
+          placeholder="Enter referral name" maxLength={50}
           disabled={form.source !== 'Referral'}
           value={form.referralby} onChange={e => set('referralby', e.target.value)} />
         {errors.referralby && <p style={{ color: '#ef4444', fontSize: '12px', margin: '4px 0 0' }}>{errors.referralby}</p>}
@@ -260,13 +320,13 @@ function AddB2CAccounts() {
 
       <div>
         <label style={labelStyle}>GST Number</label>
-        <input style={inputStyle} placeholder="Enter name" maxLength={50}
+        <input style={inputStyle} placeholder="Enter GST number" maxLength={50}
           value={form.gstNo} onChange={e => set('gstNo', e.target.value)} />
       </div>
 
       {/* Buttons */}
       <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '8px' }}>
-        <button onClick={()=>navigate(-1)}
+        <button onClick={() => navigate(-1)}
           style={{ padding: '10px 24px', borderRadius: '8px', border: '1px solid #ddd', background: 'white', cursor: 'pointer', fontSize: '14px' }}>
           Cancel
         </button>

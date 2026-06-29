@@ -62,7 +62,7 @@ function FileUploadCell({ file, onChange, readOnly = false }) {
         if (!file) return <span className="text-gray-400 text-xs">—</span>
         const name = typeof file === 'string' ? file : file.name
         return (
-            <span className="inline-flex items-center gap-1 text-xs text-indigo-600 font-medium truncate max-w-[100px]">
+            <span className="inline-flex items-center gap-1 text-xs text-indigo-600 font-medium truncate max-w-25">
                 <FileText size={12} className="shrink-0" />
                 <span className="truncate">{name}</span>
             </span>
@@ -79,7 +79,7 @@ function FileUploadCell({ file, onChange, readOnly = false }) {
                 onChange={(e) => onChange(e.target.files[0] || null)}
             />
             {file ? (
-                <div className="flex items-center gap-1 max-w-[110px]">
+                <div className="flex items-center gap-1 max-w-27.5">
                     <FileText size={12} className="text-indigo-500 shrink-0" />
                     <span className="text-xs text-gray-600 truncate" title={typeof file === 'string' ? file : file.name}>
                         {typeof file === 'string' ? 'Receipt' : file.name}

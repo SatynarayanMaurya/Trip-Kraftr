@@ -31,13 +31,40 @@ function AddB2BAccounts() {
 
 
   const [form, setForm] = useState({
-    businessName: '', email: '', phone: '', secondaryPhone: '',
-    source: '', referralBy: '', gstNo: '', state: '', address: '',
+    businessName: '', 
+    email: '', 
+    phone: '', 
+    secondaryPhone: '',
+    whatsappNo:'',
+    source: '', 
+    referralBy: '', 
+    gstNo: '', 
+    state: '', 
+    address: '',
   });
   const [errors, setErrors] = useState({});
   const [submitLoading, setSubmitLoading] = useState(false)
+  const [sameAsPhone, setSameAsPhone] = useState(false);
+
+  // console.log("form : ",form)
 
   const set = (key, val) => setForm(p => ({ ...p, [key]: val }));
+
+  
+  const handlePhoneChange = (val) => {
+    const cleaned = val.replace(/\D/, '');
+    setForm(p => ({
+      ...p,
+      phone: cleaned,
+      ...(sameAsPhone ? { whatsappNo: cleaned } : {}),
+    }));
+  };
+
+  const handleSameAsPhone = () => {
+    const next = !sameAsPhone;
+    setSameAsPhone(next);
+    if (next) set('whatsappNo', form.phone);
+  };
 
   const validate = (data) => {
     const e = {};
@@ -104,7 +131,7 @@ function AddB2BAccounts() {
         <label style={labelStyle}>Phone Number <span style={{ color: PINK }}>*</span></label>
         <input style={{ ...inputStyle, ...(errors.phone ? errorBorder : {}) }}
           type="tel" maxLength={10} placeholder="Enter Phone Number"
-          value={form.phone} onChange={e => set('phone', e.target.value.replace(/\D/, ''))} />
+          value={form.phone} onChange={e => handlePhoneChange(e.target.value)} />
         {errors.phone && <p style={{ color: '#ef4444', fontSize: '12px', margin: '4px 0 0' }}>{errors.phone}</p>}
       </div>
 
@@ -115,6 +142,46 @@ function AddB2BAccounts() {
           value={form.secondaryPhone} onChange={e => set('secondaryPhone', e.target.value.replace(/\D/, ''))} />
         {errors.secondaryPhone && <p style={{ color: '#ef4444', fontSize: '12px', margin: '4px 0 0' }}>{errors.secondaryPhone}</p>}
       </div>
+
+      
+            {/* WhatsApp Number */}
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                <label style={{ ...labelStyle, margin: 0 }}>WhatsApp Number</label>
+                <button
+                  type="button"
+                  onClick={handleSameAsPhone}
+                  style={{
+                    fontSize: '11px',
+                    padding: '2px 10px',
+                    borderRadius: '20px',
+                    border: `1.5px solid ${PINK}`,
+                    background: sameAsPhone ? PINK : 'white',
+                    color: sameAsPhone ? 'white' : PINK,
+                    cursor: 'pointer',
+                    fontWeight: '600',
+                    transition: 'all 0.15s',
+                    lineHeight: '1.6',
+                  }}
+                >
+                  Same as Phone
+                </button>
+              </div>
+              <input
+                style={{
+                  ...inputStyle,
+                  ...(errors.whatsappNo ? errorBorder : {}),
+                  ...(sameAsPhone ? { background: '#f5f5f5' } : {}),
+                }}
+                type="tel"
+                maxLength={10}
+                placeholder="Enter WhatsApp Number"
+                value={form.whatsappNo}
+                disabled={sameAsPhone}
+                onChange={e => set('whatsappNo', e.target.value.replace(/\D/, ''))}
+              />
+              {errors.whatsappNo && <p style={{ color: '#ef4444', fontSize: '12px', margin: '4px 0 0' }}>{errors.whatsappNo}</p>}
+            </div>
 
       <div>
         <label style={labelStyle}>Source</label>

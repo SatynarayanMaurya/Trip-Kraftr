@@ -6,7 +6,7 @@ import B2CEnquiry from "../../models/Enquiry/B2CEnquiry.model.js"
 
 export const addB2BEnquiry = async(req ,res)=>{
     try{
-        const {accountId, adult, assignedTo, child, childAges,totalMembers, destinations, dietaryPreference, hotelCategory, noOfDays, notes, startDate, status, tripType, month} = req.body;
+        const {accountId, adult, assignedTo, child, childAges,totalMembers, destinations, dietaryPreference, hotelCategory, noOfDays, notes, startDate, status, tripType, month, purpose} = req.body;
 
         if(!accountId || !adult || !noOfDays || !destinations){
             return res.status(400).json({
@@ -37,7 +37,8 @@ export const addB2BEnquiry = async(req ,res)=>{
                 startDate, 
                 status, 
                 tripType,
-                month
+                month,
+                purpose
             })
 
         await newEnquiry.populate({path:'accountId',select: "_id businessName phone source"})
@@ -58,7 +59,7 @@ export const addB2BEnquiry = async(req ,res)=>{
 
 export const addB2CEnquiry = async(req ,res)=>{
     try{
-        const {accountId, adult, assignedTo, child, childAges,totalMembers, destinations, dietaryPreference, hotelCategory, noOfDays, notes, startDate, status, tripType, month} = req.body;
+        const {accountId, adult, assignedTo, child, childAges,totalMembers, destinations, dietaryPreference, hotelCategory, noOfDays, notes, startDate, status, tripType, month, purpose} = req.body;
 
         if(!accountId || !adult || !noOfDays || !destinations){
             return res.status(400).json({
@@ -89,7 +90,8 @@ export const addB2CEnquiry = async(req ,res)=>{
                 startDate, 
                 status, 
                 tripType,
-                month
+                month,
+                purpose
 
             })
 

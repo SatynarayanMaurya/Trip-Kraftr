@@ -199,6 +199,7 @@ function ViewB2CAccount() {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <ContactRow icon={Phone} label="Phone Number"   value={d?.phone ? `+91 ${d.phone}` : '—'} />
+            <ContactRow icon={Phone} label="Whatsapp Number"   value={d?.whatsappNo ? `+91 ${d.whatsappNo}` : '—'} />
             <ContactRow icon={Mail}  label="Email Address"  value={d?.email} />
           </div>
         </div>

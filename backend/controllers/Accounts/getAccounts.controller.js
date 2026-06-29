@@ -103,7 +103,7 @@ export const getB2BAccountById = async (req, res) => {
         // Fetch the hotel (org_id is already validated in middleware)
         const foundAccount = await B2BAccount
             .findOne({ org_id: req.user.org_id, _id: accountId })
-            .select("_id accountId businessName email gstNo isActive phone secondaryPhone source referralBy state address")
+            .select("_id accountId businessName email gstNo isActive phone whatsappNo secondaryPhone source referralBy state address")
 
         if (!foundAccount) {
             return res.status(404).json({
@@ -150,7 +150,7 @@ export const getB2CAccountById = async (req, res) => {
         // Fetch the hotel (org_id is already validated in middleware)
         const foundAccount = await B2CAccount
             .findOne({ org_id: req.user.org_id, _id: accountId })
-            .select("_id accountId fullName email isActive phone source referralBy state assignedTo destinations dietaryPreference month noOfMembers tripType")
+            .select("_id accountId fullName email isActive phone whatsappNo source referralBy state assignedTo destinations dietaryPreference month noOfMembers tripType")
 
         if (!foundAccount) {
             return res.status(404).json({

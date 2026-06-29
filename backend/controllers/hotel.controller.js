@@ -17,13 +17,18 @@ export const addHotel = async (req, res) => {
             googleRating,
             regionId,
             subRegionId,
-            amenities
+            amenities,
+            checkIn,
+            checkOut,
+            notes,
+            paymentDetails
         } = req.body;
+
 
         const amenitiesArray = amenities ? JSON.parse(amenities) : [];
 
         // ✅ Basic validation
-        if (!hotelName?.trim() || !contact || !regionId || !category) {
+        if (!hotelName?.trim() || !contact || !regionId || !category || !checkIn || !checkOut) {
             return res.status(400).json({
                 success: false,
                 message: "Required fields are missing"
@@ -74,6 +79,10 @@ export const addHotel = async (req, res) => {
             hotelName_lower: hotelName.trim().toLowerCase(),
             contact,
             category,
+            checkIn,
+            checkOut,
+            notes,
+            paymentDetails,
             org_id: new mongoose.Types.ObjectId(req.user.org_id),
             regionId: new mongoose.Types.ObjectId(regionId)
         };
@@ -183,7 +192,6 @@ export const getHotelById = async (req, res) => {
     try {
         const { hotelId } = req.params;
 
-        console.log("Hotel Id : ", hotelId)
         if (!hotelId) {
             return res.status(400).json({
                 success: false,
@@ -227,78 +235,46 @@ export const getHotelById = async (req, res) => {
 };
 
 
-// export const getHotelsBySubRegionIds = async (req, res) => {
-//     try {
-//       const subRegionIds = req.query.subRegionIds.split(",");
-//       const {category} = req.query;
-//       console.log("categroy : ",category)
-  
-//       const allHotels = await Hotel
-//         .find({
-//           org_id: req.user.org_id,
-//           subRegionId: { $in: subRegionIds.map(id => new mongoose.Types.ObjectId(id)) },
-//           category,
-//           is_active:true
-//         })
-//         .sort({ createdAt: -1 })
-//         .lean()
-//         .select("_id regionId subRegionId hotelName category images amenities googleRating")
-  
-//       return res.status(200).json({
-//         success: true,
-//         message: "Hotels fetched successfully",
-//         allHotels
-//       });
-  
-//     } catch (error) {
-//       return res.status(500).json({
-//         success: false,
-//         message: error?.message || "Internal Server Error"
-//       });
-//     }
-// };
-
 export const getHotelsBySubRegionIds = async (req, res) => {
     try {
-      const subRegionIds = req.query.subRegionIds.split(",");
-      const { category } = req.query;
-  
-      console.log("category :", category);
-  
-      const query = {
-        org_id: req.user.org_id,
-        subRegionId: {
-          $in: subRegionIds.map(
-            (id) => new mongoose.Types.ObjectId(id)
-          ),
-        },
-        is_active: true,
-      };
-  
-      // add category only if it exists
-      if (category) {
-        query.category = category;
-      }
-  
-      const allHotels = await Hotel.find(query)
-        .sort({ createdAt: -1 })
-        .lean()
-        .select(
-          "_id regionId subRegionId hotelName category images amenities googleRating"
-        );
-  
-      return res.status(200).json({
-        success: true,
-        message: "Hotels fetched successfully",
-        allHotels,
-      });
+        const subRegionIds = req.query.subRegionIds.split(",");
+        const { category } = req.query;
+
+
+        const query = {
+            org_id: req.user.org_id,
+            subRegionId: {
+                $in: subRegionIds.map(
+                    (id) => new mongoose.Types.ObjectId(id)
+                ),
+            },
+            is_active: true,
+        };
+
+        // add category only if it exists
+        if (category) {
+            query.category = category;
+        }
+
+        const allHotels = await Hotel.find(query)
+            .sort({ createdAt: -1 })
+            .lean()
+            .select(
+                "_id regionId subRegionId hotelName category images amenities googleRating"
+            );
+
+        return res.status(200).json({
+            success: true,
+            message: "Hotels fetched successfully",
+            allHotels,
+        });
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: error?.message || "Internal Server Error",
-      });
+        return res.status(500).json({
+            success: false,
+            message: error?.message || "Internal Server Error",
+        });
     }
-  };
+};
 
 
 export const updateHotelById = async (req, res) => {
@@ -323,7 +299,11 @@ export const updateHotelById = async (req, res) => {
             regionId,
             subRegionId,
             amenities,
-            imagesToDelete
+            imagesToDelete,
+            checkIn,
+            checkOut,
+            notes,
+            paymentDetails
         } = req.body;
 
         const amenitiesArray = amenities ? JSON.parse(amenities) : [];
@@ -336,7 +316,7 @@ export const updateHotelById = async (req, res) => {
 
         // ✅ Find hotel first
         // const hotel = await Hotel.findById(hotelId);
-        const hotel = await Hotel.findOne({org_id:req.user.org_id,_id:hotelId});
+        const hotel = await Hotel.findOne({ org_id: req.user.org_id, _id: hotelId });
         if (!hotel) {
             return res.status(404).json({
                 success: false,
@@ -404,6 +384,10 @@ export const updateHotelById = async (req, res) => {
         if (category) hotel.category = category;
         if (email) hotel.email = email.trim();
         if (address) hotel.address = address.trim();
+        if (paymentDetails) hotel.paymentDetails = paymentDetails.trim();
+        if (notes) hotel.notes = notes.trim();
+        if (checkOut) hotel.checkOut = checkOut.trim();
+        if (checkIn) hotel.checkIn = checkIn.trim();
 
         if (regionId && mongoose.Types.ObjectId.isValid(regionId)) {
             hotel.regionId = new mongoose.Types.ObjectId(regionId);
@@ -473,7 +457,7 @@ export const updateHotelStatusById = async (req, res) => {
                 org_id: req.user.org_id
             },
             {
-                $set: { is_active:status }
+                $set: { is_active: status }
             },
             {
                 new: true,

@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import {
   ArrowLeft, ChevronDown, Phone, Mail, MapPin,
-  Star, Upload, X, Save, XCircle,
+  Star, Upload, X, Save, XCircle,Timer,
   BedDouble,
 } from 'lucide-react'
 import { useSelector } from 'react-redux'
@@ -18,22 +18,22 @@ const MAX_IMAGES = 3
 
 // ── Amenities master list ─────────────────────────────────────────────────
 const AMENITIES_LIST = [
-  { key: 'wifi',           label: 'Free Wi-Fi' },
-  { key: 'pool',           label: 'Swimming Pool' },
-  { key: 'parking',        label: 'Free Parking' },
-  { key: 'restaurant',     label: 'Restaurant' },
-  { key: 'gym',            label: 'Fitness Center' },
-  { key: 'ac',             label: 'Air Conditioning' },
-  { key: 'tv',             label: 'Smart TV' },
-  { key: 'breakfast',      label: 'Breakfast' },
-  { key: 'hotwater',       label: 'Hot Shower' },
+  { key: 'wifi', label: 'Free Wi-Fi' },
+  { key: 'pool', label: 'Swimming Pool' },
+  { key: 'parking', label: 'Free Parking' },
+  { key: 'restaurant', label: 'Restaurant' },
+  { key: 'gym', label: 'Fitness Center' },
+  { key: 'ac', label: 'Air Conditioning' },
+  { key: 'tv', label: 'Smart TV' },
+  { key: 'breakfast', label: 'Breakfast' },
+  { key: 'hotwater', label: 'Hot Shower' },
   { key: 'airportShuttle', label: 'Airport Shuttle' },
-  { key: 'laundry',        label: 'Laundry' },
-  { key: 'kidsPlay',       label: 'Kids Play Area' },
-  { key: 'bonfire',        label: 'Bonfire' },
-  { key: 'security',       label: '24/7 Security' },
-  { key: 'accessible',     label: 'Accessible' },
-  { key: 'roomService',    label: 'Room Service' },
+  { key: 'laundry', label: 'Laundry' },
+  { key: 'kidsPlay', label: 'Kids Play Area' },
+  { key: 'bonfire', label: 'Bonfire' },
+  { key: 'security', label: '24/7 Security' },
+  { key: 'accessible', label: 'Accessible' },
+  { key: 'roomService', label: 'Room Service' },
 ]
 
 // ── Star display ──────────────────────────────────────────────────────────
@@ -60,11 +60,11 @@ function AmenityChip({ amenity, selected, onToggle }) {
       onClick={() => onToggle(amenity.label)}
       className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-semibold border transition-all select-none"
       style={{
-        border:     selected ? '1.5px solid #ED5F8D' : '1.5px solid #E5E7EB',
+        border: selected ? '1.5px solid #ED5F8D' : '1.5px solid #E5E7EB',
         background: selected ? '#FFF0F7' : '#FAFAFA',
-        color:      selected ? '#ED5F8D' : '#6B7280',
-        boxShadow:  selected ? '0 2px 8px rgba(237,95,141,0.13)' : '0 1px 4px rgba(0,0,0,0.06)',
-        transform:  selected ? 'translateY(-1px)' : 'translateY(0)',
+        color: selected ? '#ED5F8D' : '#6B7280',
+        boxShadow: selected ? '0 2px 8px rgba(237,95,141,0.13)' : '0 1px 4px rgba(0,0,0,0.06)',
+        transform: selected ? 'translateY(-1px)' : 'translateY(0)',
         transition: 'all 0.15s ease',
       }}
       onMouseEnter={(e) => {
@@ -123,19 +123,19 @@ function Skeleton() {
 
 // ── Main ──────────────────────────────────────────────────────────────────
 export default function UpdateHotel() {
-  const navigate   = useNavigate()
-  const location   = useLocation()
+  const navigate = useNavigate()
+  const location = useLocation()
   const { hotelId } = useParams()
 
-  const isProduction           = useSelector((state) => state?.user?.isProduction)
+  const isProduction = useSelector((state) => state?.user?.isProduction)
   const allRegionsForSuggestions = useSelector((state) => state.user.allRegionsForSuggestions)
 
   const { searchSubRegionForOrg } = useCommonHooks()
-  const { getRegionsForOrg }      = useRegionHooks()
+  const { getRegionsForOrg } = useRegionHooks()
   const { getHotelById, updateHotelById } = useHotelHooks()
 
   // ── Loading states ───────────────────────────────────────────────────
-  const [fetchLoading,  setFetchLoading]  = useState(false)
+  const [fetchLoading, setFetchLoading] = useState(false)
   const [regionLoading, setRegionLoading] = useState(false)
   const [submitLoading, setSubmitLoading] = useState(false)
 
@@ -144,42 +144,46 @@ export default function UpdateHotel() {
 
   // ── Form state ───────────────────────────────────────────────────────
   const [form, setForm] = useState({
-    hotelName:     '',
-    category:      'Budget',
-    regionId:      '',
-    regionName:    '',
-    subRegionId:   '',
+    hotelName: '',
+    category: 'Budget',
+    regionId: '',
+    regionName: '',
+    subRegionId: '',
     subRegionName: '',
-    contact:       '',
-    email:         '',
-    address:       '',
-    googleRating:  '',
+    contact: '',
+    email: '',
+    address: '',
+    googleRating: '',
+    checkIn: '',
+    checkOut: '',
+    notes: '',
+    paymentDetails: ''
   })
 
   const [selectedAmenities, setSelectedAmenities] = useState([])
   const [errors, setErrors] = useState({})
 
   const [existingImages, setExistingImages] = useState([])
-  const [imagesToDelete,  setImagesToDelete]  = useState([])  // public_ids
-  const [newImages,       setNewImages]       = useState([])   // { file, preview }
+  const [imagesToDelete, setImagesToDelete] = useState([])  // public_ids
+  const [newImages, setNewImages] = useState([])   // { file, preview }
 
   // ── Dropdown / search refs ───────────────────────────────────────────
-  const categoryRef  = useRef(null)
-  const regionRef    = useRef(null)
+  const categoryRef = useRef(null)
+  const regionRef = useRef(null)
   const subRegionRef = useRef(null)
   const fileInputRef = useRef(null)
 
   const [categoryOpen, setCategoryOpen] = useState(false)
-  const [regionOpen,   setRegionOpen]   = useState(false)
+  const [regionOpen, setRegionOpen] = useState(false)
 
-  const [subRegionInput,       setSubRegionInput]       = useState('')
+  const [subRegionInput, setSubRegionInput] = useState('')
   const [subRegionSuggestions, setSubRegionSuggestions] = useState([])
-  const [subRegionLoading,     setSubRegionLoading]     = useState(false)
+  const [subRegionLoading, setSubRegionLoading] = useState(false)
 
   // ── Derived ──────────────────────────────────────────────────────────
-  const totalImages   = existingImages.length + newImages.length
-  const slotsLeft     = MAX_IMAGES - totalImages
-  const ratingNum     = Math.min(5, Math.max(0, Number(form.googleRating) || 0))
+  const totalImages = existingImages.length + newImages.length
+  const slotsLeft = MAX_IMAGES - totalImages
+  const ratingNum = Math.min(5, Math.max(0, Number(form.googleRating) || 0))
 
   // ── Fetch regions for dropdown ────────────────────────────────────────
   const fetchRegions = async () => {
@@ -199,22 +203,25 @@ export default function UpdateHotel() {
   const populate = (data) => {
     setOriginalData(data)
     setForm({
-      hotelName:     data?.hotelName     ?? '',
-      category:      data?.category      ?? 'Budget',
-      regionId:      data?.regionId?._id ?? '',
-      regionName:    data?.regionId?.name ?? '',
-      subRegionId:   data?.subRegionId?._id ?? '',
+      hotelName: data?.hotelName ?? '',
+      category: data?.category ?? 'Budget',
+      regionId: data?.regionId?._id ?? '',
+      regionName: data?.regionId?.name ?? '',
+      subRegionId: data?.subRegionId?._id ?? '',
       subRegionName: data?.subRegionId?.name ?? '',
-      contact:       String(data?.contact ?? ''),
-      email:         data?.email         ?? '',
-      address:       data?.address       ?? '',
-      googleRating:  data?.googleRating  ?? '',
+      contact: String(data?.contact ?? ''),
+      email: data?.email ?? '',
+      address: data?.address ?? '',
+      googleRating: data?.googleRating ?? '',
+      checkIn: data?.checkIn ?? '',
+      checkOut: data?.checkOut ?? '',
+      notes: data?.notes ?? '',
+      paymentDetails: data?.paymentDetails ?? '',
     })
     setSubRegionInput(data?.subRegionId?.name ?? '')
     setSelectedAmenities(data?.amenities ?? [])
     setExistingImages(data?.images ?? [])
   }
-
 
   // ── Load hotel (from state or API) ────────────────────────────────────
   useEffect(() => {
@@ -241,8 +248,8 @@ export default function UpdateHotel() {
   // ── Close dropdowns on outside click ─────────────────────────────────
   useEffect(() => {
     const h = (e) => {
-      if (categoryRef.current  && !categoryRef.current.contains(e.target))  setCategoryOpen(false)
-      if (regionRef.current    && !regionRef.current.contains(e.target))    setRegionOpen(false)
+      if (categoryRef.current && !categoryRef.current.contains(e.target)) setCategoryOpen(false)
+      if (regionRef.current && !regionRef.current.contains(e.target)) setRegionOpen(false)
       if (subRegionRef.current && !subRegionRef.current.contains(e.target)) setSubRegionSuggestions([])
     }
     document.addEventListener('mousedown', h)
@@ -326,26 +333,32 @@ export default function UpdateHotel() {
 
   // ── Change detection ──────────────────────────────────────────────────
   const hasChanges =
-    form.hotelName     !== (originalData?.hotelName     ?? '')           ||
-    form.category      !== (originalData?.category      ?? 'Budget')     ||
-    form.regionId      !== (originalData?.regionId?._id ?? '')           ||
-    form.subRegionId   !== (originalData?.subRegionId?._id ?? '')        ||
-    form.contact       !== String(originalData?.contact ?? '')           ||
-    form.email         !== (originalData?.email         ?? '')           ||
-    form.address       !== (originalData?.address       ?? '')           ||
+    form.hotelName !== (originalData?.hotelName ?? '') ||
+    form.category !== (originalData?.category ?? 'Budget') ||
+    form.regionId !== (originalData?.regionId?._id ?? '') ||
+    form.subRegionId !== (originalData?.subRegionId?._id ?? '') ||
+    form.contact !== String(originalData?.contact ?? '') ||
+    form.email !== (originalData?.email ?? '') ||
+    form.address !== (originalData?.address ?? '') ||
+    form.paymentDetails !== (originalData?.paymentDetails ?? '') ||
+    form.notes !== (originalData?.notes ?? '') ||
+    form.checkOut !== (originalData?.checkOut ?? '') ||
+    form.checkIn !== (originalData?.checkIn ?? '') ||
     String(form.googleRating) !== String(originalData?.googleRating ?? '') ||
     JSON.stringify(selectedAmenities.slice().sort()) !==
-      JSON.stringify((originalData?.amenities ?? []).slice().sort())     ||
-    imagesToDelete.length > 0                                            ||
+    JSON.stringify((originalData?.amenities ?? []).slice().sort()) ||
+    imagesToDelete.length > 0 ||
     newImages.length > 0
 
   // ── Validation ────────────────────────────────────────────────────────
   const validate = () => {
     const e = {}
-    if (!form.hotelName?.trim())  e.hotelName = 'Hotel name is required.'
-    if (!form.category)           e.category  = 'Please select a category.'
-    if (!form.regionId)           e.regionId  = 'Please select a region.'
-    if (!form.contact?.trim())    e.contact   = 'Contact is required.'
+    if (!form.hotelName?.trim()) e.hotelName = 'Hotel name is required.'
+    if (!form.category) e.category = 'Please select a category.'
+    if (!form.regionId) e.regionId = 'Please select a region.'
+    if (!form.contact?.trim()) e.contact = 'Contact is required.'
+    if (!form.checkIn?.trim()) e.checkIn = 'checkIn is required.'
+    if (!form.checkOut?.trim()) e.checkOut = 'checkOut is required.'
     else if (!/^\+?[\d\s\-()]{7,15}$/.test(form.contact.trim())) e.contact = 'Enter a valid contact number.'
     if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) e.email = 'Enter a valid email.'
     if (form.googleRating !== '') {
@@ -366,11 +379,15 @@ export default function UpdateHotel() {
 
       const formData = new FormData()
       formData.append('hotelName', form.hotelName)
-      formData.append('category',  form.category)
-      formData.append('regionId',  form.regionId)
+      formData.append('category', form.category)
+      formData.append('regionId', form.regionId)
+      formData.append('checkOut', form.checkOut)
+      formData.append('checkIn', form.checkIn)
+      formData.append('notes', form.notes)
+      formData.append('paymentDetails', form.paymentDetails)
       if (form.subRegionId) formData.append('subRegionId', form.subRegionId)
-      formData.append('contact',   form.contact)
-      if (form.email)   formData.append('email',   form.email)
+      formData.append('contact', form.contact)
+      if (form.email) formData.append('email', form.email)
       if (form.address) formData.append('address', form.address)
       if (form.googleRating !== '') formData.append('googleRating', Number(form.googleRating))
       formData.append('amenities', JSON.stringify(selectedAmenities))
@@ -652,6 +669,41 @@ export default function UpdateHotel() {
             {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
           </div>
 
+
+          {/* Check In */}
+          <div>
+            <label className="block text-sm font-semibold text-[#18305C] mb-1.5">Check-In</label>
+            <div className="relative">
+              <Timer size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              <input
+                type="time"
+                value={form.checkIn}
+                onChange={(e) => { setForm((f) => ({ ...f, checkIn: e.target.value })); clearError('checkIn') }}
+                placeholder="e.g 12:40"
+                className={`${inputCls('checkIn')} pl-9`}
+              />
+            </div>
+            {errors.checkIn && <p className="text-red-500 text-xs mt-1">{errors.checkIn}</p>}
+          </div>
+
+          {/* Check Out */}
+          <div>
+            <label className="block text-sm font-semibold text-[#18305C] mb-1.5">Check-Out</label>
+            <div className="relative">
+              <Timer size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              <input
+                type="time"
+                value={form.checkOut}
+                onChange={(e) => { setForm((f) => ({ ...f, checkOut: e.target.value })); clearError('checkOut') }}
+                placeholder="e.g 12:40"
+                className={`${inputCls('checkOut')} pl-9`}
+              />
+            </div>
+            {errors.checkOut && <p className="text-red-500 text-xs mt-1">{errors.checkOut}</p>}
+          </div>
+
+
+
           {/* Address */}
           <div>
             <label className="block text-sm font-semibold text-[#18305C] mb-1.5">Address</label>
@@ -784,6 +836,33 @@ export default function UpdateHotel() {
             {errors.googleRating && <p className="text-red-500 text-xs mt-1">{errors.googleRating}</p>}
           </div>
 
+
+          
+        {/* Notes */}
+        <div>
+          <label className="block text-sm font-semibold text-[#18305C] mb-1.5">Hotel Notes</label>
+          <textarea
+            value={form.notes}
+            onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
+            placeholder="Enter notes"
+            rows={4}
+            className={inputCls('notes')}
+          />
+        </div>
+
+
+        {/* Payment Details */}
+        <div>
+          <label className="block text-sm font-semibold text-[#18305C] mb-1.5">Payment Details</label>
+          <textarea
+            value={form.paymentDetails}
+            onChange={(e) => setForm((f) => ({ ...f, paymentDetails: e.target.value }))}
+            placeholder="Enter full Payment Details"
+            rows={4}
+            className={inputCls('paymentDetails')}
+          />
+        </div>
+
         </div>
 
         {/* ── Amenities ──────────────────────────────────────────────────── */}
@@ -849,6 +928,8 @@ export default function UpdateHotel() {
             </div>
           )}
         </div>
+
+
       </div>
 
       {/* ── Actions ───────────────────────────────────────────────────────── */}

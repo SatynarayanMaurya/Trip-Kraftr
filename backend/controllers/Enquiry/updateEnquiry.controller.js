@@ -6,7 +6,7 @@ import B2CEnquiry from "../../models/Enquiry/B2CEnquiry.model.js"
 
 export const updateB2BEnquiryById = async(req ,res)=>{
     try{
-        const { adult, assignedTo, child, childAges,totalMembers, destinations, dietaryPreference, hotelCategory, noOfDays, notes, startDate, status, tripType, month} = req.body;
+        const { adult, assignedTo, child, childAges,totalMembers, destinations, dietaryPreference, hotelCategory, noOfDays, notes, startDate, status, tripType, month, purpose} = req.body;
 
         const {enquiryId} = req.params
         if(!enquiryId){
@@ -45,7 +45,8 @@ export const updateB2BEnquiryById = async(req ,res)=>{
                     startDate, 
                     status, 
                     tripType,
-                    month
+                    month,
+                    purpose
                 }
             }
         )
@@ -75,7 +76,7 @@ export const updateB2BEnquiryById = async(req ,res)=>{
 
 export const updateB2CEnquiryById = async(req ,res)=>{
     try{
-        const { adult, assignedTo, child, childAges,totalMembers, destinations, dietaryPreference, hotelCategory, noOfDays, notes, startDate, status, tripType, month} = req.body;
+        const { adult, assignedTo, child, childAges,totalMembers, destinations, dietaryPreference, hotelCategory, noOfDays, notes, startDate, status, tripType, month, purpose} = req.body;
 
         const {enquiryId} = req.params
         if(!enquiryId){
@@ -114,7 +115,8 @@ export const updateB2CEnquiryById = async(req ,res)=>{
                     startDate, 
                     status, 
                     tripType,
-                    month
+                    month,
+                    purpose
                 }
             }
         )

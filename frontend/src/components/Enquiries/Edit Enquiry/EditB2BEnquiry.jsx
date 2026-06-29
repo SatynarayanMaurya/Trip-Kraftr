@@ -22,9 +22,10 @@ const LIGHT_PINK = '#FFF6F9';
 const BLUE = '#18305C';
 
 const HOTEL_CATEGORIES = ['Budget', 'Premium', 'Luxury'];
+const PURPOSE = ['Honeymoon', 'Family - Leisure', 'Friends - Leisure', 'Adventure', 'Wildlife', 'Cultural', 'Eco-Tourism', 'Slow travel', 'Others']
 const DIETARY_OPTIONS = ['Vegetarian', 'Non-Vegetarian', 'Both (Veg & Non-Veg)', 'Vegan', 'Jain'];
 const TRIP_TYPES = ['Group Trip', 'Private'];
-const STATUS_OPTIONS = ['New', 'In Progress', 'Warm', 'Won', 'Lost'];
+const STATUS_OPTIONS = ['New', 'In Progress', 'Warm', 'Won', 'Lost', 'Postponed'];
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December'];
 
@@ -115,7 +116,8 @@ function EditB2BEnquiry({ onCancel }) {
     dietaryPreference: '',
     destinations: [],
     notes: '',
-    month:''
+    month: '',
+    purpose: 'Others'
   });
 
   useEffect(() => {
@@ -136,6 +138,7 @@ function EditB2BEnquiry({ onCancel }) {
       destinations: enquiryDetails?.destinations || [],
       notes: enquiryDetails?.notes || '',
       month: enquiryDetails?.month || '',
+      purpose: enquiryDetails?.purpose || 'Others',
     })
   }, [enquiryDetails])
 
@@ -597,6 +600,19 @@ function EditB2BEnquiry({ onCancel }) {
                 <FiChevronDown style={chevronIcon} />
               </div>
             </div>
+
+
+            <div style={{ ...fieldWrap, marginBottom: '20px' }}>
+              <label style={labelStyle}>Purpose</label>
+              <div style={{ position: 'relative' }}>
+                <select style={selectStyle} value={form.purpose}
+                  onChange={e => setForm(f => ({ ...f, purpose: e.target.value }))}>
+                  <option value="">Select</option>
+                  {PURPOSE.map(d => <option key={d}>{d}</option>)}
+                </select>
+                <FiChevronDown style={chevronIcon} />
+              </div>
+            </div>
           </div>
 
           {/* ── Destination (multi-select) ── */}
@@ -674,7 +690,7 @@ function EditB2BEnquiry({ onCancel }) {
 
           {/* ── Footer Buttons ── */}
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', flexWrap: 'wrap' }}>
-            <button onClick={onCancel} style={cancelBtn}>
+            <button  onClick={()=>navigate(-1)} style={cancelBtn}>
               Cancel
             </button>
             <button

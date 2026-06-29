@@ -104,7 +104,7 @@ function EnquiryPrivateTrip({
                                                         {enquiry?.enquiryId}
                                                     </p>
                                                     <p className="text-sm font-medium text-gray-900 truncate">
-                                                        {enquiry?.accountId?.fullName || enquiry?.accountId?.businessName}
+                                                        {enquiry?.accountId?.fullName || enquiry?.accountId?.businessName} • {enquiry?.purpose}
                                                     </p>
                                                     <p className="text-sm text-gray-500 mt-0.5">
                                                         {enquiry?.accountId?.phone}
@@ -143,7 +143,7 @@ function EnquiryPrivateTrip({
                     <div className="flex items-center justify-between mb-5">
                         <div>
                             <h3 className="text-lg font-semibold">
-                                {enquiryDetails.accountId?.fullName || enquiryDetails.accountId?.businessName}
+                                {enquiryDetails.accountId?.fullName || enquiryDetails.accountId?.businessName} • {enquiryDetails?.purpose}
                             </h3>
                             <p className="text-sm text-gray-500">
                                 {enquiryDetails.enquiryId}

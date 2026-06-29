@@ -6,7 +6,7 @@ import mongoose from "mongoose";
 
 export const updateB2BAccount = async (req, res) => {
     try {
-        const { businessName, gstNo, email, source, referralBy, secondaryPhone, phone, state ,address,} = req.body;
+        const { businessName, gstNo, email, source, referralBy, secondaryPhone, phone,whatsappNo, state ,address,} = req.body;
         const {accountId} = req.params;
         if (!businessName || !email || !phone) {
             return res.status(400).json({
@@ -23,6 +23,7 @@ export const updateB2BAccount = async (req, res) => {
             referralBy,
             secondaryPhone,
             phone,
+            whatsappNo,
             state,address
 
         }},{new:true})
@@ -50,7 +51,7 @@ export const updateB2BAccount = async (req, res) => {
 
 export const updateB2CAccount = async (req, res) => {
     try {
-        const { fullName, email, source, referralby, phone, state, month, dietaryPreference, noOfMembers, destinations, tripType, assignedTo,gstNo } = req.body;
+        const { fullName, email, source, referralby, phone,whatsappNo, state, month, dietaryPreference, noOfMembers, destinations, tripType, assignedTo,gstNo } = req.body;
         const {accountId} = req.params;
         if (!fullName || !email || !phone) {
             return res.status(400).json({
@@ -67,6 +68,7 @@ export const updateB2CAccount = async (req, res) => {
             source,
             referralBy:referralby,
             phone,
+            whatsappNo,
             state,
             month,
             dietaryPreference,

@@ -180,6 +180,7 @@ function ViewB2BAccount() {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <ContactRow icon={Phone} label="Phone Number" value={accountDetails?.phone ? `+91 ${accountDetails.phone}` : '—'} />
+            <ContactRow icon={Phone} label="Whatsapp Number" value={accountDetails?.whatsappNo ? `+91 ${accountDetails.whatsappNo}` : '—'} />
             <ContactRow icon={Phone} label="Secondary No." value={accountDetails?.secondaryPhone ? `+91 ${accountDetails.secondaryPhone}` : '—'} />
             <ContactRow icon={Mail} label="Email Address" value={accountDetails?.email} />
           </div>

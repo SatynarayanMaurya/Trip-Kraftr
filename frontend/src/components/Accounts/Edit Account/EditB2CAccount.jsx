@@ -35,6 +35,8 @@ function DestinationSelect({ selected, onChange }) {
   const ref = useRef();
   const { regions, loading: regionLoading } = useRegionsData();
   const [suggestedDestinations, setSuggestedDestinations] = useState([])
+  
+
   useEffect(()=>{
       if(!regions)return ;
       setSuggestedDestinations(regions?.map(val=>val?.name))
@@ -112,6 +114,7 @@ function EditB2CAccount() {
 
   const [fetchLoading, setFetchLoading] = useState(false)
   const {accountId} = useParams();
+    const [sameAsPhone, setSameAsPhone] = useState(false);
 
   const accountDetails = useSelector(s => s.account.b2cAccountsByIds?.[accountId])
 
@@ -137,7 +140,7 @@ function EditB2CAccount() {
 
 
   const [form, setForm] = useState({
-    fullName: '', email: '', phone: '', month: '',
+    fullName: '', email: '', phone: '',whatsappNo:'', month: '',
     source: '', referralby: '', destinations: [],
     noOfMembers: '', state: '', tripType: 'Group Trip',
     dietaryPreference: '', assignedTo: '',gstNo:''
@@ -150,6 +153,7 @@ function EditB2CAccount() {
         fullName: accountDetails.fullName || '',
         email: accountDetails.email || '',
         phone: accountDetails.phone || '',
+        whatsappNo: accountDetails.whatsappNo || '',
         month: accountDetails.month || '',
         source: accountDetails.source || '',
         referralby: accountDetails.referralBy || '',
@@ -164,6 +168,22 @@ function EditB2CAccount() {
     }
   }, [accountDetails]);
   const set = (key, val) => setForm(p => ({ ...p, [key]: val }));
+
+  
+  const handlePhoneChange = (val) => {
+    const cleaned = val.replace(/\D/, '');
+    setForm(p => ({
+      ...p,
+      phone: cleaned,
+      ...(sameAsPhone ? { whatsappNo: cleaned } : {}),
+    }));
+  };
+
+  const handleSameAsPhone = () => {
+    const next = !sameAsPhone;
+    setSameAsPhone(next);
+    if (next) set('whatsappNo', form.phone);
+  };
 
   const validate = (data) => {
     const e = {};
@@ -257,8 +277,48 @@ function EditB2CAccount() {
         <label style={labelStyle}>Phone Number <span style={{ color: PINK }}>*</span></label>
         <input style={{ ...inputStyle, ...(errors.phone ? errorBorder : {}) }}
           type="tel" maxLength={10} placeholder="Enter Phone Number"
-          value={form.phone} onChange={e => set('phone', e.target.value.replace(/\D/, ''))} />
+          value={form.phone} onChange={e => handlePhoneChange(e.target.value)} />
         {errors.phone && <p style={{ color: '#ef4444', fontSize: '12px', margin: '4px 0 0' }}>{errors.phone}</p>}
+      </div>
+
+      
+      {/* WhatsApp Number */}
+      <div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+          <label style={{ ...labelStyle, margin: 0 }}>WhatsApp Number</label>
+          <button
+            type="button"
+            onClick={handleSameAsPhone}
+            style={{
+              fontSize: '11px',
+              padding: '2px 10px',
+              borderRadius: '20px',
+              border: `1.5px solid ${PINK}`,
+              background: sameAsPhone ? PINK : 'white',
+              color: sameAsPhone ? 'white' : PINK,
+              cursor: 'pointer',
+              fontWeight: '600',
+              transition: 'all 0.15s',
+              lineHeight: '1.6',
+            }}
+          >
+            Same as Phone
+          </button>
+        </div>
+        <input
+          style={{
+            ...inputStyle,
+            ...(errors.whatsappNo ? errorBorder : {}),
+            ...(sameAsPhone ? { background: '#f5f5f5' } : {}),
+          }}
+          type="tel"
+          maxLength={10}
+          placeholder="Enter WhatsApp Number"
+          value={form.whatsappNo}
+          disabled={sameAsPhone}
+          onChange={e => set('whatsappNo', e.target.value.replace(/\D/, ''))}
+        />
+        {errors.whatsappNo && <p style={{ color: '#ef4444', fontSize: '12px', margin: '4px 0 0' }}>{errors.whatsappNo}</p>}
       </div>
 
       <div>

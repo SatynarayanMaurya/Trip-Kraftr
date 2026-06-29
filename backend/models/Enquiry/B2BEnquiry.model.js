@@ -86,6 +86,10 @@ const B2BEnquirySchema = new mongoose.Schema({
         type: String,
         default: null
     },
+    purpose: {
+        type: String,
+        default: null
+    },
 
 }, { timestamps: true });
 

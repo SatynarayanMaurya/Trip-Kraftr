@@ -5,7 +5,7 @@ import {
   Star, Upload, X, Save, XCircle,
   Wifi, Waves, ParkingCircle, Utensils, Dumbbell, Wind,
   Tv, Coffee, ShowerHead, Car, Shirt, Baby,
-  Flame, Shield, Accessibility, BedDouble,
+  Flame, Shield, Accessibility, BedDouble, Timer
 } from 'lucide-react'
 import { useCommonHooks } from '../../hooks/useCommonHooks'
 import { useSelector } from 'react-redux'
@@ -149,6 +149,10 @@ export default function AddHotel() {
     email: '',
     address: '',
     googleRating: '',
+    checkIn: '',
+    checkOut: '',
+    notes: '',
+    paymentDetails: ''
   })
 
   // ── Amenities state — default: wifi, pool, parking selected ──────────
@@ -259,6 +263,8 @@ export default function AddHotel() {
     if (!form.regionId) e.regionId = 'Please select a region.'
     if (!form.subRegionId) e.subRegionId = 'Please select a Sub Region.'
     if (!form.contact.trim()) e.contact = 'Contact is required.'
+    if (!form.checkIn.trim()) e.checkIn = 'Check In is required.'
+    if (!form.checkOut.trim()) e.checkOut = 'Check Out is required.'
     else if (!/^\+?[\d\s\-()]{7,15}$/.test(form.contact.trim())) e.contact = 'Enter a valid contact number.'
     if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) e.email = 'Enter a valid email.'
     if (form.googleRating !== '') {
@@ -279,6 +285,10 @@ export default function AddHotel() {
       formData.append('hotelName', form.hotelName)
       formData.append('category', form.category)
       formData.append('regionId', form.regionId)
+      formData.append('checkIn', form.checkIn)
+      formData.append('checkOut', form.checkOut)
+      formData.append('notes', form.notes)
+      formData.append('paymentDetails', form.paymentDetails)
       if (form.subRegionId) formData.append('subRegionId', form.subRegionId)
       formData.append('contact', form.contact)
       if (form.email) formData.append('email', form.email)
@@ -313,6 +323,7 @@ export default function AddHotel() {
     }`
 
   const ratingNum = Math.min(5, Math.max(0, Number(form.googleRating) || 0))
+
 
   return (
     <div className="min-h-screen bg-white p-6 md:p-8 font-sans">
@@ -498,7 +509,7 @@ export default function AddHotel() {
                     >
                       {sr?.name}
                     </button>
-                    
+
                   ))}
                 </div>
               </div>
@@ -539,6 +550,39 @@ export default function AddHotel() {
             </div>
             {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
           </div>
+
+          {/* Check In */}
+          <div>
+            <label className="block text-sm font-semibold text-[#18305C] mb-1.5">Check-In</label>
+            <div className="relative">
+              <Timer size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              <input
+                type="time"
+                value={form.checkIn}
+                onChange={(e) => { setForm((f) => ({ ...f, checkIn: e.target.value })); clearError('checkIn') }}
+                placeholder="e.g 12:40"
+                className={`${inputCls('checkIn')} pl-9`}
+              />
+            </div>
+            {errors.checkIn && <p className="text-red-500 text-xs mt-1">{errors.checkIn}</p>}
+          </div>
+
+          {/* Check Out */}
+          <div>
+            <label className="block text-sm font-semibold text-[#18305C] mb-1.5">Check-Out</label>
+            <div className="relative">
+              <Timer size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              <input
+                type="time"
+                value={form.checkOut}
+                onChange={(e) => { setForm((f) => ({ ...f, checkOut: e.target.value })); clearError('checkOut') }}
+                placeholder="e.g 12:40"
+                className={`${inputCls('checkOut')} pl-9`}
+              />
+            </div>
+            {errors.checkOut && <p className="text-red-500 text-xs mt-1">{errors.checkOut}</p>}
+          </div>
+
 
           {/* Address */}
           <div>
@@ -620,6 +664,33 @@ export default function AddHotel() {
             {errors.googleRating && <p className="text-red-500 text-xs mt-1">{errors.googleRating}</p>}
           </div>
 
+
+
+          {/* Notes */}
+          <div>
+            <label className="block text-sm font-semibold text-[#18305C] mb-1.5">Hotel Notes</label>
+            <textarea
+              value={form.notes}
+              onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
+              placeholder="Enter notes"
+              rows={4}
+              className={inputCls('notes')}
+            />
+          </div>
+
+
+          {/* Payment Details */}
+          <div>
+            <label className="block text-sm font-semibold text-[#18305C] mb-1.5">Payment Details</label>
+            <textarea
+              value={form.paymentDetails}
+              onChange={(e) => setForm((f) => ({ ...f, paymentDetails: e.target.value }))}
+              placeholder="Enter full Payment Details"
+              rows={4}
+              className={inputCls('paymentDetails')}
+            />
+          </div>
+
         </div>
 
         {/* ── Amenities ──────────────────────────────────────────────────── */}
@@ -689,6 +760,8 @@ export default function AddHotel() {
             </div>
           )}
         </div>
+
+
       </div>
 
       {/* ── Actions ─────────────────────────────────────────────────────── */}

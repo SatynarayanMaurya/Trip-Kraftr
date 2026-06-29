@@ -6,7 +6,7 @@ import B2CAccount from "../../models/Accounts/B2CAccounts.model.js";
 
 export const addB2BAccount = async (req, res) => {
     try {
-        const { businessName, gstNo, email, source, referralBy, secondaryPhone, phone, state ,address} = req.body;
+        const { businessName, gstNo, email, source, referralBy, secondaryPhone, phone, whatsappNo,state ,address} = req.body;
         if (!businessName || !email || !phone) {
             return res.status(400).json({
                 success: false,
@@ -35,6 +35,7 @@ export const addB2BAccount = async (req, res) => {
             referralBy,
             secondaryPhone,
             phone,
+            whatsappNo,
             state,address
 
         })
@@ -63,7 +64,7 @@ export const addB2BAccount = async (req, res) => {
 
 export const addB2CAccount = async (req, res) => {
     try {
-        const { fullName, email, source, referralby, phone, state, month, dietaryPreference, noOfMembers, destinations, tripType, assignedTo, gstNo} = req.body;
+        const { fullName, email, source, referralby, phone,whatsappNo, state, month, dietaryPreference, noOfMembers, destinations, tripType, assignedTo, gstNo} = req.body;
         if (!fullName || !email || !phone) {
             return res.status(400).json({
                 success: false,
@@ -90,6 +91,7 @@ export const addB2CAccount = async (req, res) => {
             source,
             referralBy:referralby,
             phone,
+            whatsappNo,
             state,
             month,
             dietaryPreference,

@@ -369,6 +369,7 @@ export const getAllGroupTripAndPrivateTripAssociatedWithEnquiryId = async (req, 
         privateTripId: 1,
         enquiryId: 1,
         enquiryModel: 1,
+        purpose:1,
         "regionDetails.region1": 1,
         "regionDetails.region2": 1,
         "regionDetails.region3": 1,
@@ -416,7 +417,7 @@ export const searchB2BAccountsForEnquiry = async (req, res) => {
     const searchedAccounts = await B2BAccount
       .find(query)
       .limit(Number(pageLimit) || 5)
-      .select("_id fullName businessName email phone state destinations source accountId isActive");
+      .select("_id fullName businessName email phone state destinations source accountId isActive purpose");
 
     return res.status(200).json({
       success: true,
@@ -453,7 +454,7 @@ export const searchB2CAccountsForEnquiry = async (req, res) => {
     const searchedAccounts = await B2CAccount
       .find(query)
       .limit(Number(pageLimit) || 5)
-      .select("_id fullName email phone  source accountId state noOfMembers")
+      .select("_id fullName email phone  source accountId state noOfMembers purpose")
 
     return res.status(200).json({
       success: true,

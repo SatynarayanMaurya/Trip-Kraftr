@@ -72,6 +72,23 @@ const hotelSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
+    checkIn: {
+        type: String,
+        default: null
+    },
+    checkOut: {
+        type: String,
+        default: null
+    },
+    notes: {
+        type: String,
+        default: null
+    },
+    paymentDetails: {
+        type: String,
+        default: null
+    },
+
 
 }, { timestamps: true })
 
