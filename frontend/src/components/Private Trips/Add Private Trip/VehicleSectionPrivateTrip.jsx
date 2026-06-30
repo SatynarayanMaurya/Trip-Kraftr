@@ -8,13 +8,13 @@ const BLUE = '#18305C';
 
 // ─── blank vehicle entry ──────────────────────────────────────────────────────
 export const blankVehicle = () => ({
-  vehicleId:       null,
-  capacity:        0,
-  pricePerDay:     0,
+  vehicleId: null,
+  capacity: 0,
+  pricePerDay: 0,
   vehicleImageUrl: '',
-  vehicleModel:    '',
-  vehicleType:     '',
-  quantity:        1,
+  vehicleModel: '',
+  vehicleType: '',
+  quantity: 1,
   // _id:             '',
 });
 
@@ -24,8 +24,8 @@ const labelCls = 'block text-sm font-semibold text-[#18305C] mb-2';
 const selectCls = (disabled) =>
   `w-full border rounded-lg px-3 py-2 outline-none appearance-none text-[13px] transition-colors
    ${disabled
-     ? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
-     : 'border-gray-300 bg-white cursor-pointer focus:ring-2 focus:ring-pink-300'}`;
+    ? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
+    : 'border-gray-300 bg-white cursor-pointer focus:ring-2 focus:ring-pink-300'}`;
 
 // ─── SectionHeader (same style as the rest of the file) ──────────────────────
 function SectionHeader({ icon, label }) {
@@ -49,13 +49,13 @@ function VehicleEntry({ entry, index, total, allVehicles, disabled, onEntryChang
   const handleVehicleSelect = (vehicleId) => {
     const v = allVehicles?.find(v => v._id === vehicleId);
     onEntryChange(index, {
-      vehicleId:       v?._id       || null,
-      capacity:        v?.capacity       || 0,
-      pricePerDay:     v?.pricePerDay    || 0,
+      vehicleId: v?._id || null,
+      capacity: v?.capacity || 0,
+      pricePerDay: v?.pricePerDay || 0,
       vehicleImageUrl: v?.vehicleImageUrl || '',
-      vehicleModel:    v?.vehicleModel   || '',
-      vehicleType:     v?.vehicleType    || '',
-      quantity:        entry.quantity    || 1,
+      vehicleModel: v?.vehicleModel || '',
+      vehicleType: v?.vehicleType || '',
+      quantity: entry.quantity || 1,
       // _id:             v?._id            || '',
     });
   };
@@ -142,7 +142,7 @@ function VehicleEntry({ entry, index, total, allVehicles, disabled, onEntryChang
         {/* ── Image preview ── */}
         <div>
           <label className={labelCls}>Vehicle Preview</label>
-          <div className="h-[150px] rounded-xl overflow-hidden border border-gray-200 bg-gray-100">
+          <div className="h-37.5 rounded-xl overflow-hidden border border-gray-200 bg-gray-100">
             {selected?.vehicleImageUrl ? (
               <img
                 src={selected.vehicleImageUrl}
@@ -178,7 +178,7 @@ function VehicleEntry({ entry, index, total, allVehicles, disabled, onEntryChang
 // ─────────────────────────────────────────────────────────────────────────────
 // VehicleSection — main export
 // ─────────────────────────────────────────────────────────────────────────────
-function VehicleSectionPrivateTrip({ dayData, allVehicles, onDayChange }) {
+function VehicleSectionPrivateTrip({ dayData, allVehicles, onDayChange, activeDay, formData }) {
   // vehicleDetails is always an array (from blankDay)
   const vehicles = Array.isArray(dayData?.vehicleDetails)
     ? dayData.vehicleDetails
@@ -186,8 +186,8 @@ function VehicleSectionPrivateTrip({ dayData, allVehicles, onDayChange }) {
 
 
   // last entry must have a vehicleId before adding another
-  const lastEntry   = vehicles[vehicles.length - 1];
-  const canAddMore  = !!lastEntry?.vehicleId;
+  const lastEntry = vehicles[vehicles.length - 1];
+  const canAddMore = !!lastEntry?.vehicleId;
 
   // ── handlers ──────────────────────────────────────────────────────────────
 
@@ -206,30 +206,54 @@ function VehicleSectionPrivateTrip({ dayData, allVehicles, onDayChange }) {
     onDayChange('vehicleDetails', vehicles.filter((_, i) => i !== index));
   };
 
+  const handleSameAsPrevious = () => {
+    const previousVehicle = formData?.itineraryBuilder?.daysDetails?.[activeDay - 2]?.vehicleDetails
+    const copiedVehicles = previousVehicle.map(vehicle => ({
+      ...vehicle,
+    }));
+
+    onDayChange("vehicleDetails", copiedVehicles);
+  }
+
   // ── render ────────────────────────────────────────────────────────────────
   return (
     <div style={cardStyle}>
       <SectionHeader icon={<Car size={16} />} label="Vehicle" />
 
       {/* Add vehicle button row */}
-      <div className="flex justify-end mb-3">
+      <div className="flex justify-between mb-3">
+
         <button
           type="button"
           onClick={handleAddVehicle}
           disabled={!canAddMore}
           title={
-            !canAddMore  ? 'Select a vehicle first' :
-            'Add another vehicle'
+            !canAddMore ? 'Select a vehicle first' :
+              'Add another vehicle'
           }
           className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] font-semibold transition-all
-            ${canAddMore 
+            ${canAddMore
               ? 'text-white cursor-pointer'
               : 'text-gray-300 bg-gray-100 border border-gray-200 cursor-not-allowed'}`}
-          style={canAddMore  ? { background: PINK, border: `1px solid ${PINK}` } : {}}
+          style={canAddMore ? { background: PINK, border: `1px solid ${PINK}` } : {}}
         >
           <Plus size={13} />
           Add Vehicle
         </button>
+
+        {
+          activeDay !== 1 &&
+          <button
+            type="button"
+            onClick={handleSameAsPrevious}
+            // disabled={!canAddMore}
+            title="Same as Previous day Vehicle"
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] font-semibold transition-all text-white cursor-pointer  `}
+            style={{ background: PINK, border: `1px solid ${PINK}` }}
+          >
+            Same as Previous day
+          </button>
+        }
       </div>
 
       {/* Vehicle entries */}

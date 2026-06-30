@@ -7,6 +7,8 @@ import VehicleSectionPrivateTrip from './VehicleSectionPrivateTrip';
 import HotelDetailsPrivateTrip from './HotelDetailsPrivateTrip';
 import ActivitySectionPrivateTrip from './ActivitySectionPrivateTrip';
 import PriceSection from "./PriceSection"
+import { isCurrentDayValid, isCurrentDayVehicleValid } from '../../Sample Package/Add Sample Package/ValidationSimplePackage';
+import { toast } from 'react-toastify';
 const PINK = '#ED5F8D';
 const BLUE = '#18305C';
 
@@ -211,6 +213,7 @@ function ItineraryBuilderPrivateTrip({
     const numDays = itineraryBuilder?.daysDetails?.length ?? 0;
     const currentDay = itineraryBuilder?.daysDetails?.[activeDay - 1];
 
+
     const updateDayField = (field, value) => {
         if (value === '') value = null;
         let updates = { [field]: value };
@@ -257,6 +260,19 @@ function ItineraryBuilderPrivateTrip({
         handleItineraryChange(activeDay - 1, { hotelDetails: updated });
     }, [hotelsForActiveDay]);
 
+
+    const nextDayClicked = (dayNum) => {
+        const isCurrentDayCorrect = isCurrentDayValid(formData,activeDay)
+        if (!isCurrentDayCorrect?.success) {
+            return toast.warn(isCurrentDayCorrect.message || "Error")
+        }
+        const isCurrentDayVehicleCorrect = isCurrentDayVehicleValid(formData,activeDay)
+        if (!isCurrentDayVehicleCorrect?.success) {
+            return toast.warn(isCurrentDayVehicleCorrect.message || "Error")
+        }
+        setActiveDay(dayNum)
+    }
+
     return (
 
 
@@ -266,7 +282,7 @@ function ItineraryBuilderPrivateTrip({
                 {/* Trip Name, Trip Overview, Days layout, Save button — everything except PriceSection */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
-                    {/* Trip Name — UNTOUCHED */}
+                    {/* Trip Name */}
                     <div className="w-full flex items-center gap-3 border border-[#18305C] rounded-full px-5 py-2 bg-white">
 
                         <span className="text-[18px] font-bold text-[#18305C] whitespace-nowrap">
@@ -285,7 +301,7 @@ function ItineraryBuilderPrivateTrip({
 
                     </div>
 
-                    {/* Trip Overview — UNTOUCHED */}
+                    {/* Trip Overview */}
                     <div style={{ ...cardStyle }}>
                         <div style={{ fontSize: '18px', fontWeight: '700', color: BLUE, marginBottom: '12px' }}>Trip Overview</div>
                         <textarea
@@ -306,7 +322,7 @@ function ItineraryBuilderPrivateTrip({
                                 const dayNum = i + 1;
                                 const isActive = activeDay === dayNum;
                                 return (
-                                    <button key={dayNum} onClick={() => setActiveDay(dayNum)} style={{ flexShrink: 0, background: isActive ? '#FEF4F8' : 'transparent', border: 'none', borderRadius: '8px', padding: '8px 16px', cursor: 'pointer', textAlign: 'center', minWidth: '70px' }}>
+                                    <button key={dayNum} onClick={() => nextDayClicked(dayNum)} style={{ flexShrink: 0, background: isActive ? '#FEF4F8' : 'transparent', border: 'none', borderRadius: '8px', padding: '8px 16px', cursor: 'pointer', textAlign: 'center', minWidth: '70px' }}>
                                         <div style={{ fontSize: '13px', fontWeight: '700', color: isActive ? BLUE : 'white', whiteSpace: 'nowrap' }}>Day {dayNum}</div>
                                         <div style={{ fontSize: '10px', color: isActive ? BLUE : 'rgba(255,255,255,0.55)', marginTop: '2px' }}>{getDayOfWeek(startDate, i)}</div>
                                     </button>
@@ -322,7 +338,7 @@ function ItineraryBuilderPrivateTrip({
                                     const dayNum = i + 1;
                                     const isActive = activeDay === dayNum;
                                     return (
-                                        <button key={dayNum} onClick={() => setActiveDay(dayNum)} style={{ background: isActive ? '#FEF4F8' : 'transparent', border: 'none', borderRadius: isActive ? '20px 0 0 20px' : '0', margin: isActive ? '0 0 0 8px' : '0', padding: '8px 6px', cursor: 'pointer', textAlign: 'center' }}>
+                                        <button key={dayNum}  onClick={() => nextDayClicked(dayNum)} style={{ background: isActive ? '#FEF4F8' : 'transparent', border: 'none', borderRadius: isActive ? '20px 0 0 20px' : '0', margin: isActive ? '0 0 0 8px' : '0', padding: '8px 6px', cursor: 'pointer', textAlign: 'center' }}>
                                             <div style={{ fontSize: '14px', fontWeight: '700', color: isActive ? BLUE : 'white' }}>Day {dayNum}</div>
                                             <div style={{ fontSize: '11px', color: isActive ? BLUE : 'rgba(255,255,255,0.6)' }}>{getDayOfWeek(startDate, i)}</div>
                                         </button>
@@ -356,6 +372,8 @@ function ItineraryBuilderPrivateTrip({
                                     dayData={currentDay}
                                     allVehicles={allVehicles}
                                     onDayChange={updateDayField}
+                                    activeDay={activeDay}
+                                    formData={formData}
                                 />
 
                                 <HotelDetailsPrivateTrip
@@ -400,7 +418,7 @@ function ItineraryBuilderPrivateTrip({
 
                                         <button
                                             disabled={activeDay === numDays}
-                                            onClick={() => setActiveDay(activeDay + 1)}
+                                             onClick={() => nextDayClicked(activeDay+1)}
                                             className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#E91E8C] text-white text-sm font-medium shadow-md transition-all duration-200 hover:bg-[#d81b7f] disabled:bg-pink-300 disabled:cursor-not-allowed"
                                         >
                                             Next
@@ -434,7 +452,7 @@ function ItineraryBuilderPrivateTrip({
                             </label>
 
                             <textarea
-                                value={formData?.internalNotes||''}
+                                value={formData?.internalNotes || ''}
                                 onChange={(e) => {
                                     setFormData(prev => ({
                                         ...formData,
@@ -460,7 +478,7 @@ function ItineraryBuilderPrivateTrip({
                             </label>
 
                             <textarea
-                                value={formData?.customerNotes||''}
+                                value={formData?.customerNotes || ''}
                                 onChange={(e) => {
                                     setFormData(prev => ({
                                         ...formData,

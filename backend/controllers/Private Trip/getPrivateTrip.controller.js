@@ -1,5 +1,9 @@
 import PrivateTrip from "../../models/Private Trip/privateTrip.model.js"
 import PrivateTripFinance from "../../models/Private Trip/privateTripfinances.model.js"
+import B2CAccount from "../../models/Accounts/B2CAccounts.model.js"
+import B2BAccount from "../../models/Accounts/B2BAccounts.model.js"
+import B2CEnquiry from "../../models/Enquiry/B2CEnquiry.model.js"
+import B2BEnquiry from "../../models/Enquiry/B2BEnquiry.model.js"
 
 import mongoose from "mongoose"
 
@@ -22,7 +26,7 @@ export const getPrivateTrips = async (req, res) => {
         privateTripId: 1,
         enquiryId: 1,
         enquiryModel: 1,
-        status:1,
+        status: 1,
         "regionDetails.region1": 1,
         "regionDetails.startDate": 1,
         "regionDetails.noOfDays": 1,
@@ -112,17 +116,17 @@ export const getPrivateTripById = async (req, res) => {
       .populate({ path: 'itineraryBuilder.daysDetails.subRegion2', select: "_id name" })
       .populate({ path: 'itineraryBuilder.daysDetails.subRegion3', select: "_id name" })
 
-    if(foundPrivateTrip){
+    if (foundPrivateTrip) {
       foundPrivateTripFinance = await PrivateTripFinance.findOne(
         {
-          org_id:req.user.org_id,
-          privateTripId:foundPrivateTrip?._id
+          org_id: req.user.org_id,
+          privateTripId: foundPrivateTrip?._id
         }
       )
-      .populate({
-        path:'vehiclePayments.vehicleId',
-        select:"_id vendorName contactNo vehicleImageUrl"
-      })
+        .populate({
+          path: 'vehiclePayments.vehicleId',
+          select: "_id vendorName contactNo vehicleImageUrl"
+        })
     }
     if (!foundPrivateTrip) {
       return res.status(404).json({
@@ -149,7 +153,7 @@ export const getPrivateTripById = async (req, res) => {
 
 export const searchPrivateTrips = async (req, res) => {
   try {
-    const { search,regionId,daysFilter,statusFilter } = req.query;
+    const { search, regionId, daysFilter, statusFilter } = req.query;
 
     const query = {
       org_id: req.user.org_id
@@ -162,9 +166,53 @@ export const searchPrivateTrips = async (req, res) => {
       query.status = statusFilter
     }
 
+    // if (search) {
+    //   query["itineraryBuilder.tripName"] = { $regex: `^${search.trim()}`, $options: "i" };
+    // }
+
+    const regex = {
+      $regex: `^${search.trim()}`,
+      $options: "i"
+    };
+    // Search B2C accounts
+    const b2cAccounts = await B2CAccount.find({
+      fullName: regex
+    }).select("_id");
+
+    // Search B2B accounts
+    const b2bAccounts = await B2BAccount.find({
+      businessName: regex
+    }).select("_id");
+
+    // Get matching B2C enquiries
+    const b2cEnquiries = await B2CEnquiry.find({
+      accountId: { $in: b2cAccounts.map(a => a._id) }
+    }).select("_id");
+
+    // Get matching B2B enquiries
+    const b2bEnquiries = await B2BEnquiry.find({
+      accountId: { $in: b2bAccounts.map(a => a._id) }
+    }).select("_id");
+
+    const enquiryIds = [
+      ...b2cEnquiries.map(e => e._id),
+      ...b2bEnquiries.map(e => e._id),
+    ];
+
     if (search) {
-      query["itineraryBuilder.tripName"] = { $regex: `^${search.trim()}`, $options: "i" };
+      query.$or = [
+        {
+          "itineraryBuilder.tripName": {
+            $regex: search.trim(),
+            $options: "i"
+          }
+        },
+        {
+          enquiryId: { $in: enquiryIds }
+        }
+      ];
     }
+
     if (regionId) {
       const regionObjectId = new mongoose.Types.ObjectId(regionId);
 
@@ -183,7 +231,7 @@ export const searchPrivateTrips = async (req, res) => {
         privateTripId: 1,
         enquiryId: 1,
         enquiryModel: 1,
-        status:1,
+        status: 1,
         "regionDetails.region1": 1,
         "regionDetails.startDate": 1,
         "regionDetails.noOfDays": 1,
@@ -207,11 +255,11 @@ export const searchPrivateTrips = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Searched private trips found",
-      data:searchedPrivateTrips
+      data: searchedPrivateTrips
     });
 
   } catch (error) {
-    console.log("error : ",error)
+    console.log("error : ", error)
     return res.status(500).json({
       success: false,
       message: error?.message || "Internal Server Error"

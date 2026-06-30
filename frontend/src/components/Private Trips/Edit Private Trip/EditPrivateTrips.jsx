@@ -457,7 +457,6 @@ function EditPrivateTrips() {
     tabClick(3)
   };
 
-
   const handleSaveItinerary = async () => {
     try {
       setSubmitLoading(true);

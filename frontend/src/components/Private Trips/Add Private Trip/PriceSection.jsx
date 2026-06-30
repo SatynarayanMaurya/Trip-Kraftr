@@ -166,19 +166,19 @@ export default function PriceSection({ price, noOfDays = 1, setPrice = () => { }
                 </div>
 
                 {isActivitiesOpen && (
-                    <div className="space-y-2 mt-3">
+                    <div className="space-y-1 mt-3 text-[10px]">
                         {allActivities.map((activity) => (
                             <div
                                 key={activity._id}
-                                className="flex items-center justify-between p-2 rounded-md bg-gray-50"
+                                className="flex items-center justify-between p-1 rounded-md bg-gray-50"
                             >
                                 <div>
-                                    <p className="text-sm font-semibold" style={{ color: NAVY }}>
-                                        {activity.activityName?.length>18 ?activity.activityName?.slice(0,18) + "..." : activity.activityName}
+                                    <p className=" font-semibold" style={{ color: NAVY }}>
+                                        {activity.activityName?.length>25 ?activity.activityName?.slice(0,25) + "..." : activity.activityName}
                                     </p>
                                 </div>
 
-                                <div className="flex items-center gap-4 text-sm" style={{ color: NAVY }}>
+                                <div className="flex items-center gap-4 " style={{ color: NAVY }}>
                                     <span>
                                          {activity.quantity}
                                     </span>

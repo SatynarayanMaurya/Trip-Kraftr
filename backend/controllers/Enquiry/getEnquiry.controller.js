@@ -417,7 +417,7 @@ export const searchB2BAccountsForEnquiry = async (req, res) => {
     const searchedAccounts = await B2BAccount
       .find(query)
       .limit(Number(pageLimit) || 5)
-      .select("_id fullName businessName email phone state destinations source accountId isActive purpose");
+      .select("_id fullName businessName email phone whatsappNo state destinations source accountId isActive purpose");
 
     return res.status(200).json({
       success: true,
@@ -454,7 +454,7 @@ export const searchB2CAccountsForEnquiry = async (req, res) => {
     const searchedAccounts = await B2CAccount
       .find(query)
       .limit(Number(pageLimit) || 5)
-      .select("_id fullName email phone  source accountId state noOfMembers purpose")
+      .select("_id fullName email phone whatsappNo  source accountId state noOfMembers purpose")
 
     return res.status(200).json({
       success: true,

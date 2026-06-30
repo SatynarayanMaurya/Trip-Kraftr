@@ -13,7 +13,7 @@ import {
 import { MdOutlineTravelExplore } from 'react-icons/md';
 
 import { gridTwo, cardLabelStyle, cardValueStyle, saveBtn, cancelBtn, destTag, suggestionItem, suggestionBox, spinnerStyle, searchIcon, chevronIcon } from './CommonCssForEnquiry';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useRegionsData } from '../../../hooks/Resuable Hooks/useResuableData';
 
 // ── Constants ──────────────────────────────────────────────────────────────
@@ -22,12 +22,12 @@ const LIGHT_PINK = '#FFF6F9';
 const BLUE = '#18305C';
 
 const HOTEL_CATEGORIES = ['Budget', 'Premium', 'Luxury', "Any"];
-const PURPOSE = ['Honeymoon','Family - Leisure','Friends - Leisure','Adventure','Wildlife','Cultural','Eco-Tourism','Slow travel','Others']
+const PURPOSE = ['Honeymoon', 'Family - Leisure', 'Friends - Leisure', 'Adventure', 'Wildlife', 'Cultural', 'Eco-Tourism', 'Slow travel', 'Others']
 const DIETARY_OPTIONS = ['Vegetarian', 'Non-Vegetarian', 'Both (Veg & Non-Veg)', 'Vegan', 'Jain'];
 const TRIP_TYPES = ['Group Trip', 'Private'];
-const STATUS_OPTIONS = ['New', 'In Progress', 'Warm', 'Won', 'Lost','Postponed'];
+const STATUS_OPTIONS = ['New', 'In Progress', 'Warm', 'Won', 'Lost', 'Postponed'];
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'];
+    'July', 'August', 'September', 'October', 'November', 'December'];
 
 // ── Tiny helpers ────────────────────────────────────────────────────────────
 const inputStyle = (disabled = false) => ({
@@ -58,10 +58,14 @@ const fieldWrap = { display: 'flex', flexDirection: 'column', gap: 0 };
 // ── Component ───────────────────────────────────────────────────────────────
 function AddEnquiryB2B({ onCancel }) {
 
+    const [searchParams] = useSearchParams();
+
+    const id = searchParams.get("id");
+
     const navigate = useNavigate()
     const isProduction = useSelector(s => s.user.isProduction);
     const { searchB2BAccountsForEnquiry } = useCommonHooks?.() ?? {};
-    const { addEnquiryB2B } = useEnquiryHooks()
+    const { addEnquiryB2B, getb2bEnquiryById } = useEnquiryHooks()
     const { regions, loading: regionLoading } = useRegionsData();
     const [suggestedDestinations, setSuggestedDestinations] = useState([])
     useEffect(() => {
@@ -92,9 +96,55 @@ function AddEnquiryB2B({ onCancel }) {
         dietaryPreference: '',
         destinations: [],
         notes: '',
-        month:'',
-        purpose:'Others'
+        month: '',
+        purpose: 'Others'
     });
+
+
+  const [enquiryDetails, setEnquiryDetails] = useState(null)
+
+  const fetchEnquiry = async () => {
+    try {
+      setFetchLoading(true)
+      const response = await getb2bEnquiryById(id)
+      setEnquiryDetails(response?.data?.foundEnquiry)
+    } catch (error) {
+      if (!isProduction) {
+        console.log("Error:", error)
+        console.log("Error:", error?.response)
+      }
+    //   toast.error(error?.response?.data?.message || error?.message || "Failed to fetch enquiry")
+    } finally {
+      setFetchLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (id && !enquiryDetails) fetchEnquiry()
+  }, [id])
+
+
+  useEffect(() => {
+    if (!enquiryDetails) return
+    setSearchInput(enquiryDetails?.accountId?.businessName)
+    setForm({
+      tripType: enquiryDetails?.tripType || 'Group Trip',
+      status: enquiryDetails?.status || 'New',
+      assignedTo: enquiryDetails?.assignedTo || '',
+      noOfDays: enquiryDetails?.noOfDays || '',
+      totalMembers: enquiryDetails?.totalMembers || '',
+      adult: enquiryDetails?.adult || '',
+      child: enquiryDetails?.child || '',
+      childAges: enquiryDetails?.childAges || [],
+      startDate: enquiryDetails?.startDate?.split("T")?.[0] || '',
+      hotelCategory: enquiryDetails?.hotelCategory || '',
+      dietaryPreference: enquiryDetails?.dietaryPreference || '',
+      destinations: enquiryDetails?.destinations || [],
+      notes: enquiryDetails?.notes || '',
+      month: enquiryDetails?.month || '',
+      purpose: enquiryDetails?.purpose || 'Others',
+    })
+  }, [enquiryDetails])
 
 
     const [destInput, setDestInput] = useState('');
@@ -278,20 +328,12 @@ function AddEnquiryB2B({ onCancel }) {
                 marginBottom: '20px',
                 position: 'relative',
             }}>
-                {/* B2C badge */}
-                <span style={{
-                    position: 'absolute', top: '14px', right: '16px',
-                    background: PINK, color: 'white',
-                    fontSize: '11px', fontWeight: '700',
-                    borderRadius: '6px', padding: '3px 9px',
-                    letterSpacing: '0.5px',
-                }}>B2C</span>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '18px 24px' }}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '18px 24px' }}
                     className="account-grid">
 
                     {/* Full Name (search) */}
-                    <div style={{ ...fieldWrap, position: 'relative' }} ref={searchRef}>
+                    <div style={{ ...fieldWrap, position: 'relative',gridColumn: "span 3"  }} ref={searchRef}>
                         <label style={cardLabelStyle}>
                             <FiUser style={{ color: PINK, marginRight: 5, verticalAlign: 'middle' }} />
                             Bussiness Name *
@@ -347,7 +389,7 @@ function AddEnquiryB2B({ onCancel }) {
                     </div>
 
                     {/* Email Id */}
-                    <div style={fieldWrap}>
+                    <div style={{...fieldWrap, gridColumn: "span 3" }}>
                         <label style={cardLabelStyle}>
                             <FiMail style={{ color: PINK, marginRight: 5, verticalAlign: 'middle' }} />
                             Email Id *
@@ -362,7 +404,7 @@ function AddEnquiryB2B({ onCancel }) {
                     </div>
 
                     {/* Phone */}
-                    <div style={fieldWrap}>
+                    <div style={{...fieldWrap, gridColumn: "span 2" }}>
                         <label style={cardLabelStyle}>
                             <FiPhone style={{ color: PINK, marginRight: 5, verticalAlign: 'middle' }} />
                             Phone no. *
@@ -376,8 +418,23 @@ function AddEnquiryB2B({ onCancel }) {
                         />
                     </div>
 
+                    {/* whatsappNo */}
+                    <div style={{...fieldWrap, gridColumn: "span 2" }}>
+                        <label style={cardLabelStyle}>
+                            <FiPhone style={{ color: PINK, marginRight: 5, verticalAlign: 'middle' }} />
+                            whatsappNo *
+                        </label>
+                        <input
+                            type="text"
+                            value={selectedAccount ? `+91 ${selectedAccount.whatsappNo}` : ''}
+                            disabled
+                            placeholder="Auto filled"
+                            style={cardValueStyle}
+                        />
+                    </div>
+
                     {/* Source */}
-                    <div style={fieldWrap}>
+                    <div style={{...fieldWrap, gridColumn: "span 2" }}>
                         <label style={cardLabelStyle}>
                             <MdOutlineTravelExplore style={{ color: PINK, marginRight: 5, verticalAlign: 'middle' }} />
                             Source *

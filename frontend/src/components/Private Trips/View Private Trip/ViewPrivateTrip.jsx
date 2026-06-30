@@ -11,6 +11,7 @@ import ProfitAndLoss from './ProfitAndLoss'
 import VendorPayment from './VendorPayment'
 import DaysDetails from './DaysDetails'
 import PriceSection from '../Add Private Trip/PriceSection'
+import { isAllDayValid } from '../../Sample Package/Add Sample Package/ValidationSimplePackage'
 const BLUE = '#18305C';
 const PINK = '#ED5F8D';
 const STATUS_CONFIG = [
@@ -43,7 +44,7 @@ const STATUS_CONFIG = [
 function ViewPrivateTrip() {
     const { privateTripId } = useParams()
     const navigate = useNavigate()
-    const { getPrivateTripById , updatePrivateTripStatus} = usePrivateTripHooks()
+    const { getPrivateTripById, updatePrivateTripStatus } = usePrivateTripHooks()
 
     const isProduction = useSelector(s => s.user.isProduction)
     const privateTripDetails = useSelector(s => s.privateTrip.privateTripById?.[privateTripId])
@@ -88,11 +89,17 @@ function ViewPrivateTrip() {
     const tabs = ['Day Details', 'Policy', 'Guest Payment', 'P & L', 'Vendor Payment'];
 
     const changeStatus = async (val) => {
+        if (val === 'confirmed' || val === 'completed') {
+            const checkAllDayValid = isAllDayValid(privateTripDetails)
+            if (!checkAllDayValid?.success) {
+                return toast.warn(checkAllDayValid.message || "Error")
+            }
+        }
         try {
             setFetchLoading(true)
-            if(val===status) return 
+            if (val === status) return
             setStatus(val)
-            const response = await updatePrivateTripStatus(privateTripId,val)
+            const response = await updatePrivateTripStatus(privateTripId, val)
             toast.success(response?.data?.message)
         }
         catch (error) {
@@ -104,7 +111,7 @@ function ViewPrivateTrip() {
             }
             toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin")
         }
-        finally{
+        finally {
             setFetchLoading(false)
         }
     }
@@ -129,7 +136,7 @@ function ViewPrivateTrip() {
                             className="rounded-lg border border-gray-300 px-2 py-1 text-sm font-medium outline-none transition "
                             style={{
                                 color: selectedStatus?.color,
-                                backgroundColor: selectedStatus?.bgColor,
+                                // backgroundColor: selectedStatus?.bgColor,
                             }}
                         >
                             {STATUS_CONFIG.map((item) => (

@@ -82,7 +82,6 @@ function EditB2BEnquiry({ onCancel }) {
 
 
   const [enquiryDetails, setEnquiryDetails] = useState(null)
-  // console.log("Enquiry Details : ",enquiryDetails)
 
   const fetchEnquiry = async () => {
     try {

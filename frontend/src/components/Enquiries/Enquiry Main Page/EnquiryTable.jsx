@@ -1,5 +1,6 @@
 import React from 'react';
-import { Eye, Pencil, Trash2 } from 'lucide-react';
+import { Eye, Pencil, Trash2, Copy } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 // ── Constants ─────────────────────────────────────────────────────────────
 const PINK = '#ED5F8D';
@@ -7,11 +8,11 @@ const BLUE = '#18305C';
 
 // Status badge colors
 const STATUS_STYLE = {
-  'New':         { bg: '#EFF6FF', color: '#3B82F6' },
+  'New': { bg: '#EFF6FF', color: '#3B82F6' },
   'In Progress': { bg: '#FEF3C7', color: '#B45309' },
-  'Warm':        { bg: '#FFF7ED', color: '#EA580C' },
-  'Won':         { bg: '#F0FDF4', color: '#16A34A' },
-  'Lost':        { bg: '#FFF1F2', color: '#E11D48' },
+  'Warm': { bg: '#FFF7ED', color: '#EA580C' },
+  'Won': { bg: '#F0FDF4', color: '#16A34A' },
+  'Lost': { bg: '#FFF1F2', color: '#E11D48' },
 };
 
 const getStatusStyle = (status) =>
@@ -49,6 +50,7 @@ const SkeletonRow = () => (
 function EnquiryTable({ data = [], fetchLoading = false, onView, onEdit, onDelete }) {
 
   const isEmpty = !fetchLoading && data.length === 0;
+  const navigate = useNavigate()
 
   return (
     <>
@@ -134,19 +136,19 @@ function EnquiryTable({ data = [], fetchLoading = false, onView, onEdit, onDelet
 
             {/* Data rows */}
             {!fetchLoading && data.map((row, rowIdx) => {
-              const account   = row.accountId ?? {};
-              const name      = account.fullName ?? account.businessName ?? '—';
-              const phone     = account.phone ? `+91 ${String(account.phone).replace(/(\d{5})(\d{5})/, '$1 $2')}` : '—';
-              const dest      = Array.isArray(row.destinations) && row.destinations.length > 0
-                                  ? row.destinations[0]
-                                  : '—';
+              const account = row.accountId ?? {};
+              const name = account.fullName ?? account.businessName ?? '—';
+              const phone = account.phone ? `+91 ${String(account.phone).replace(/(\d{5})(\d{5})/, '$1 $2')}` : '—';
+              const dest = Array.isArray(row.destinations) && row.destinations.length > 0
+                ? row.destinations[0]
+                : '—';
               const extraDest = Array.isArray(row.destinations) && row.destinations.length > 1
-                                  ? `+${row.destinations.length - 1}`
-                                  : null;
-              const days      = row.noOfDays != null ? String(row.noOfDays).padStart(2, '0') : '—';
-              const source    = account.source ?? row.source ?? '—';
-              const assigned  = row.assignedTo ?? '—';
-              const status    = row.status ?? '—';
+                ? `+${row.destinations.length - 1}`
+                : null;
+              const days = row.noOfDays != null ? String(row.noOfDays).padStart(2, '0') : '—';
+              const source = account.source ?? row.source ?? '—';
+              const assigned = row.assignedTo ?? '—';
+              const status = row.status ?? '—';
               const { bg: sBg, color: sColor } = getStatusStyle(status);
 
               return (
@@ -244,6 +246,17 @@ function EnquiryTable({ data = [], fetchLoading = false, onView, onEdit, onDelet
                         onClick={() => onView?.(row)}
                       >
                         <Eye size={16} color={PINK} />
+                      </button>
+
+                      {/* Copy */}
+                      <button
+                        className="enq-action-btn"
+                        title="Copy"
+                        onClick={() =>
+                          navigate(`add-enquiry?id=${row._id}`)
+                        }
+                      >
+                        <Copy size={16} color={PINK} />
                       </button>
 
                       {/* Edit */}

@@ -12,7 +12,7 @@ import {
 import { MdOutlineTravelExplore } from 'react-icons/md';
 
 import { gridTwo, cardLabelStyle, cardValueStyle, saveBtn, cancelBtn, destTag, suggestionItem, suggestionBox, spinnerStyle, searchIcon, chevronIcon } from './CommonCssForEnquiry';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useRegionsData } from '../../../hooks/Resuable Hooks/useResuableData';
 
 // ── Constants ──────────────────────────────────────────────────────────────
@@ -55,10 +55,16 @@ const fieldWrap = { display: 'flex', flexDirection: 'column', gap: 0 };
 // ── Component ───────────────────────────────────────────────────────────────
 function AddEnquiryB2C({ onCancel }) {
 
+
+    const [searchParams] = useSearchParams();
+
+    const id = searchParams.get("id");
+
+
     const dateRef = useRef(null);
     const isProduction = useSelector(s => s.user.isProduction);
     const { searchB2CAccountsForEnquiry } = useCommonHooks?.() ?? {};
-    const { addEnquiryB2C } = useEnquiryHooks()
+    const { addEnquiryB2C, getb2cEnquiryById } = useEnquiryHooks()
     const navigate = useNavigate()
     const { regions, loading: regionLoading } = useRegionsData();
     const [suggestedDestinations, setSuggestedDestinations] = useState([])
@@ -96,6 +102,51 @@ function AddEnquiryB2C({ onCancel }) {
         purpose: 'Others'
     });
 
+
+
+    const [enquiryDetails, setEnquiryDetails] = useState(null)
+
+    const fetchEnquiry = async () => {
+        try {
+            setFetchLoading(true)
+            const response = await getb2cEnquiryById(id)
+            setEnquiryDetails(response?.data?.foundEnquiry)
+        } catch (error) {
+            if (!isProduction) console.log("Error:", error)
+            // toast.error(error?.response?.data?.message || error?.message || "Failed to fetch enquiry")
+        } finally {
+            setFetchLoading(false)
+        }
+    }
+
+    useEffect(() => {
+        if (id && !enquiryDetails) fetchEnquiry()
+    }, [id])
+
+
+    useEffect(() => {
+        if (!enquiryDetails) return
+        setSearchInput(enquiryDetails?.accountId?.fullName)
+        setForm({
+            tripType: enquiryDetails?.tripType || 'Group Trip',
+            status: enquiryDetails?.status || 'New',
+            assignedTo: enquiryDetails?.assignedTo || '',
+            noOfDays: enquiryDetails?.noOfDays || '',
+            totalMembers: enquiryDetails?.totalMembers || '',
+            adult: enquiryDetails?.adult || '',
+            child: enquiryDetails?.child || '',
+            childAges: enquiryDetails?.childAges || [],
+            startDate: enquiryDetails?.startDate?.split("T")?.[0] || '',
+            hotelCategory: enquiryDetails?.hotelCategory || '',
+            dietaryPreference: enquiryDetails?.dietaryPreference || '',
+            destinations: enquiryDetails?.destinations || [],
+            notes: enquiryDetails?.notes || '',
+            month: enquiryDetails?.month || '',
+            purpose: enquiryDetails?.purpose || 'Others',
+        })
+    }, [enquiryDetails])
+
+
     const [destInput, setDestInput] = useState('');
     const [showDestDrop, setShowDestDrop] = useState(false);
     const [submitLoading, setSubmitLoading] = useState(false);
@@ -119,7 +170,7 @@ function AddEnquiryB2C({ onCancel }) {
 
     // ── debounced search ──
     useEffect(() => {
-        if (!searchInput.trim()) {
+        if (!searchInput?.trim()) {
             setSearchedAccounts([]);
             setShowSuggestions(false);
             return;
@@ -278,14 +329,6 @@ function AddEnquiryB2C({ onCancel }) {
                 marginBottom: '20px',
                 position: 'relative',
             }}>
-                {/* B2C badge */}
-                <span style={{
-                    position: 'absolute', top: '14px', right: '16px',
-                    background: PINK, color: 'white',
-                    fontSize: '11px', fontWeight: '700',
-                    borderRadius: '6px', padding: '3px 9px',
-                    letterSpacing: '0.5px',
-                }}>B2C</span>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '18px 24px' }}
                     className="account-grid">
@@ -370,6 +413,21 @@ function AddEnquiryB2C({ onCancel }) {
                         <input
                             type="text"
                             value={selectedAccount ? `+91 ${selectedAccount.phone}` : ''}
+                            disabled
+                            placeholder="Auto filled"
+                            style={cardValueStyle}
+                        />
+                    </div>
+
+                    {/* Phone */}
+                    <div style={fieldWrap}>
+                        <label style={cardLabelStyle}>
+                            <FiPhone style={{ color: PINK, marginRight: 5, verticalAlign: 'middle' }} />
+                            Whatsapp No *
+                        </label>
+                        <input
+                            type="text"
+                            value={selectedAccount ? `+91 ${selectedAccount.whatsappNo}` : ''}
                             disabled
                             placeholder="Auto filled"
                             style={cardValueStyle}

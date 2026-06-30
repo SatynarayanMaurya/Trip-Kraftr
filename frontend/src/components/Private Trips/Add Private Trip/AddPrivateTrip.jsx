@@ -366,7 +366,6 @@ function AddPrivateTrip() {
     };
 
     const handleItineraryChange = (dayIndex, fieldOrUpdates, value) => {
-        // console.log("value : ",value)
         setFormData(prev => {
             const iti = prev.itineraryBuilder;
 
@@ -386,6 +385,8 @@ function AddPrivateTrip() {
             return { ...prev, itineraryBuilder: { ...iti, daysDetails: updatedDays } };
         });
     };
+
+
 
     const handleSaveRegion = () => {
         tabClick(3)
