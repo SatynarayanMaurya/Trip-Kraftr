@@ -79,7 +79,7 @@ function MainLayout() {
       <div
         className={`
           fixed top-0 left-0 h-full bg-[#1E3A5F] z-50
-          w-[75vw] max-w-[280px]
+          w-[75vw] max-w-70
           transform transition-all duration-300 ease-in-out
           ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
           md:translate-x-0 md:static md:w-[16vw]
@@ -103,7 +103,7 @@ function MainLayout() {
       </div>
 
       {/* 🔹 Main Content */}
-      <div className="flex-1 h-screen overflow-y-auto md:ml-0 pt-[60px] md:pt-0">
+      <div className="flex-1 h-screen overflow-y-auto md:ml-0 pt-15 md:pt-0">
         <Outlet />
       </div>
 
