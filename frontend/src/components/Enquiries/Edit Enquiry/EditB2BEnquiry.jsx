@@ -350,20 +350,12 @@ function EditB2BEnquiry({ onCancel }) {
             marginBottom: '20px',
             position: 'relative',
           }}>
-            {/* B2C badge */}
-            <span style={{
-              position: 'absolute', top: '14px', right: '16px',
-              background: PINK, color: 'white',
-              fontSize: '11px', fontWeight: '700',
-              borderRadius: '6px', padding: '3px 9px',
-              letterSpacing: '0.5px',
-            }}>B2C</span>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '18px 24px' }}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '18px 24px' }}
               className="account-grid">
 
               {/* Full Name (search) */}
-              <div style={{ ...fieldWrap, position: 'relative' }} ref={searchRef}>
+              <div style={{ ...fieldWrap, position: 'relative', gridColumn: "span 3"   }} ref={searchRef}>
                 <label style={cardLabelStyle}>
                   <FiUser style={{ color: PINK, marginRight: 5, verticalAlign: 'middle' }} />
                   Bussiness Name *
@@ -420,7 +412,7 @@ function EditB2BEnquiry({ onCancel }) {
               </div>
 
               {/* Email Id */}
-              <div style={fieldWrap}>
+              <div style={{...fieldWrap, gridColumn: "span 3" }}>
                 <label style={cardLabelStyle}>
                   <FiMail style={{ color: PINK, marginRight: 5, verticalAlign: 'middle' }} />
                   Email Id *
@@ -435,7 +427,7 @@ function EditB2BEnquiry({ onCancel }) {
               </div>
 
               {/* Phone */}
-              <div style={fieldWrap}>
+              <div style={{...fieldWrap, gridColumn: "span 2" }}>
                 <label style={cardLabelStyle}>
                   <FiPhone style={{ color: PINK, marginRight: 5, verticalAlign: 'middle' }} />
                   Phone no. *
@@ -449,8 +441,23 @@ function EditB2BEnquiry({ onCancel }) {
                 />
               </div>
 
+              {/* Phone */}
+              <div style={{...fieldWrap, gridColumn: "span 2" }}>
+                <label style={cardLabelStyle}>
+                  <FiPhone style={{ color: PINK, marginRight: 5, verticalAlign: 'middle' }} />
+                  Whatsapp No *
+                </label>
+                <input
+                  type="text"
+                  value={selectedAccount ? `+91 ${selectedAccount.whatsappNo}` : ''}
+                  disabled
+                  placeholder="Auto filled"
+                  style={cardValueStyle}
+                />
+              </div>
+
               {/* Source */}
-              <div style={fieldWrap}>
+              <div style={{...fieldWrap, gridColumn: "span 2" }}>
                 <label style={cardLabelStyle}>
                   <MdOutlineTravelExplore style={{ color: PINK, marginRight: 5, verticalAlign: 'middle' }} />
                   Source *
