@@ -11,6 +11,7 @@ export const regionEndpoints  = {
     SEARCH_MASTER_REGIONS : BASE_URL + '/search-master-regions',
     GET_COUNTRY_FOR_ORG : BASE_URL + '/get-country-for-org',
     FETCH_REGIONS_IMAGES : BASE_URL + '/fetch-regions-images',
+    FETCH_ORG_REGIONS_IMAGES : BASE_URL + '/fetch-org-regions-images',
     SEARCH_MASTER_COUNTRIES : BASE_URL + '/search-master-countries',
     SEARCH_MASTER_REGION_ONLY : BASE_URL + '/search-master-regions-only',
 }

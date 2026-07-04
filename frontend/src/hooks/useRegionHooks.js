@@ -126,8 +126,6 @@ export const useRegionHooks = () => {
     try {
       dispatch(setLoading(true));
       const response = await apiConnector("POST", regionEndPointsSuperAdmin.ADD_REGION_IMAGES, regionDetails, { "Content-Type": "multipart/form-data" })
-      // dispatch(addNewMasterRegion(response?.data?.newMasterRegion))
-      // console.log("Response : ",response)
       return response;
     } catch (error) {
       throw error;
@@ -142,6 +140,21 @@ export const useRegionHooks = () => {
       const response = await apiConnector(
         "GET",
         `${regionEndpoints.FETCH_REGIONS_IMAGES}?regionId=${regionId}`
+      )
+      return response;
+    } catch (error) {
+      throw error;
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }
+
+  const fetchOrgRegionImages = async (regionId) => {   // The region id is master region id
+    try {
+      dispatch(setLoading(true));
+      const response = await apiConnector(
+        "GET",
+        `${regionEndpoints.FETCH_ORG_REGIONS_IMAGES}?regionId=${regionId}`
       )
       return response;
     } catch (error) {
@@ -191,6 +204,7 @@ export const useRegionHooks = () => {
     getmasterRegions, 
     addRegionImages, 
     fetchRegionImages,
+    fetchOrgRegionImages,
     getRegionById,
     updateRegionById,
     deleteRegionById ,

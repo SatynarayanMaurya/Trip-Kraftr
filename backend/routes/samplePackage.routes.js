@@ -9,7 +9,7 @@ const samplePackageRouter = express.Router()
 
 samplePackageRouter.post("/add-sample-package",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),createSamplePackage)
 samplePackageRouter.get("/get-sample-package",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),getSamplePackages)
-samplePackageRouter.get("/get-sample-package-by-id/:samplePackageId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),getSamplePackageById)
+samplePackageRouter.get("/get-sample-package-by-id/:samplePackageId",getSamplePackageById)
 samplePackageRouter.put("/update-sample-package-by-id/:samplePackageId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),updateSamplePackageById)
 samplePackageRouter.get("/search-sample-package",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),searchSamplePackage)
 // samplePackageRouter.put("/update-room-by-id",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),updateRoomById)

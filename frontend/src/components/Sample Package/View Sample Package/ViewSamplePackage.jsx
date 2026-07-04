@@ -14,6 +14,7 @@ import ViewItineraryBuilder from './ViewItineraryBuilder';
 import GroupTripPolicies from '../../Group Trips/Add Group Trip/GroupTripPolicies';
 import ViewRegionSamplePackage from './ViewRegionSamplePackage';
 import { ShareIcon } from '../../Icons/Icons';
+import ShareModal from '../../Share/ShareModal';
 const PINK = '#ED5F8D';
 const BLUE = '#18305C';
 const GREEN = '#4CAF50';
@@ -34,6 +35,7 @@ function ViewSamplePackage() {
     const [deleteLoading, setDeleteLoading] = useState(false);
     const [activeTab, setActiveTab] = useState(1);
     const [activeDay, setActiveDay] = useState(1);
+    const [isShare, setIsShare] = useState(false)
 
     useEffect(() => {
         if (!samplePackageId) return;
@@ -113,7 +115,7 @@ function ViewSamplePackage() {
                         <Pencil size={14} /> Edit
                     </button>
 
-                    <button style={iconBtn} title="Share" onClick={() => toast.info('Sharing...')}>
+                    <button style={iconBtn} title="Share" onClick={() => setIsShare(true)}>
                         <ShareIcon />
                     </button>
                 </div>
@@ -147,74 +149,15 @@ function ViewSamplePackage() {
                     readOnly
                 />
             )}
+
+            {/* Share */}
+            {
+                isShare &&
+                <ShareModal onClose={() => setIsShare(false)} data={data} tripType='samplePackage' />
+            }
         </div>
     );
 }
 
 export default ViewSamplePackage;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// import React, { useEffect, useState } from 'react'
-// import { useSelector } from 'react-redux'
-// import { useParams } from 'react-router-dom'
-// import { toast } from 'react-toastify'
-// import { useSamplePackageHooks } from '../../../hooks/useSamplePackageHooks'
-
-// function ViewSamplePackage() {
-
-//     const {samplePackageId} = useParams()
-//     const {getSamplePackageById} = useSamplePackageHooks()
-
-//     const isProduction = useSelector(s=>s.user.isProduction)
-//     const samplePackageDetails = useSelector(s=>s.samplePackage.samplePackageById?.[samplePackageId])
-
-//     const [fetchLoading, setFetchLoading] = useState(false)
-//     console.log("samplePackageDetails ",samplePackageDetails)
-
-//     const fetchSamplePackage = async()=>{
-//         try{
-//             setFetchLoading(true)
-//             await getSamplePackageById(samplePackageId)
-//         }
-//         catch(error){
-//           if (!isProduction) {
-//             console.log("========= ERROR DEBUG START =========");
-//             console.log("Error:", error);
-//             console.log("Response:", error?.response);
-//             console.log("========= ERROR DEBUG END =========");
-//           }
-//           toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin")
-//         }
-//         finally{
-//             setFetchLoading(false)
-//         }
-//     }
-
-//     useEffect(()=>{
-//         if(samplePackageId){
-//             fetchSamplePackage()
-//         }
-//     },[samplePackageId])
-//   return (
-//     <div>ViewSamplePackage</div>
-//   )
-// }
-
-// export default ViewSamplePackage

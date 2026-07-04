@@ -70,7 +70,6 @@ export const getSamplePackageById = async (req, res) => {
 
     const foundSamplePackage = await SamplePackage.findOne(
       {
-        org_id: req.user.org_id,
         _id: samplePackageId
       }
     )

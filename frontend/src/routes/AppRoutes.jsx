@@ -29,6 +29,8 @@ import { AccountRoutes } from "./AccountRoutes";
 import { EnquiriesRoutes } from "./EnquiriesRoutes";
 import { SamplePackageRoutes } from "./SamplePackageRoutes";
 import { PrivateTripsRoutes } from "./PrivateTripsRoutes";
+import PreviewPdf from "../components/Share/Share Pdf/PreviewPdf";
+import { PreviewPdfRoutes } from "./PreviewPdfRoutes";
 
 function AppRoutes() {
   return (
@@ -36,6 +38,8 @@ function AppRoutes() {
       <Routes>
         {/* 🔐 Auth */}
         <Route path="/auth" element={<LoginPage />} />
+        {/* <Route path="/tripDetails/:tripId" element={<PreviewPdf />} /> */}
+        {PreviewPdfRoutes}
 
         {/* 🔐 Protected */}
         <Route

@@ -233,7 +233,7 @@ function ViewPrivateTrip() {
             {/* Share */}
             {
                 isShare && 
-                <ShareModal onClose={()=>setIsShare(false)}/>
+                <ShareModal onClose={()=>setIsShare(false)} data={privateTripDetails} tripType='privateTrip'/>
             }
 
 

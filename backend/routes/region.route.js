@@ -1,6 +1,6 @@
 import express from "express";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
-import { addMasterRegion, addRegion, addRegionImages, deleteRegionById, fetchRegionImages, getCountryForOrg, getMasterRegions, getRegionById, getRegionForOrg, getRegions, searchMasterCountries, searchMasterRegions, searchMasterRegionsOnly, updateRegionById } from "../controllers/region.controller.js";
+import { addMasterRegion, addRegion, addRegionImages, deleteRegionById, fetchOrgRegionImages, fetchRegionImages, getCountryForOrg, getMasterRegions, getRegionById, getRegionForOrg, getRegions, searchMasterCountries, searchMasterRegions, searchMasterRegionsOnly, updateRegionById } from "../controllers/region.controller.js";
 import { roleMiddleware } from "../middlewares/role.middleware.js";
 const regionRouter = express.Router()
 
@@ -16,6 +16,7 @@ regionRouter.get("/get-country-for-org",authMiddleware,getCountryForOrg)  // For
 
 
 regionRouter.get("/fetch-regions-images",authMiddleware,roleMiddleware(["org_admin",'super_admin']),fetchRegionImages)
+regionRouter.get("/fetch-org-regions-images",fetchOrgRegionImages)
 regionRouter.get("/search-master-countries",authMiddleware,roleMiddleware(["org_admin",'super_admin']),searchMasterCountries)
 regionRouter.get("/search-master-regions-only",authMiddleware,roleMiddleware(["org_admin",'super_admin']),searchMasterRegionsOnly)
 

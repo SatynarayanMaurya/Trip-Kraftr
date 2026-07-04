@@ -37,8 +37,16 @@ const activitySchema = new mongoose.Schema({
         required: true,
     },
 
-    imageUrl: String,
-    imagePublicId: String
+    imageUrl: {
+        type: String,
+        default:null,
+    },
+
+    imagePublicId: {
+        type: String,
+        default:null,
+    },
+
 
 }, { timestamps: true });
 

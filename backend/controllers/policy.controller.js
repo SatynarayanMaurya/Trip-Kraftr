@@ -291,3 +291,63 @@ export const deletePolicy = async (req, res) => {
         });
     }
 };
+
+export const getAllPolicyForRegion = async (req, res) => {
+  try {
+    const { regionId } = req.query;
+
+    if (!regionId) {
+      return res.status(400).json({
+        success: false,
+        message: "RegionId is required",
+      });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(regionId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid regionId",
+      });
+    }
+
+    const query = {
+      regionId,
+    };
+
+    const populate = {
+      path: "regionId",
+      select: "_id name",
+    };
+
+    const [
+      payment,
+      cancellation,
+      inclusion,
+      exclusion,
+      thingsToPack,
+    ] = await Promise.all([
+      PaymentPolicy.findOne(query).populate(populate),
+      CancellationPolicy.findOne(query).populate(populate),
+      InclusionPolicy.findOne(query).populate(populate),
+      ExclusionPolicy.findOne(query).populate(populate),
+      ThingsToPack.findOne(query).populate(populate),
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      message: "Policies found",
+      data: {
+        payment,
+        cancellation,
+        inclusion,
+        exclusion,
+        thingsToPack,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Internal Server Error",
+    });
+  }
+};

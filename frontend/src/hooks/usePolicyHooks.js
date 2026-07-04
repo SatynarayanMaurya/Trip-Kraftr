@@ -59,6 +59,26 @@ export const usePolicyHooks = () => {
     }
 
     // For getting place with paginated
+    const getPoliciesForRegion = async ( regionId) => {
+        try {
+
+            dispatch(setLoading(true))
+
+            const response = await apiConnector(
+                "GET",
+                `${policyEndpoints.GET_POLICY_FOR_REGION}?regionId=${regionId}`
+            )
+
+            return response
+
+        } catch (error) {
+            throw error
+        } finally {
+            dispatch(setLoading(false))
+        }
+    }
+
+    // For getting place with paginated
     const updatePolicy = async (policyDetails) => {
         try {
             dispatch(setLoading(true))
@@ -122,6 +142,7 @@ export const usePolicyHooks = () => {
     return {
         addPolicy,
         getPolicies,
+        getPoliciesForRegion,
         updatePolicy,
         deletePolicy
     };

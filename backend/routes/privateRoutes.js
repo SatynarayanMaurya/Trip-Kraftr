@@ -10,7 +10,7 @@ const privateTripRouter = express.Router()
 
 privateTripRouter.post("/add-private-trip",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),createPrivateTrip)
 privateTripRouter.get("/get-private-trips",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),getPrivateTrips)
-privateTripRouter.get("/get-private-trip-by-id/:privateTripId",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),getPrivateTripById)
+privateTripRouter.get("/get-private-trip-by-id/:privateTripId",getPrivateTripById)
 
 privateTripRouter.get("/search-private-trip",authMiddleware,roleMiddleware(["org_admin","operational_consultant"]),searchPrivateTrips)
 

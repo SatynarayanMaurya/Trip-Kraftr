@@ -11,6 +11,7 @@ import {
   Eye,
   MapPin,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const PINK = "#ED5F8D";
 const NAVY = "#08255B";
@@ -22,8 +23,9 @@ const OPTIONS = [
   { id: "email", label: "Email", icon: Mail },
 ];
 
-function ShareModal({ data, onClose }) {
-  const [selected, setSelected] = useState("whatsapp");
+function ShareModal({  onClose,data={},tripType='privateTrip' }) {
+  const [selected, setSelected] = useState("download");
+  const navigate = useNavigate()
 
   // Placeholder trip data — swap with real fields from `data` whenever ready
   const trip = {
@@ -77,6 +79,14 @@ function ShareModal({ data, onClose }) {
   };
 
   const handlePreviewPdf = () => {
+
+    if(tripType === 'privateTrip'){
+        window.open(`/private-trip/${data?._id}`, "_blank");
+    }
+    else if (tripType === 'samplePackage'){
+        window.open(`/sample-package/${data?._id}`, "_blank");
+        
+    }
     // TODO: wire actual preview logic
     toast.info("Opening PDF preview...");
   };
@@ -155,7 +165,7 @@ function ShareModal({ data, onClose }) {
           >
             {selected === "whatsapp" && (
               <div className="bg-[#DCF4E3] rounded-lg p-3">
-                <div className="bg-white rounded-lg rounded-tr-none p-3 shadow-sm text-sm text-gray-800 leading-relaxed whitespace-pre-wrap break-words">
+                <div className="bg-white rounded-lg rounded-tr-none p-3 shadow-sm text-sm text-gray-800 leading-relaxed whitespace-pre-wrap wrap-break-word">
                   {getWhatsAppText()}
                 </div>
                 <div className="text-right text-[10px] text-gray-500 mt-1 pr-1">
@@ -176,7 +186,7 @@ function ShareModal({ data, onClose }) {
                     Your {trip.tripName} Itinerary is Ready!
                   </div>
                 </div>
-                <div className="p-4 text-sm text-gray-800 leading-relaxed whitespace-pre-wrap break-words">
+                <div className="p-4 text-sm text-gray-800 leading-relaxed whitespace-pre-wrap wrap-break-word">
                   {getEmailText().split("\n\n").slice(1).join("\n\n")}
                 </div>
               </div>

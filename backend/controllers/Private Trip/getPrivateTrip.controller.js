@@ -89,7 +89,6 @@ export const getPrivateTripById = async (req, res) => {
     let foundPrivateTripFinance;
     const foundPrivateTrip = await PrivateTrip.findOne(
       {
-        org_id: req.user.org_id,
         _id: privateTripId
       }
     )
@@ -100,6 +99,10 @@ export const getPrivateTripById = async (req, res) => {
           path: 'subRegionId',
           select: "_id name" // choose fields you need
         }
+      })
+      .populate({
+        path: 'itineraryBuilder.daysDetails.activities.activityId',
+        select: "_id imageUrl notes",
       })
       .populate({
         path: 'enquiryId',
@@ -116,10 +119,9 @@ export const getPrivateTripById = async (req, res) => {
       .populate({ path: 'itineraryBuilder.daysDetails.subRegion2', select: "_id name" })
       .populate({ path: 'itineraryBuilder.daysDetails.subRegion3', select: "_id name" })
 
-    if (foundPrivateTrip) {
+    if (foundPrivateTrip ) {
       foundPrivateTripFinance = await PrivateTripFinance.findOne(
         {
-          org_id: req.user.org_id,
           privateTripId: foundPrivateTrip?._id
         }
       )
