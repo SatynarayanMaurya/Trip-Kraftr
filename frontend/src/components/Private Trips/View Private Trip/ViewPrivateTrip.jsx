@@ -12,8 +12,16 @@ import VendorPayment from './VendorPayment'
 import DaysDetails from './DaysDetails'
 import PriceSection from '../Add Private Trip/PriceSection'
 import { isAllDayValid } from '../../Sample Package/Add Sample Package/ValidationSimplePackage'
-const BLUE = '#18305C';
+import { ShareIcon } from "../../Icons/Icons"
+import ShareModal from '../../Share/ShareModal'
 const PINK = '#ED5F8D';
+const BLUE = '#18305C';
+const GREEN = '#4CAF50';
+const iconBtn = {
+    width: '38px', height: '38px', borderRadius: '8px',
+    background: GREEN, color: 'white', border: 'none', cursor: 'pointer',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+};
 const STATUS_CONFIG = [
     {
         value: "created",
@@ -48,6 +56,7 @@ function ViewPrivateTrip() {
 
     const isProduction = useSelector(s => s.user.isProduction)
     const privateTripDetails = useSelector(s => s.privateTrip.privateTripById?.[privateTripId])
+    const [isShare, setIsShare] = useState(false)
 
     const [status, setStatus] = useState(
         privateTripDetails?.status || "created"
@@ -167,6 +176,10 @@ function ViewPrivateTrip() {
                     >
                         <Pencil size={14} /> Edit
                     </button>
+
+                    <button style={iconBtn} title="Share" onClick={() => setIsShare(true)}>
+                        <ShareIcon />
+                    </button>
                 </div>
             </div>
 
@@ -216,6 +229,12 @@ function ViewPrivateTrip() {
             {activeTab === 5 && (
                 <VendorPayment />
             )}
+
+            {/* Share */}
+            {
+                isShare && 
+                <ShareModal onClose={()=>setIsShare(false)}/>
+            }
 
 
         </div>

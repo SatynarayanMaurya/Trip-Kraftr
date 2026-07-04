@@ -13,8 +13,15 @@ import StepperTab from '../../Group Trips/Edit Group Trip/StepperTab';
 import ViewItineraryBuilder from './ViewItineraryBuilder';
 import GroupTripPolicies from '../../Group Trips/Add Group Trip/GroupTripPolicies';
 import ViewRegionSamplePackage from './ViewRegionSamplePackage';
-const BLUE = '#18305C';
+import { ShareIcon } from '../../Icons/Icons';
 const PINK = '#ED5F8D';
+const BLUE = '#18305C';
+const GREEN = '#4CAF50';
+const iconBtn = {
+    width: '38px', height: '38px', borderRadius: '8px',
+    background: GREEN, color: 'white', border: 'none', cursor: 'pointer',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+};
 
 function ViewSamplePackage() {
     const { samplePackageId } = useParams();
@@ -105,6 +112,10 @@ function ViewSamplePackage() {
                     >
                         <Pencil size={14} /> Edit
                     </button>
+
+                    <button style={iconBtn} title="Share" onClick={() => toast.info('Sharing...')}>
+                        <ShareIcon />
+                    </button>
                 </div>
             </div>
 
@@ -125,7 +136,7 @@ function ViewSamplePackage() {
                     activeDay={activeDay}
                     setActiveDay={setActiveDay}
                     price={price}
-                    vendorDetails={vendorDetails} 
+                    vendorDetails={vendorDetails}
                 />
             )}
 

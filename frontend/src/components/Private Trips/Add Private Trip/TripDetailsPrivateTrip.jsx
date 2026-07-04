@@ -19,7 +19,6 @@ function TripDetailsPrivateTrip({
     getFilteredRegions,
 }) {
 
-    console.log("form data : ",formData)
     const dateRef = useRef(null);
     return (
         <div>
