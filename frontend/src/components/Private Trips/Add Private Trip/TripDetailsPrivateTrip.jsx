@@ -18,6 +18,8 @@ function TripDetailsPrivateTrip({
     handleSave,
     getFilteredRegions,
 }) {
+
+    console.log("form data : ",formData)
     const dateRef = useRef(null);
     return (
         <div>
@@ -241,7 +243,7 @@ function TripDetailsPrivateTrip({
                         value={customerNotes}
                         onChange={(e) => {
                             setFormData(prev => ({
-                                ...formData,
+                                ...prev,
                                 customerNotes: e.target.value
                             }))
                         }}

@@ -455,7 +455,7 @@ function ItineraryBuilderPrivateTrip({
                                 value={formData?.internalNotes || ''}
                                 onChange={(e) => {
                                     setFormData(prev => ({
-                                        ...formData,
+                                        ...prev,
                                         internalNotes: e.target.value
                                     }))
                                 }}
