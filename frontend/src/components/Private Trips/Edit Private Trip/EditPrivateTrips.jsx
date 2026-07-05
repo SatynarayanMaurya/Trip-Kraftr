@@ -124,6 +124,7 @@ function EditPrivateTrips() {
 
   const [price, setPrice] = useState({
     showBreakUp: false,
+    showPricePerAdult: false,
     baseCost: 0,
     min_margin: 0,
     max_margin: 0,
@@ -189,6 +190,12 @@ function EditPrivateTrips() {
               ...place,
               placeId: place?.placeId?._id || place?.placeId || null,
             })),
+            // ✅ normalize places
+            activities: (day?.activities || []).map(activity => ({
+              ...activity,
+              activityId: activity?.activityId?._id || activity?.activityId || null,
+            })),
+            // activities:day?.activities
           })),
         },
 

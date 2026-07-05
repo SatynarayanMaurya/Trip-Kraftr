@@ -12,6 +12,7 @@ import Participants from './Participants';
 import ViewItineraryBuilder from './ViewItineraryBuilder';
 import FinancialCloseup from './FinancialCloseup';
 import GroupTripPolicies from '../Add Group Trip/GroupTripPolicies';
+import ShareModal from '../../Share/ShareModal';
 
 const PINK = '#ED5F8D';
 const BLUE = '#18305C';
@@ -91,6 +92,7 @@ function ViewGroupTrip() {
     const [activeTab, setActiveTab] = useState(0);
     const [showStatusDrop, setShowStatusDrop] = useState(false);
     const [isFinancialPopup, setIsFinancialPopup] = useState(false)
+    const [isShare, setIsShare] = useState(false)
 
 
     const fetchGroupTrip = async () => {
@@ -184,9 +186,9 @@ function ViewGroupTrip() {
                             onClick={() => setShowStatusDrop(p => !p)}
                             style={{
                                 display: 'flex', alignItems: 'center', gap: '8px',
-                                background: 'white', border: `1.5px solid ${statusCfg?.border||'red'}`,
+                                background: 'white', border: `1.5px solid ${statusCfg?.border || 'red'}`,
                                 borderRadius: '8px', padding: '8px 16px',
-                                fontSize: '13px', fontWeight: '600', color: (statusCfg.color||'red'),
+                                fontSize: '13px', fontWeight: '600', color: (statusCfg.color || 'red'),
                                 cursor: 'pointer',
                             }}
                         >
@@ -224,7 +226,7 @@ function ViewGroupTrip() {
                     <button style={iconBtn} title="Download" onClick={() => toast.info('Downloading...')}>
                         <DownloadIcon />
                     </button>
-                    <button style={iconBtn} title="Share" onClick={() => toast.info('Sharing...')}>
+                    <button style={iconBtn} title="Share" onClick={() => setIsShare(true)}>
                         <ShareIcon />
                     </button>
                     <button style={iconBtn} title="Copy" onClick={() => toast.info('Copied!')}>
@@ -329,6 +331,13 @@ function ViewGroupTrip() {
                 isFinancialPopup &&
                 <FinancialCloseup groupTripSummary={groupTripSummary} isOpen={isFinancialPopup} onClose={() => setIsFinancialPopup(false)} />
             }
+
+            {/* Share */}
+            {
+                isShare &&
+                <ShareModal onClose={() => setIsShare(false)} data={groupTripDetails} tripType='groupTrip' />
+            }
+
         </div>
     );
 }

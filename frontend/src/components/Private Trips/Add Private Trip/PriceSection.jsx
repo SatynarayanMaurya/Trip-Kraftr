@@ -12,6 +12,8 @@ export default function PriceSection({ price, noOfDays = 1, setPrice = () => { }
         day.activities?.filter(activity => activity.activityName?.trim()) || []
     ) || [];
 
+    const totalAdults = formData?.regionDetails?.adults
+
     const [isMarginMode, setIsMarginMode] = useState(price?.isMargin ?? true);
     const [mobileOpen, setMobileOpen] = useState(false);
     const [isActivitiesOpen, setIsActivitiesOpen] = useState(false)
@@ -174,13 +176,13 @@ export default function PriceSection({ price, noOfDays = 1, setPrice = () => { }
                             >
                                 <div>
                                     <p className=" font-semibold" style={{ color: NAVY }}>
-                                        {activity.activityName?.length>25 ?activity.activityName?.slice(0,25) + "..." : activity.activityName}
+                                        {activity.activityName?.length > 25 ? activity.activityName?.slice(0, 25) + "..." : activity.activityName}
                                     </p>
                                 </div>
 
                                 <div className="flex items-center gap-4 " style={{ color: NAVY }}>
                                     <span>
-                                         {activity.quantity}
+                                        {activity.quantity}
                                     </span>
 
                                     <span className="font-semibold">
@@ -266,23 +268,51 @@ export default function PriceSection({ price, noOfDays = 1, setPrice = () => { }
 
                 {/* Show Price / Adult */}
                 <div className="flex items-center gap-2 mb-3">
-                    <span className="w-4 h-4 rounded shrink-0" style={{ background: PINK }} />
+                    <input
+                        type="checkbox"
+                        checked={price?.showPricePerAdult ?? false}
+                        onChange={(e) => update({ showPricePerAdult: e.target.checked })}
+                        className="w-3.5 h-3.5 cursor-pointer ml-1"
+                        style={{ accentColor: PINK }}
+                    />
+                    {/* <span className="w-4 h-4 rounded shrink-0" style={{ background: PINK }} /> */}
                     <span className="text-sm font-bold" style={{ color: NAVY }}>Show Price / Adult</span>
                 </div>
 
                 {/* Final Price */}
                 <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs text-gray-500">Final Price / Adult</span>
-                    <span className="text-sm font-semibold" style={{ color: NAVY }}>{fmt(price?.finalPrice)}</span>
+                    {
+                        price?.showPricePerAdult ?
+                            <>
+                                <span className="text-xs text-gray-500">Final Price / Adult</span>
+                                <span className="text-sm font-semibold" style={{ color: NAVY }}>{fmt(price?.finalPrice/totalAdults)}</span>
+                            </> :
+                            <>
+                                <span className="text-xs text-gray-500">Final Price </span>
+                                <span className="text-sm font-semibold" style={{ color: NAVY }}>{fmt(price?.finalPrice)}</span>
+                            </>
+                    }
                 </div>
 
                 {/* Discounted Price */}
                 <div className="flex items-start justify-between">
-                    <span className="text-xs text-gray-500">Discounted Price / Adult</span>
-                    <div className="text-right">
-                        <span className="block text-xs text-gray-400 line-through">{fmt(price?.finalPrice)}</span>
-                        <span className="block text-sm font-bold" style={{ color: PINK }}>{fmt(price?.discountedPrice)}</span>
-                    </div>
+                    {
+                        price?.showPricePerAdult ?
+                            <>
+                                <span className="text-xs text-gray-500">Discounted Price / Adult</span>
+                                <div className="text-right">
+                                    <span className="block text-xs text-gray-400 line-through">{fmt(price?.finalPrice/totalAdults)}</span>
+                                    <span className="block text-sm font-bold" style={{ color: PINK }}>{fmt(price?.discountedPrice/totalAdults)}</span>
+                                </div>
+                            </> :
+                            <>
+                                <span className="text-xs text-gray-500">Discounted Price</span>
+                                <div className="text-right">
+                                    <span className="block text-xs text-gray-400 line-through">{fmt(price?.finalPrice)}</span>
+                                    <span className="block text-sm font-bold" style={{ color: PINK }}>{fmt(price?.discountedPrice)}</span>
+                                </div>
+                            </>
+                    }
                 </div>
             </div>
         </div>
@@ -291,7 +321,7 @@ export default function PriceSection({ price, noOfDays = 1, setPrice = () => { }
     return (
         <>
             {/* ══ DESKTOP / TABLET: sticky card, no scroll of its own ══ */}
-            <div className="hidden sm:block " style={{ position: 'sticky', top: '20px', flexShrink: 0, alignSelf: 'flex-start', width: '20vw',maxHeight: "calc(100vh - 40px)",  overflowY: "auto", }}>
+            <div className="hidden sm:block " style={{ position: 'sticky', top: '20px', flexShrink: 0, alignSelf: 'flex-start', width: '20vw', maxHeight: "calc(100vh - 40px)", overflowY: "auto", }}>
                 {cardJSX}
             </div>
 

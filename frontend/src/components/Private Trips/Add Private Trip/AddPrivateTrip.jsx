@@ -109,6 +109,7 @@ function AddPrivateTrip() {
 
     const [price, setPrice] = useState({
         showBreakUp: false,
+        showPricePerAdult:false,
         baseCost: 0,
         min_margin: 0,
         max_margin: 0,

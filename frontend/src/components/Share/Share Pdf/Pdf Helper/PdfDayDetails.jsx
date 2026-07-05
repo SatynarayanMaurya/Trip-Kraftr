@@ -46,7 +46,8 @@ function PdfDayDetails({ days }) {
                             src={day.hotel.image}
                             alt={day.hotel.name}
                             className="rounded-lg shrink-0"
-                            style={{ width: "100%", maxWidth: "220px", minHeight: "150px", maxHeigth:'300px' }}
+                            // style={{ width: "100%", maxWidth: "220px", minHeight: "150px", maxHeigth:'300px' }}
+                            style={{ width: 300,  height: "auto", minHeight: 90 }}
                         />
                         <div className="min-w-0">
                             <div className="text-base font-bold" style={{ color: NAVY }}>
@@ -111,7 +112,7 @@ function PdfDayDetails({ days }) {
                             src={day.placeImage}
                             alt="Favourite place"
                             className="rounded-lg shrink-0"
-                            style={{ width: "100%", maxWidth: "220px", height: "auto", minHeight: "150px" }}
+                            style={{ width: 300,  height: "auto", minHeight: 100 }}
                         />
                     </div>
                 </div>

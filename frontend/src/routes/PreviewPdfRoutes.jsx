@@ -16,5 +16,9 @@ export const PreviewPdfRoutes = (
       path="sample-package/:tripId"
       element={<PreviewPdf /> }
     />
+    <Route
+      path="group-trip/:tripId"
+      element={<PreviewPdf /> }
+    />
   </>
 );

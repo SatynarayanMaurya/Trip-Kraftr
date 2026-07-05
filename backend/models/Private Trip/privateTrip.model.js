@@ -162,6 +162,7 @@ const privateTripSchema = new mongoose.Schema(
 
         price: {
             showBreakUp: { type: Boolean },
+            showPricePerAdult: { type: Boolean,default:false},
             baseCost: { type: Number },
             min_margin: { type: Number },
             max_margin: { type: Number },

@@ -102,7 +102,7 @@ export const getPrivateTripById = async (req, res) => {
       })
       .populate({
         path: 'itineraryBuilder.daysDetails.activities.activityId',
-        select: "_id imageUrl notes",
+        select: "_id imageUrl description notes",
       })
       .populate({
         path: 'enquiryId',

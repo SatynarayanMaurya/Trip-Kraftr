@@ -10,6 +10,7 @@ import PdfContactFooter from "./Pdf Helper/PdfContactFooter";
 import {Download} from 'lucide-react'
 import TripPdf from "./Trip Pdf/TripPdf";
 import { pdf } from "@react-pdf/renderer";
+import TripPdfGroupTrip from "./Trip Pdf/TripPdfGroupTrip";
 function getRegionImage(regionsImage) {
   if (!regionsImage) return null;
   const obj = Array.isArray(regionsImage) ? regionsImage[0] : regionsImage;
@@ -31,8 +32,9 @@ function addDays(dateStr, days) {
   return d;
 }
 
-function PdfDetailsPrivateAndSample({ tripDetails, regionsImage,policies, tripType = "privateTrip" }) {
+function PdfDetailsGroupTrip({ tripDetails, regionsImage,policies, tripType = "privateTrip" }) {
   if (!tripDetails) return null;
+
 
   const itinerary = tripDetails?.itineraryBuilder || {};
   const daysDetails = itinerary?.daysDetails || [];
@@ -44,24 +46,24 @@ function PdfDetailsPrivateAndSample({ tripDetails, regionsImage,policies, tripTy
     .filter(Boolean)
     .join(", ");
 
-  const startDate = formatDate(regionDetails?.startDate);
-  const endDateObj = addDays(regionDetails?.startDate, regionDetails?.noOfDays);
-  const endDate = endDateObj ? formatDate(endDateObj) : null;
+  const startDate = formatDate(regionDetails?.fromDate);
+  const endDateObj = addDays(regionDetails?.fromDate, (regionDetails?.toDate-regionDetails?.fromDate));
+  const endDate = endDateObj ? formatDate(toDate) : null;
 
   const totalPersons = (regionDetails?.adults || 0) + (regionDetails?.children || 0);
-  const tripTypeText = `${tripType === "privateTrip" ? "Private Trip" : "Sample Package"} (${totalPersons} Persons)`;
+  const tripTypeText = `GROUP TRIP`;
 
   const coverData = {
     regionImage: getRegionImage(regionsImage),
     regionName,
-    tripLabel: tripType === "privateTrip" ? "PRIVATE TRIP" : "SAMPLE PACKAGE",
+    tripLabel: "GROUP TRIP",
     days: regionDetails?.noOfDays || daysDetails.length,
     startingPrice: `₹${Number(price?.finalPrice || 0).toLocaleString("en-IN")}`,
     tripName: itinerary?.tripName || "Untitled Trip",
     tripOverview: itinerary?.tripOverview,
     destination,
     duration: regionDetails?.noOfDays ? `${regionDetails.noOfDays} Days / ${regionDetails.noOfDays - 1} Nights` : null,
-    travelDates: startDate ? `${startDate}${endDate ? " - " + endDate : ""}` : null,
+    travelDates: startDate ? startDate : null,
     tripTypeText,
     orgInitial: "TK",
   };
@@ -92,7 +94,7 @@ function PdfDetailsPrivateAndSample({ tripDetails, regionsImage,policies, tripTy
         name: day?.hotelDetails?.hotelName,
         category: day?.hotelDetails?.hotelCategory,
         image: day?.hotelDetails?.hotelImage,
-        rooms,
+        rooms:[{meals:day?.hotelDetails?.meals,roomType:day?.hotelDetails?.roomType}],
       },
       places: placeDetails.map((p) => p?.placeId?.placeName).filter(Boolean),
       placeImage,
@@ -104,7 +106,7 @@ function PdfDetailsPrivateAndSample({ tripDetails, regionsImage,policies, tripTy
       const handleDownloadPdf = async () => {
   
           const blob = await pdf(
-              <TripPdf 
+              <TripPdfGroupTrip 
                   tripDetails={tripDetails}  
                   regionsImage={regionsImage} 
                   policies={policies} 
@@ -129,11 +131,12 @@ function PdfDetailsPrivateAndSample({ tripDetails, regionsImage,policies, tripTy
     <>
         <div>
         <PdfCoverSection data={coverData} />
-        <PdfPricingHighlights price={price} activities={highlightActivities} tripType={tripType} />
+        <PdfPricingHighlights price={price} activities={highlightActivities} tripType="groupTrip" tripDetails={tripDetails} />
         <PdfDayDetails days={days} />
         <PdfPolicies policies={policies} />
         <PdfContactFooter />
         </div>
+
 
         <button onClick={handleDownloadPdf}
         className="fixed bottom-5 right-5 z-50 flex items-center gap-2 rounded-full bg-blue-600 px-5 py-3 text-white shadow-xl transition hover:bg-blue-700 active:scale-95"
@@ -145,4 +148,5 @@ function PdfDetailsPrivateAndSample({ tripDetails, regionsImage,policies, tripTy
     );
 }
 
-export default PdfDetailsPrivateAndSample;
+
+export default PdfDetailsGroupTrip

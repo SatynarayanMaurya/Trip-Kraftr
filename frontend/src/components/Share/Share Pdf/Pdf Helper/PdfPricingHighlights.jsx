@@ -6,14 +6,45 @@ const PINK = "#ED5F8D";
 const NAVY = "#08255B";
 const BLUE = '#9CBFFF57'
 
-function PdfPricingHighlights({ price, activities }) {
-  const rows = [
-    { label: "Base Cost", value: price?.baseCost },
-    { label: "Additional Activities", value: price?.additionalActivities },
-    { label: "Festival Surge", value: price?.festivalSurge },
-    { label: "Discount", value: price?.discount ? `- ${price.discount}` : 0 },
-    price?.isGstChecked ? { label: "GST", value: price?.gstPrice } : null,
-  ].filter(Boolean);
+function PdfPricingHighlights({ price, activities,tripType='privateTrip',tripDetails={} }) {
+  // const rows = [
+  //   { label: "Base Cost", value: price?.baseCost },
+  //   { label: "Additional Activities", value: price?.additionalActivities },
+  //   { label: "Festival Surge", value: price?.festivalSurge },
+  //   { label: "Discount", value: price?.discount ? `- ${price.discount}` : 0 },
+  //   price?.isGstChecked ? { label: "GST", value: price?.gstPrice } : null,
+  // ].filter(Boolean);
+
+      const rowsPrivateTrip = [
+        { label: "Base Cost", value: price?.baseCost },
+        { label: "Additional Activities", value: price?.additionalActivities },
+        { label: "Festival Surge", value: price?.festivalSurge },
+        {
+            label: "Discount",
+            value: price?.discount ? `- ${price.discount}` : 0,
+        },
+        price?.isGstChecked
+            ? { label: "GST", value: price?.gstPrice }
+            : null,
+    ].filter(Boolean);
+
+    const rowsGroupTrip = [
+        { label: "Single Occupancy", value: tripDetails?.tripDetails?.occupancy?.single },
+        { label: "Double Occupancy", value: tripDetails?.tripDetails?.occupancy?.double },
+        { label: "Triple Occupancy", value: tripDetails?.tripDetails?.occupancy?.triple },
+    ].filter(Boolean);
+
+       const rowsSamplePackage = [
+        { label: "Total Price", value: price?.totalPrice },
+    ].filter(Boolean);
+
+    const rowsMap = {
+        privateTrip: rowsPrivateTrip,
+        groupTrip: rowsGroupTrip,
+        samplePackage: rowsSamplePackage, // add when ready
+    };
+
+    const rows = rowsMap[tripType] || [];
 
   const fmt = (v) => `₹${Number(v || 0).toLocaleString("en-IN")}`;
 
@@ -55,7 +86,7 @@ function PdfPricingHighlights({ price, activities }) {
               src={a.image}
               alt={a.name}
               className="rounded-md shrink-0"
-              style={{ width: "220px", height: "130px" }}
+              style={{ width: 300, height: 150 }}
             />
             <div className="min-w-0">
               <div className="text-sm font-semibold" style={{ color: NAVY }}>
