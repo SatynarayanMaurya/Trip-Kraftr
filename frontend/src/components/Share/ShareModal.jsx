@@ -92,6 +92,7 @@ function ShareModal({ onClose, data = {}, tripType = 'privateTrip' }) {
         try {
             setMailLoading(true)
             const { from, to, subject, body } = getMailContent(data, tripType)
+            return toast.info("This feature is under development. Please check back later.")
             const response = await sendMail(from, to, subject, body)
             toast.success(response?.data?.message)
             onClose()
