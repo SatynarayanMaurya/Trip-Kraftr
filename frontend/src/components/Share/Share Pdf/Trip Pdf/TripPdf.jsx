@@ -97,9 +97,8 @@ export default function TripPdf({
                 ? "PRIVATE TRIP"
                 : "SAMPLE PACKAGE",
         days: regionDetails?.noOfDays || daysDetails.length,
-        startingPrice: `${Number(price?.finalPrice || 0).toLocaleString(
-            "en-IN"
-        )}`,
+        startingPrice: tripType === 'privateTrip' ? `${Number(tripDetails?.price?.showPricePerAdult ? price?.discountedPrice / tripDetails?.regionDetails?.adults : price?.discountedPrice || 0).toLocaleString("en-IN")}` : `${Number(price?.finalPrice || 0).toLocaleString("en-IN")}`,
+        priceSubtitle: tripDetails?.price?.showPricePerAdult ? '/ Per Person' : 'Total Price',
         tripName: itinerary?.tripName || "Untitled Trip",
         tripOverview: itinerary?.tripOverview,
         destination,
@@ -165,7 +164,6 @@ export default function TripPdf({
             ),
         };
     });
-    console.log("tripType inside trip pdf : ",tripType)
 
     return (
         <Document>
@@ -175,11 +173,11 @@ export default function TripPdf({
                 <PdfPricingHighlightsPdf
                     price={price}
                     activities={highlightActivities}
-                    tripType
+                    tripType={tripType}
                     tripDetails={tripDetails}
                 />
 
-                <PdfDayDetailsPDF days={days} wrap={false} />
+                <PdfDayDetailsPDF days={days}  tripType={tripType}  tripDetails={tripDetails} />
 
                 <PdfPoliciesPDF policies={policies} />
 

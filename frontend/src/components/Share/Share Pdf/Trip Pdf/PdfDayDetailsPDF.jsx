@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 10,
     marginBottom: 10,
-    position:'relative'
+    position: 'relative'
   },
 
   hotelInfo: {
@@ -121,22 +121,23 @@ function getMealsText(rooms) {
 }
 
 
-const getImageHeight =(day)=>{
-    return Math.max(
-  100,
-  (day.places.length * 18 +  day.activities.length * 18 + 30)
-);
+const getImageHeight = (day) => {
+  return Math.max(
+    100,
+    (day.places.length * 18 + day.activities.length * 18 + 30)
+  );
 }
 
-function PdfDayDetailsPdf({ days = [] }) {
+function PdfDayDetailsPdf({ days = [], tripType, tripDetails }) {
   return (
     <View >
 
-      {days?.map((day,index) => (
-        <View key={day.dayNumber}     
-            style={[
-                styles.dayWrapper,
-            ]}>
+      {days?.map((day, index) => (
+        <View key={day.dayNumber}
+          wrap={false}
+          style={[
+            styles.dayWrapper,
+          ]}>
 
           {/* DAY TITLE */}
           <Text style={styles.dayTitle}>
@@ -147,18 +148,24 @@ function PdfDayDetailsPdf({ days = [] }) {
           <View style={styles.hotelCard}>
 
             {/* VEHICLES (top right block removed absolute → inline) */}
-            <View style={{ position: "absolute", top: 2, right: 2,width:'20%', flexDirection: "row", flexWrap: "wrap" }}>
-              {day?.vehicleDetails?.map((v) => (
-                <Text key={v._id} style={styles.vehicleTag}>
-                  {v.vehicleModel} ×{v.quantity} {v.pricePerDay}
-                </Text>
-              ))}
+            <View style={{ position: "absolute", top: 2, right: 2, width: '20%', flexDirection: "row", flexWrap: "wrap" }}>
+              {
+                tripType !== 'groupTrip' ?
+                  day?.vehicleDetails?.map((v) => (
+                    <Text key={v._id} style={styles.vehicleTag}>
+                      {v.vehicleModel} · ×{v.quantity} · {v.capacity}
+                    </Text>
+                  )) :
+                  <Text style={styles.vehicleTag}>
+                    {tripDetails?.tripDetails?.selectedVehicleId?.vehicleModel} · ×{tripDetails?.tripDetails?.quantity} · {tripDetails?.tripDetails?.selectedVehicleId?.capacity}
+                  </Text>
+              }
             </View>
 
             {/* HOTEL IMAGE */}
             <PdfImagePdf
               src={day.hotel.image}
-              style={{ width: 200, height:100, borderRadius: 6 }}
+              style={{ width: 200, height: 100, borderRadius: 6 }}
             />
 
             {/* HOTEL INFO */}

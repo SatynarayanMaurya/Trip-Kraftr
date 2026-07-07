@@ -285,7 +285,7 @@ export default function PriceSection({ price, noOfDays = 1, setPrice = () => { }
                         price?.showPricePerAdult ?
                             <>
                                 <span className="text-xs text-gray-500">Final Price / Adult</span>
-                                <span className="text-sm font-semibold" style={{ color: NAVY }}>{fmt(price?.finalPrice/totalAdults)}</span>
+                                <span className="text-sm font-semibold" style={{ color: NAVY }}>{fmt(price?.finalPrice / totalAdults)}</span>
                             </> :
                             <>
                                 <span className="text-xs text-gray-500">Final Price </span>
@@ -301,8 +301,8 @@ export default function PriceSection({ price, noOfDays = 1, setPrice = () => { }
                             <>
                                 <span className="text-xs text-gray-500">Discounted Price / Adult</span>
                                 <div className="text-right">
-                                    <span className="block text-xs text-gray-400 line-through">{fmt(price?.finalPrice/totalAdults)}</span>
-                                    <span className="block text-sm font-bold" style={{ color: PINK }}>{fmt(price?.discountedPrice/totalAdults)}</span>
+                                    <span className="block text-xs text-gray-400 line-through">{fmt(price?.finalPrice / totalAdults)}</span>
+                                    <span className="block text-sm font-bold" style={{ color: PINK }}>{fmt(price?.discountedPrice / totalAdults)}</span>
                                 </div>
                             </> :
                             <>

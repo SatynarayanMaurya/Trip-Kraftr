@@ -1,7 +1,7 @@
 // components/Pdf/PdfSections/PdfPricingHighlightsPdf.jsx
 
 import React from "react";
-import { View, Text, StyleSheet, Image } from "@react-pdf/renderer";
+import { View, Text, StyleSheet } from "@react-pdf/renderer";
 import PdfImagePdf from "./PdfImagePdf";
 import { RupeeIcon } from "./Icons";
 const PINK = "#ED5F8D";
@@ -120,23 +120,35 @@ const styles = StyleSheet.create({
     },
 });
 
-function PdfPricingHighlightsPdf({ price, activities = [], tripType, tripDetails = {} }) {
+function PdfPricingHighlightsPdf({ price, activities = [], tripType = "privateTrip", tripDetails = {} }) {
+
+    const allActivities = tripDetails?.itineraryBuilder?.daysDetails?.flatMap(day =>
+        day.activities?.filter(activity => activity.activityName?.trim()) || []
+    ) || [];
+
     const rowsPrivateTrip = [
-        { label: "Base Cost", value: price?.baseCost },
-        { label: "Additional Activities", value: price?.additionalActivities },
-        { label: "Festival Surge", value: price?.festivalSurge },
-        { label: "Discount", value: price?.discount ? `- ${price.discount}` : 0, },
-        price?.isGstChecked ? { label: "GST", value: price?.gstPrice } : null,
+        { label: "Total Package Cost", value: price?.finalPrice, show: true, highlight: false },
+        { label: "Additional Activities", value: price?.additionalActivities, show: true, highlight: false },
+        { label: "+ GST (5%)", value: price?.gstPrice, show: price?.isGstChecked, highlight: false },
+        { label: "Discount Applied", value: price?.discount, show: price?.discount > 0, highlight: false },
+        { label: "Festival Surge", value: price?.festivalSurge, show: price?.festivalSurge > 0, highlight: false },
+        ...allActivities.map((activity) => ({
+            label: `${activity.activityName} (Activity)`,
+            value: activity.isComplimentary ? 0 : activity.price,
+            show: price?.showBreakUp,
+            highlight: false,
+        })),
+        { label: "Final Price", value: price?.discountedPrice, show: true, highlight: true },
     ].filter(Boolean);
 
     const rowsGroupTrip = [
-        { label: "Single Occupancy", value: tripDetails?.tripDetails?.occupancy?.single },
-        { label: "Double Occupancy", value: tripDetails?.tripDetails?.occupancy?.double },
-        { label: "Triple Occupancy", value: tripDetails?.tripDetails?.occupancy?.triple },
+        { label: "Single Occupancy", value: tripDetails?.tripDetails?.occupancy?.single, show: true, highlight: false },
+        { label: "Double Occupancy", value: tripDetails?.tripDetails?.occupancy?.double, show: true, highlight: false },
+        { label: "Triple Occupancy", value: tripDetails?.tripDetails?.occupancy?.triple, show: true, highlight: false },
     ].filter(Boolean);
 
     const rowsSamplePackage = [
-        { label: "Total Price", value: price?.totalPrice },
+        { label: "Total Price", value: price?.totalPrice, show: true, highlight: true },
     ].filter(Boolean);
 
     const rowsMap = {
@@ -145,10 +157,9 @@ function PdfPricingHighlightsPdf({ price, activities = [], tripType, tripDetails
         samplePackage: rowsSamplePackage, // add when ready
     };
 
-    console.log("trip Type : ",tripType)
-    const rows = rowsMap[rowsPrivateTrip] || [];
+    const rows = rowsMap[tripType] || [];
 
-    const fmt = (v) => `INR ${Number(v || 0).toLocaleString("en-IN")}`;
+    const fmtNum = (v) => Number(v || 0).toLocaleString("en-IN");
 
     return (
         <View style={styles.section}>
@@ -156,27 +167,25 @@ function PdfPricingHighlightsPdf({ price, activities = [], tripType, tripDetails
             {/* PRICING */}
             <Text style={styles.title}>Pricing Details</Text>
 
-            <View style={styles.priceBox}>
+            <View style={styles.priceBox}  wrap={false}>
 
-                {rowsPrivateTrip?.map((r, i) => (
-                    <View key={i} style={styles.row}>
-                        <Text style={styles.label}>{r.label}</Text>
-                        <View style={styles.priceRow}>
-                            <RupeeIcon size={10} color={"#fff"} />
-                            <Text style={styles.value}>{r.value}</Text>
+                {rows?.filter(r => r.show).map((r, i) => (
+                    <React.Fragment key={`${r.label}-${i}`}>
+                        {r.highlight && <View style={styles.divider} />}
+
+                        <View style={r.highlight ? styles.finalRow : styles.row}>
+                            <Text style={r.highlight ? styles.finalLabel : styles.label}>
+                                {r.label}
+                            </Text>
+                            <View style={styles.priceRow}>
+                                <RupeeIcon size={r.highlight ? 14 : 10} color={r.highlight ? PINK : "#fff"} />
+                                <Text style={r.highlight ? styles.price : styles.value}>
+                                    {fmtNum(r.value)}
+                                </Text>
+                            </View>
                         </View>
-                    </View>
+                    </React.Fragment>
                 ))}
-
-                <View style={styles.divider} />
-
-                <View style={styles.finalRow}>
-                    <Text style={styles.finalLabel}>Final Price</Text>
-                    <View style={styles.priceRow}>
-                        <RupeeIcon size={14} color={PINK} />
-                        <Text style={styles.price}>{price?.finalPrice}</Text>
-                    </View>
-                </View>
 
             </View>
 
@@ -191,7 +200,7 @@ function PdfPricingHighlightsPdf({ price, activities = [], tripType, tripDetails
                 </Text>
             ) : (
                 activities.map((a, i) => (
-                    <View key={i} style={styles.highlightCard}>
+                    <View key={i} style={styles.highlightCard}  wrap={false}>
 
                         {/* IMAGE */}
                         <PdfImagePdf src={a?.image} style={{ width: 200, height: 100 }} />

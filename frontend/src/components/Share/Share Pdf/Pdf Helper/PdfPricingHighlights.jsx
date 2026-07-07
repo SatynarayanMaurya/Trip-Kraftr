@@ -6,45 +6,40 @@ const PINK = "#ED5F8D";
 const NAVY = "#08255B";
 const BLUE = '#9CBFFF57'
 
-function PdfPricingHighlights({ price, activities,tripType='privateTrip',tripDetails={} }) {
-  // const rows = [
-  //   { label: "Base Cost", value: price?.baseCost },
-  //   { label: "Additional Activities", value: price?.additionalActivities },
-  //   { label: "Festival Surge", value: price?.festivalSurge },
-  //   { label: "Discount", value: price?.discount ? `- ${price.discount}` : 0 },
-  //   price?.isGstChecked ? { label: "GST", value: price?.gstPrice } : null,
-  // ].filter(Boolean);
+function PdfPricingHighlights({ price, activities, tripType = 'privateTrip', tripDetails = {} }) {
 
-      const rowsPrivateTrip = [
-        { label: "Base Cost", value: price?.baseCost },
-        { label: "Additional Activities", value: price?.additionalActivities },
-        { label: "Festival Surge", value: price?.festivalSurge },
-        {
-            label: "Discount",
-            value: price?.discount ? `- ${price.discount}` : 0,
-        },
-        price?.isGstChecked
-            ? { label: "GST", value: price?.gstPrice }
-            : null,
-    ].filter(Boolean);
+  const allActivities = tripDetails?.itineraryBuilder?.daysDetails?.flatMap(day =>
+    day.activities?.filter(activity => activity.activityName?.trim()) || []
+  ) || [];
 
-    const rowsGroupTrip = [
-        { label: "Single Occupancy", value: tripDetails?.tripDetails?.occupancy?.single },
-        { label: "Double Occupancy", value: tripDetails?.tripDetails?.occupancy?.double },
-        { label: "Triple Occupancy", value: tripDetails?.tripDetails?.occupancy?.triple },
-    ].filter(Boolean);
+  const rowsPrivateTrip = [
+    { label: "Total Package Cost", value: price?.finalPrice, show: true, highlight: false },
+    { label: "Additional Activities", value: price?.additionalActivities, show: true, highlight: false },
+    { label: "+ GST (5%) ", value: price?.gstPrice, show: price?.isGstChecked, highlight: false },
+    { label: "Discount Applied", value: price?.discount, show: price?.discount > 0, highlight: false },
+    { label: "Festival Surge", value: price?.festivalSurge, show: price?.festivalSurge > 0, highlight: false },
+    ...allActivities.map((activity) => ({label: `${activity.activityName} (Activity)`, value: activity.isComplimentary ? 0 : activity.price, show: price?.showBreakUp, highlight: false,
+  })),
+  { label: "Final Price", value: price?.discountedPrice, show: true, highlight: true },
+  ].filter(Boolean);
 
-       const rowsSamplePackage = [
-        { label: "Total Price", value: price?.totalPrice },
-    ].filter(Boolean);
+  const rowsGroupTrip = [
+    { label: "Single Occupancy", value: tripDetails?.tripDetails?.occupancy?.single, show: true },
+    { label: "Double Occupancy", value: tripDetails?.tripDetails?.occupancy?.double, show: true },
+    { label: "Triple Occupancy", value: tripDetails?.tripDetails?.occupancy?.triple, show: true },
+  ].filter(Boolean);
 
-    const rowsMap = {
-        privateTrip: rowsPrivateTrip,
-        groupTrip: rowsGroupTrip,
-        samplePackage: rowsSamplePackage, // add when ready
-    };
+  const rowsSamplePackage = [
+    { label: "Total Price", value: price?.totalPrice, show: true },
+  ].filter(Boolean);
 
-    const rows = rowsMap[tripType] || [];
+  const rowsMap = {
+    privateTrip: rowsPrivateTrip,
+    groupTrip: rowsGroupTrip,
+    samplePackage: rowsSamplePackage, // add when ready
+  };
+
+  const rows = rowsMap[tripType] || [];
 
   const fmt = (v) => `₹${Number(v || 0).toLocaleString("en-IN")}`;
 
@@ -55,17 +50,27 @@ function PdfPricingHighlights({ price, activities,tripType='privateTrip',tripDet
         Pricing Details
       </h3>
       <div className="rounded-xl p-4" style={{ background: NAVY }}>
-        {rows.map((r) => (
-          <div key={r.label} className="flex justify-between text-sm py-1.5" style={{ color: "#CBD5E1" }}>
-            <span>{r.label}</span>
-            <span className="font-medium text-white">{fmt(r.value)}</span>
-          </div>
+        {rows?.filter(r => r.show).map((r) => (
+          <React.Fragment key={r.label}>
+            {r.highlight && <div className="border-t border-white/20 my-2" />}
+
+            <div
+              className={`flex justify-between text-sm py-1.5 ${r.highlight ? "font-bold" : ""
+                }`}
+            >
+              <span style={{ color: r.highlight ? PINK : "#CBD5E1" }}>
+                {r.label}
+              </span>
+
+              <span
+                className={r.highlight ? "font-bold" : "font-medium"}
+                style={{ color: r.highlight ? PINK : "#fff" }}
+              >
+                {fmt(r.value)}
+              </span>
+            </div>
+          </React.Fragment>
         ))}
-        <div className="border-t border-white/20 my-2" />
-        <div className="flex justify-between text-sm font-bold py-1">
-          <span style={{ color: PINK }}>Final Price</span>
-          <span className="text-white">{fmt(price?.finalPrice)}</span>
-        </div>
       </div>
 
       {/* Highlights */}

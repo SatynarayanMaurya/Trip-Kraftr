@@ -93,6 +93,7 @@ export const getGroupTripById = async (req, res) => {
           }
         })
         .populate({ path: 'regionDetails.region1', select: "_id name" })
+        .populate({ path: 'tripDetails.selectedVehicleId', select: "_id vehicleModel capacity pricePerDay" })
         .populate({ path: 'itineraryBuilder.daysDetails.hotelDetails.hotelId', select: "_id images amenities googleRating category" })
         .populate({ path: 'itineraryBuilder.daysDetails.hotelDetails.roomTypeId', select: "_id roomName quantity" })
         .populate({ path: 'itineraryBuilder.daysDetails.subRegion1', select: "_id name" })

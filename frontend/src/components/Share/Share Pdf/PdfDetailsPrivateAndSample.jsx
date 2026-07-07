@@ -1,15 +1,16 @@
 
 
 // ===== PdfDetailsPrivateAndSample.jsx =====
-import React from "react";
+import React, { useState } from "react";
 import PdfCoverSection from "./Pdf Helper/PdfCoverSection";
 import PdfPricingHighlights from "./Pdf Helper/PdfPricingHighlights";
 import PdfDayDetails from "./Pdf Helper/PdfDayDetails";
 import PdfPolicies from "./Pdf Helper/PdfPolicies";
 import PdfContactFooter from "./Pdf Helper/PdfContactFooter";
-import {Download} from 'lucide-react'
+import { Download } from 'lucide-react'
 import TripPdf from "./Trip Pdf/TripPdf";
 import { pdf } from "@react-pdf/renderer";
+import {toast} from 'react-toastify'
 function getRegionImage(regionsImage) {
   if (!regionsImage) return null;
   const obj = Array.isArray(regionsImage) ? regionsImage[0] : regionsImage;
@@ -31,8 +32,11 @@ function addDays(dateStr, days) {
   return d;
 }
 
-function PdfDetailsPrivateAndSample({ tripDetails, regionsImage,policies, tripType = "privateTrip" }) {
+function PdfDetailsPrivateAndSample({ tripDetails, regionsImage, policies, tripType = "privateTrip" }) {
   if (!tripDetails) return null;
+
+  
+    const [pdfLoading, setPdfLoading] = useState(false)
 
   const itinerary = tripDetails?.itineraryBuilder || {};
   const daysDetails = itinerary?.daysDetails || [];
@@ -56,7 +60,8 @@ function PdfDetailsPrivateAndSample({ tripDetails, regionsImage,policies, tripTy
     regionName,
     tripLabel: tripType === "privateTrip" ? "PRIVATE TRIP" : "SAMPLE PACKAGE",
     days: regionDetails?.noOfDays || daysDetails.length,
-    startingPrice: `₹${Number(price?.finalPrice || 0).toLocaleString("en-IN")}`,
+    startingPrice: tripType === 'privateTrip' ? `₹${Number(tripDetails?.price?.showPricePerAdult ? price?.discountedPrice / tripDetails?.regionDetails?.adults : price?.discountedPrice || 0).toLocaleString("en-IN")}` : `₹${Number(price?.finalPrice || 0).toLocaleString("en-IN")}`,
+    priceSubtitle: tripDetails?.price?.showPricePerAdult ? '/ Per Person' : 'Total Price',
     tripName: itinerary?.tripName || "Untitled Trip",
     tripOverview: itinerary?.tripOverview,
     destination,
@@ -97,52 +102,94 @@ function PdfDetailsPrivateAndSample({ tripDetails, regionsImage,policies, tripTy
       places: placeDetails.map((p) => p?.placeId?.placeName).filter(Boolean),
       placeImage,
       activities: (day?.activities || []).map((a) => a?.activityName).filter(Boolean),
-      vehicleDetails: (day?.vehicleDetails || [])?.filter(val=>val?.vehicleId).filter(Boolean),
+      vehicleDetails: (day?.vehicleDetails || [])?.filter(val => val?.vehicleId).filter(Boolean),
     };
   });
 
-      const handleDownloadPdf = async () => {
-  
-          const blob = await pdf(
-              <TripPdf 
-                  tripDetails={tripDetails}  
-                  regionsImage={regionsImage} 
-                  policies={policies} 
-                  tripType={tripType} 
-              />
-          ).toBlob();
-  
-          const url = URL.createObjectURL(blob);
-  
-          const link = document.createElement("a");
-  
-          link.href = url;
-  
-          link.download = "Trip.pdf";
-  
-          link.click();
-  
-          URL.revokeObjectURL(url);
-      };
 
-    return (
+  const handleDownloadPdf = async () => {
+    try {
+      setPdfLoading(true)
+      const blob = await pdf(
+        <TripPdf
+          tripDetails={tripDetails}
+          regionsImage={regionsImage}
+          policies={policies}
+          tripType={tripType}
+        />
+      ).toBlob();
+
+      setPdfLoading(false)
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+
+      link.href = url;
+
+      link.download = "Trip.pdf";
+
+      link.click();
+
+      URL.revokeObjectURL(url);
+    }
+    catch (error) {
+      console.log("Error in download the pdf : ", error)
+      toast.error(error?.message || "Error in download the pdf")
+    }
+
+  };
+
+  return (
     <>
-        <div>
+      <div>
         <PdfCoverSection data={coverData} />
-        <PdfPricingHighlights price={price} activities={highlightActivities} tripType={tripType} />
-        <PdfDayDetails days={days} />
+        <PdfPricingHighlights price={price} activities={highlightActivities} tripType={tripType} tripDetails={tripDetails} />
+        <PdfDayDetails days={days} tripDetails={tripDetails} tripType={tripType} />
         <PdfPolicies policies={policies} />
         <PdfContactFooter />
-        </div>
+      </div>
 
-        <button onClick={handleDownloadPdf}
-        className="fixed bottom-5 right-5 z-50 flex items-center gap-2 rounded-full bg-blue-600 px-5 py-3 text-white shadow-xl transition hover:bg-blue-700 active:scale-95"
-        >
-        <Download size={18} />
-        Download PDF
-        </button>
+      <button
+        onClick={handleDownloadPdf}
+        disabled={pdfLoading}
+        className={`fixed bottom-5 right-5 z-50 flex items-center gap-2 rounded-full px-5 py-3 text-white shadow-xl transition active:scale-95 ${pdfLoading
+          ? "cursor-not-allowed bg-blue-400"
+          : "bg-blue-600 hover:bg-blue-700"
+          }`}
+      >
+        {pdfLoading ? (
+          <>
+            <svg
+              className="h-5 w-5 animate-spin"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              />
+            </svg>
+            Generating PDF...
+          </>
+        ) : (
+          <>
+            <Download size={18} />
+            Download PDF
+          </>
+        )}
+      </button>
     </>
-    );
+  );
 }
 
 export default PdfDetailsPrivateAndSample;

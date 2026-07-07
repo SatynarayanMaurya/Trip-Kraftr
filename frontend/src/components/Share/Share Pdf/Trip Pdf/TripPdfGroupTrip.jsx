@@ -97,9 +97,8 @@ export default function TripPdfGroupTrip({
                 ? "PRIVATE TRIP"
                 : "SAMPLE PACKAGE",
         days: regionDetails?.noOfDays || daysDetails.length,
-        startingPrice: `${Number(price?.finalPrice || 0).toLocaleString(
-            "en-IN"
-        )}`,
+        startingPrice: `${Number(tripDetails?.tripDetails?.occupancy?.single || 0).toLocaleString("en-IN")}`,
+        priceSubtitle: '/ Single Person',
         tripName: itinerary?.tripName || "Untitled Trip",
         tripOverview: itinerary?.tripOverview,
         destination,
@@ -171,10 +170,11 @@ export default function TripPdfGroupTrip({
                 <PdfPricingHighlightsPdf
                     price={price}
                     activities={highlightActivities}
-                    tripType
+                    tripType={tripType}
+                    tripDetails={tripDetails}
                 />
 
-                <PdfDayDetailsPDF days={days} wrap={false} />
+                <PdfDayDetailsPDF days={days}  tripType={tripType}  tripDetails={tripDetails} />
 
                 <PdfPoliciesPDF policies={policies} />
 

@@ -165,6 +165,7 @@ function PdfCoverSectionPdf({ data }) {
         tripLabel,
         days,
         startingPrice,
+        priceSubtitle,
         tripName,
         tripOverview,
         destination,
@@ -206,12 +207,11 @@ function PdfCoverSectionPdf({ data }) {
 
                 {/* BOTTOM RIGHT PRICE */}
                 <View style={styles.bottomRightCard}>
-                    <Text style={styles.priceLabel}>Starting from</Text>
                     <View style={styles.priceRow}>
                         <RupeeIcon size={14} color={PINK} />
                         <Text style={styles.price}>{startingPrice}</Text>
                     </View>
-                    {/* <Text style={styles.priceSub}>/ per person</Text> */}
+                    <Text style={styles.priceSub}>{priceSubtitle}</Text>
                 </View>
 
             </PdfImagePdf>

@@ -29,15 +29,11 @@ export const useTripPdfData = ({ tripId, tripType = 'privateTrip' }) => {
     );
 
     const groupTripDetails = useSelector(s => s.groupTrip.groupTripById?.[tripId]);
-    console.log("tripType inside hhook ",tripType)
 
     const isPrivateTrip = tripType === "privateTrip";
     const isSamplePackage = tripType === "samplePackage";
     const isGroupTrip = tripType === 'groupTrip'
 
-    // const tripDetails = isPrivateTrip
-    //   ? privateTripDetails
-    //   : samplePackageDetails;
     const tripDetailsMap = {
         privateTrip: privateTripDetails,
         samplePackage: samplePackageDetails,

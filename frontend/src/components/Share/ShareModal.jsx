@@ -4,6 +4,7 @@ import { pdf } from "@react-pdf/renderer";
 import {
     X,
     Download,
+    Loader2 ,
     Link2,
     MessageCircle,
     Mail,
@@ -11,11 +12,18 @@ import {
     FileText,
     Eye,
     MapPin,
+    Send
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTripPdfData } from "../../hooks/useTripPdfData";
 import TripPdf from "./Share Pdf/Trip Pdf/TripPdf";
 import TripPdfGroupTrip from "./Share Pdf/Trip Pdf/TripPdfGroupTrip";
+import WhatsappTemplate from "./Templates/WhatsappTemplate";
+import MailTemplate from "./Templates/MailTemplate";
+import LinkTemplate from "./Templates/LinkTemplate";
+import { getMailContent, getUrl, getWhatsappMessage } from "./Utils/Messages";
+import { useSelector } from "react-redux";
+import { useMailHooks } from "../../hooks/useMailHooks";
 
 const PINK = "#ED5F8D";
 const NAVY = "#08255B";
@@ -28,8 +36,12 @@ const OPTIONS = [
 ];
 
 function ShareModal({ onClose, data = {}, tripType = 'privateTrip' }) {
-    const [selected, setSelected] = useState("download");
+    const [selected, setSelected] = useState("whatsapp");
     const navigate = useNavigate()
+    const { sendMail } = useMailHooks()
+    const isProduction = useSelector(s => s.user.isProduction)
+    const [downloadPdfLoading, setDownloadPdfLoading] = useState(false)
+    const [mailLoading, setMailLoading] = useState(false)
 
     const {
         loading: pdfLoading,
@@ -54,38 +66,50 @@ function ShareModal({ onClose, data = {}, tripType = 'privateTrip' }) {
         agencyName: data?.agencyName || "Mezenga Travels",
     };
 
-    const getWhatsAppText = () =>
-        `Hi ${trip.guestName}, here is your personalized itinerary for the ${trip.tripName} trip (${trip.days} Days).\n\n` +
-        `Dates: ${trip.startDate} - ${trip.endDate}\n` +
-        `Destination: ${trip.destination}\n` +
-        `Total: ${trip.price}\n\n` +
-        `Looking forward to your feedback!\n\nView here: ${trip.link}`;
+    const handleShareWhatsapp = () => {
+        const message = getWhatsappMessage(data, tripType);
 
-    const getEmailText = () =>
-        `Subject: Your ${trip.tripName} Itinerary is Ready!\n\n` +
-        `Dear ${trip.guestName},\n\n` +
-        `We're excited to share your personalized itinerary for the ${trip.tripName} trip.\n\n` +
-        `Dates: ${trip.startDate} - ${trip.endDate}\n` +
-        `Destination: ${trip.destination}\n` +
-        `Total: ${trip.price}\n\n` +
-        `View your full itinerary here: ${trip.link}\n\n` +
-        `Best regards,\n${trip.agencyName}`;
+        window.open(
+            `https://wa.me/?text=${encodeURIComponent(message)}`,
+            "_blank"
+        );
+    }
 
-    const handleCopy = async () => {
-        let text = "";
-        if (selected === "whatsapp") text = getWhatsAppText();
-        else if (selected === "email") text = getEmailText();
-        else if (selected === "link") text = trip.link;
+    const handleCopyUrl = async () => {
+        const link = getUrl(data, tripType);
+
+        if (!link) return;
 
         try {
-            await navigator.clipboard.writeText(text);
-            toast.success(
-                selected === "link" ? "Link copied!" : "Message copied!"
-            );
-        } catch {
-            toast.error("Failed to copy");
+            await navigator.clipboard.writeText(link);
+            toast.success("URL copied successfully")
+        } catch (error) {
+            console.error("Failed to copy URL:", error);
         }
     };
+
+    const handleSendEmail = async () => {
+        try {
+            setMailLoading(true)
+            const { from, to, subject, body } = getMailContent(data, tripType)
+            const response = await sendMail(from, to, subject, body)
+            toast.success(response?.data?.message)
+            onClose()
+        }
+        catch (error) {
+            if (!isProduction) {
+                console.log("========= ERROR DEBUG START =========");
+                console.log("Error:", error);
+                console.log("Response:", error?.response);
+                console.log("========= ERROR DEBUG END =========");
+            }
+            toast.error(error?.response?.data?.message || error?.message || "Error in adding the admin")
+        }
+        finally {
+            setMailLoading(false)
+        }
+
+    }
 
     const handlePreviewPdf = () => {
 
@@ -102,41 +126,52 @@ function ShareModal({ onClose, data = {}, tripType = 'privateTrip' }) {
 
     const handleDownloadPdf = async () => {
 
-        let blob = null
-        if (tripType !== 'groupTrip') {
-            blob = await pdf(
-                <TripPdf
-                    tripDetails={tripDetails}
-                    regionsImage={regionsImage}
-                    policies={policies}
-                    tripType={tripType}
-                />
-            ).toBlob();
+        try {
+            setDownloadPdfLoading(true)
+            let blob = null
+            if (tripType !== 'groupTrip') {
+                blob = await pdf(
+                    <TripPdf
+                        tripDetails={tripDetails}
+                        regionsImage={regionsImage}
+                        policies={policies}
+                        tripType={tripType}
+                    />
+                ).toBlob();
+            }
+            else {
+                blob = await pdf(
+                    <TripPdfGroupTrip
+                        tripDetails={tripDetails}
+                        regionsImage={regionsImage}
+                        policies={policies}
+                        tripType={tripType}
+                    />
+                ).toBlob();
+            }
+
+            setDownloadPdfLoading(false)
+
+
+
+            const url = URL.createObjectURL(blob);
+
+            const link = document.createElement("a");
+
+            link.href = url;
+
+            link.download = "Trip.pdf";
+
+            link.click();
+
+            URL.revokeObjectURL(url);
+
         }
-        else {
-            blob = await pdf(
-                <TripPdfGroupTrip
-                    tripDetails={tripDetails}
-                    regionsImage={regionsImage}
-                    policies={policies}
-                    tripType={tripType}
-                />
-            ).toBlob();
+        catch (error) {
+            console.log("Error in download the pdf : ", error)
+            toast.error(error?.message || "Error in download the pdf")
         }
 
-
-
-        const url = URL.createObjectURL(blob);
-
-        const link = document.createElement("a");
-
-        link.href = url;
-
-        link.download = "Trip.pdf";
-
-        link.click();
-
-        URL.revokeObjectURL(url);
     };
 
     return (
@@ -212,65 +247,15 @@ function ShareModal({ onClose, data = {}, tripType = 'privateTrip' }) {
                         style={{ background: "#FDF1F5", maxHeight: "280px", overflowY: "auto" }}
                     >
                         {selected === "whatsapp" && (
-                            <div className="bg-[#DCF4E3] rounded-lg p-3">
-                                <div className="bg-white rounded-lg rounded-tr-none p-3 shadow-sm text-sm text-gray-800 leading-relaxed whitespace-pre-wrap wrap-break-word">
-                                    {getWhatsAppText()}
-                                </div>
-                                <div className="text-right text-[10px] text-gray-500 mt-1 pr-1">
-                                    10:42 AM ✓✓
-                                </div>
-                            </div>
+                            <WhatsappTemplate data={data} tripType={tripType} />
                         )}
 
                         {selected === "email" && (
-                            <div className="border border-gray-200 rounded-lg overflow-hidden bg-white">
-                                <div className="bg-gray-50 border-b border-gray-200 px-4 py-2 text-xs text-gray-600 space-y-1">
-                                    <div>
-                                        <span className="font-semibold text-gray-700">To: </span>
-                                        {trip.guestName}
-                                    </div>
-                                    <div>
-                                        <span className="font-semibold text-gray-700">Subject: </span>
-                                        Your {trip.tripName} Itinerary is Ready!
-                                    </div>
-                                </div>
-                                <div className="p-4 text-sm text-gray-800 leading-relaxed whitespace-pre-wrap wrap-break-word">
-                                    {getEmailText().split("\n\n").slice(1).join("\n\n")}
-                                </div>
-                            </div>
+                            <MailTemplate data={data} tripType={tripType} />
                         )}
 
                         {selected === "link" && (
-                            <div className="space-y-3">
-                                <div className="flex items-center gap-2 border border-gray-200 rounded-lg p-2.5 bg-white">
-                                    <Link2 size={16} className="text-gray-400 shrink-0" />
-                                    <span className="text-sm text-gray-700 truncate">
-                                        {trip.link}
-                                    </span>
-                                </div>
-                                <div className="text-xs text-gray-400">
-                                    Preview of how the link will appear
-                                </div>
-                                <div className="border border-gray-200 rounded-lg overflow-hidden bg-white">
-                                    <div
-                                        className="h-20 flex items-center justify-center"
-                                        style={{ background: NAVY }}
-                                    >
-                                        <MapPin size={24} className="text-white" />
-                                    </div>
-                                    <div className="p-3">
-                                        <div className="font-semibold text-sm" style={{ color: NAVY }}>
-                                            {trip.tripName} · {trip.days} Days
-                                        </div>
-                                        <div className="text-xs text-gray-500 mt-1">
-                                            {trip.destination} • {trip.startDate} - {trip.endDate}
-                                        </div>
-                                        <div className="text-xs text-gray-400 mt-1 truncate">
-                                            {trip.link}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <LinkTemplate data={data} tripType={tripType} />
                         )}
 
                         {selected === "download" && (
@@ -292,22 +277,6 @@ function ShareModal({ onClose, data = {}, tripType = 'privateTrip' }) {
                                     </div>
                                 </div>
                                 <div className="flex gap-3 w-full">
-                                    {/* <button
-                                        onClick={handlePreviewPdf}
-                                        className="flex-1 rounded-lg py-2.5 flex items-center justify-center gap-2 font-medium text-sm border-2"
-                                        style={{ borderColor: PINK, color: PINK, background: "#fff" }}
-                                    >
-                                        <Eye size={16} />
-                                        Preview PDF
-                                    </button>
-                                    <button
-                                        onClick={handleDownloadPdf}
-                                        className="flex-1 rounded-lg py-2.5 flex items-center justify-center gap-2 font-medium text-sm text-white"
-                                        style={{ background: PINK }}
-                                    >
-                                        <Download size={16} />
-                                        Download PDF
-                                    </button> */}
                                     <button
                                         disabled={pdfLoading}
                                         onClick={handlePreviewPdf}
@@ -318,12 +287,12 @@ function ShareModal({ onClose, data = {}, tripType = 'privateTrip' }) {
                                     </button>
 
                                     <button
-                                        disabled={pdfLoading}
+                                        disabled={pdfLoading || downloadPdfLoading}
                                         onClick={handleDownloadPdf}
                                         className="flex-1 rounded-lg py-2.5 flex items-center justify-center gap-2 font-medium text-sm text-white"
                                         style={{ background: PINK }}
                                     >
-                                        {pdfLoading ? "Preparing..." : "Download PDF"}
+                                        {(pdfLoading || downloadPdfLoading) ? "Preparing..." : "Download PDF"}
                                     </button>
                                 </div>
                             </div>
@@ -331,14 +300,47 @@ function ShareModal({ onClose, data = {}, tripType = 'privateTrip' }) {
                     </div>
 
                     {/* Bottom action (hidden for download, since its buttons are inline above) */}
-                    {selected !== "download" && (
+                    {selected === "link" && (
                         <button
-                            onClick={handleCopy}
+                            onClick={handleCopyUrl}
                             className="w-full rounded-full py-3 flex items-center justify-center gap-2 font-semibold text-white transition-opacity hover:opacity-90"
                             style={{ background: PINK }}
                         >
                             <Copy size={16} />
                             {selected === "link" ? "Copy Link" : "Copy Message"}
+                        </button>
+                    )}
+                    {/* Bottom action (hidden for download, since its buttons are inline above) */}
+                    {selected === "whatsapp" && (
+                        <button
+                            onClick={handleShareWhatsapp}
+                            className="w-full rounded-full py-3 flex items-center justify-center gap-2 font-semibold text-white transition-opacity hover:opacity-90"
+                            style={{ background: PINK }}
+                        >
+                            <Send size={16} />
+                            Share
+                        </button>
+                    )}
+                    {/* Bottom action (hidden for download, since its buttons are inline above) */}
+                    {selected === "email" && (
+                        <button
+                            onClick={handleSendEmail}
+                            disabled={mailLoading}
+                            className={`w-full rounded-full py-3 flex items-center justify-center gap-2 font-semibold text-white transition-opacity ${mailLoading ? "opacity-70 cursor-not-allowed" : "hover:opacity-90"
+                                }`}
+                            style={{ background: PINK }}
+                        >
+                            {mailLoading ? (
+                                <>
+                                    <Loader2 size={16} className="animate-spin" />
+                                    Sending...
+                                </>
+                            ) : (
+                                <>
+                                    <Mail size={16} />
+                                    Send Mail
+                                </>
+                            )}
                         </button>
                     )}
                 </div>

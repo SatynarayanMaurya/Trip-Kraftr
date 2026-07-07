@@ -14,6 +14,7 @@ function PdfCoverSection({ data }) {
     tripLabel,
     days,
     startingPrice,
+    priceSubtitle,
     tripName,
     tripOverview,
     destination,
@@ -73,11 +74,10 @@ function PdfCoverSection({ data }) {
 
         {/* Bottom-right price card */}
         <div className="absolute bottom-3 right-3 bg-white rounded-lg px-4 py-2 shadow-md text-center">
-          <div className="text-[10px] text-gray-500">Starting from</div>
           <div className="text-lg font-bold" style={{ color: PINK }}>
             {startingPrice}
           </div>
-          <div className="text-[10px] text-gray-400">/ per person</div>
+          <div className="text-[10px] text-gray-400">{priceSubtitle}</div>
         </div>
       </PdfImage>
 

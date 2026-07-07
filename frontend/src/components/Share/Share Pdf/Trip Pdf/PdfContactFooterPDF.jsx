@@ -111,7 +111,7 @@ function PdfContactFooterPDF() {
   ];
 
   return (
-    <View style={styles.wrapper}>
+    <View style={styles.wrapper} wrap={false}>
       {/* BRAND */}
       <Text style={styles.brand}>TRIPKRAFTR</Text>
 

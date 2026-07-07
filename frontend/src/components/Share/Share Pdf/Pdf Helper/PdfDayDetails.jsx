@@ -19,7 +19,8 @@ function getMealsText(rooms) {
     return plans.map((p) => MEAL_PLAN_LABELS[p] || p.toUpperCase()).join(", ");
 }
 
-function PdfDayDetails({ days }) {
+function PdfDayDetails({ days, tripDetails, tripType }) {
+    // console.log("tripDetails : ",tripDetails?.tripDetails)
     return (
         <div className="mt-8 space-y-8">
             {days.map((day) => (
@@ -31,23 +32,29 @@ function PdfDayDetails({ days }) {
                     {/* Hotel card */}
                     <div className="flex relative flex-col sm:flex-row gap-4 rounded-xl p-4" style={{ background: "#FFBCD275" }}>
                         <div className="absolute top-1 right-2 flex flex-wrap justify-end gap-2 max-w-[90%] md:max-w-[45%] z-50">
-                            {day?.vehicleDetails?.map((vehicle) => (
-                                <span
-                                    key={vehicle._id}
-                                    className="inline-flex items-center gap-1 rounded-full bg-green-100 text-green-700 px-2.5 py-1 text-[10px] font-semibold border border-green-200"
-                                >
-                                    <span>{vehicle.vehicleModel}</span>
-                                    <span>×{vehicle.quantity}</span>
-                                    <span>₹{vehicle.pricePerDay}</span>
-                                </span>
-                            ))}
+                            {
+                                tripType !== 'groupTrip' ?
+                                    day?.vehicleDetails?.map((vehicle) => (
+                                        <span
+                                            key={vehicle._id}
+                                            className="inline-flex items-center gap-1 rounded-full bg-green-100 text-green-700 px-2.5 py-1 text-[10px] font-semibold border border-green-200"
+                                        >
+                                            <span>{vehicle.vehicleModel} · ×{vehicle.quantity} · {vehicle.capacity}</span>
+                                        </span>
+                                    )) :
+                                    <span
+                                        className="inline-flex items-center gap-1 rounded-full bg-green-100 text-green-700 px-2.5 py-1 text-[10px] font-semibold border border-green-200"
+                                    >
+                                        <span>{tripDetails?.tripDetails?.selectedVehicleId?.vehicleModel} · ×{tripDetails?.tripDetails?.quantity} · {tripDetails?.tripDetails?.selectedVehicleId?.capacity}</span>
+                                    </span>
+                            }
                         </div>
+
                         <PdfImage
                             src={day.hotel.image}
                             alt={day.hotel.name}
                             className="rounded-lg shrink-0"
-                            // style={{ width: "100%", maxWidth: "220px", minHeight: "150px", maxHeigth:'300px' }}
-                            style={{ width: 300,  height: "auto", minHeight: 90 }}
+                            style={{ width: 300, height: "auto", minHeight: 90 }}
                         />
                         <div className="min-w-0">
                             <div className="text-base font-bold" style={{ color: NAVY }}>
@@ -63,7 +70,7 @@ function PdfDayDetails({ days }) {
                                 )}
                                 {day.hotel.rooms.map((r) => (
                                     <span
-                                        key={r._id}
+                                        key={r.roomType}
                                         className="text-[11px] px-2 py-1 rounded-full font-medium"
                                         style={{ background: "transparent", color: NAVY, border: "1px solid #F0C4D4" }}
                                     >
@@ -112,7 +119,7 @@ function PdfDayDetails({ days }) {
                             src={day.placeImage}
                             alt="Favourite place"
                             className="rounded-lg shrink-0"
-                            style={{ width: 300,  height: "auto", minHeight: 100 }}
+                            style={{ width: 300, height: "auto", minHeight: 100 }}
                         />
                     </div>
                 </div>
